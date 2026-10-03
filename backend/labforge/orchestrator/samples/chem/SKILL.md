@@ -1,106 +1,100 @@
 ---
-name: run-chem-lib-768
-description: Orchestrate the Two-stage chemistry library benchmark (abstract) lab through its instrument APIs. Use when running, scheduling or troubleshooting this lab's workflow; covers the devices and their limits, run order, safety rules and when to call a person.
+name: run-chem-library-768
+description: Orchestrate the Two-stage chemistry library benchmark (abstract equipment demand) lab through its instrument APIs. Use when running, scheduling or troubleshooting this lab's workflow; covers the devices and their limits, run order, safety rules and when to call a person.
 ---
 
-# Running Two-stage chemistry library benchmark (abstract)
+# Running Two-stage chemistry library benchmark (abstract equipment demand)
 
-You orchestrate this lab. Goal: about 768 compounds_per_day (24 h/day), safely. You have the tools in `tools.json`; each device's limits, zone and confidence are listed there. This file was generated from the lab's digital twin (workflow `chem_lib_768_wf_v1`, layout `chem_lib_768_wf_v1_layout`, simulation `chem_lib_768_wf_v1_layout_sim`). Where the twin was unsure, this file says so; trust a measurement over the twin and log it with `record_measurement`.
+You orchestrate this lab. Goal: about 768 compounds_per_day (24 h/day), safely. You have the tools in `tools.json`; each device's limits, zone and confidence are listed there. This file was generated from the lab's digital twin (workflow `chem_library_768_wf_v1`, layout `chem_library_768_wf_v1_layout`, simulation `chem_library_768_wf_v1_layout_sim`). Where the twin was unsure, this file says so; trust a measurement over the twin and log it with `record_measurement`.
 
 ## Before the first run
 
-The layout check found problems that are not fixed. **Do not start until a person has fixed each one or signed it off** (`request_human`, urgency soon, listing them):
-
-- clearance: glovebox_1 and biotage_spe_1 are closer than their service clearance.
-- zone_mismatch: quantos_1 must sit in a fume hood zone (inferred: powder_dosing with toxic reagents in the brief).
-- zone_mismatch: glovebox_1 must sit in a fume hood zone (catalog: mbraun_glovebox has toxic reagents).
-- zone_mismatch: hamilton_1 must sit in a bsl2 zone (catalog: hamilton_microlab_star has biohazard).
-- zone_mismatch: lcms_1 must sit in a fume hood zone (catalog: agilent_1290_lcmsd_iq has toxic reagents).
-- zone_mismatch: lcms_2 must sit in a fume hood zone (catalog: agilent_1290_lcmsd_iq has toxic reagents).
-- zone_mismatch: hood_1 must sit in a fume hood zone (catalog: labconco_fume_hood has toxic reagents).
-- zone_mismatch: hood_2 must sit in a fume hood zone (catalog: labconco_fume_hood has toxic reagents).
-- egress_blocked: No 1.0 m walkway from the door to where someone works at biotage_spe_1.
-- egress_blocked: No 1.0 m walkway from the door to where someone works at genevac_1.
-- egress_blocked: No 1.0 m walkway from the door to where someone works at glovebox_1.
+The layout check passed with no violations.
 
 These values are placeholders in the catalog. Measure each on the first run and log it with `record_measurement`:
 
-- `glovebox_1` process.durations_s.inert_atmosphere = 600 (range 300-1800)
 - `swing_1-2` process.durations_s.reaction = 14400 (range 3600-86400)
-- `genevac_1` process.durations_s.evaporation = 5400 (range 1800-14400)
-- `genevac_1` process.capacity = 6 (range 3-12)
+- `evap_1` process.durations_s.evaporation = 5400 (range 1800-14400)
+- `evap_1` process.capacity = 6 (range 3-12)
 - `store_1` process.durations_s.compound_storage = 120 (range 30-600)
-- `amr_1` transport.pick_place_s = 15 (range 8-60)
+- `cytomat_1` process.durations_s.incubation = 3600 (range 600-172800)
+- `kmr_1` transport.pick_place_s = 15 (range 8-60)
 
 ## Devices
 
 | Device | Model | Does | Capacity | Control | Data |
 |---|---|---|---|---|---|
 | `quantos_1` | Quantos QB5 | powder_dosing | 1 (datasheet) | vendor software only | estimated |
-| `glovebox_1` | LABstar pro SP | inert_atmosphere | 1 (estimated) | vendor software only | estimated |
-| `hamilton_1` | Microlab STAR | liquid_handling | 1 (estimated) | vendor software only | estimated |
-| `swing_1-2` | SWING XL | reaction | 1 (estimated) | vendor software only | estimated |
-| `biotage_filt_1` | PRESSURE+ 96 | filtration | 1 (estimated) | vendor software only | estimated |
-| `biotage_spe_1` | PRESSURE+ 96 | solid_phase_extraction | 1 (estimated) | vendor software only | estimated |
-| `genevac_1` | Genevac HT-6 (Series 3i) | evaporation | 6 (placeholder) | vendor api | estimated |
+| `fume_hood_1` | Protector XStream 6 ft | transport/support | 1 (datasheet) | none listed | datasheet |
+| `star_1` | Microlab STAR | liquid_handling | 1 (estimated) | vendor software only | estimated |
+| `swing_1-2` | SWING XL | liquid_dosing, reaction | 1 (estimated) | vendor software only | estimated |
+| `pressure_1` | PRESSURE+ 96 | filtration | 1 (estimated) | vendor software only | estimated |
+| `pressure_2` | PRESSURE+ 96 | solid_phase_extraction | 1 (estimated) | vendor software only | estimated |
+| `evap_1` | Genevac HT-6 (Series 3i) | evaporation | 6 (placeholder) | vendor api | estimated |
 | `lcms_1-2` | 1290 Infinity II LC with InfinityLab LC/MSD iQ | lcms | 1 (estimated) | vendor software only | estimated |
 | `store_1` | SampleStore (ambient to -20 C) | compound_storage | 1094 (estimated) | vendor software only | estimated |
-| `incubator_1` | STX44 | incubation | 44 (estimated) | open standard | estimated |
-| `reader_1` | CLARIOstar Plus | fluorescence_read | 1 (estimated) | vendor api | estimated |
-| `amr_1` | KMR iiwa | transport/support | 1 (estimated) | vendor api | estimated |
-| `hood_1-2` | Protector XStream 6 ft | transport/support | 1 (datasheet) | none listed | datasheet |
+| `echo_1` | Echo 650 Plus | acoustic_dispensing | 1 (datasheet) | vendor api | estimated |
+| `combi_1` | Multidrop Combi | reagent_dispensing | 1 (datasheet) | vendor software only | datasheet |
+| `cytomat_1` | Cytomat 2 C-LiN Automated Incubator | incubation | 42 (datasheet) | unconfirmed | estimated |
+| `pherastar_1` | PHERAstar FSX | fluorescence_read | 1 (estimated) | vendor api | estimated |
+| `kmr_1` | KMR iiwa | transport/support | 1 (estimated) | vendor api | estimated |
 
 ## Workflow and handoffs
 
 Steps in run order. Times are the twin's expected value and range per unit of labware.
 
-1. **Powder-dosing stock preparation** (`stock_powder`, semi automated, operator: chemist) on `quantos_1` (start). Expect 2.3 h (56 min-7.0 h, estimated); pause and escalate past 10.5 h.
-   - handoff `quantos_1` to `glovebox_1` by `amr_1` (4.05 m, ~35 s)
-2. **Inert handling of stock rack** (`inert_transfer`, semi automated, operator: chemist) on `glovebox_1` after stock_powder. Expect 10 min (5 min-30 min, placeholder); pause and escalate past 45 min.
-   - handoff `glovebox_1` to `hamilton_1` by `amr_1` (3.28 m, ~34 s)
-3. **Liquid-handling dissolution of stocks** (`dissolve`, automated) on `hamilton_1` after inert_transfer. Expect 15 min (5 min-45 min, estimated); pause and escalate past 68 min.
-4. **Stage-1 dispense into reaction block** (`s1_dispense`, automated) on `hamilton_1` after dissolve. Expect 10 min (5 min-30 min, estimated); pause and escalate past 45 min.
-   - handoff `hamilton_1` to `swing_1` by `amr_1` (4.23 m, ~35 s)
-   - handoff `hamilton_1` to `swing_2` by `amr_1` (3.88 m, ~35 s)
-5. **Stage-1 reaction (inert)** (`s1_react`, automated) on `swing_1` or `swing_2` after s1_dispense. Expect 4.0 h (2.0 h-8.0 h, placeholder); pause and escalate past 12.0 h.
-   - handoff `swing_1` to `biotage_filt_1` by `amr_1` (5.42 m, ~36 s)
-   - handoff `swing_2` to `biotage_filt_1` by `amr_1` (2.52 m, ~33 s)
-6. **Stage-1 workup filtration** (`s1_filter`, semi automated, operator: chemist) on `biotage_filt_1` after s1_react. Expect 5 min (60 s-15 min, estimated); pause and escalate past 22 min.
-   - handoff `biotage_filt_1` to `hamilton_1` by `amr_1` (3.83 m, ~35 s)
-7. **Stage-2 expansion dispense (1 block -> 8 blocks)** (`s2_dispense`, automated) on `hamilton_1` after s1_filter. Expect 80 min (40 min-4.0 h, estimated); pause and escalate past 6.0 h.
-   - handoff `hamilton_1` to `swing_1` by `amr_1` (4.23 m, ~35 s)
-   - handoff `hamilton_1` to `swing_2` by `amr_1` (3.88 m, ~35 s)
-8. **Stage-2 reaction (inert)** (`s2_react`, automated) on `swing_1` or `swing_2` after s2_dispense. Expect 4.0 h (2.0 h-8.0 h, placeholder); pause and escalate past 12.0 h.
-   - handoff `swing_1` to `biotage_filt_1` by `amr_1` (5.42 m, ~36 s)
-   - handoff `swing_2` to `biotage_filt_1` by `amr_1` (2.52 m, ~33 s)
-9. **Stage-2 workup filtration** (`s2_filter`, semi automated, operator: chemist) on `biotage_filt_1` after s2_react. Expect 5 min (60 s-15 min, estimated); pause and escalate past 22 min.
-   - handoff `biotage_filt_1` to `biotage_spe_1` by `amr_1` (3.24 m, ~34 s)
-10. **Purification (SPE)** (`purify_spe`, semi automated, operator: chemist) on `biotage_spe_1` after s2_filter. Expect 10 min (5 min-30 min, estimated); pause and escalate past 45 min.
-   - handoff `biotage_spe_1` to `genevac_1` by `amr_1` (2.58 m, ~33 s)
-11. **Evaporation** (`evaporate`, semi automated, operator: chemist) on `genevac_1` after purify_spe. Expect 90 min (30 min-4.0 h, placeholder); pause and escalate past 6.0 h.
-   - handoff `genevac_1` to `hamilton_1` by `amr_1` (5.26 m, ~36 s)
-12. **Reconstitute and reformat to stock plate** (`reconstitute`, automated) on `hamilton_1` after evaporate. Expect 10 min (5 min-30 min, estimated); pause and escalate past 45 min.
-   - handoff `hamilton_1` to `lcms_1` by `amr_1` (8.22 m, ~40 s)
-   - handoff `hamilton_1` to `lcms_2` by `amr_1` (2.44 m, ~33 s)
-13. **LC-MS QC of every product** (`lcms_qc`, automated) on `lcms_1` or `lcms_2` after reconstitute. Expect 4.0 h (2.7 h-8.0 h, estimated); pause and escalate past 12.0 h.
-   - handoff `lcms_1` to `hamilton_1` by `amr_1` (8.25 m, ~40 s)
-   - handoff `lcms_2` to `hamilton_1` by `amr_1` (2.44 m, ~33 s)
-14. **Assay prep: compounds + supplied protein target into assay plate** (`assay_prep`, automated) on `hamilton_1` after lcms_qc. Expect 15 min (5 min-45 min, estimated); pause and escalate past 68 min.
-   - handoff `hamilton_1` to `store_1` by `amr_1` (3.0 m, ~34 s)
-   - handoff `hamilton_1` to `incubator_1` by `amr_1` (6.67 m, ~38 s)
-15. **Compound storage of stock plate** (`store_stock`, automated) on `store_1` after assay_prep. Expect 2 min (30 s-10 min, placeholder); pause and escalate past 15 min.
-15. **Assay incubation** (`incubate`, automated) on `incubator_1` after assay_prep. Expect 60 min (30 min-2.0 h, estimated); pause and escalate past 3.0 h.
-   - handoff `incubator_1` to `reader_1` by `amr_1` (1.75 m, ~32 s)
-16. **Fluorescence screening readout** (`read_fluor`, automated) on `reader_1` after incubate. Expect 3 min (90 s-10 min, estimated); pause and escalate past 15 min.
-17. **Screening data analysis (sink)** (`hit_analysis`, in silico) on compute after read_fluor. Expect 10 min (2 min-30 min, estimated); pause and escalate past 45 min.
+1. **Stock preparation: powder dosing of building-block stock vials** (`stock_powder_dosing`, semi automated, operator: chemist_operator) on `quantos_1` (start). Expect 2.3 h (56 min-7.0 h, estimated); pause and escalate past 10.5 h.
+   - handoff `quantos_1` to `star_1` by `kmr_1` (6.79 m, ~38 s)
+2. **Stock dissolution (liquid handling)** (`stock_dissolution`, automated) on `star_1` after stock_powder_dosing. Expect 5 min (2 min-15 min, estimated); pause and escalate past 22 min.
+   - handoff `star_1` to `swing_1` by `kmr_1` (7.95 m, ~40 s)
+   - handoff `star_1` to `swing_2` by `kmr_1` (8.99 m, ~41 s)
+3. **Stage 1: dose stocks into reaction block** (`s1_dosing`, automated) on `swing_1` or `swing_2` after stock_dissolution. Expect 24 min (10 min-50 min, estimated); pause and escalate past 75 min.
+   - handoff `swing_1` to `swing_2` by `kmr_1` (5.51 m, ~37 s)
+   - handoff `swing_2` to `swing_1` by `kmr_1` (5.51 m, ~37 s)
+4. **Stage 1 reaction (inert, heated/stirred)** (`s1_reaction`, automated) on `swing_1` or `swing_2` after s1_dosing. Expect 4.0 h (60 min-24.0 h, placeholder); pause and escalate past 36.0 h.
+   - handoff `swing_1` to `pressure_1` by `kmr_1` (6.82 m, ~38 s)
+   - handoff `swing_2` to `pressure_1` by `kmr_1` (7.51 m, ~39 s)
+5. **Stage 1 workup/filtration** (`s1_workup_filtration`, manual, operator: chemist_operator) on `pressure_1` after s1_reaction. Expect 7 min (2 min-25 min, estimated); pause and escalate past 38 min.
+   - handoff `pressure_1` to `star_1` by `kmr_1` (3.09 m, ~34 s)
+6. **Stage 2 expansion: distribute each stage-1 product into 8 variant blocks** (`s2_expansion`, automated) on `star_1` after s1_workup_filtration. Expect 40 min (16 min-2.0 h, estimated); pause and escalate past 3.0 h.
+   - handoff `star_1` to `swing_1` by `kmr_1` (7.95 m, ~40 s)
+   - handoff `star_1` to `swing_2` by `kmr_1` (8.99 m, ~41 s)
+7. **Stage 2: dose variant stocks into each block** (`s2_dosing`, automated) on `swing_1` or `swing_2` after s2_expansion. Expect 24 min (10 min-50 min, estimated); pause and escalate past 75 min.
+   - handoff `swing_1` to `swing_2` by `kmr_1` (5.51 m, ~37 s)
+   - handoff `swing_2` to `swing_1` by `kmr_1` (5.51 m, ~37 s)
+8. **Stage 2 reaction (inert, heated/stirred)** (`s2_reaction`, automated) on `swing_1` or `swing_2` after s2_dosing. Expect 4.0 h (60 min-24.0 h, placeholder); pause and escalate past 36.0 h.
+   - handoff `swing_1` to `pressure_2` by `kmr_1` (6.2 m, ~38 s)
+   - handoff `swing_2` to `pressure_2` by `kmr_1` (6.89 m, ~38 s)
+9. **Purification (solid-phase extraction)** (`purification_spe`, manual, operator: chemist_operator) on `pressure_2` after s2_reaction. Expect 12 min (6 min-40 min, estimated); pause and escalate past 60 min.
+   - handoff `pressure_2` to `evap_1` by `kmr_1` (9.73 m, ~42 s)
+10. **Solvent evaporation** (`evaporation`, automated) on `evap_1` after purification_spe. Expect 90 min (30 min-4.0 h, placeholder); pause and escalate past 6.0 h.
+   - handoff `evap_1` to `star_1` by `kmr_1` (11.9 m, ~44 s)
+11. **Reconstitution into 96-well QC/master plate** (`reconstitution`, automated) on `star_1` after evaporation. Expect 5 min (2 min-15 min, estimated); pause and escalate past 22 min.
+   - handoff `star_1` to `lcms_1` by `kmr_1` (3.33 m, ~34 s)
+   - handoff `star_1` to `lcms_2` by `kmr_1` (2.16 m, ~33 s)
+12. **LC-MS QC of every product** (`lcms_qc`, automated) on `lcms_1` or `lcms_2` after reconstitution. Expect 4.0 h (2.7 h-8.0 h, estimated); pause and escalate past 12.0 h.
+   - handoff `lcms_1` to `star_1` by `kmr_1` (3.3 m, ~34 s)
+   - handoff `lcms_2` to `star_1` by `kmr_1` (2.14 m, ~33 s)
+13. **Reformat to 384-well acoustic source plate** (`reformat_384`, automated) on `star_1` after lcms_qc. Expect 5 min (2 min-15 min, estimated); pause and escalate past 22 min.
+   - handoff `star_1` to `store_1` by `kmr_1` (7.84 m, ~40 s)
+14. **Compound storage deposit/retrieve** (`compound_storage`, automated) on `store_1` after reformat_384. Expect 2 min (30 s-10 min, placeholder); pause and escalate past 15 min.
+   - handoff `store_1` to `echo_1` by `kmr_1` (1.62 m, ~32 s)
+15. **Assay prep: acoustic compound transfer** (`assay_compound_transfer`, automated) on `echo_1` after compound_storage. Expect 3 min (60 s-10 min, estimated); pause and escalate past 15 min.
+   - handoff `echo_1` to `combi_1` by `kmr_1` (2.3 m, ~33 s)
+16. **Assay prep: dispense supplied purified protein target/reagents** (`assay_protein_dispense`, automated) on `combi_1` after assay_compound_transfer. Expect 70 s (35 s-5 min, estimated); pause and escalate past 8 min.
+   - handoff `combi_1` to `cytomat_1` by `kmr_1` (1.63 m, ~32 s)
+17. **Assay incubation** (`assay_incubation`, automated) on `cytomat_1` after assay_protein_dispense. Expect 60 min (30 min-2.0 h, placeholder); pause and escalate past 3.0 h.
+   - handoff `cytomat_1` to `pherastar_1` by `kmr_1` (1.71 m, ~32 s)
+18. **Fluorescence screening readout** (`fluorescence_read`, automated) on `pherastar_1` after assay_incubation. Expect 30 s (14 s-90 s, estimated); pause and escalate past 2 min.
+19. **Hit analysis (in silico) - counting sink** (`hit_analysis`, in silico) on compute after fluorescence_read. Expect 10 min (2 min-30 min, placeholder); pause and escalate past 45 min.
 
 ## Run order and dispatch
 
-The twin's bottleneck is `swing_2` (busy 100%; steps s1_react, s2_react; parallel units swing_1, swing_2).
-Pull-based release paced by the bottleneck (drum-buffer-rope): keep 1-2 units queued in front of swing_2 (s1_react, s2_react) so it never idles, and release a new unit at the first step only when that buffer drops below 2. Among ready steps, serve the one feeding the bottleneck first, then oldest labware first.
+The twin's bottleneck is `swing_1` (busy 100%; steps s1_dosing, s1_reaction, s2_dosing, s2_reaction; parallel units swing_1, swing_2).
+Pull-based release paced by the bottleneck (drum-buffer-rope): keep 1-2 units queued in front of swing_1 (s1_dosing, s1_reaction, s2_dosing, s2_reaction) so it never idles, and release a new unit at the first step only when that buffer drops below 2. Among ready steps, serve the one feeding the bottleneck first, then oldest labware first.
 _Heuristic from the twin's utilisation; not an optimised schedule. Confirm in the simulator before relying on it._
 
-Work-in-progress limits (never exceed): `store_1` 1094, `incubator_1` 44.
+Work-in-progress limits (never exceed): `store_1` 1094, `cytomat_1` 42.
 
 ## Safety rules (hard limits)
 
@@ -108,27 +102,26 @@ Work-in-progress limits (never exceed): `store_1` 1094, `incubator_1` 44.
 - Never load a device beyond its capacity or storage slots, and never load labware types it does not accept.
 - Never start a step before every step in its `after` list has finished for that labware unit.
 - Keep walkways of at least 1.0 m and egress of at least 1.2 m clear; mobile robots must not park in them.
-- flammable solvents: biotage_filt_1, biotage_spe_1, genevac_1, hood_1-2, lcms_1-2, quantos_1, swing_1-2 must only run inside a fume_hood or ventilated zone with its extraction or monitoring confirmed on.
-- toxic reagents: glovebox_1, hood_1-2, lcms_1-2, swing_1-2 must only run inside a fume_hood zone with its extraction or monitoring confirmed on.
-- biohazard: hamilton_1 must only run inside a bsl2 zone with its extraction or monitoring confirmed on.
+- flammable solvents: evap_1, fume_hood_1, lcms_1-2, pressure_1-2, quantos_1, swing_1-2 must only run inside a fume_hood or ventilated zone with its extraction or monitoring confirmed on.
+- toxic reagents: combi_1, fume_hood_1, lcms_1-2, swing_1-2 must only run inside a fume_hood zone with its extraction or monitoring confirmed on.
+- biohazard: star_1 must only run inside a bsl2 zone with its extraction or monitoring confirmed on.
 
 ## When to call a person
 
-- Manual or semi-automated steps (stock_powder, inert_transfer, s1_filter, s2_filter, purify_spe, evaporate): call `request_human` with the step's operator role before the labware arrives. chemist works 8 h shifts. Out of shift, hold the labware in storage rather than skipping the step.
+- Manual or semi-automated steps (stock_powder_dosing, s1_workup_filtration, purification_spe): call `request_human` with the step's operator role before the labware arrives. chemist_operator works 8 h shifts. Out of shift, hold the labware in storage rather than skipping the step.
 - A step still running at 1.5x its high bound (`pause_after_s` in the run order) is outside what the twin expects: check the device status, `pause_line` from that step, and `request_human` (urgency soon).
 - Any device error, safety interlock, labware mismatch or barcode you cannot read: stop that device, `request_human` (urgency now). Do not retry a failed physical action more than once.
-- No confirmed programmable interface for biotage_filt_1, biotage_spe_1, glovebox_1, hamilton_1, lcms_1-2, quantos_1, store_1, swing_1-2: until a driver is verified, treat their tools as 'ask a human to do this and confirm', not as direct control.
-- The twin gives only a 10% chance of meeting the 768 compounds_per_day target. Tell the lab manager on day one instead of pushing devices past their limits to catch up.
-- Design claim refuted by the verifier: "Simulated P50 throughput meets the 768 compounds/day target." (verified throughput.p50 = 688.0). Never report the claimed value as expected performance; use the verified one.
-- Design claim refuted by the verifier: "Total BOM is within the USD 2,000,000 budget." (verified bom.total_usd = 5506050.0). Never report the claimed value as expected performance; use the verified one.
-- Design claim refuted by the verifier: "Layout has zero violations." (verified layout.violations = 11.0). Never report the claimed value as expected performance; use the verified one.
+- No confirmed programmable interface for combi_1, cytomat_1, lcms_1-2, quantos_1, star_1, store_1, swing_1-2: until a driver is verified, treat their tools as 'ask a human to do this and confirm', not as direct control.
+- The twin gives only a 0% chance of meeting the 768 compounds_per_day target. Tell the lab manager on day one instead of pushing devices past their limits to catch up.
+- Design claim refuted by the verifier: "Simulated P50 throughput meets the 768 compounds/day target" (verified throughput.p50 = 320.0). Never report the claimed value as expected performance; use the verified one.
+- Design claim refuted by the verifier: "Total BOM is within the USD 2,000,000 equipment budget" (verified bom.total_usd = 5890359.0). Never report the claimed value as expected performance; use the verified one.
 
 ## What the twin expects
 
-Throughput P10/P50/P90: 521.6 / 632.0 / 753.6 compounds_per_day (target 768, chance of meeting it 0.1).
+Throughput P10/P50/P90: 212.8 / 312.0 / 372.8 compounds_per_day (target 768, chance of meeting it 0.0).
 
-**The verifier did not reproduce this.** Its independent recompute gives throughput.p50 = 688.0. Plan on the verified number until real runs say otherwise.
+**The verifier did not reproduce this.** Its independent recompute gives throughput.p50 = 320.0. Plan on the verified number until real runs say otherwise.
 
-Inputs that move throughput most (measure these first): s2_react.duration_s (-608), s1_react.duration_s (-368), lcms_qc.duration_s (-184), stock_powder.duration_s (+80), s1_filter.duration_s (-16).
+Inputs that move throughput most (measure these first): s2_reaction.duration_s (-646), s1_reaction.duration_s (-238), s1_dosing.duration_s (-32), stock_powder_dosing.duration_s (-16), s2_dosing.duration_s (+12).
 
 If real throughput or utilisation drifts outside these bands for a full day, tell the lab manager and log the measurements so the twin can be re-run. Do not hide a shortfall by skipping QC or overloading devices.

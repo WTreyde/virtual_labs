@@ -20,7 +20,7 @@ page.on("requestfailed", (r) => errors.push(`request failed (${r.failure()?.erro
 page.on("response", (r) => { if (r.status() >= 400 && !r.url().endsWith("/favicon.ico")) errors.push(`HTTP ${r.status()}: ${r.url()}`); });
 // Backend routes, whether the API is another origin (make frontend) or the same one (make demo).
 const API_PATH = /^\/(chat|catalog|layout|simulate|verify|report|optimise|prioritise|validation|bench|example|health)\b/;
-page.on("request", (r) => { const u = new URL(r.url()); if (!r.url().startsWith(base) || API_PATH.test(u.pathname)) apiCalls++; });
+page.on("request", (r) => { const u = new URL(r.url()); if (!r.url().startsWith(base) || API_PATH.test(u.pathname)) { apiCalls++; console.log("  backend request:", r.method(), r.url()); } });
 
 const finalState = () => page.evaluate(() => ({
   equipment: Math.max(0, document.querySelectorAll("#bom tr").length - 1),

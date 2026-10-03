@@ -4,11 +4,11 @@ import { chat, exampleDesign, leaderboard, liveCatalog, optimise, prioritise, se
 import demoQueue from "../../backend/labforge/catalog/data/demo_prioritise_queue.json";
 import cachedDemoSchedule from "./fixtures/demo_schedule.json";
 import { galleryDesign } from "./fixtures/gallery";
-import { renderLanding } from "./landing";
+import { renderLanding, summaryBox } from "./landing";
 import { LabScene } from "./LabScene";
 import { renderPanel } from "./panel";
 import { openReport } from "./report";
-import { emptyDesign, loadReplay, loadWhatIfCache, playReplay } from "./replay";
+import { emptyDesign, loadReplay, loadSummary, loadWhatIfCache, playReplay } from "./replay";
 import { migrateLegacyLinks, parseRoute, routeKey, type Route } from "./router";
 import { clock } from "./timeline";
 import type { ChatMessage, Design, ProjectRequest, ProjectSchedule } from "./types";
@@ -60,6 +60,12 @@ function show(d: Design) {
   updateWhatIfButton();
 }
 
+/** One log entry per line, scrolled to the newest. */
+function appendLog(line: string) {
+  log.textContent += (log.textContent ? "\n\n" : "") + line;
+  log.scrollTop = log.scrollHeight;
+}
+
 const setChatEnabled = (on: boolean) => {
   for (const el of document.querySelectorAll<HTMLInputElement | HTMLButtonElement>("#chat-input, #chat-form button")) el.disabled = !on;
 };
@@ -74,6 +80,7 @@ async function go(r: Route) {
   hideStatCard();
   badge.classList.add("hidden");
   badge.querySelector("button")?.remove();
+  $("#checked").classList.add("hidden");
   log.textContent = "";
   history = [];
   chatting = false;
@@ -123,14 +130,28 @@ async function startReplay(name: string) {
   badge.append(skipBtn);
   show(emptyDesign());
   try {
-    const [run, whatif] = await Promise.all([loadReplay(name), loadWhatIfCache(name)]);
+    const [run, whatif, summary] = await Promise.all([loadReplay(name), loadWhatIfCache(name), loadSummary(name)]);
     if (!live()) return;
     badge.querySelector(".text")!.textContent = `Replay of a recorded run${run.model ? ` · ${run.model}` : ""}`;
     if (run.output.lab_spec) show(emptyDesign(run.output.lab_spec));
     await playReplay(run, {
       say: (lines, speaker) => live() && dialogue.say(lines, speaker),
-      log: (line) => { if (live()) { log.textContent += `\n${line}`; log.scrollTop = log.scrollHeight; } },
-      showDesign: (d) => { if (live()) { show({ ...d, whatif_cache: whatif }); dialogue.say(introLines(d)); } },
+      log: (line) => { if (live()) appendLog(line); },
+      showDesign: (d) => {
+        if (!live()) return;
+        show({ ...d, whatif_cache: whatif });
+        const lines = introLines(d);
+        if (summary) {
+          // Planned vs independently checked, and the recorded limits, shown with the design (not only on the landing card).
+          const box = $("#checked");
+          box.innerHTML = summaryBox(summary);
+          box.classList.remove("hidden");
+          const t = summary.headline_throughput;
+          if (t.verified_p50 != null)
+            lines.push(`Careful: my planning simulation says ${Math.round(t.p50)}, but an independent check of the same design gives ${Math.round(t.verified_p50)} ${t.unit.replace(/_/g, " ")}. The limits are listed on the right.`);
+        }
+        dialogue.say(lines);
+      },
       showAnswer: (title, html) => live() && showHtml(title, html),
     }, skip);
   } catch (e) {
@@ -150,19 +171,19 @@ $<HTMLFormElement>("#chat-form").addEventListener("submit", async (e) => {
   chatting = true;
   const input = $<HTMLInputElement>("#chat-input"), started = route;
   history.push({ role: "user", content: input.value });
-  log.textContent += `\nYou: ${input.value}`;
+  appendLog(`You: ${input.value}`);
   input.value = "";
   try {
     const out = await chat(history, design);
     if (route !== started) return;
     history = out.history;
-    log.textContent += `\nAgent: ${out.reply}`;
+    appendLog(`Agent: ${out.reply}`);
     show(out.design);
     hideStatCard();
     dialogue.say([out.reply]);
   } catch (error) {
     history.pop(); // the failed request was not committed to the conversation
-    log.textContent += `\n${error instanceof Error ? error.message : "Chat failed"}`;
+    appendLog(error instanceof Error ? error.message : "Chat failed");
   } finally {
     chatting = false;
   }

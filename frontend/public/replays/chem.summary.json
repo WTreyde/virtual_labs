@@ -1,19 +1,19 @@
 {
   "title": "Chemistry library, QC and screening",
   "brief": "Plan an abstract two-stage 768-compound library, quality control and screening against a supplied protein target.",
-  "source": "backend/labforge/agent/demo/scenarios_20261003_repaired/chemistry.json",
+  "source": "backend/labforge/agent/demo/scenarios_20261003_chem_story_check/chemistry.json",
   "headline_throughput": {
-    "p50": 632.0,
-    "p10": 521.6,
-    "p90": 753.6,
+    "p50": 312.0,
+    "p10": 212.8,
+    "p90": 372.8,
     "unit": "compounds_per_day",
     "basis": "recorded planning simulation",
-    "verified_p50": 688.0,
+    "verified_p50": 320.0,
     "target": 768
   },
   "bottleneck": {
-    "instance_id": "swing_2",
-    "name": "swing 2",
+    "instance_id": "swing_1",
+    "name": "swing 1",
     "catalog_id": "chemspeed_swing_xl",
     "model": "SWING XL",
     "busy_fraction": 0.998,
@@ -22,16 +22,16 @@
   "budget_vs_bom": {
     "currency": "USD",
     "budget": 2000000,
-    "bom": 5506050.0,
+    "bom": 5890359.0,
     "claim_status": "refuted",
     "basis": "recorded checked equipment cost; excludes installation, service, consumables and building work"
   },
   "gate_passed": true,
   "limits": [
-    "11 recorded layout violations; physical feasibility is qualified.",
-    "Refuted claim: Simulated P50 throughput meets the 768 compounds/day target. (verified value 688.0).",
-    "Refuted claim: Total BOM is within the USD 2,000,000 budget. (verified value 5506050.0).",
-    "Planning median 632.0 versus independent verifier 688.0 compounds_per_day; the headline is the planning simulation, not a verified measurement.",
+    "0 recorded layout violations; physical feasibility is qualified.",
+    "Refuted claim: Simulated P50 throughput meets the 768 compounds/day target (verified value 320.0).",
+    "Refuted claim: Total BOM is within the USD 2,000,000 equipment budget (verified value 5890359.0).",
+    "Planning median 312.0 versus independent verifier 320.0 compounds_per_day; the headline is the planning simulation, not a verified measurement.",
     "Timing and yield assumptions are provisional; no physical lab was operated."
   ]
 }

@@ -92,3 +92,13 @@ export interface Leaderboard {
     tasks: { task_id: string; trap?: string; score: number | null; checks: BenchCheck[]; brier?: number | null; error?: string }[];
   }[];
 }
+
+/** public/replays/<case>.summary.json, written with each recording (Albert): headline facts and known limits. */
+export interface CaseSummary {
+  title?: string; brief?: string; source?: string;
+  headline_throughput: { p50: number; p10?: number; p90?: number; unit: string; basis?: string; verified_p50?: number; target?: number };
+  bottleneck?: { instance_id: string; name?: string; catalog_id?: string; model?: string; busy_fraction?: number; basis?: string };
+  budget_vs_bom?: { currency?: string; budget?: number; bom?: number; claim_status?: string; basis?: string };
+  gate_passed?: boolean;
+  limits?: string[];
+}
