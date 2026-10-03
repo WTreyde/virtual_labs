@@ -1,4 +1,4 @@
-.PHONY: install check backend frontend
+.PHONY: install check backend frontend demo
 
 install:
 	cd backend && python3 -m pip install -e '.[dev]'
@@ -14,3 +14,8 @@ backend:
 
 frontend:
 	cd frontend && npx vite
+
+# One command, one URL: build the game and serve it with the API on http://localhost:8000
+demo:
+	cd frontend && VITE_API= npx vite build
+	cd backend && uvicorn labforge.gateway:app --port 8000

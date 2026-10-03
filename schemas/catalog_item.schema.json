@@ -116,7 +116,7 @@
         },
         "durations_s": {
           "type": "object",
-          "description": "Typical time per labware for each capability, keyed by capability.",
+          "description": "Typical time per labware for each capability, keyed by capability. If process.duration_basis names another unit for a capability, the time is per that unit instead.",
           "additionalProperties": {
             "type": "number",
             "minimum": 0
@@ -126,6 +126,19 @@
           "type": "number",
           "minimum": 0,
           "default": 0
+        },
+        "duration_basis": {
+          "type": "object",
+          "description": "Optional. What one duration in durations_s covers, keyed by capability: 'labware' (the default, one plate/tube/puck) or a smaller unit such as 'crystal', 'sample' or 'well'. A step's time is then the per-unit time x units it handles (e.g. params.crystals_harvested_per_plate).",
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "hold_time_s": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Optional, for storage and transit containers: how long contents can be held (e.g. a dry shipper's cold-hold time). Not a processing time; never use it as a step duration."
         }
       }
     },
