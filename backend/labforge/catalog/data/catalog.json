@@ -8318,5 +8318,1999 @@
     "safety": {
       "notes": "Prepares reagents and protein at shift start, restocks plates and tips, moves plates between cells, handles waste."
     }
+  },
+  {
+    "id": "formulatrix_rock_imager_2",
+    "vendor": "Formulatrix",
+    "model": "Rock Imager 2",
+    "category": "instrument",
+    "capabilities": [
+      "crystal_imaging",
+      "plate_storage"
+    ],
+    "footprint": {
+      "width_m": 0.42,
+      "depth_m": 0.371,
+      "height_m": 0.586,
+      "clearance_m": 0.4,
+      "mount": "bench"
+    },
+    "access_points": [
+      {
+        "id": "plate_door",
+        "position": {
+          "x": 0,
+          "y": -0.19,
+          "z": 0.3
+        },
+        "labware": [
+          "crystallization_plate_96",
+          "sbs_96"
+        ]
+      }
+    ],
+    "process": {
+      "capacity": 2,
+      "durations_s": {
+        "crystal_imaging": 180
+      }
+    },
+    "integration": [
+      "Rock Maker / Rock Imager software"
+    ],
+    "safety": {
+      "hazards": [
+        "moving_parts"
+      ],
+      "requires_zone": [
+        "vibration_free"
+      ],
+      "needs_light_curtain": false,
+      "collaborative": false
+    },
+    "visual": {
+      "color": "#a05fd0"
+    },
+    "source_urls": [
+      "https://formulatrix.com/protein-crystallization-systems/rock-imager-protein-images/",
+      "https://help.formulatrix.com/rock-imager/3.9/Content/ROCK_IMAGER_Models/ROCK_IMAGER_2.htm",
+      "https://americanlaboratorytrading.com/lab-equipment-products/formulatrix-inc-rock-imager-1000-14143/",
+      "https://api.usaspending.gov/api/v2/search/spending_by_award/ (awards 75N96021P00363, SPE2D620F9BQ1)"
+    ],
+    "data_confidence": "estimated",
+    "provenance": {
+      "footprint.width_m": {
+        "value": 0.42,
+        "low": 0.42,
+        "high": 0.42,
+        "confidence": "datasheet",
+        "source": "https://formulatrix.com/protein-crystallization-systems/rock-imager-protein-images/",
+        "note": "17 in"
+      },
+      "footprint.depth_m": {
+        "value": 0.371,
+        "low": 0.371,
+        "high": 0.371,
+        "confidence": "datasheet",
+        "source": "https://formulatrix.com/protein-crystallization-systems/rock-imager-protein-images/"
+      },
+      "footprint.height_m": {
+        "value": 0.586,
+        "low": 0.586,
+        "high": 0.586,
+        "confidence": "datasheet",
+        "source": "https://formulatrix.com/protein-crystallization-systems/rock-imager-protein-images/"
+      },
+      "footprint.clearance_m": {
+        "value": 0.4,
+        "low": 0.2,
+        "high": 1.0,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "service/loading space not published"
+      },
+      "access_points.plate_door.position": {
+        "value": 0.3,
+        "low": 0.1,
+        "high": 0.5,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "access height not published"
+      },
+      "process.capacity": {
+        "value": 2,
+        "low": 2,
+        "high": 2,
+        "confidence": "datasheet",
+        "source": "https://formulatrix.com/protein-crystallization-systems/rock-imager-protein-images/",
+        "note": "holds 2 SBS plates (Linbro 1)"
+      },
+      "process.durations_s.crystal_imaging": {
+        "value": 180,
+        "low": 60,
+        "high": 600,
+        "confidence": "estimated",
+        "source": "https://americanlaboratorytrading.com/lab-equipment-products/formulatrix-inc-rock-imager-1000-14143/ ; 3 min per 96-well plate stated for the Rock Imager family, not for the RI 2 specifically"
+      },
+      "storage_slots": {
+        "value": 2,
+        "low": 2,
+        "high": 2,
+        "confidence": "datasheet",
+        "source": "https://formulatrix.com/protein-crystallization-systems/rock-imager-protein-images/",
+        "note": "no hotel storage; 2 plates on the imaging stage"
+      },
+      "lead_time_weeks": {
+        "value": 12,
+        "low": 6,
+        "high": 24,
+        "confidence": "placeholder",
+        "source": "agent_estimate"
+      },
+      "price_usd_estimate": {
+        "value": 100000,
+        "low": 50000,
+        "high": 240000,
+        "confidence": "placeholder",
+        "source": "https://api.usaspending.gov/api/v2/search/spending_by_award/ (awards 75N96021P00363, SPE2D620F9BQ1)",
+        "note": "No sourced price for the RI 2 specifically: vendor says Please Inquire. Anchors that do not name the model: HHS 2021 Rock Imager purchase $183,143 (75N96021P00363); DLA 2020 Rock Imager 54 w/ software $238,605. Value is a guess for a 2-plate benchtop unit below those; wide range. Used listing $10K is a floor.",
+        "year": 2021
+      }
+    },
+    "storage_slots": 2,
+    "lead_time_weeks": 12,
+    "price_usd_estimate": 100000
+  },
+  {
+    "id": "formulatrix_rock_imager_182",
+    "vendor": "Formulatrix",
+    "model": "Rock Imager 182",
+    "category": "instrument",
+    "capabilities": [
+      "crystal_imaging",
+      "plate_storage"
+    ],
+    "footprint": {
+      "width_m": 0.865,
+      "depth_m": 0.798,
+      "height_m": 1.028,
+      "clearance_m": 0.6,
+      "mount": "floor"
+    },
+    "access_points": [
+      {
+        "id": "plate_door",
+        "position": {
+          "x": 0,
+          "y": -0.4,
+          "z": 0.7
+        },
+        "labware": [
+          "crystallization_plate_96",
+          "sbs_96"
+        ]
+      }
+    ],
+    "process": {
+      "capacity": 1,
+      "durations_s": {
+        "crystal_imaging": 180
+      }
+    },
+    "integration": [
+      "Rock Maker / Rock Imager software"
+    ],
+    "safety": {
+      "hazards": [
+        "heavy",
+        "moving_parts"
+      ],
+      "requires_zone": [
+        "vibration_free"
+      ],
+      "needs_light_curtain": false,
+      "collaborative": false
+    },
+    "visual": {
+      "color": "#a05fd0"
+    },
+    "source_urls": [
+      "https://formulatrix.com/protein-crystallization-systems/rock-imager-protein-images/",
+      "http://help.formulatrix.com/rock-imager/3.5/Content/ROCK_IMAGER_Models/ROCK_IMAGERs_182_and_54.htm",
+      "https://americanlaboratorytrading.com/lab-equipment-products/formulatrix-inc-rock-imager-1000-14143/",
+      "https://api.usaspending.gov/api/v2/search/spending_by_award/ (award 75N93022P01021)"
+    ],
+    "data_confidence": "estimated",
+    "provenance": {
+      "footprint.width_m": {
+        "value": 0.865,
+        "low": 0.865,
+        "high": 0.865,
+        "confidence": "datasheet",
+        "source": "https://formulatrix.com/protein-crystallization-systems/rock-imager-protein-images/ ; http://help.formulatrix.com/rock-imager/3.5/Content/ROCK_IMAGER_Models/ROCK_IMAGERs_182_and_54.htm"
+      },
+      "footprint.depth_m": {
+        "value": 0.798,
+        "low": 0.798,
+        "high": 0.798,
+        "confidence": "datasheet",
+        "source": "https://formulatrix.com/protein-crystallization-systems/rock-imager-protein-images/ ; http://help.formulatrix.com/rock-imager/3.5/Content/ROCK_IMAGER_Models/ROCK_IMAGERs_182_and_54.htm"
+      },
+      "footprint.height_m": {
+        "value": 1.028,
+        "low": 1.028,
+        "high": 1.028,
+        "confidence": "datasheet",
+        "source": "https://formulatrix.com/protein-crystallization-systems/rock-imager-protein-images/ ; http://help.formulatrix.com/rock-imager/3.5/Content/ROCK_IMAGER_Models/ROCK_IMAGERs_182_and_54.htm"
+      },
+      "footprint.clearance_m": {
+        "value": 0.6,
+        "low": 0.3,
+        "high": 1.5,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "service/loading space not published"
+      },
+      "access_points.plate_door.position": {
+        "value": 0.7,
+        "low": 0.4,
+        "high": 1.0,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "access height not published"
+      },
+      "process.capacity": {
+        "value": 1,
+        "low": 1,
+        "high": 1,
+        "confidence": "estimated",
+        "source": "https://americanlaboratorytrading.com/lab-equipment-products/formulatrix-inc-rock-imager-1000-14143/ ; one plate imaged at a time"
+      },
+      "process.durations_s.crystal_imaging": {
+        "value": 180,
+        "low": 60,
+        "high": 600,
+        "confidence": "estimated",
+        "source": "https://americanlaboratorytrading.com/lab-equipment-products/formulatrix-inc-rock-imager-1000-14143/ ; 3 min per 96-well plate stated for Rock Imager 1000, assumed similar"
+      },
+      "storage_slots": {
+        "value": 182,
+        "low": 182,
+        "high": 182,
+        "confidence": "datasheet",
+        "source": "https://formulatrix.com/protein-crystallization-systems/rock-imager-protein-images/",
+        "note": "182 SBS plates (Linbro up to 106)"
+      },
+      "power_w": {
+        "value": 480,
+        "low": 300,
+        "high": 600,
+        "confidence": "datasheet",
+        "source": "https://formulatrix.com/protein-crystallization-systems/rock-imager-protein-images/ ; 100-240VAC 480W 6.3A"
+      },
+      "lead_time_weeks": {
+        "value": 12,
+        "low": 6,
+        "high": 24,
+        "confidence": "placeholder",
+        "source": "agent_estimate"
+      },
+      "price_usd_estimate": {
+        "value": 240144,
+        "low": 180903,
+        "high": 240144,
+        "confidence": "estimated",
+        "source": "https://api.usaspending.gov/api/v2/search/spending_by_award/ (award 75N93022P01021)",
+        "note": "NIH award 75N93022P01021 (Aug 2022): 'Formulatrix Rock Imager 182 with controlling software' $240,144 = configured system with software. Low: NIH Sep 2019 award 75N92019P00404 $180,903 for a protein crystallization imager with Compound Zoom UV option (catalog 360180, model not stated).",
+        "year": 2022
+      }
+    },
+    "storage_slots": 182,
+    "power_w": 480,
+    "lead_time_weeks": 12,
+    "price_usd_estimate": 240144
+  },
+  {
+    "id": "formulatrix_mantis",
+    "vendor": "Formulatrix",
+    "model": "Mantis",
+    "category": "instrument",
+    "capabilities": [
+      "reagent_dispensing"
+    ],
+    "footprint": {
+      "width_m": 0.35,
+      "depth_m": 0.232,
+      "height_m": 0.212,
+      "clearance_m": 0.2,
+      "mount": "bench"
+    },
+    "access_points": [
+      {
+        "id": "deck",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0.03
+        },
+        "labware": [
+          "sbs_96",
+          "sbs_384",
+          "sbs_1536",
+          "crystallization_plate_96"
+        ]
+      }
+    ],
+    "process": {
+      "capacity": 1,
+      "durations_s": {
+        "reagent_dispensing": 25
+      }
+    },
+    "integration": [
+      "Mantis software (CSV import)",
+      "Automation-friendly integration (interface unconfirmed)"
+    ],
+    "safety": {
+      "hazards": [
+        "moving_parts"
+      ],
+      "requires_zone": [],
+      "needs_light_curtain": false,
+      "collaborative": false
+    },
+    "visual": {
+      "color": "#2f9e8f"
+    },
+    "source_urls": [
+      "https://formulatrix.com/liquid-handling-systems/mantis-liquid-handler/",
+      "https://formulatrix.com/liquid-handling-systems/mantis-liquid-dispenser/",
+      "https://api.usaspending.gov/api/v2/search/spending_by_award/ (award 75N91024P00535)"
+    ],
+    "data_confidence": "estimated",
+    "provenance": {
+      "footprint.width_m": {
+        "value": 0.35,
+        "low": 0.35,
+        "high": 0.35,
+        "confidence": "datasheet",
+        "source": "https://formulatrix.com/liquid-handling-systems/mantis-liquid-handler/",
+        "note": "350x232x212 mm per product page (manual lists 335x215x230 mm)"
+      },
+      "footprint.depth_m": {
+        "value": 0.232,
+        "low": 0.232,
+        "high": 0.232,
+        "confidence": "datasheet",
+        "source": "https://formulatrix.com/liquid-handling-systems/mantis-liquid-handler/"
+      },
+      "footprint.height_m": {
+        "value": 0.212,
+        "low": 0.212,
+        "high": 0.212,
+        "confidence": "datasheet",
+        "source": "https://formulatrix.com/liquid-handling-systems/mantis-liquid-handler/"
+      },
+      "footprint.clearance_m": {
+        "value": 0.2,
+        "low": 0.1,
+        "high": 0.5,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "service/loading space not published"
+      },
+      "access_points.deck.position": {
+        "value": 0.03,
+        "low": 0.0,
+        "high": 0.1,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "access height not published"
+      },
+      "process.capacity": {
+        "value": 1,
+        "low": 1,
+        "high": 1,
+        "confidence": "datasheet",
+        "source": "https://formulatrix.com/liquid-handling-systems/mantis-liquid-handler/",
+        "note": "one SBS plate on the stage"
+      },
+      "process.durations_s.reagent_dispensing": {
+        "value": 25,
+        "low": 15,
+        "high": 120,
+        "confidence": "datasheet",
+        "source": "https://formulatrix.com/liquid-handling-systems/mantis-liquid-dispenser/ (via search excerpt)",
+        "note": "100 nL/well into a 96-well plate: 25 s; depends on volume and chip"
+      },
+      "power_w": {
+        "value": 50,
+        "low": 50,
+        "high": 150,
+        "confidence": "datasheet",
+        "source": "https://formulatrix.com/liquid-handling-systems/mantis-liquid-dispenser/ (via search excerpt)",
+        "note": "50 W typical, 150 W max"
+      },
+      "lead_time_weeks": {
+        "value": 8,
+        "low": 4,
+        "high": 16,
+        "confidence": "placeholder",
+        "source": "agent_estimate"
+      },
+      "price_usd_estimate": {
+        "value": 62940,
+        "low": 42820,
+        "high": 64602,
+        "confidence": "estimated",
+        "source": "https://api.usaspending.gov/api/v2/search/spending_by_award/ (award 75N91024P00535)",
+        "note": "NIH Aug 2024 PO 75N91024P00535: one Mantis V.4 liquid dispenser and associated instrumentation $62,940. Range: NIH 2018 $42,820 (75N91018P00348), 2018 $53,324, 2020 $46,745, 2019 $64,602 (with accessories). Older years likely lower than today.",
+        "year": 2024
+      }
+    },
+    "power_w": 50,
+    "lead_time_weeks": 8,
+    "price_usd_estimate": 62940
+  },
+  {
+    "id": "sptlabtech_dragonfly",
+    "vendor": "SPT Labtech",
+    "model": "dragonfly discovery",
+    "category": "instrument",
+    "capabilities": [
+      "reagent_dispensing"
+    ],
+    "footprint": {
+      "width_m": 0.6,
+      "depth_m": 0.44,
+      "height_m": 0.64,
+      "clearance_m": 0.2,
+      "mount": "bench"
+    },
+    "access_points": [
+      {
+        "id": "deck",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0.08
+        },
+        "labware": [
+          "sbs_96",
+          "sbs_384",
+          "sbs_1536"
+        ]
+      }
+    ],
+    "process": {
+      "capacity": 1,
+      "durations_s": {
+        "reagent_dispensing": 60
+      }
+    },
+    "integration": [
+      "Vendor control software (interfaces not confirmed)"
+    ],
+    "safety": {
+      "hazards": [
+        "moving_parts"
+      ],
+      "requires_zone": [],
+      "needs_light_curtain": false,
+      "collaborative": false
+    },
+    "visual": {
+      "color": "#e8863a"
+    },
+    "source_urls": [
+      "https://www.sptlabtech.com/products/dragonfly",
+      "https://www.sptlabtech.com/products/dragonfly/dragonfly-discovery",
+      "https://api.usaspending.gov/api/v2/search/spending_by_award/ (award 75N93022P00640)"
+    ],
+    "data_confidence": "estimated",
+    "provenance": {
+      "footprint.width_m": {
+        "value": 0.6,
+        "low": 0.6,
+        "high": 0.6,
+        "confidence": "datasheet",
+        "source": "https://www.sptlabtech.com/products/dragonfly/dragonfly-discovery ; https://www.sptlabtech.com/product-help-center/dragonfly-discovery-user-manual-installation",
+        "note": "60x44x64 cm, 46 kg"
+      },
+      "footprint.depth_m": {
+        "value": 0.44,
+        "low": 0.44,
+        "high": 0.44,
+        "confidence": "datasheet",
+        "source": "https://www.sptlabtech.com/products/dragonfly/dragonfly-discovery ; https://www.sptlabtech.com/product-help-center/dragonfly-discovery-user-manual-installation"
+      },
+      "footprint.height_m": {
+        "value": 0.64,
+        "low": 0.64,
+        "high": 0.64,
+        "confidence": "datasheet",
+        "source": "https://www.sptlabtech.com/products/dragonfly/dragonfly-discovery ; https://www.sptlabtech.com/product-help-center/dragonfly-discovery-user-manual-installation"
+      },
+      "footprint.clearance_m": {
+        "value": 0.2,
+        "low": 0.1,
+        "high": 0.5,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "service/loading space not published"
+      },
+      "access_points.deck.position": {
+        "value": 0.08,
+        "low": 0.02,
+        "high": 0.2,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "access height not published"
+      },
+      "process.capacity": {
+        "value": 1,
+        "low": 1,
+        "high": 1,
+        "confidence": "datasheet",
+        "source": "https://www.sptlabtech.com/products/dragonfly/dragonfly-discovery",
+        "note": "one SBS plate at a time"
+      },
+      "process.durations_s.reagent_dispensing": {
+        "value": 60,
+        "low": 20,
+        "high": 300,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "per-plate time not published; depends on heads and volume"
+      },
+      "power_w": {
+        "value": 200,
+        "low": 200,
+        "high": 200,
+        "confidence": "datasheet",
+        "source": "https://www.sptlabtech.com/product-help-center/dragonfly-discovery-user-manual-installation",
+        "note": "max 200 W"
+      },
+      "lead_time_weeks": {
+        "value": 8,
+        "low": 4,
+        "high": 16,
+        "confidence": "placeholder",
+        "source": "agent_estimate"
+      },
+      "price_usd_estimate": {
+        "value": 98371,
+        "low": 64240,
+        "high": 163013,
+        "confidence": "estimated",
+        "source": "https://api.usaspending.gov/api/v2/search/spending_by_award/ (award 75N93022P00640)",
+        "note": "NIH Apr 2022 PO 75N93022P00640: dragonfly discovery 6-head with all items $98,371 (configured). Range: NIH Jul 2020 $64,240 (75D30120P08773, config unstated) to CDC Sep 2020 $163,013 (75D30120P09059).",
+        "year": 2022
+      }
+    },
+    "power_w": 200,
+    "lead_time_weeks": 8,
+    "price_usd_estimate": 98371
+  },
+  {
+    "id": "sptlabtech_mosquito_lcp",
+    "vendor": "SPT Labtech",
+    "model": "mosquito LCP",
+    "category": "instrument",
+    "capabilities": [
+      "crystallization_setup"
+    ],
+    "footprint": {
+      "width_m": 0.79,
+      "depth_m": 0.47,
+      "height_m": 0.69,
+      "clearance_m": 0.2,
+      "mount": "bench"
+    },
+    "access_points": [
+      {
+        "id": "deck",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0.15
+        },
+        "labware": [
+          "crystallization_plate_96",
+          "sbs_96",
+          "sbs_384"
+        ]
+      }
+    ],
+    "process": {
+      "capacity": 4,
+      "durations_s": {
+        "crystallization_setup": 240
+      }
+    },
+    "integration": [
+      "Vendor control software (interfaces not confirmed)"
+    ],
+    "safety": {
+      "hazards": [
+        "moving_parts"
+      ],
+      "requires_zone": [
+        "vibration_free"
+      ],
+      "needs_light_curtain": false,
+      "collaborative": false
+    },
+    "visual": {
+      "color": "#e8863a"
+    },
+    "source_urls": [
+      "https://www.sptlabtech.com/products/mosquito",
+      "https://www.sptlabtech.com/products/mosquito/mosquito-lcp",
+      "https://api.usaspending.gov/api/v2/search/spending_by_award/ (award 75N93018P00988)"
+    ],
+    "data_confidence": "estimated",
+    "provenance": {
+      "footprint.width_m": {
+        "value": 0.79,
+        "low": 0.44,
+        "high": 0.79,
+        "confidence": "datasheet",
+        "source": "https://www.sptlabtech.com/products/mosquito/mosquito-lcp",
+        "note": "4-plate deck is 790 mm wide; 2-plate deck 440 mm"
+      },
+      "footprint.depth_m": {
+        "value": 0.47,
+        "low": 0.47,
+        "high": 0.47,
+        "confidence": "datasheet",
+        "source": "https://www.sptlabtech.com/products/mosquito/mosquito-lcp"
+      },
+      "footprint.height_m": {
+        "value": 0.69,
+        "low": 0.69,
+        "high": 0.69,
+        "confidence": "datasheet",
+        "source": "https://www.sptlabtech.com/products/mosquito/mosquito-lcp"
+      },
+      "footprint.clearance_m": {
+        "value": 0.2,
+        "low": 0.1,
+        "high": 0.5,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "service/loading space not published"
+      },
+      "access_points.deck.position": {
+        "value": 0.15,
+        "low": 0.05,
+        "high": 0.3,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "access height not published"
+      },
+      "process.capacity": {
+        "value": 4,
+        "low": 2,
+        "high": 4,
+        "confidence": "datasheet",
+        "source": "https://www.sptlabtech.com/products/mosquito/mosquito-lcp",
+        "note": "4-position deck; plates processed sequentially"
+      },
+      "process.durations_s.crystallization_setup": {
+        "value": 240,
+        "low": 120,
+        "high": 240,
+        "confidence": "datasheet",
+        "source": "https://www.sptlabtech.com/products/mosquito/mosquito-lcp",
+        "note": "2 min per standard 96-well plate, 4 min per 96-well LCP plate"
+      },
+      "lead_time_weeks": {
+        "value": 8,
+        "low": 4,
+        "high": 16,
+        "confidence": "placeholder",
+        "source": "agent_estimate"
+      },
+      "power_w": {
+        "value": 150,
+        "low": 50,
+        "high": 300,
+        "confidence": "placeholder",
+        "source": "agent_estimate"
+      },
+      "price_usd_estimate": {
+        "value": 149999,
+        "low": 145591,
+        "high": 149999,
+        "confidence": "estimated",
+        "source": "https://api.usaspending.gov/api/v2/search/spending_by_award/ (award 75N93018P00988)",
+        "note": "NIH Jul 2018 PO 75N93018P00988: nanolitre 4-position deck mosquito LCP with computer and humidity chamber $149,999. Consistent with NCI Sep 2015 $149,900 and Army Sep 2017 $145,591. 2015-2018 prices; likely higher today.",
+        "year": 2018
+      }
+    },
+    "power_w": 150,
+    "lead_time_weeks": 8,
+    "price_usd_estimate": 149999
+  },
+  {
+    "id": "tecan_freedom_evo_150",
+    "vendor": "Tecan",
+    "model": "Freedom EVO 150",
+    "category": "instrument",
+    "capabilities": [
+      "liquid_handling"
+    ],
+    "footprint": {
+      "width_m": 1.45,
+      "depth_m": 0.78,
+      "height_m": 0.87,
+      "clearance_m": 0.5,
+      "mount": "bench"
+    },
+    "access_points": [
+      {
+        "id": "deck",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0.8
+        },
+        "labware": [
+          "sbs_96",
+          "sbs_384",
+          "deep_well_96",
+          "tip_rack",
+          "reservoir",
+          "tube_rack",
+          "crystallization_plate_96"
+        ]
+      }
+    ],
+    "process": {
+      "capacity": 1,
+      "durations_s": {
+        "liquid_handling": 1800
+      }
+    },
+    "integration": [
+      "Tecan EVOware",
+      "Tecan Freedom EVOware COM/API (verify)"
+    ],
+    "safety": {
+      "hazards": [
+        "moving_parts",
+        "heavy"
+      ],
+      "requires_zone": [],
+      "needs_light_curtain": false,
+      "collaborative": false
+    },
+    "visual": {
+      "color": "#3a8fd6"
+    },
+    "source_urls": [
+      "https://lifesciences.tecan.com/freedom-evo-platform",
+      "https://shop.labexchange.com/en/tecan-freedom-evo-150-56870.html",
+      "https://api.usaspending.gov/api/v2/search/spending_by_award/ (award 15F06719P0003989)"
+    ],
+    "data_confidence": "estimated",
+    "provenance": {
+      "footprint.width_m": {
+        "value": 1.45,
+        "low": 1.45,
+        "high": 1.45,
+        "confidence": "estimated",
+        "source": "https://shop.labexchange.com/en/tecan-freedom-evo-150-56870.html",
+        "note": "dimensions from reseller listing citing the Tecan spec (1450x780x870 mm, 130 kg)"
+      },
+      "footprint.depth_m": {
+        "value": 0.78,
+        "low": 0.78,
+        "high": 0.78,
+        "confidence": "estimated",
+        "source": "https://shop.labexchange.com/en/tecan-freedom-evo-150-56870.html"
+      },
+      "footprint.height_m": {
+        "value": 0.87,
+        "low": 0.87,
+        "high": 0.87,
+        "confidence": "estimated",
+        "source": "https://shop.labexchange.com/en/tecan-freedom-evo-150-56870.html"
+      },
+      "footprint.clearance_m": {
+        "value": 0.5,
+        "low": 0.25,
+        "high": 1.25,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "service/loading space not published"
+      },
+      "access_points.deck.position": {
+        "value": 0.8,
+        "low": 0.7,
+        "high": 1.0,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "access height not published"
+      },
+      "process.capacity": {
+        "value": 1,
+        "low": 1,
+        "high": 1,
+        "confidence": "estimated",
+        "source": "https://lifesciences.tecan.com/freedom-evo-platform ; deck holds many labware but one batch run at a time"
+      },
+      "process.durations_s.liquid_handling": {
+        "value": 1800,
+        "low": 300,
+        "high": 7200,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "depends on protocol; per 96-well plate"
+      },
+      "power_w": {
+        "value": 1000,
+        "low": 600,
+        "high": 1200,
+        "confidence": "estimated",
+        "source": "https://shop.labexchange.com/en/tecan-freedom-evo-150-56870.html ; 600-1200 VA depending on size"
+      },
+      "lead_time_weeks": {
+        "value": 10,
+        "low": 6,
+        "high": 20,
+        "confidence": "placeholder",
+        "source": "agent_estimate"
+      },
+      "price_usd_estimate": {
+        "value": 221030,
+        "low": 154099,
+        "high": 494158,
+        "confidence": "estimated",
+        "source": "https://api.usaspending.gov/api/v2/search/spending_by_award/ (award 15F06719P0003989)",
+        "note": "FBI Sep 2019 PO 15F06719P0003989: additional TEDAC Freedom EVO 150 robotic instrument $221,030 (configured). High: NIH Sep 2022 75N95022P00630 EVO150 liquid handling platform $494,158 (large configuration). Low: VA Sep 2018 36C25918F4479 Freedom EVO system $154,099 (model size unstated). Bare unit is cheaper than these.",
+        "year": 2019
+      }
+    },
+    "power_w": 1000,
+    "lead_time_weeks": 10,
+    "price_usd_estimate": 221030
+  },
+  {
+    "id": "hamilton_starlet",
+    "vendor": "Hamilton",
+    "model": "Microlab STARlet",
+    "category": "instrument",
+    "capabilities": [
+      "liquid_handling"
+    ],
+    "footprint": {
+      "width_m": 1.12,
+      "depth_m": 0.78,
+      "height_m": 0.903,
+      "clearance_m": 0.5,
+      "mount": "bench"
+    },
+    "access_points": [
+      {
+        "id": "deck",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0.85
+        },
+        "labware": [
+          "sbs_96",
+          "sbs_384",
+          "deep_well_96",
+          "tip_rack",
+          "reservoir",
+          "tube_rack",
+          "crystallization_plate_96"
+        ]
+      }
+    ],
+    "process": {
+      "capacity": 1,
+      "durations_s": {
+        "liquid_handling": 1800
+      }
+    },
+    "integration": [
+      "Hamilton VENUS software",
+      "Hamilton Venus COM/Python (verify)"
+    ],
+    "safety": {
+      "hazards": [
+        "moving_parts",
+        "heavy"
+      ],
+      "requires_zone": [],
+      "needs_light_curtain": false,
+      "collaborative": false
+    },
+    "visual": {
+      "color": "#d6453a"
+    },
+    "source_urls": [
+      "https://www.hamiltoncompany.com/automated-liquid-handling/platforms/microlab-starlet",
+      "https://robotics.hamiltoncompany.com/microlab-star-site-requirements",
+      "https://api.usaspending.gov/api/v2/search/spending_by_award/ (award 36C26123P1173)"
+    ],
+    "data_confidence": "estimated",
+    "provenance": {
+      "footprint.width_m": {
+        "value": 1.12,
+        "low": 1.12,
+        "high": 1.12,
+        "confidence": "estimated",
+        "source": "https://robotics.hamiltoncompany.com/microlab-star-site-requirements",
+        "note": "from Microlab STAR/STARlet site requirements via search excerpt; depth 0.78-1.01 m by configuration"
+      },
+      "footprint.depth_m": {
+        "value": 0.78,
+        "low": 0.78,
+        "high": 1.01,
+        "confidence": "estimated",
+        "source": "https://robotics.hamiltoncompany.com/microlab-star-site-requirements"
+      },
+      "footprint.height_m": {
+        "value": 0.903,
+        "low": 0.903,
+        "high": 0.903,
+        "confidence": "estimated",
+        "source": "https://robotics.hamiltoncompany.com/microlab-star-site-requirements"
+      },
+      "footprint.clearance_m": {
+        "value": 0.5,
+        "low": 0.25,
+        "high": 1.25,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "service/loading space not published"
+      },
+      "access_points.deck.position": {
+        "value": 0.85,
+        "low": 0.7,
+        "high": 1.0,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "access height not published"
+      },
+      "process.capacity": {
+        "value": 1,
+        "low": 1,
+        "high": 1,
+        "confidence": "estimated",
+        "source": "https://www.hamiltoncompany.com/automated-liquid-handling/platforms/microlab-starlet ; deck holds many labware, one batch run at a time"
+      },
+      "process.durations_s.liquid_handling": {
+        "value": 1800,
+        "low": 300,
+        "high": 7200,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "depends on protocol; per 96-well plate"
+      },
+      "power_w": {
+        "value": 1000,
+        "low": 600,
+        "high": 1000,
+        "confidence": "datasheet",
+        "source": "https://robotics.hamiltoncompany.com/microlab-star-site-requirements ; 600 or 1000 VA by configuration"
+      },
+      "lead_time_weeks": {
+        "value": 10,
+        "low": 6,
+        "high": 20,
+        "confidence": "placeholder",
+        "source": "agent_estimate"
+      },
+      "price_usd_estimate": {
+        "value": 193191,
+        "low": 128958,
+        "high": 193191,
+        "confidence": "estimated",
+        "source": "https://api.usaspending.gov/api/v2/search/spending_by_award/ (award 36C26123P1173)",
+        "note": "VA May 2023 PO 36C26123P1173: Hamilton Microlab STARlet system $193,191 (configuration not stated, likely with extras). Low: USDA 2011 STARlet 454 bead enrichment/PCR system $128,958 (AG91H2P110025). No list price published.",
+        "year": 2023
+      }
+    },
+    "power_w": 1000,
+    "lead_time_weeks": 10,
+    "price_usd_estimate": 193191
+  },
+  {
+    "id": "agilent_bravo",
+    "vendor": "Agilent",
+    "model": "Bravo",
+    "category": "instrument",
+    "capabilities": [
+      "liquid_handling"
+    ],
+    "footprint": {
+      "width_m": 0.648,
+      "depth_m": 0.438,
+      "height_m": 0.697,
+      "clearance_m": 0.3,
+      "mount": "bench"
+    },
+    "access_points": [
+      {
+        "id": "deck",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0.15
+        },
+        "labware": [
+          "sbs_96",
+          "sbs_384",
+          "deep_well_96",
+          "tip_rack",
+          "reservoir",
+          "crystallization_plate_96"
+        ]
+      }
+    ],
+    "process": {
+      "capacity": 1,
+      "durations_s": {
+        "liquid_handling": 600
+      }
+    },
+    "integration": [
+      "Agilent VWorks software",
+      "VWorks automation control (verify)"
+    ],
+    "safety": {
+      "hazards": [
+        "moving_parts"
+      ],
+      "requires_zone": [],
+      "needs_light_curtain": false,
+      "collaborative": false
+    },
+    "visual": {
+      "color": "#7a5ad6"
+    },
+    "source_urls": [
+      "https://www.agilent.com/en/product/automated-liquid-handling/automated-liquid-handling-platforms/bravo-automated-liquid-handling-platform",
+      "https://www.agilent.com/cs/library/datasheets/public/5990-3480EN.pdf",
+      "https://www.agilent.com/Library/usermanuals/Public/G5409-90007E_BravoSafety_P_EN_.pdf",
+      "https://api.usaspending.gov/api/v2/search/spending_by_award/ (award 1232SA25P0554)"
+    ],
+    "data_confidence": "estimated",
+    "provenance": {
+      "footprint.width_m": {
+        "value": 0.648,
+        "low": 0.648,
+        "high": 0.648,
+        "confidence": "datasheet",
+        "source": "https://www.agilent.com/Library/usermanuals/Public/G5409-90007E_BravoSafety_P_EN_.pdf (via search excerpt)",
+        "note": "25.5 x 17.2 x 27.4 in; 52 kg"
+      },
+      "footprint.depth_m": {
+        "value": 0.438,
+        "low": 0.438,
+        "high": 0.438,
+        "confidence": "datasheet",
+        "source": "https://www.agilent.com/Library/usermanuals/Public/G5409-90007E_BravoSafety_P_EN_.pdf (via search excerpt)"
+      },
+      "footprint.height_m": {
+        "value": 0.697,
+        "low": 0.697,
+        "high": 0.697,
+        "confidence": "datasheet",
+        "source": "https://www.agilent.com/Library/usermanuals/Public/G5409-90007E_BravoSafety_P_EN_.pdf (via search excerpt)"
+      },
+      "footprint.clearance_m": {
+        "value": 0.3,
+        "low": 0.15,
+        "high": 0.75,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "service/loading space not published"
+      },
+      "access_points.deck.position": {
+        "value": 0.15,
+        "low": 0.05,
+        "high": 0.3,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "access height not published"
+      },
+      "process.capacity": {
+        "value": 1,
+        "low": 1,
+        "high": 1,
+        "confidence": "estimated",
+        "source": "https://www.agilent.com/cs/library/datasheets/public/5990-3480EN.pdf ; 9 deck positions but one batch run at a time"
+      },
+      "process.durations_s.liquid_handling": {
+        "value": 600,
+        "low": 120,
+        "high": 3600,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "per 96-well plate step; depends on protocol"
+      },
+      "power_w": {
+        "value": 1100,
+        "low": 600,
+        "high": 1400,
+        "confidence": "estimated",
+        "source": "Agilent Bravo safety guide ; 11.5 A at 120 V, 6 A at 240 V"
+      },
+      "lead_time_weeks": {
+        "value": 8,
+        "low": 4,
+        "high": 16,
+        "confidence": "placeholder",
+        "source": "agent_estimate"
+      },
+      "price_usd_estimate": {
+        "value": 132922,
+        "low": 39037,
+        "high": 132922,
+        "confidence": "estimated",
+        "source": "https://api.usaspending.gov/api/v2/search/spending_by_award/ (award 1232SA25P0554)",
+        "note": "USDA Sep 2025 PO 1232SA25P0554: Agilent Bravo liquid handling platform $132,922 (configuration unstated). Low: 2016 refurbished Bravo without gripper (with PC, VWorks, 96 head) $39,037 (N3239816P0249), a used-class floor.",
+        "year": 2025
+      }
+    },
+    "power_w": 1100,
+    "lead_time_weeks": 8,
+    "price_usd_estimate": 132922
+  },
+  {
+    "id": "beckman_biomek_4000",
+    "vendor": "Beckman Coulter",
+    "model": "Biomek 4000",
+    "category": "instrument",
+    "capabilities": [
+      "liquid_handling"
+    ],
+    "footprint": {
+      "width_m": 1.225,
+      "depth_m": 0.505,
+      "height_m": 0.675,
+      "clearance_m": 0.3,
+      "mount": "bench"
+    },
+    "access_points": [
+      {
+        "id": "deck",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0.3
+        },
+        "labware": [
+          "sbs_96",
+          "sbs_384",
+          "deep_well_96",
+          "tip_rack",
+          "reservoir",
+          "tube_rack"
+        ]
+      }
+    ],
+    "process": {
+      "capacity": 1,
+      "durations_s": {
+        "liquid_handling": 600
+      }
+    },
+    "integration": [
+      "Biomek Software (vendor)",
+      "Biomek 4000 Software with Orbital/thermal off-deck integrations (vendor)"
+    ],
+    "safety": {
+      "hazards": [
+        "moving_parts"
+      ],
+      "requires_zone": []
+    },
+    "visual": {
+      "color": "#2c6fbb"
+    },
+    "source_urls": [
+      "https://www.beckman.com/liquid-handlers/biomek-4000",
+      "https://www.ste-mart.com/biomek-4000-liquid-handling-workstation-122-5-cm-50-5-cm-67-5-cm-beckman-coulter-11221.htm",
+      "https://api.usaspending.gov/api/v2/search/spending_by_award/ (awards 3721 Dec 2016 'Biomek 4000 liquid handling package' $51,525; HHSN272201600287U Jul 2016 $40,588.95; 75N95020P00592 Sep 2020 Illumina NGS system $55,800)"
+    ],
+    "data_confidence": "estimated",
+    "provenance": {
+      "footprint.width_m": {
+        "value": 1.225,
+        "low": 1.18825,
+        "high": 1.2617500000000001,
+        "confidence": "datasheet",
+        "source": "https://www.beckman.com/liquid-handlers/biomek-4000 ; 122.5 x 50.5 x 67.5 cm per vendor-sourced listing"
+      },
+      "footprint.depth_m": {
+        "value": 0.505,
+        "low": 0.48985,
+        "high": 0.52015,
+        "confidence": "datasheet",
+        "source": "https://www.beckman.com/liquid-handlers/biomek-4000 ; 122.5 x 50.5 x 67.5 cm per vendor-sourced listing"
+      },
+      "footprint.height_m": {
+        "value": 0.675,
+        "low": 0.65475,
+        "high": 0.69525,
+        "confidence": "datasheet",
+        "source": "https://www.beckman.com/liquid-handlers/biomek-4000 ; 122.5 x 50.5 x 67.5 cm per vendor-sourced listing"
+      },
+      "footprint.clearance_m": {
+        "value": 0.3,
+        "low": 0.15,
+        "high": 0.6,
+        "confidence": "placeholder",
+        "source": "agent_estimate"
+      },
+      "process.durations_s.liquid_handling": {
+        "value": 600,
+        "low": 180,
+        "high": 1800,
+        "confidence": "placeholder",
+        "source": "agent_estimate: one 96-well plate transfer step incl. tip pickup; protocol dependent"
+      },
+      "process.capacity": {
+        "value": 1,
+        "low": 1,
+        "high": 1,
+        "confidence": "estimated",
+        "source": "https://www.beckman.com/liquid-handlers/biomek-4000 ; 12 deck positions but one plate-level protocol at a time"
+      },
+      "price_usd_estimate": {
+        "value": 51525,
+        "low": 40588.95,
+        "high": 55800,
+        "confidence": "estimated",
+        "source": "https://api.usaspending.gov/api/v2/search/spending_by_award/ (awards 3721 Dec 2016 'Biomek 4000 liquid handling package' $51,525; HHSN272201600287U Jul 2016 $40,588.95; 75N95020P00592 Sep 2020 Illumina NGS system $55,800)",
+        "note": "Legacy product. Purchase records, not list price; configured systems (package with accessories/installation), not necessarily a bare unit.",
+        "year": 2016
+      }
+    },
+    "scraped_at": "2026-10-03T14:00:00Z",
+    "price_usd_estimate": 51525
+  },
+  {
+    "id": "beckman_echo_555",
+    "vendor": "Beckman Coulter",
+    "model": "Echo 555",
+    "category": "instrument",
+    "capabilities": [
+      "acoustic_dispensing"
+    ],
+    "footprint": {
+      "width_m": 0.539,
+      "depth_m": 0.683,
+      "height_m": 0.925,
+      "clearance_m": 0.3,
+      "mount": "bench"
+    },
+    "access_points": [
+      {
+        "id": "source_plate_drawer",
+        "position": {
+          "x": 0,
+          "y": -0.34,
+          "z": 0.35
+        },
+        "labware": [
+          "sbs_384",
+          "sbs_1536"
+        ]
+      },
+      {
+        "id": "destination_plate_drawer",
+        "position": {
+          "x": 0,
+          "y": -0.34,
+          "z": 0.55
+        },
+        "labware": [
+          "sbs_96",
+          "sbs_384",
+          "sbs_1536"
+        ]
+      }
+    ],
+    "process": {
+      "capacity": 1,
+      "durations_s": {
+        "acoustic_dispensing": 70
+      }
+    },
+    "integration": [
+      "Echo Liquid Handler software (vendor)",
+      "Echo Plate Reformat / Cherry Pick (vendor)"
+    ],
+    "safety": {
+      "hazards": [
+        "moving_parts"
+      ],
+      "requires_zone": [
+        "vibration_free"
+      ]
+    },
+    "visual": {
+      "color": "#2e8b8b"
+    },
+    "source_urls": [
+      "https://www.beckman.com/liquid-handlers/echo-acoustic",
+      "https://www.selectscience.net/products/echo-555-liquid-handler/?prodID=15048",
+      "https://labplan.ie/content/uploads/2020/03/Echo525-Technical-Specifications.pdf",
+      "https://api.usaspending.gov/api/v2/search/spending_by_award/ (Echo 550 proxy: HHSD200201690301C Jun 2016 $301,000.50; DOCSB134118SU0244 Jun 2018 $298,747 incl. 4-yr service; Echo 525 Army 2019 $246,083 as low end)"
+    ],
+    "data_confidence": "estimated",
+    "provenance": {
+      "footprint.width_m": {
+        "value": 0.539,
+        "low": 0.52283,
+        "high": 0.55517,
+        "confidence": "estimated",
+        "source": "https://www.beckman.com/liquid-handlers/echo-acoustic ; sibling Echo 525 53.9 x 68.3 x 92.5 cm (https://labplan.ie/content/uploads/2020/03/Echo525-Technical-Specifications.pdf); 555 dimensions not found, assumed same Echo family chassis"
+      },
+      "footprint.depth_m": {
+        "value": 0.683,
+        "low": 0.66251,
+        "high": 0.7034900000000001,
+        "confidence": "estimated",
+        "source": "https://www.beckman.com/liquid-handlers/echo-acoustic ; sibling Echo 525 53.9 x 68.3 x 92.5 cm (https://labplan.ie/content/uploads/2020/03/Echo525-Technical-Specifications.pdf); 555 dimensions not found, assumed same Echo family chassis"
+      },
+      "footprint.height_m": {
+        "value": 0.925,
+        "low": 0.89725,
+        "high": 0.9527500000000001,
+        "confidence": "estimated",
+        "source": "https://www.beckman.com/liquid-handlers/echo-acoustic ; sibling Echo 525 53.9 x 68.3 x 92.5 cm (https://labplan.ie/content/uploads/2020/03/Echo525-Technical-Specifications.pdf); 555 dimensions not found, assumed same Echo family chassis"
+      },
+      "footprint.clearance_m": {
+        "value": 0.3,
+        "low": 0.15,
+        "high": 0.6,
+        "confidence": "placeholder",
+        "source": "agent_estimate"
+      },
+      "process.durations_s.acoustic_dispensing": {
+        "value": 70,
+        "low": 40,
+        "high": 300,
+        "confidence": "estimated",
+        "source": "https://labplan.ie/content/uploads/2020/03/Echo525-Technical-Specifications.pdf ; Echo 525 384PP->384PP 25 nL takes 2.2 min; Echo 555 'doubles throughput of the Echo 550' per selectscience listing, so ~half"
+      },
+      "process.capacity": {
+        "value": 1,
+        "low": 1,
+        "high": 1,
+        "confidence": "estimated",
+        "source": "one source/destination plate pair at a time"
+      },
+      "price_usd_estimate": {
+        "value": 300000,
+        "low": 246083,
+        "high": 301000,
+        "confidence": "estimated",
+        "source": "https://api.usaspending.gov/api/v2/search/spending_by_award/ (Echo 550 proxy: HHSD200201690301C Jun 2016 $301,000.50; DOCSB134118SU0244 Jun 2018 $298,747 incl. 4-yr service; Echo 525 Army 2019 $246,083 as low end)",
+        "note": "No purchase record found for the Echo 555 itself (only service contracts). Price is proxied from its predecessor Echo 550 and sibling Echo 525; 555 may cost more. Configured system.",
+        "year": 2018
+      }
+    },
+    "scraped_at": "2026-10-03T14:00:00Z",
+    "price_usd_estimate": 300000
+  },
+  {
+    "id": "thermo_kingfisher_flex",
+    "vendor": "Thermo Fisher Scientific",
+    "model": "KingFisher Flex (96 deep-well head)",
+    "category": "instrument",
+    "capabilities": [
+      "protein_purification",
+      "liquid_handling"
+    ],
+    "footprint": {
+      "width_m": 0.68,
+      "depth_m": 0.6,
+      "height_m": 0.38,
+      "clearance_m": 0.2,
+      "mount": "bench"
+    },
+    "access_points": [
+      {
+        "id": "plate_stage",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0.2
+        },
+        "labware": [
+          "deep_well_96",
+          "sbs_96"
+        ]
+      }
+    ],
+    "process": {
+      "capacity": 1,
+      "durations_s": {
+        "protein_purification": 1200,
+        "liquid_handling": 1200
+      }
+    },
+    "integration": [
+      "BindIt software (vendor)"
+    ],
+    "safety": {
+      "hazards": [
+        "moving_parts"
+      ],
+      "requires_zone": []
+    },
+    "visual": {
+      "color": "#d35400"
+    },
+    "source_urls": [
+      "https://www.thermofisher.com/order/catalog/product/5400630",
+      "https://api.usaspending.gov/api/v2/search/spending_by_award/ (CONT_AWD_75F40123F80118 May 2023 $62,928; CONT_AWD_123A9424P0056 Jul 2024 $63,138.52; CONT_AWD_AG32SCD160213 Sep 2016 SKU 5400630 $51,707)"
+    ],
+    "data_confidence": "datasheet",
+    "provenance": {
+      "footprint.width_m": {
+        "value": 0.68,
+        "low": 0.6596000000000001,
+        "high": 0.7004,
+        "confidence": "datasheet",
+        "source": "https://www.thermofisher.com/order/catalog/product/5400630 ; 68 W x 60 D x 38 H cm, 28 kg"
+      },
+      "footprint.depth_m": {
+        "value": 0.6,
+        "low": 0.582,
+        "high": 0.618,
+        "confidence": "datasheet",
+        "source": "https://www.thermofisher.com/order/catalog/product/5400630 ; 68 W x 60 D x 38 H cm, 28 kg"
+      },
+      "footprint.height_m": {
+        "value": 0.38,
+        "low": 0.3686,
+        "high": 0.3914,
+        "confidence": "datasheet",
+        "source": "https://www.thermofisher.com/order/catalog/product/5400630 ; 68 W x 60 D x 38 H cm, 28 kg"
+      },
+      "footprint.clearance_m": {
+        "value": 0.3,
+        "low": 0.15,
+        "high": 0.6,
+        "confidence": "placeholder",
+        "source": "agent_estimate"
+      },
+      "process.durations_s.protein_purification": {
+        "value": 1200,
+        "low": 600,
+        "high": 3600,
+        "confidence": "datasheet",
+        "source": "https://www.thermofisher.com/order/catalog/product/5400630 ; 'up to 96 samples in less than 20 minutes' (upper-end figure; run time depends on protocol)"
+      },
+      "process.capacity": {
+        "value": 1,
+        "low": 1,
+        "high": 1,
+        "confidence": "datasheet",
+        "source": "https://www.thermofisher.com/order/catalog/product/5400630 ; one 96 deep-well plate per run"
+      },
+      "process.durations_s.liquid_handling": {
+        "value": 1200,
+        "low": 600,
+        "high": 3600,
+        "confidence": "estimated",
+        "source": "same run as protein_purification"
+      },
+      "price_usd_estimate": {
+        "value": 62928,
+        "low": 51707,
+        "high": 63247,
+        "confidence": "estimated",
+        "source": "https://api.usaspending.gov/api/v2/search/spending_by_award/ (CONT_AWD_75F40123F80118 May 2023 $62,928; CONT_AWD_123A9424P0056 Jul 2024 $63,138.52; CONT_AWD_AG32SCD160213 Sep 2016 SKU 5400630 $51,707)",
+        "note": "US federal purchase records for KingFisher Flex with 96 deep-well head (SKU 5400630); some include SmartStart service/accessories. Not a list price.",
+        "year": 2023
+      }
+    },
+    "scraped_at": "2026-10-03T14:00:00Z",
+    "price_usd_estimate": 62928
+  },
+  {
+    "id": "sartorius_ambr15",
+    "vendor": "Sartorius",
+    "model": "Ambr 15 Cell Culture (24-vessel)",
+    "category": "instrument",
+    "capabilities": [
+      "bioreactor",
+      "cell_culture"
+    ],
+    "footprint": {
+      "width_m": 1.5,
+      "depth_m": 0.9,
+      "height_m": 0.9,
+      "clearance_m": 0.5,
+      "mount": "bench"
+    },
+    "access_points": [
+      {
+        "id": "vessel_deck",
+        "position": {
+          "x": 0,
+          "y": -0.45,
+          "z": 0.8
+        },
+        "labware": [
+          "other",
+          "deep_well_96"
+        ]
+      }
+    ],
+    "process": {
+      "capacity": 24,
+      "durations_s": {
+        "bioreactor": 1209600,
+        "cell_culture": 1209600
+      }
+    },
+    "integration": [
+      "Ambr 15 software (vendor)",
+      "Integrations with Vi-CELL XR, Cedex HiRes, BioProfile FLEX2, Octet (vendor-stated)"
+    ],
+    "safety": {
+      "hazards": [
+        "biohazard",
+        "moving_parts"
+      ],
+      "requires_zone": [
+        "bsl2"
+      ]
+    },
+    "visual": {
+      "color": "#27ae60"
+    },
+    "source_urls": [
+      "https://www.sartorius.com/en/products/fermentation-bioreactors/ambr-multi-parallel-bioreactors/ambr-15-cell-culture",
+      "https://shop.sartorius.com/us/p/ambr-15-cell-culture-system--24-vessel--standard/001-8B20-P",
+      "no sourced Ambr 15 system price. Proxy: US Commerce 2024 Ambr 250 Modular $279,007.85 (CONT_AWD_1333ND24PNB640607_1341); low = used listing $65,000 (americanlaboratorytrading.com, lower bound only)"
+    ],
+    "data_confidence": "estimated",
+    "provenance": {
+      "footprint.width_m": {
+        "value": 1.5,
+        "low": 1.0,
+        "high": 2.2,
+        "confidence": "placeholder",
+        "source": "agent_estimate: dimensions not published on vendor page; liquid-handler workstation with 2 culture stations"
+      },
+      "footprint.depth_m": {
+        "value": 0.9,
+        "low": 0.7,
+        "high": 1.2,
+        "confidence": "placeholder",
+        "source": "agent_estimate"
+      },
+      "footprint.height_m": {
+        "value": 0.9,
+        "low": 0.7,
+        "high": 1.1,
+        "confidence": "placeholder",
+        "source": "agent_estimate"
+      },
+      "footprint.clearance_m": {
+        "value": 0.5,
+        "low": 0.3,
+        "high": 1.0,
+        "confidence": "placeholder",
+        "source": "agent_estimate"
+      },
+      "process.capacity": {
+        "value": 24,
+        "low": 24,
+        "high": 48,
+        "confidence": "datasheet",
+        "source": "https://www.sartorius.com/en/products/fermentation-bioreactors/ambr-multi-parallel-bioreactors/ambr-15-cell-culture ; 24 or 48 parallel cultivations, 10-15 mL"
+      },
+      "process.durations_s.bioreactor": {
+        "value": 1209600,
+        "low": 432000,
+        "high": 1814400,
+        "confidence": "estimated",
+        "source": "agent_estimate: 14-day fed-batch CHO run typical for Ambr 15 process development"
+      },
+      "process.durations_s.cell_culture": {
+        "value": 1209600,
+        "low": 432000,
+        "high": 1814400,
+        "confidence": "estimated",
+        "source": "agent_estimate: same 14-day run"
+      },
+      "price_usd_estimate": {
+        "value": 279008,
+        "low": 65000,
+        "high": 600000,
+        "confidence": "placeholder",
+        "source": "no sourced Ambr 15 system price. Proxy: US Commerce 2024 Ambr 250 Modular $279,007.85 (CONT_AWD_1333ND24PNB640607_1341); low = used listing $65,000 (americanlaboratorytrading.com, lower bound only)",
+        "note": "Sartorius shop shows 'Request a Quote'; usaspending shows only Ambr 15 service/parts. Value is a placeholder proxy, not a measured price; configured vs bare unknown. High is an agent guess.",
+        "year": 2024
+      }
+    },
+    "scraped_at": "2026-10-03T14:00:00Z",
+    "price_usd_estimate": 279008
+  },
+  {
+    "id": "sartorius_ambr250_modular",
+    "vendor": "Sartorius",
+    "model": "Ambr 250 Modular (4-vessel)",
+    "category": "instrument",
+    "capabilities": [
+      "bioreactor",
+      "cell_culture"
+    ],
+    "footprint": {
+      "width_m": 1.27,
+      "depth_m": 0.455,
+      "height_m": 0.6,
+      "clearance_m": 0.4,
+      "mount": "bench"
+    },
+    "access_points": [
+      {
+        "id": "vessel_stations",
+        "position": {
+          "x": 0,
+          "y": -0.23,
+          "z": 0.4
+        },
+        "labware": [
+          "other",
+          "bottle"
+        ]
+      }
+    ],
+    "process": {
+      "capacity": 4,
+      "durations_s": {
+        "bioreactor": 1209600,
+        "cell_culture": 1209600
+      }
+    },
+    "integration": [
+      "Ambr 250 Modular software (vendor)"
+    ],
+    "safety": {
+      "hazards": [
+        "biohazard",
+        "moving_parts"
+      ],
+      "requires_zone": [
+        "bsl2"
+      ]
+    },
+    "visual": {
+      "color": "#2ecc71"
+    },
+    "source_urls": [
+      "https://www.sartorius.com/en/products/fermentation-bioreactors/ambr-multi-parallel-bioreactors/ambr-250-modular",
+      "https://shop.sartorius.com/us/p/ambr-250-modular-system--4-vessel/001-8A65-P",
+      "https://www.sartorius.com/download/1317956/ambr250-modular-techspec-en-b-sartorius-e-pdf-data.pdf",
+      "https://www.usaspending.gov/award/CONT_AWD_1333ND24PNB640607_1341_-NONE-_-NONE- (US Commerce Sep 2024, Ambr 250 Modular incl. delivery, installation, training, service)"
+    ],
+    "data_confidence": "estimated",
+    "provenance": {
+      "footprint.width_m": {
+        "value": 1.27,
+        "low": 1.2319,
+        "high": 1.3081,
+        "confidence": "datasheet",
+        "source": "https://shop.sartorius.com/us/p/ambr-250-modular-system--4-vessel/001-8A65-P ; 4-vessel 1270 x 455 x 600 mm (search-result excerpt of Sartorius shop/techspec)"
+      },
+      "footprint.depth_m": {
+        "value": 0.455,
+        "low": 0.44135,
+        "high": 0.46865,
+        "confidence": "datasheet",
+        "source": "https://shop.sartorius.com/us/p/ambr-250-modular-system--4-vessel/001-8A65-P ; 4-vessel 1270 x 455 x 600 mm (search-result excerpt of Sartorius shop/techspec)"
+      },
+      "footprint.height_m": {
+        "value": 0.6,
+        "low": 0.582,
+        "high": 0.618,
+        "confidence": "datasheet",
+        "source": "https://shop.sartorius.com/us/p/ambr-250-modular-system--4-vessel/001-8A65-P ; 4-vessel 1270 x 455 x 600 mm (search-result excerpt of Sartorius shop/techspec)"
+      },
+      "footprint.clearance_m": {
+        "value": 0.3,
+        "low": 0.15,
+        "high": 0.6,
+        "confidence": "placeholder",
+        "source": "agent_estimate"
+      },
+      "process.capacity": {
+        "value": 4,
+        "low": 4,
+        "high": 8,
+        "confidence": "datasheet",
+        "source": "https://www.sartorius.com/download/1317956/ambr250-modular-techspec-en-b-sartorius-e-pdf-data.pdf ; combines 2,4,6 or 8 vessels; 4-vessel config modelled"
+      },
+      "process.durations_s.bioreactor": {
+        "value": 1209600,
+        "low": 432000,
+        "high": 1814400,
+        "confidence": "estimated",
+        "source": "agent_estimate: 14-day fed-batch run; 100-250 mL working volume"
+      },
+      "process.durations_s.cell_culture": {
+        "value": 1209600,
+        "low": 432000,
+        "high": 1814400,
+        "confidence": "estimated",
+        "source": "agent_estimate: same 14-day run"
+      },
+      "price_usd_estimate": {
+        "value": 279007.85,
+        "low": 279007.85,
+        "high": 279007.85,
+        "confidence": "estimated",
+        "source": "https://www.usaspending.gov/award/CONT_AWD_1333ND24PNB640607_1341_-NONE-_-NONE- (US Commerce Sep 2024, Ambr 250 Modular incl. delivery, installation, training, service)",
+        "note": "Single purchase record; vessel count not stated (low=high=value, true range unknown). Configured system incl. install/training/service.",
+        "year": 2024
+      }
+    },
+    "scraped_at": "2026-10-03T14:00:00Z",
+    "price_usd_estimate": 279007.85
+  },
+  {
+    "id": "unchained_junior",
+    "vendor": "Unchained Labs",
+    "model": "Junior",
+    "category": "instrument",
+    "capabilities": [
+      "powder_dosing",
+      "liquid_dosing",
+      "reaction"
+    ],
+    "footprint": {
+      "width_m": 1.05,
+      "depth_m": 0.904,
+      "height_m": 1.4,
+      "clearance_m": 0.5,
+      "mount": "floor"
+    },
+    "access_points": [
+      {
+        "id": "deck",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0.8
+        },
+        "labware": [
+          "vial_rack",
+          "sbs_96",
+          "tube_rack",
+          "other"
+        ]
+      }
+    ],
+    "process": {
+      "capacity": 1,
+      "durations_s": {
+        "powder_dosing": 1800,
+        "liquid_dosing": 900,
+        "reaction": 14400
+      }
+    },
+    "integration": [
+      "Unchained Labs Automation Studio / Library Studio (vendor)"
+    ],
+    "safety": {
+      "hazards": [
+        "moving_parts",
+        "toxic_reagents"
+      ],
+      "requires_zone": [
+        "ventilated"
+      ]
+    },
+    "visual": {
+      "color": "#8e44ad"
+    },
+    "source_urls": [
+      "https://www.unchainedlabs.com/junior/",
+      "https://www.unchainedlabs.com/wp-content/uploads/2021/12/10_solid_dispense_station_spec_sheet.pdf",
+      "https://api.usaspending.gov/api/v2/search/spending_by_award/ (NIAID 75N95019P00423, Jul 2019, 'one Junior automated reaction dosing system')"
+    ],
+    "data_confidence": "estimated",
+    "provenance": {
+      "footprint.width_m": {
+        "value": 1.05,
+        "low": 1.0185,
+        "high": 1.0815000000000001,
+        "confidence": "datasheet",
+        "source": "https://www.unchainedlabs.com/junior/ ; spec excerpt: 105 W x 90.4 D x 140 H cm with enclosure, ~150 kg, 110-220 VAC 16 A"
+      },
+      "footprint.depth_m": {
+        "value": 0.904,
+        "low": 0.87688,
+        "high": 0.9311200000000001,
+        "confidence": "datasheet",
+        "source": "https://www.unchainedlabs.com/junior/ ; spec excerpt: 105 W x 90.4 D x 140 H cm with enclosure, ~150 kg, 110-220 VAC 16 A"
+      },
+      "footprint.height_m": {
+        "value": 1.4,
+        "low": 1.3579999999999999,
+        "high": 1.442,
+        "confidence": "datasheet",
+        "source": "https://www.unchainedlabs.com/junior/ ; spec excerpt: 105 W x 90.4 D x 140 H cm with enclosure, ~150 kg, 110-220 VAC 16 A"
+      },
+      "footprint.clearance_m": {
+        "value": 0.3,
+        "low": 0.15,
+        "high": 0.6,
+        "confidence": "placeholder",
+        "source": "agent_estimate"
+      },
+      "process.capacity": {
+        "value": 1,
+        "low": 1,
+        "high": 1,
+        "confidence": "placeholder",
+        "source": "agent_estimate: one reactor block / vial rack at a time"
+      },
+      "process.durations_s.powder_dosing": {
+        "value": 1800,
+        "low": 600,
+        "high": 7200,
+        "confidence": "placeholder",
+        "source": "agent_estimate: one vial rack/block; workflow dependent"
+      },
+      "process.durations_s.liquid_dosing": {
+        "value": 900,
+        "low": 300,
+        "high": 3600,
+        "confidence": "placeholder",
+        "source": "agent_estimate: one vial rack/block; workflow dependent"
+      },
+      "process.durations_s.reaction": {
+        "value": 14400,
+        "low": 3600,
+        "high": 86400,
+        "confidence": "placeholder",
+        "source": "agent_estimate: one vial rack/block; workflow dependent"
+      },
+      "price_usd_estimate": {
+        "value": 677898,
+        "low": 677898,
+        "high": 677898,
+        "confidence": "estimated",
+        "source": "https://api.usaspending.gov/api/v2/search/spending_by_award/ (NIAID 75N95019P00423, Jul 2019, 'one Junior automated reaction dosing system')",
+        "note": "Single purchase record for a configured system (dosing/reaction modules); other configurations will differ. low=high=value because only one record found.",
+        "year": 2019
+      }
+    },
+    "scraped_at": "2026-10-03T14:00:00Z",
+    "price_usd_estimate": 677898
+  },
+  {
+    "id": "cytiva_akta_go",
+    "vendor": "Cytiva",
+    "model": "AKTA go",
+    "category": "instrument",
+    "capabilities": [
+      "protein_purification"
+    ],
+    "footprint": {
+      "width_m": 0.335,
+      "depth_m": 0.464,
+      "height_m": 0.482,
+      "clearance_m": 0.2,
+      "mount": "bench"
+    },
+    "access_points": [
+      {
+        "id": "column_holder",
+        "position": {
+          "x": 0,
+          "y": -0.23,
+          "z": 0.3
+        },
+        "labware": [
+          "tube_rack",
+          "other"
+        ]
+      }
+    ],
+    "process": {
+      "capacity": 1,
+      "durations_s": {
+        "protein_purification": 3600
+      }
+    },
+    "integration": [
+      "UNICORN software (vendor)"
+    ],
+    "safety": {
+      "hazards": [
+        "moving_parts"
+      ],
+      "requires_zone": []
+    },
+    "visual": {
+      "color": "#c0392b"
+    },
+    "source_urls": [
+      "https://www.cytivalifesciences.com/en/us/products/items/akta-go-protein-purification-system-p-21891",
+      "https://cdn.cytivalifesciences.com/api/public/content/digi-30614-pdf",
+      "https://api.usaspending.gov/api/v2/search/spending_by_award/ (NIH 75N93023F00292 Jul 2023 $49,589.87; 75N94025P00659 Sep 2025 $56,269.34 w/ UNICORN; 75N90025P00776 Sep 2025 $38,912.96; 75N92025F00165 Aug 2025 $71,439.69)"
+    ],
+    "data_confidence": "datasheet",
+    "provenance": {
+      "footprint.width_m": {
+        "value": 0.335,
+        "low": 0.325,
+        "high": 0.345,
+        "confidence": "datasheet",
+        "source": "https://cdn.cytivalifesciences.com/api/public/content/digi-30614-pdf ; 335 W x 482 H x 464 D mm, <27 kg, 0.01-25 mL/min, 5 MPa"
+      },
+      "footprint.depth_m": {
+        "value": 0.464,
+        "low": 0.45,
+        "high": 0.48,
+        "confidence": "datasheet",
+        "source": "https://cdn.cytivalifesciences.com/api/public/content/digi-30614-pdf ; 335 W x 482 H x 464 D mm, <27 kg, 0.01-25 mL/min, 5 MPa"
+      },
+      "footprint.height_m": {
+        "value": 0.482,
+        "low": 0.47,
+        "high": 0.5,
+        "confidence": "datasheet",
+        "source": "https://cdn.cytivalifesciences.com/api/public/content/digi-30614-pdf ; 335 W x 482 H x 464 D mm, <27 kg, 0.01-25 mL/min, 5 MPa"
+      },
+      "footprint.clearance_m": {
+        "value": 0.2,
+        "low": 0.1,
+        "high": 0.4,
+        "confidence": "placeholder",
+        "source": "agent_estimate"
+      },
+      "power_w": {
+        "value": 100,
+        "low": 20,
+        "high": 300,
+        "confidence": "datasheet",
+        "source": "https://cdn.cytivalifesciences.com/api/public/content/digi-30614-pdf ; 335 W x 482 H x 464 D mm, <27 kg, 0.01-25 mL/min, 5 MPa ; typical 100 W, max 300 VA, power-save <20 W"
+      },
+      "process.capacity": {
+        "value": 1,
+        "low": 1,
+        "high": 1,
+        "confidence": "datasheet",
+        "source": "single-column FPLC system"
+      },
+      "process.durations_s.protein_purification": {
+        "value": 3600,
+        "low": 1800,
+        "high": 14400,
+        "confidence": "estimated",
+        "source": "agent_estimate: one affinity/SEC run incl. equilibration, 0.01-25 mL/min"
+      },
+      "price_usd_estimate": {
+        "value": 49590,
+        "low": 38913,
+        "high": 71440,
+        "confidence": "estimated",
+        "source": "https://api.usaspending.gov/api/v2/search/spending_by_award/ (NIH 75N93023F00292 Jul 2023 $49,589.87; 75N94025P00659 Sep 2025 $56,269.34 w/ UNICORN; 75N90025P00776 Sep 2025 $38,912.96; 75N92025F00165 Aug 2025 $71,439.69)",
+        "note": "Median-ish of US federal purchase records 2021-2025; configured with accessories/software, not a list price.",
+        "year": 2023
+      }
+    },
+    "scraped_at": "2026-10-03T14:00:00Z",
+    "price_usd_estimate": 49590
   }
 ]

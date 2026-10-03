@@ -28,9 +28,9 @@
     "equipment": [
       {
         "instance_id": "tecan_fluent_1",
-        "catalog_id": "tecan_fluent",
-        "rationale": "Proxy: the source's Tecan Freedom EVO 150 is not in the catalog; its successor family is priced.",
-        "match": "proxy"
+        "catalog_id": "tecan_freedom_evo_150",
+        "rationale": "Named in the source; exact catalog model (added 3 Oct).",
+        "match": "exact"
       },
       {
         "instance_id": "sptlabtech_mosquito_xtal3_1",
