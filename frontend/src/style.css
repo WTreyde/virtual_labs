@@ -109,3 +109,12 @@ body.page-view #panel, body.page-view #dialogue, body.page-view #clockbar, body.
 body.page-view #game { overflow: visible; }
 body.page-view #modal { position: static; transform: none; width: auto; max-width: 1200px; max-height: none; margin: 24px auto; }
 body.page-view #modal .close { display: none; }
+
+/* Throughput block: one fact per line so the pixel font never runs lines together. */
+#metrics { line-height: 1.6; }
+#metrics .metric-title { font-weight: bold; margin-bottom: 4px; }
+#metrics .metric-big { font-size: 14px; line-height: 1.5; margin-bottom: 4px; overflow-wrap: anywhere; }
+#metrics .metric-big .unit { font-size: 9px; color: #556; }
+#metrics .metric-row { display: flex; justify-content: space-between; gap: 8px; font-size: 9px; }
+#metrics .metric-row > span:first-child { color: #556; }
+#metrics .band { margin-top: 6px; }

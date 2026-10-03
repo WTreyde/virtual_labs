@@ -32,8 +32,11 @@ export interface ReplayHooks {
 
 export async function loadReplay(name: string): Promise<RecordedRun> {
   const res = await fetch(`${(import.meta as any).env?.BASE_URL ?? "/"}replays/${encodeURIComponent(name)}.json`);
-  if (!res.ok) throw new Error(`There is no recorded run called "${name}" yet, so there is nothing to replay. (Looked for public/replays/${name}.json.)`);
-  return res.json();
+  // Dev servers and static hosts often answer a missing file with index.html and status 200, so check the body too.
+  const text = res.ok ? await res.text() : "";
+  if (!text.trimStart().startsWith("{"))
+    throw new Error(`There is no recorded run called "${name}" yet, so there is nothing to replay. (Looked for public/replays/${name}.json.)`);
+  return JSON.parse(text);
 }
 
 /** A room with nothing in it, shown while the recorded agent is still "working". */
@@ -83,6 +86,7 @@ function headline(md: string): string {
 /** Resolves after ms, or as soon as skip.now is set. Timer-based so it also runs while the tab renders slowly. */
 const wait = (ms: number, skip: { now: boolean }) =>
   new Promise<void>((resolve) => {
+    if (skip.now) return resolve(); // after Skip, run straight through to the final state
     let left = ms;
     const id = setInterval(() => { left -= 100; if (skip.now || left <= 0) { clearInterval(id); resolve(); } }, 100);
   });
@@ -97,7 +101,7 @@ export async function playReplay(run: RecordedRun, hooks: ReplayHooks, skip: { n
     const line = describe(e);
     if (!line) continue;
     hooks.log(`Agent: ${line}`);
-    hooks.say([line]);
+    if (!skip.now) hooks.say([line]);
     await wait(e.type === "model_call" ? 1400 : 700, skip);
   }
 
