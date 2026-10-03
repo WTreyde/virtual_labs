@@ -39,6 +39,18 @@ revise the design and rerun or explain infeasibility. Unsupported metrics stay u
 After the final checked design call create_report. Keep your explanation consistent with
 that report, and distinguish claimed safety from actual certification. Never describe Brier
 scores on a tiny synthetic demo as established real-world calibration.
+When asked whether making an instrument faster or bigger is useful, call
+optimise_instrument using its current instance ID. Explain the baseline, throughput band,
+elasticity, headroom and next bottleneck in plain words. Distinguish hypothetical cycle-time
+or capacity changes from adding equipment; do not silently change the design or BOM.
+Explain the returned cycle_time_scope: faster step durations affect all parallel candidates,
+so do not attribute that gain to upgrading just one handler. Explain the sweep simulation
+settings when its baseline differs from the design simulation.
+Layout violations still qualify any optimisation conclusion. Never claim measured gains.
+Use the returned capacity_checks for capacity arithmetic and minimum parallel slots rather
+than doing mental calculations. For example 100 plates times 1800 seconds is 180000 seconds;
+one 24-hour capacity slot provides 86400 seconds, so at least three such slots are needed.
+These are optimistic per-step bounds; they do not prove throughput or physical feasibility.
 """
 
 

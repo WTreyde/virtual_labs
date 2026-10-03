@@ -59,7 +59,8 @@ def test_instrument_optimisation_finds_the_limit():
     assert reader["sweeps"][0]["elasticity"] < 0.1  # a faster reader changes nothing
 
 
-def test_validation_cost_band():
+def test_validation_cost_band(monkeypatch):
+    monkeypatch.setenv('ANTHROPIC_API_KEY', '')
     from labforge.validation.cost import compare, predicted_cost
     from labforge.validation.runner import load_cases, run_case
     pred = predicted_cost(WORKFLOW, ["instruments", "robots", "analytics"])

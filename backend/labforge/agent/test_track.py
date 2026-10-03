@@ -44,6 +44,23 @@ class SessionTests(unittest.TestCase):
         self.assertEqual(self.session.claims, [])
         self.assertEqual(self.session.verify([claim()])['claims'][0]['status'], 'supported')
 
+    def test_multiple_check_batches_preserve_refutation(self):
+        self.design()
+        self.session.verify([claim()])
+        self.session.verify([{**claim(), 'id': 'budget', 'metric': 'bom.total_usd', 'comparator': '<=', 'predicted_value': 400000}])
+        self.assertEqual(len(self.session.claims), 2)
+        self.assertEqual(self.session.claims[0]['status'], 'refuted')
+        self.assertIn('Refutation history', self.session.report()['report_markdown'])
+
+    def test_capacity_bound_uses_correct_target_arithmetic(self):
+        from labforge.agent.tools import capacity_checks
+        self.spec['throughput_target']['value'] = 100
+        checks = capacity_checks(self.spec, self.workflow)
+        dispense = next(row for row in checks['steps'] if row['step_id'] == 'dispense')
+        self.assertEqual(dispense['target_processing_seconds_per_day'], 180000)
+        self.assertEqual(dispense['minimum_parallel_slots_for_target'], 3)
+        self.assertEqual(dispense['upper_bound_plates_per_day'], 48)
+
     def test_spoofed_status_is_ignored_and_invalid_numbers_rejected(self):
         self.design()
         c = {**claim(), 'status': 'supported', 'verified_value': 999}
@@ -108,6 +125,21 @@ class SessionTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_design(self.spec, workflow)
 
+    def test_vendor_sweeps_preserve_design_and_reject_catalog_ids(self):
+        self.design()
+        before = copy.deepcopy(self.session.design)
+        output = self.session.optimise('lh_1')
+        self.assertEqual(output['simulation_config'], {'hours': 48, 'replicates': 8, 'seed': 0})
+        self.assertTrue(output['cycle_time_scope'])
+        self.assertIn('whole affected step', output['limitation'])
+        result = output['instrument_optimisation']
+        self.assertEqual(self.session.design, before)
+        self.assertEqual(result['instance_id'], 'lh_1')
+        self.assertEqual(len(result['sweeps']), 2)
+        self.assertGreater(result['sweeps'][0]['elasticity'], 0)
+        with self.assertRaises(ValueError):
+            self.session.optimise('opentrons_flex')
+
 
 class EvidenceTests(unittest.TestCase):
     def test_no_key_is_honest(self):
@@ -149,6 +181,24 @@ class BenchmarkTests(unittest.TestCase):
         self.assertNotIn('sim_result', out)
         self.assertEqual(out['claims'][0]['status'], 'unverified')
         self.assertNotIn('verified_value', out['claims'][0])
+
+
+class ValidationAdapterTests(unittest.TestCase):
+    def test_reported_cost_is_withheld_and_only_valid_live_design_returned(self):
+        from labforge.agent.validation_cases import design_from_brief
+        spec, workflow = load_example('lab_spec'), load_example('workflow')
+        case = {'brief': 'Design an enzyme screening lab', 'reported': {'cost': {'value_usd': 99912345}}, 'notes': 'Do not reveal this private answer'}
+        with patch.dict(os.environ, {'ANTHROPIC_API_KEY': 'test-only'}), patch('labforge.agent.validation_cases.run_turn', return_value={'completed': True, 'lab_spec': spec, 'workflow': workflow}) as run:
+            self.assertEqual(design_from_brief(case), workflow)
+        run.assert_called_once_with([{'role': 'user', 'content': case['brief']}])
+
+    def test_unanswered_requirements_or_offline_access_are_not_fixture_predictions(self):
+        from labforge.agent.validation_cases import design_from_brief
+        with patch.dict(os.environ, {'ANTHROPIC_API_KEY': ''}), patch('labforge.agent.validation_cases.run_turn') as run:
+            self.assertIsNone(design_from_brief({'brief': 'Incomplete brief'}))
+            run.assert_not_called()
+        with patch.dict(os.environ, {'ANTHROPIC_API_KEY': 'test-only'}), patch('labforge.agent.validation_cases.run_turn', return_value={'completed': True, 'messages': [{'role': 'assistant', 'content': 'What room size?'}]}):
+            self.assertIsNone(design_from_brief({'brief': 'Incomplete brief'}))
 
 
 class PlannerIntegrationTests(unittest.TestCase):

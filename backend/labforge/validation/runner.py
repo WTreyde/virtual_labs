@@ -20,8 +20,9 @@ def load_cases() -> list[dict]:
 
 
 def design_from_brief(case: dict) -> dict | None:
-    """TODO(Max with Albert): run labforge.agent.planner.run_turn on case['brief'] and return its workflow."""
-    return None
+    """Delegate to Strand C; reported costs are withheld from the model."""
+    from labforge.agent.validation_cases import design_from_brief as plan
+    return plan(case)
 
 
 def run_case(case: dict) -> dict:
