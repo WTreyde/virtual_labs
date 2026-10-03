@@ -52,6 +52,17 @@ def validate_design(spec: dict, workflow: dict) -> None:
             item = catalog[instances[instance]["catalog_id"]]
             if step["capability"] not in item["capabilities"]:
                 raise ValueError(f"{instance} does not support {step['capability']}")
+            process = item.get('process', {})
+            if process.get('duration_basis', {}).get(step['capability']) == 'crystal':
+                params = step.get('params', {})
+                units = params.get('units_per_run', params.get('crystals_harvested_per_plate'))
+                if type(units) not in (int, float) or not math.isfinite(units) or units <= 0:
+                    raise ValueError(f"{step['id']}: catalog duration is per crystal; declare positive params.units_per_run (crystals attempted per run) and multiply per-crystal duration/bounds by that count.")
+                typical = process['durations_s'][step['capability']]
+                provenance = item.get('provenance', {}).get('process.durations_s.' + step['capability'], {})
+                floor = provenance.get('low', typical)
+                if step['duration_s'] < floor * units:
+                    raise ValueError(f"{step['id']}: {step['duration_s']} seconds for {units} crystals is below the catalog per-crystal floor ({floor} x {units}); use per-crystal time x crystals per run, not per-crystal time as a plate duration.")
         u = step.get("duration_uncertainty")
         if u:
             value = step["duration_s"]
