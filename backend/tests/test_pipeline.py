@@ -78,3 +78,23 @@ def test_bench_leaderboard_route(tmp_path, monkeypatch):
     board.write_text('{"arms": []}')
     monkeypatch.setattr(gw, "LEADERBOARD", board)
     assert client.get("/bench/leaderboard").json() == {"arms": []}
+
+
+def test_demo_serves_built_game_behind_api_routes(tmp_path, monkeypatch):
+    """`make demo`: the built client is served at / and its replays statically, while API routes still win."""
+    import importlib
+    import labforge.gateway as gw
+    (tmp_path / "replays").mkdir()
+    (tmp_path / "index.html").write_text("<html>LabForge</html>")
+    (tmp_path / "replays" / "chem.json").write_text('{"brief": "x"}')
+    monkeypatch.setenv("LABFORGE_STATIC_DIR", str(tmp_path))
+    try:
+        client = TestClient(importlib.reload(gw).app)
+        assert "LabForge" in client.get("/").text
+        assert client.get("/replays/chem.json").json() == {"brief": "x"}
+        assert client.get("/health").status_code == 200
+        assert client.get("/example/lab_spec").status_code == 200
+    finally:
+        monkeypatch.delenv("LABFORGE_STATIC_DIR")
+        importlib.reload(gw)
+
