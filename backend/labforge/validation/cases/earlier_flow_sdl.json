@@ -22,5 +22,6 @@
   },
   "verified": true,
   "notes": "Verified 3 Oct 2026. Primary statement is by the platform's own authors in Pilon et al., Nat. Synth. 2026 (doi 10.1038/s44160-026-01053-0), read via nature.com HTML: \"The first 'RoboChem' platform developed by our group cost approximately US$50,000 for essential components alone, not including the most expensive component, a benchtop nuclear magnetic resonance (NMR) spectrometer\". Same figure in UvA press release (hims.uva.nl, Apr 2026), quoting Noel: \"the system cost us over 50.000 dollar, not even including the very expensive NMR equipment\". CAVEAT: the original Science 2024 paper (403 paywall) and its SI could not be opened, so the figure is NOT confirmed in the platform paper itself and the hardware list comes from the UvA press release (phys.org 25 Jan 2024), not the SI. Not like-for-like with RoboChem-Flex (that drops inline analytics). Earlier GBP 36,900 conversion remains unconfirmed and is not used.",
-  "split": "in_sample"
+  "split": "in_sample",
+  "figure_type": "paper_quote"
 }

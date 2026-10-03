@@ -76,6 +76,19 @@ UNKNOWN_YEAR_GAP = 5
 # the spread within one product family in the catalog: Fluent 480 vs 780 differ by ln(316k/210k) ~ 0.41, ~0.32 as
 # a P10-P90 sigma.
 PROXY_MODEL_SIGMA = 0.32
+# Configurable systems (liquid handlers, LC-MS, bioreactors, chromatography, synthesis platforms, imagers, acoustic
+# dispensers, compound stores) vary a lot with options. Estimated from configured-price ranges within one product
+# family in the catalog: Fluent 480-1080 ln(500k/209k)=0.87, Biomek i7 0.74, OT-2 workstations 0.69, ÄKTA 0.93,
+# Opentrons Flex 0.74 -> typical ~0.8 between low and high, i.e. ~0.31 as a P10-P90 sigma. Applied as a floor on
+# the item's own range (not for bare-unit prices), so a price that already carries a wide range is not widened twice.
+CONFIGURABLE_CAPABILITIES = {"liquid_handling", "lcms", "hplc", "bioreactor", "protein_purification", "reaction",
+                             "crystal_imaging", "acoustic_dispensing", "compound_storage", "powder_dosing"}
+CONFIG_SIGMA = 0.31
+# A grant award is not an invoice: it may bundle accessories, service or a workstation, or be capped. Estimated from
+# five award-vs-purchase pairs for the same instrument in the catalog notes (Echo 650 S10s at Yale and Rutgers vs a
+# federal purchase: ln ratio ~0.0; Echo S10s with an Access workstation at Wistar and Northwestern: ~0.4; Hamilton
+# STAR S10 at Thomas Jefferson vs federal purchases: -0.06): RMS 0.25 (mean +0.15, not applied as a shift).
+GRANT_SIGMA = 0.25
 CONFIDENCE_TOLERANCE = 1.25  # "confidence" = chance the true cost is within x/÷ 1.25 of our P50
 EVIDENCE_WEIGHT = {"datasheet": 1.0, "literature": 0.9, "estimated": 0.7, "placeholder": 0.3}
 
@@ -130,8 +143,11 @@ def item_evidence(item: dict, basis: str | None, year: int | None, match: str = 
     src_year = entry.get("year")
     gap = abs(target - src_year) if src_year else UNKNOWN_YEAR_GAP
     conf = entry.get("confidence") or item.get("data_confidence", "estimated")
+    rng_sigma = math.log(hi / lo) / (2 * Z90) if lo > 0 and hi > lo else 0.0
+    configurable = basis != "base" and bool(CONFIGURABLE_CAPABILITIES & set(item["capabilities"]))
     parts = {
-        "range": math.log(hi / lo) / (2 * Z90) if lo > 0 and hi > lo else 0.0,
+        "range": rng_sigma,
+        "configuration": math.sqrt(max(0.0, CONFIG_SIGMA ** 2 - rng_sigma ** 2)) if configurable else 0.0,
         "source": SOURCE_SIGMA.get(conf, 0.15),
         "year_gap": YEAR_SIGMA_PER_YEAR * gap,
         "basis_mismatch": 0.0 if basis_ok else basis_mismatch_sigma(),
@@ -154,11 +170,13 @@ def year_factor(year: int | None) -> float:
 
 
 def predicted_cost(workflow: dict, includes: list[str], samples: int = 2000, seed: int = 0,
-                   build: str = "turnkey", year: int | None = None, basis: str | None = None) -> dict:
+                   build: str = "turnkey", year: int | None = None, basis: str | None = None,
+                   figure_type: str | None = None) -> dict:
     """P10/P50/P90 cost of the workflow's equipment in the given categories, in `year` dollars (today's if None),
     with a confidence block. Each item is drawn lognormally around its selected price adjusted from its own source
     year; its spread grows with every evidence gap (see item_evidence). Workflow equipment may mark
-    "match": "proxy" when the catalog model stands in for the one actually used."""
+    "match": "proxy" when the catalog model stands in for the one actually used. figure_type "grant_award" predicts
+    a grant amount rather than a purchase price, adding GRANT_SIGMA of noise for unknown contents."""
     rng = random.Random(seed)
     entries = [(get_item(e["catalog_id"]), e.get("match", "exact")) for e in workflow["equipment"]]
     entries = [(it, m) for it, m in entries if cost_category(it) in includes]
@@ -175,7 +193,15 @@ def predicted_cost(workflow: dict, includes: list[str], samples: int = 2000, see
         if "integration_labour" in includes:
             lo, mode, hi = INTEGRATION_FRACTION[build]
             hw *= 1 + rng.triangular(lo, hi, mode)
+        if figure_type == "grant_award":
+            hw *= math.exp(rng.gauss(0, GRANT_SIGMA))
         totals.append(hw)
+    if not priced:
+        # Nothing in the requested categories can be priced: say so instead of predicting $0 with full confidence.
+        return {"p10": None, "p50": None, "p90": None, "n_items": len(entries), "price_year_factor": round(year_factor(year), 3),
+                "confidence": {"within_25pct": None, "label": "none", "data_coverage": 0.0,
+                               "unpriced_items": [e["catalog_id"] for e in ev], "drivers": [], "figure_noise": 0.0},
+                "items": ev, "not_costable": "no priced equipment in the reported cost categories"}
     q = statistics.quantiles(totals, n=10, method="inclusive")
     p50 = statistics.median(totals)
     within = sum(p50 / CONFIDENCE_TOLERANCE <= t <= p50 * CONFIDENCE_TOLERANCE for t in totals) / samples
@@ -190,7 +216,8 @@ def predicted_cost(workflow: dict, includes: list[str], samples: int = 2000, see
     return {"p10": round(q[0]), "p50": round(p50), "p90": round(q[-1]), "n_items": len(entries),
             "price_year_factor": round(year_factor(year), 3),
             "confidence": {"within_25pct": round(within, 2), "label": label, "data_coverage": round(coverage, 2),
-                           "unpriced_items": unpriced, "drivers": drivers},
+                           "unpriced_items": unpriced, "drivers": drivers,
+                           "figure_noise": GRANT_SIGMA if figure_type == "grant_award" else 0.0},
             "items": ev}
 
 

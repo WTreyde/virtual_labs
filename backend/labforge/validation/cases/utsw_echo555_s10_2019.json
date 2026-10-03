@@ -1,0 +1,49 @@
+{
+  "id": "utsw_echo555_s10_2019",
+  "name": "UT Southwestern HTS Core: replacement Labcyte Echo 555 acoustic dispenser (NIH S10; 2019)",
+  "domain": "biology",
+  "sources": [
+    "https://api.reporter.nih.gov/v2/projects/search (project_num 1S10OD026758-01)",
+    "https://reporter.nih.gov/project-details/9707324"
+  ],
+  "build": "turnkey",
+  "brief": "A high-throughput screening core replaces its ageing non-contact acoustic droplet liquid handler used for nanolitre compound transfers into assay plates.",
+  "reported": {
+    "cost": {
+      "value_usd": 336900,
+      "original": "US$336,900 (NIH S10 award, FY2019)",
+      "year": 2019,
+      "includes": [
+        "instruments"
+      ],
+      "excludes_note": "NIH S10 award for one Echo 555; installation and service contract not itemised."
+    }
+  },
+  "verified": true,
+  "notes": "Out-of-sample round 2: collected blind after the model was frozen at commit 973d0f5. Out-of-sample (oos2 set), found after the cost model was frozen; not used for catalog prices. price_basis=configured (grant award; options/warranty unstated). Quote: \"we have selected a new Echo555 as our proposed ADE instrument.\" Verified 3 Oct 2026 via RePORTER API, award_amount 336900. Newer than the Echo 555 catalog entry sources.",
+  "workflow": {
+    "id": "utsw_echo555_s10_2019_wf",
+    "lab_spec_id": "utsw_echo555_s10_2019",
+    "equipment": [
+      {
+        "instance_id": "beckman_echo_555_1",
+        "catalog_id": "beckman_echo_555",
+        "rationale": "Named in the source.",
+        "match": "exact"
+      }
+    ],
+    "steps": [
+      {
+        "id": "use",
+        "name": "Placeholder step (cost comparison only)",
+        "capability": "manual_bench",
+        "candidate_instances": [],
+        "duration_s": 0
+      }
+    ]
+  },
+  "price_basis": "configured",
+  "condition": "new",
+  "split": "out_of_sample",
+  "figure_type": "grant_award"
+}
