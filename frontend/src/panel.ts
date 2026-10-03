@@ -11,9 +11,13 @@ export function renderPanel(d: Design) {
   const lo = t.p10 ?? t.value, hi = t.p90 ?? t.value, target = t.target ?? t.value;
   const max = Math.max(hi, target) * 1.25;
   const pct = (v: number) => `${(100 * v) / max}%`;
+  const p = t.prob_meets_target;
   document.querySelector("#metrics")!.innerHTML = `
-    <b>Throughput</b> ${t.p50 ?? t.value} ${t.unit}<br/>
-    P10–P90: ${lo}–${hi} · target ${target} · P(meet) ${t.prob_meets_target ?? "?"}
+    <div class="metric-title">Throughput</div>
+    <div class="metric-big">${t.p50 ?? t.value} <span class="unit">${String(t.unit).replace(/_/g, " ")}</span></div>
+    <div class="metric-row"><span>P10–P90</span><span>${lo}–${hi}</span></div>
+    <div class="metric-row"><span>Target</span><span>${target}</span></div>
+    <div class="metric-row"><span>P(meet target)</span><span>${p == null ? "?" : `${Math.round(p * 100)}%`}</span></div>
     <div class="band"><div class="range" style="left:${pct(lo)};width:calc(${pct(hi)} - ${pct(lo)})"></div>
     <div class="target" style="left:${pct(target)}"></div></div>`;
   const esc = (v: unknown) => String(v ?? "").replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
