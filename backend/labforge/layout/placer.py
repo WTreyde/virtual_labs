@@ -11,6 +11,13 @@
    need them (catalog safety fields, safety_rules.json, or the spec's hazards).
 5. Each transfer goes to the fastest transporter that reaches both access points: arm or rail,
    then mobile robot, then a human operator walking an A* path around the equipment.
+6. A lab-like arrangement replaces the annealed one when it is at least as safe (no more violations,
+   collisions, cut-off work spots or clearance clashes) and adds at most 15% transfer time: arm cells
+   stay as annealed; every other instrument stands back-to-wall, clockwise or anticlockwise from the
+   door in workflow order, with what does not fit in one straight island row. Failing that, a lighter
+   tidy pass pushes single instruments to walls and lines up the rest.
+7. A break area (a human_only zone) is drawn where idle staff wait, clear of equipment, the door,
+   arm envelopes and hazard zones; each operator's `home` is a separate spot in it.
 """
 import copy
 import math
@@ -35,6 +42,14 @@ PLACEHOLDER_ITEM = {  # geometry for catalog ids the catalog does not have (yet)
 }
 W_OVERLAP, W_ROOM, W_KEEP_OUT, W_DOOR, W_CLEARANCE, W_ACCESS, W_COHESION = 2e4, 2e4, 2e4, 1e4, 300, 500, 30
 HARD_S = 5000.0  # fixed cost per collision, out-of-room item or keep-out breach: worse than any transfer saving
+GRID_M = 0.1  # tidy: positions snap to this grid
+WALL_GAP_M = 0.05  # tidy: a bench's back this far from the wall
+ROW_BAND_M = 0.4  # tidy: free-standing items this close in y (or x) are lined up in one row (column)
+TIDY_COST_SLACK = 0.08  # tidy may cost at most 8% more transfer time and penalties than the annealed layout
+BREAK_AREA_SIZES = ((2.0, 1.5), (1.5, 1.2))  # a table for a few people, else a smaller corner (m)
+BREAK_HAZARD_MARGIN_M = 0.5  # the break area stays this far from every hazard zone...
+HAZARD_ZONES = {"fume_hood", "ventilated", "bsl2", "cryogen"}  # ...and does not overlap the others
+STRUCTURED_COST_SLACK = 0.15  # a lab-like layout may add up to 15% flow-weighted transfer time over the annealed one
 
 
 def transfer_edges(workflow: dict) -> list[tuple[str, str]]:
@@ -370,17 +385,20 @@ class Placer:
                     best, best_cost = dict(cand), c
         return self.polish_clearance(self.repair_egress(self.repair(best, best_cost)))
 
-    def _walkway_check(self, state: dict) -> tuple[list[str] | None, list, float]:
-        """The validator's walkway test on a candidate state: (cut-off work spots, pinch points, base cost)."""
-        pl = self.placements(state)
-        boxes = [aabb(pl[i], self.items[i]) for i in self.placeable]
+    def _work_spots(self, pl: dict[str, dict]) -> dict[str, tuple[float, float]]:
+        """Where people stand: at hands-on instruments and both ends of every walked transfer."""
         touched = set(self.hands_on) & set(self.placeable)
         for a, b in self.weights:
             if self.serve(a, b, pl)[3] == "walk":
                 touched |= {a, b}
         arms = arm_bases(pl, self.items)
-        spots = {i: human_spot(pl[i], self.items[i], arms) for i in touched}
-        cut, pinches = walkway_unreachable(self.W, self.D, boxes, spots, self.doors[0], self.walkway)
+        return {i: human_spot(pl[i], self.items[i], arms) for i in touched}
+
+    def _walkway_check(self, state: dict) -> tuple[list[str] | None, list, float]:
+        """The validator's walkway test on a candidate state: (cut-off work spots, pinch points, base cost)."""
+        pl = self.placements(state)
+        boxes = [aabb(pl[i], self.items[i]) for i in self.placeable]
+        cut, pinches = walkway_unreachable(self.W, self.D, boxes, self._work_spots(pl), self.doors[0], self.walkway)
         return cut, pinches, self.cost(state)
 
     def repair_egress(self, state: dict, rounds: int = 150) -> dict:
@@ -471,6 +489,246 @@ class Placer:
                 state, pairs, area_now, n_cut, cost = cand, c_pairs, c_area, c_n, c_cost
         return state
 
+    # ---------- tidy: benches against walls, on a grid, in process order ----------
+    def _quality(self, state: dict) -> tuple[bool, int, int, float]:
+        """(collision-free, work spots cut off, clearance clashes, cost): what a tidy move must not make worse."""
+        cut, _, cost = self._walkway_check(state)
+        return self._hard_free(state), len(cut) if cut is not None else len(self.placeable) + 1, \
+            len(self._clearance_pairs(state)[0]), cost
+
+    def transfer_time(self, state: dict) -> float:
+        """Flow-weighted transfer time (s): what the layout costs the process, without the search's penalty terms."""
+        pl = self.placements(state)
+        return sum(w * self.serve(a, b, pl)[2] for (a, b), w in self.weights.items())
+
+    def _hard_free(self, state: dict) -> bool:
+        """No collision, nothing outside the room or in a keep-out area (counted, not read off the cost)."""
+        pl = self.placements(state)
+        boxes = [aabb(pl[i], self.items[i]) for i in self.placeable]
+        for k, b in enumerate(boxes):
+            if outside_area(b, self.room_box) > 1e-6 or any(overlap_area(b, z) > 1e-6 for z in self.keep_out):
+                return False
+            if any(overlap_area(b, o) > 1e-9 for o in boxes[k + 1:]):
+                return False
+        return True
+
+    def _in_cells(self, state: dict) -> set[str]:
+        """Arms, other transporters and the instruments an arm serves where they stand: those keep the arm's ring."""
+        pl = self.placements(state)
+        held = {i for i in self.movable if i in self.arms or _kind(self.items[i])}
+        for a, b in self.weights:
+            if self.serve(a, b, pl)[3] in ("arm", "rail"):
+                held |= {a, b}
+        return held
+
+    def _box(self, state: dict, inst: str) -> tuple[float, float, float, float]:
+        return aabb(self.placements(state)[inst], self.items[inst])
+
+    def _wall_of(self, box: tuple) -> str | None:
+        """The wall a box's back sits against (within a few cm), if any."""
+        gaps = {"W": box[0], "E": self.W - box[2], "S": box[1], "N": self.D - box[3]}
+        wall = min(gaps, key=gaps.get)
+        return wall if gaps[wall] <= WALL_GAP_M + 0.02 else None
+
+    def _against(self, state: dict, inst: str, wall: str, along: float | None = None) -> dict:
+        """`inst` pushed back against `wall`, at grid position `along` (default: where it is, snapped)."""
+        s = dict(state)
+        x, y = s[inst]
+        if wall in ("W", "E"):
+            y = _snap(y if along is None else along)
+            x = 0.5 if wall == "W" else self.W - 0.5
+        else:
+            x = _snap(x if along is None else along)
+            y = 0.5 if wall == "S" else self.D - 0.5
+        s[inst] = (x, y)
+        for _ in range(2):  # the rotation follows the position (items face away from their wall), so settle twice
+            x0, y0, x1, y1 = self._box(s, inst)
+            cx, cy = s[inst]
+            if wall == "W":
+                cx += WALL_GAP_M - x0
+            elif wall == "E":
+                cx += self.W - WALL_GAP_M - x1
+            elif wall == "S":
+                cy += WALL_GAP_M - y0
+            else:
+                cy += self.D - WALL_GAP_M - y1
+            s[inst] = (cx, cy)
+        return s
+
+    def _accept(self, cand: dict, moved: list[str], now: tuple, budget: float) -> tuple | None:
+        """The candidate's quality if it is no worse than `now` on every count and within the cost budget."""
+        for inst in moved:
+            if any(overlap_area(self._box(cand, inst), d) > 0 for d in self.door_boxes):
+                return None
+        q = self._quality(cand)
+        ok = (q[0] or not now[0]) and q[1] <= now[1] and q[2] <= now[2] and q[3] <= budget
+        return q if ok else None
+
+    def _runs(self) -> list[tuple[str, float, float]]:
+        """Wall stretches clockwise from the door, as (wall, start, end) along the wall's running direction."""
+        W, D = self.W, self.D
+        walls = [("W", 0.0, D), ("N", 0.0, W), ("E", D, 0.0), ("S", W, 0.0)]
+        dx, dy = self.doors[0]["x"], self.doors[0]["y"]
+        gaps = {"W": dx, "E": W - dx, "S": dy, "N": D - dy}
+        door_wall = min(gaps, key=gaps.get)
+        k = [w for w, _, _ in walls].index(door_wall)
+        wall, a0, a1 = walls[k]
+        at = dy if wall in ("W", "E") else dx
+        return [(wall, at, a1)] + walls[k + 1:] + walls[:k] + [(wall, a0, at)]
+
+    def structured_best(self, state: dict) -> dict | None:
+        """The best valid wall packing over start wall, direction and workflow direction (fewest cut-off work spots,
+        clearance clashes, then lowest cost)."""
+        runs = self._runs()
+        ccw = [(w, b, a) for w, a, b in reversed(runs)]
+        best, best_key = None, None
+        for base in (runs, ccw):
+            for k in range(len(base)):
+                for reverse in (False, True):
+                    cand = self.structured(state, base[k:] + base[:k], reverse)
+                    if cand is None:
+                        continue
+                    q = self._quality(cand)
+                    key = (not q[0], q[1], q[2], q[3])
+                    if best_key is None or key < best_key:
+                        best, best_key = cand, key
+        return best
+
+    def structured(self, state: dict, runs: list | None = None, reverse: bool = False) -> dict | None:
+        """A lab-like alternative to the annealed layout: arm cells stay as annealed; every other instrument goes
+        back-to-wall along the walls, clockwise from the door in workflow order (so a wall reads as the process),
+        with service clearance between neighbours and nothing in the door's egress box; what does not fit stands
+        in one straight island row. None if something does not fit."""
+        held = self._in_cells(state) | set(self.locked)
+        loose = [i for i in self._first_use() if i in self.movable and i not in held][::-1 if reverse else 1]
+        if not loose:
+            return None
+        pl = self.placements(state)
+        fixed = [i for i in self.placeable if i in held]
+        blocked = list(self.door_boxes) + list(self.keep_out)
+        for a in self.arms:  # keep free-standing benches out of every arm envelope
+            p = pl[a]["position"]
+            r = self.items[a]["transport"].get("reach_m", 1.0) + self.rules.get("human_robot_separation_m", 0.5)
+            blocked.append((p["x"] - r, p["y"] - r, p["x"] + r, p["y"] + r))
+        taken = [(aabb(pl[i], self.items[i]), aabb(pl[i], self.items[i], clearance=True)) for i in fixed]
+        s = dict(state)
+
+        def free(inst: str) -> bool:
+            box, pad = self._box(s, inst), aabb(self.placements(s)[inst], self.items[inst], clearance=True)
+            if outside_area(box, self.room_box) > 1e-6 or any(overlap_area(box, b) > 1e-6 for b in blocked):
+                return False
+            return all(overlap_area(box, ob) <= 1e-9 and overlap_area(pad, ob) <= 0.01 and overlap_area(box, op) <= 0.01
+                       for ob, op in taken)
+
+        runs, r, cursor = runs or self._runs(), 0, None
+        left = []
+        for inst in loose:
+            placed = False
+            while r < len(runs) and not placed:
+                wall, a0, a1 = runs[r]
+                sgn = 1 if a1 >= a0 else -1
+                cursor = a0 if cursor is None else cursor
+                axis = 1 if wall in ("W", "E") else 0
+                while (cursor - a1) * sgn < 0:
+                    s.update(self._against(s, inst, wall, cursor + sgn * 0.5))
+                    box = self._box(s, inst)
+                    lead = box[axis] if sgn > 0 else box[axis + 2]
+                    s.update(self._against(s, inst, wall, s[inst][axis] + (cursor - lead)))
+                    box = self._box(s, inst)
+                    if free(inst):
+                        taken.append((box, aabb(self.placements(s)[inst], self.items[inst], clearance=True)))
+                        cursor = box[axis + 2] if sgn > 0 else box[axis]
+                        placed = True
+                        break
+                    cursor += sgn * GRID_M
+                if not placed:
+                    r, cursor = r + 1, None
+            if not placed:
+                left.append(inst)
+        for inst in left:  # one straight island row through the middle of the room, parallel to the long wall
+            along_x = self.W >= self.D
+            mid = (self.D if along_x else self.W) / 2
+            for a in _frange(0.6, (self.W if along_x else self.D) - 0.6, GRID_M):
+                s[inst] = (a, mid) if along_x else (mid, a)
+                if free(inst):
+                    taken.append((self._box(s, inst), aabb(self.placements(s)[inst], self.items[inst], clearance=True)))
+                    break
+            else:
+                return None
+        return s
+
+    def tidy(self, state: dict) -> dict:
+        """Make the annealed layout look like a lab: free-standing instruments back against the nearest wall that
+        takes them, on a 0.1 m grid; the rest aligned in rows; neighbours along a wall in process order.
+
+        Every move must keep the layout collision-free, cut off no work spot, add no clearance clash and keep the
+        cost within TIDY_COST_SLACK of where it started. Arm cells are not touched (their ring is their reach)."""
+        if not self.movable:
+            return state
+        held = self._in_cells(state)
+        loose = [i for i in self._first_use() if i in self.movable and i not in held]
+        if not loose:
+            return state
+        now = self._quality(state)
+        budget = now[3] * (1 + TIDY_COST_SLACK) if now[0] else now[3]
+        for inst in loose:
+            box = self._box(state, inst)
+            if self._wall_of(box):
+                continue
+            gaps = {"W": box[0], "E": self.W - box[2], "S": box[1], "N": self.D - box[3]}
+            for wall in sorted(gaps, key=gaps.get)[:2]:
+                cand = self._against(state, inst, wall)
+                q = self._accept(cand, [inst], now, budget)
+                if q:
+                    state, now = cand, q
+                    break
+        # Snap whatever stays on the floor to the grid, then line it up in rows and columns.
+        island = [i for i in loose if not self._wall_of(self._box(state, i))]
+        for inst in island:
+            cand = dict(state)
+            cand[inst] = (_snap(state[inst][0]), _snap(state[inst][1]))
+            q = self._accept(cand, [inst], now, budget)
+            if q:
+                state, now = cand, q
+        for axis in (1, 0):
+            for row in _bands([i for i in island], lambda i: state[i][axis], ROW_BAND_M):
+                target = _snap(sorted(state[i][axis] for i in row)[len(row) // 2])
+                for inst in row:
+                    cand = dict(state)
+                    cand[inst] = (target, state[inst][1]) if axis == 0 else (state[inst][0], target)
+                    q = self._accept(cand, [inst], now, budget)
+                    if q:
+                        state, now = cand, q
+        return self._order_walls(state, loose, now, budget)
+
+    def _order_walls(self, state: dict, loose: list[str], now: tuple, budget: float) -> dict:
+        """Swap neighbours along each wall so the wall reads in workflow order (the direction with fewer swaps)."""
+        rank = {i: k for k, i in enumerate(self._first_use())}
+        for _ in range(3):
+            changed = False
+            walls = {}
+            for i in loose:
+                w = self._wall_of(self._box(state, i))
+                if w:
+                    walls.setdefault(w, []).append(i)
+            for wall, members in walls.items():
+                axis = 1 if wall in ("W", "E") else 0
+                members.sort(key=lambda i: state[i][axis])
+                ranks = [rank[i] for i in members]
+                up = sum(a > b for a, b in zip(ranks, ranks[1:]))
+                down = sum(a < b for a, b in zip(ranks, ranks[1:]))
+                for a, b in zip(members, members[1:]):
+                    if (rank[a] > rank[b]) == (up > down) or rank[a] == rank[b]:
+                        continue  # already in the wall's direction
+                    pa, pb = state[a][axis], state[b][axis]
+                    cand = self._against(self._against(state, a, wall, pb), b, wall, pa)
+                    q = self._accept(cand, [a, b], now, budget)
+                    if q:
+                        state, now, changed = cand, q, True
+            if not changed:
+                break
+        return state
+
     def repair(self, state: dict, cost: float, tries: int = 400) -> dict:
         """Greedy clean-up: nudge items until hard constraints hold (only accepts improvements)."""
         if cost < HARD_S:
@@ -518,6 +776,57 @@ class Placer:
         s[inst] = (min(max(x, 0.1), self.W - 0.1), min(max(y, 0.1), self.D - 0.1))
         return s
 
+    # ---------- people: a break area ----------
+    def _break_area(self, pl: dict[str, dict], zones: list[dict]) -> dict | None:
+        """A rest corner for idle staff, as a human_only zone: against a wall, as near the door as fits, clear of
+        equipment and its service clearance, the door's egress square, arm envelopes, keep-out areas and every
+        hazard zone (with a margin), and cutting off no one's walkway. None if the room has no such spot."""
+        if not self.operators:
+            return None
+        boxes = [aabb(pl[i], self.items[i]) for i in self.placeable]
+        pads = [aabb(pl[i], self.items[i], clearance=True) for i in self.placeable]
+        egress = self.rules.get("min_egress_width_m", 1.2)
+        blocked = pads + [door_box(d, self.W, self.D, egress + 0.3) for d in self.doors] + list(self.keep_out)
+        for z in zones:
+            m = BREAK_HAZARD_MARGIN_M if z["kind"] in HAZARD_ZONES else 0.0
+            blocked.append((z["min"]["x"] - m, z["min"]["y"] - m, z["max"]["x"] + m, z["max"]["y"] + m))
+        for a in self.arms:
+            p = pl[a]["position"]
+            r = self.items[a]["transport"].get("reach_m", 1.0) + self.rules.get("human_robot_separation_m", 0.5)
+            blocked.append((p["x"] - r, p["y"] - r, p["x"] + r, p["y"] + r))
+        spots = self._work_spots(pl)
+        base_cut, _ = walkway_unreachable(self.W, self.D, boxes, spots, self.doors[0], self.walkway)
+        if base_cut is None:
+            return None
+        door = (self.doors[0]["x"], self.doors[0]["y"])
+        for w, d in BREAK_AREA_SIZES:
+            cands = []
+            for bw, bd in ((w, d), (d, w)):
+                for x in _frange(WALL_GAP_M, self.W - bw - WALL_GAP_M, 0.25):
+                    cands += [(x, WALL_GAP_M, x + bw, WALL_GAP_M + bd), (x, self.D - WALL_GAP_M - bd, x + bw, self.D - WALL_GAP_M)]
+                for y in _frange(WALL_GAP_M, self.D - bd - WALL_GAP_M, 0.25):
+                    cands += [(WALL_GAP_M, y, WALL_GAP_M + bw, y + bd), (self.W - WALL_GAP_M - bw, y, self.W - WALL_GAP_M, y + bd)]
+                    cands += [(x, y, x + bw, y + bd) for x in _frange(1.0, self.W - bw - 1.0, 0.25)]  # free floor
+            cands = [c for c in dict.fromkeys(cands) if not any(overlap_area(c, b) > 0 for b in blocked)]
+            on_wall = lambda c: min(c[0], c[1], self.W - c[2], self.D - c[3]) <= WALL_GAP_M + 1e-6
+            for c in sorted(cands, key=lambda c: (not on_wall(c), math.dist(door, ((c[0] + c[2]) / 2, (c[1] + c[3]) / 2)), c)):
+                front = dict(spots, _break=self._front_of(c))
+                cut, _ = walkway_unreachable(self.W, self.D, boxes + [c], front, self.doors[0], self.walkway)
+                if cut is not None and set(cut) <= set(base_cut):
+                    return {"id": "break_area", "kind": "human_only", "label": "break area",
+                            "min": {"x": round(c[0], 2), "y": round(c[1], 2)}, "max": {"x": round(c[2], 2), "y": round(c[3], 2)},
+                            "note": "Where idle staff wait. A rest and write-up corner, not a kitchen: food and drink stay "
+                                    "outside a lab with chemical or biological hazards."}
+        return None
+
+    def _front_of(self, box: tuple) -> tuple[float, float]:
+        """The floor point just in front of a wall-backed box, facing into the room."""
+        x0, y0, x1, y1 = box
+        gaps = {"W": x0, "E": self.W - x1, "S": y0, "N": self.D - y1}
+        wall = min(gaps, key=gaps.get)
+        cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+        return {"W": (x1 + 0.4, cy), "E": (x0 - 0.4, cy), "S": (cx, y1 + 0.4), "N": (cx, y0 - 0.4)}[wall]
+
     # ---------- output ----------
     def build(self, state: dict) -> dict:
         pl = self.placements(state)
@@ -562,18 +871,33 @@ class Placer:
                 t["est_time_s"] = round(time_s, 1)
             transfers.append(t)
             weighted += w * dist
+        zones = derive_zones(pl, self.items, self.zone_kinds, self.W, self.D)
+        operators = copy.deepcopy(self.operators)
+        rest = self._break_area(pl, zones)
+        if rest:
+            zones.append(rest)
+            for op, home in zip(operators, _seats(rest, len(operators))):
+                op["home"] = home  # idle staff wait here, spread out, instead of all at the door
         layout = {
             "id": f"{self.workflow['id']}_layout",
             "workflow_id": self.workflow["id"],
             "room": {k: self.spec["room"][k] for k in ("width_m", "depth_m", "height_m") if k in self.spec["room"]},
             "placements": [pl[i] for i in self.items],
-            "operators": self.operators,
+            "operators": operators,
             "transfers": transfers,
-            "zones": derive_zones(pl, self.items, self.zone_kinds, self.W, self.D),
+            "zones": zones,
             "score": {"total_weighted_distance_m": round(weighted, 2),
                       "floor_area_used_m2": round(sum(area(b) for b in boxes), 2)},
         }
         return layout
+
+
+def _seats(zone: dict, n: int) -> list[dict]:
+    """`n` idle spots spread over a zone, 0.6 m apart and 0.3 m in from its edges (reused if there are more people)."""
+    (x0, y0), (x1, y1) = (zone["min"]["x"], zone["min"]["y"]), (zone["max"]["x"], zone["max"]["y"])
+    spots = [{"x": round(x, 2), "y": round(y, 2)} for y in _frange(y0 + 0.3, y1 - 0.3, 0.6)
+             for x in _frange(x0 + 0.3, x1 - 0.3, 0.6)] or [{"x": round((x0 + x1) / 2, 2), "y": round((y0 + y1) / 2, 2)}]
+    return [spots[k % len(spots)] for k in range(n)]
 
 
 def _seg_dist(p: tuple, placement: dict, half: float) -> tuple[float, float]:
@@ -583,6 +907,21 @@ def _seg_dist(p: tuple, placement: dict, half: float) -> tuple[float, float]:
     ux, uy = math.cos(phi), math.sin(phi)
     s = max(-half, min(half, (p[0] - cx) * ux + (p[1] - cy) * uy))
     return math.dist(p[:2], (cx + s * ux, cy + s * uy)), s
+
+
+def _snap(v: float) -> float:
+    return round(round(v / GRID_M) * GRID_M, 3)
+
+
+def _bands(items: list[str], key, width: float) -> list[list[str]]:
+    """Group items whose key values chain within `width` of each other (rows of a scatter)."""
+    out = []
+    for i in sorted(items, key=key):
+        if out and key(i) - key(out[-1][-1]) <= width:
+            out[-1].append(i)
+        else:
+            out.append([i])
+    return [b for b in out if len(b) > 1]
 
 
 def _frange(a: float, b: float, step: float) -> list[float]:
@@ -601,6 +940,21 @@ def _one_layout(spec: dict, workflow: dict, previous: dict | None, seed: int, it
     state = placer.anneal(state, iterations if iterations is not None else min(6000, 1500 + 200 * n))
     layout = placer.build(state)
     layout["violations"] = find_violations(layout, placer.items, spec, placer.rules, workflow=workflow)
+    # Prefer a lab-like arrangement (benches along the walls in process order), then a tidied annealed layout,
+    # but only when it is at least as safe: no more violations, no collision, cut-off work spot or clearance clash.
+    now, transfer = placer._quality(state), placer.transfer_time(state)
+    for make in (placer.structured_best, placer.tidy):  # the tidy pass only runs if the structured layout fails
+        cand = make(state)
+        if cand is None:
+            continue
+        q = placer._quality(cand)
+        if not (q[0] or not now[0]) or q[1] > now[1] or q[2] > now[2] or \
+                placer.transfer_time(cand) > transfer * (1 + STRUCTURED_COST_SLACK):
+            continue
+        out = placer.build(cand)
+        out["violations"] = find_violations(out, placer.items, spec, placer.rules, workflow=workflow)
+        if len(out["violations"]) <= len(layout["violations"]):
+            return out
     return layout
 
 
