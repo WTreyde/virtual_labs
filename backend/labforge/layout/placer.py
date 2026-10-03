@@ -18,12 +18,25 @@ HUMAN_PICK_PLACE_S = 15.0
 
 
 def transfer_edges(workflow: dict) -> list[tuple[str, str]]:
-    """Pairs of equipment instances that hand labware to each other, from step dependencies."""
+    """Pairs of equipment instances that hand labware to each other, from step dependencies.
+
+    Labware waits in place during an instrument-less in-silico step (e.g. crystal scoring), so the
+    edge skips over it; after an external step (synchrotron) nothing comes back to move.
+    """
     steps = {s["id"]: s for s in workflow["steps"]}
+
+    def sources(step_id: str) -> list[str]:
+        s = steps[step_id]
+        if s["candidate_instances"]:
+            return s["candidate_instances"]
+        if s.get("mode") == "external":
+            return []
+        return [i for p in s.get("after", []) for i in sources(p)]
+
     edges = []
     for step in workflow["steps"]:
         for prev_id in step.get("after", []):
-            for a in steps[prev_id]["candidate_instances"]:
+            for a in sources(prev_id):
                 for b in step["candidate_instances"]:
                     if a != b and (a, b) not in edges:
                         edges.append((a, b))
