@@ -34,7 +34,7 @@
         "liquid_handling": 1800
       }
     },
-    "price_usd_estimate": 25000,
+    "price_usd_estimate": 24950,
     "integration": [
       "Python API",
       "HTTP API"
@@ -43,9 +43,20 @@
       "color": "#4a7bd0"
     },
     "source_urls": [
-      "https://opentrons.com/products/flex"
+      "https://opentrons.com/products/flex",
+      "https://opentrons.com/products/opentrons-flex-robot"
     ],
-    "data_confidence": "estimated"
+    "data_confidence": "estimated",
+    "provenance": {
+      "price_usd_estimate": {
+        "value": 24950,
+        "low": 24950,
+        "high": 125000,
+        "confidence": "datasheet",
+        "source": "https://opentrons.com/products/opentrons-flex-robot",
+        "note": "Vendor page (2026): 'Starting at $24,950' base robot. Federal full workstation packages $68-124K (2025-26)."
+      }
+    }
   },
   {
     "id": "ur5e",
@@ -79,7 +90,7 @@
       "pick_place_s": 8,
       "payload_kg": 5
     },
-    "price_usd_estimate": 35000,
+    "price_usd_estimate": 39083,
     "integration": [
       "URScript",
       "ROS2"
@@ -88,9 +99,21 @@
       "color": "#9aa4ad"
     },
     "source_urls": [
-      "https://www.universal-robots.com/products/ur5e/"
+      "https://www.universal-robots.com/products/ur5e/",
+      "https://www.universal-robots.com/products/e-series/",
+      "https://automationdistribution.com/universal-robots-ur5e/"
     ],
-    "data_confidence": "estimated"
+    "data_confidence": "estimated",
+    "provenance": {
+      "price_usd_estimate": {
+        "value": 39083,
+        "low": 32000,
+        "high": 48000,
+        "confidence": "datasheet",
+        "source": "https://automationdistribution.com/universal-robots-ur5e/",
+        "note": "Automation Distribution list $39,083 (arm, controller, pendant). US Army 2024 PO W911QX24P0135: UR5e with gripper $41,555."
+      }
+    }
   },
   {
     "id": "liconic_stx44",
@@ -130,7 +153,7 @@
       }
     },
     "storage_slots": 44,
-    "price_usd_estimate": 45000,
+    "price_usd_estimate": 40000,
     "integration": [
       "SiLA2"
     ],
@@ -138,9 +161,21 @@
       "color": "#d08a4a"
     },
     "source_urls": [
-      "https://www.liconic.com"
+      "https://www.liconic.com",
+      "https://www.liconic.com/stx44.html",
+      "https://www.labmakelaar.eu/shop/all/saleable/ovens-incubators-and-climate/incubator/incubators/liconic-instruments-stx44-hrsa-incubators-for-robotic-integration/"
     ],
-    "data_confidence": "estimated"
+    "data_confidence": "estimated",
+    "provenance": {
+      "price_usd_estimate": {
+        "value": 40000,
+        "low": 16400,
+        "high": 60000,
+        "confidence": "estimated",
+        "source": "https://www.labmakelaar.eu/shop/all/saleable/ovens-incubators-and-climate/incubator/incubators/liconic-instruments-stx44-hrsa-incubators-for-robotic-integration/",
+        "note": "No new price found. Source is a USED STX44-HRSA at EUR 14,000 (~$16.4K, 2026) = lower bound. $40K new is extrapolated from the comparable Thermo Cytomat 2C (NIH 2020, $44,787); close to a placeholder."
+      }
+    }
   },
   {
     "id": "bmg_clariostar",
@@ -181,7 +216,7 @@
         "fluorescence_read": 180
       }
     },
-    "price_usd_estimate": 60000,
+    "price_usd_estimate": 44450,
     "integration": [
       "vendor SDK"
     ],
@@ -189,9 +224,20 @@
       "color": "#5bb07a"
     },
     "source_urls": [
-      "https://www.bmglabtech.com/en/clariostar-plus/"
+      "https://www.bmglabtech.com/en/clariostar-plus/",
+      "https://www.usaspending.gov/award/CONT_AWD_75N98026F00453_7529_GS07F057DA_4732"
     ],
-    "data_confidence": "estimated"
+    "data_confidence": "estimated",
+    "provenance": {
+      "price_usd_estimate": {
+        "value": 44450,
+        "low": 37589,
+        "high": 67055,
+        "confidence": "estimated",
+        "source": "https://www.usaspending.gov/award/CONT_AWD_75N98026F00453_7529_GS07F057DA_4732",
+        "note": "NIH award 75N98026F00453 (Sep 2026): CLARIOstar Plus base unit, $44,450 (GSA schedule). >15 federal buys 2019-2026 span $37,589-$67,055 by configuration."
+      }
+    }
   },
   {
     "id": "agilent_plateloc",
@@ -229,7 +275,7 @@
         "plate_sealing": 10
       }
     },
-    "price_usd_estimate": 20000,
+    "price_usd_estimate": 45143,
     "integration": [
       "VWorks"
     ],
@@ -237,9 +283,21 @@
       "color": "#c05bb0"
     },
     "source_urls": [
-      "https://www.agilent.com"
+      "https://www.agilent.com",
+      "https://www.agilent.com/en/product/automated-liquid-handling/automated-microplate-management/plateloc-thermal-microplate-sealer",
+      "https://search.testmart.com/search/sitesearch.cfm/~q%60%20Family%20Code%201260~p2%6040000btw50000~s%60SELLING_PRICE"
     ],
-    "data_confidence": "estimated"
+    "data_confidence": "estimated",
+    "provenance": {
+      "price_usd_estimate": {
+        "value": 45143,
+        "low": 29872,
+        "high": 45143,
+        "confidence": "datasheet",
+        "source": "https://search.testmart.com/search/sitesearch.cfm/~q%60%20Family%20Code%201260~p2%6040000btw50000~s%60SELLING_PRICE",
+        "note": "TestMart/GSAMart open-market price $45,143 (2026). Federal buys $29,872 (2019), $31,811 (2021)."
+      }
+    }
   },
   {
     "id": "generic_plate_hotel",
@@ -271,10 +329,23 @@
       }
     ],
     "storage_slots": 20,
-    "price_usd_estimate": 2000,
+    "price_usd_estimate": 1486,
     "visual": {
       "color": "#888888"
     },
-    "data_confidence": "placeholder"
+    "data_confidence": "placeholder",
+    "provenance": {
+      "price_usd_estimate": {
+        "value": 1486,
+        "low": 1200,
+        "high": 4000,
+        "confidence": "datasheet",
+        "source": "https://www.labsrobots.com/product-page/hotel-rack-side-grip",
+        "note": "Online store list price EUR 1,270.40 (2026), ~$1,486 at 1.17 USD/EUR. High bound from other plate hotels plus margin."
+      }
+    },
+    "source_urls": [
+      "https://www.labsrobots.com/product-page/hotel-rack-side-grip"
+    ]
   }
 ]
