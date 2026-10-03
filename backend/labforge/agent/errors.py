@@ -2,6 +2,10 @@
 import os
 
 
+class BackendContractError(ValueError):
+    """Generated backend output broke a shared contract; proposal edits cannot repair it."""
+
+
 def safe_error(exc):
     if isinstance(exc, ModuleNotFoundError):
         return f'Missing dependency: {exc.name}. Install the backend dependencies, then retry.'

@@ -29,6 +29,14 @@ class SessionTests(unittest.TestCase):
         self.result = {'layout': load_example('layout'), 'sim_result': load_example('sim_result')}
         self.simulate = Mock(side_effect=lambda **kw: copy.deepcopy(self.result))
         self.tools = {**TOOLS, 'layout_and_simulate': (TOOLS['layout_and_simulate'][0], self.simulate)}
+        # These tests exercise claims over a deliberately mocked simulation. Keep the
+        # verifier on those supplied results; independent recomputation is tested separately.
+        from labforge.agent.session import verify_claims as original_verify
+        def fixture_verify(claims, workflow, layout, sim):
+            return original_verify(claims, workflow, layout, sim)
+        patcher = patch('labforge.agent.session.verify_claims', fixture_verify)
+        patcher.start()
+        self.addCleanup(patcher.stop)
         self.session = ToolSession(self.tools, [])
 
     def design(self):
@@ -93,6 +101,25 @@ class SessionTests(unittest.TestCase):
         self.assertIn('subtotal is incomplete', text)
         self.assertIn('Unknown', text)
 
+    def test_nonplate_flow_needs_explicit_counting_sink(self):
+        from labforge.agent.validation import validate_design
+        self.spec['throughput_target']['unit'] = 'compounds_per_day'
+        with self.assertRaisesRegex(ValueError, 'count_throughput'):
+            validate_design(self.spec, self.workflow)
+        self.workflow['steps'][-1]['params'] = {'count_throughput': True, 'units_per_labware': 96}
+        validate_design(self.spec, self.workflow)
+        self.workflow['steps'][-1]['params']['units_per_labware'] = 0
+        with self.assertRaisesRegex(ValueError, 'positive'):
+            validate_design(self.spec, self.workflow)
+
+    def test_unsupported_throughput_stays_unverifiable_and_report_explains_why(self):
+        self.result['simulation_limitations'] = ['Legacy simulator does not convert plate output units.']
+        self.design()
+        checked = self.session.verify([claim()])['claims'][0]
+        self.assertEqual(checked['status'], 'unverifiable')
+        self.assertNotIn('verified_value', checked)
+        self.assertIn('Simulator limitations', self.session.report()['report_markdown'])
+
     def test_fabricated_source_is_rejected(self):
         self.workflow['steps'][0]['evidence'] = [{'claim': 'Fast', 'source': 'invented-doi', 'provider': 'amass'}]
         with self.assertRaises(ValueError):
@@ -105,6 +132,32 @@ class SessionTests(unittest.TestCase):
         text = self.session.report()['report_markdown']
         for expected in ('Executive summary', 'refuted', 'Assumptions', 'not measured throughput', 'agent_estimate'):
             self.assertIn(expected, text)
+
+    def test_new_verifier_receives_backend_spec_for_independent_recompute(self):
+        self.design()
+        seen = {}
+        def independent(claims, workflow, layout, sim, spec=None):
+            seen['spec'] = spec
+            return [{**c, 'status': 'refuted', 'verified_value': 12,
+                     'verifier_note': 'recomputed by the verifier'} for c in claims]
+        with patch('labforge.agent.session.verify_claims', independent):
+            result = self.session.verify([claim()])
+        self.assertEqual(seen['spec'], self.spec)
+        self.assertEqual(result['claims'][0]['verified_value'], 12)
+
+    def test_legacy_verifier_keeps_four_argument_contract(self):
+        self.design()
+        def legacy(claims, workflow, layout, sim):
+            return [{**c, 'status': 'refuted', 'verified_value': 20} for c in claims]
+        with patch('labforge.agent.session.verify_claims', legacy):
+            self.assertEqual(self.session.verify([claim()])['claims'][0]['verified_value'], 20)
+
+    def test_report_discloses_independent_verifier_disagreement(self):
+        self.design()
+        self.session.claims = [{**claim(), 'status':'refuted', 'verified_value':0.3}]
+        text = self.session.report()['report_markdown']
+        self.assertIn('Independent verifier comparison', text)
+        self.assertIn('not present the planning number as independently confirmed', text)
 
     def test_real_simulator_and_verifier_loop(self):
         session = ToolSession(TOOLS, [])
@@ -140,6 +193,18 @@ class SessionTests(unittest.TestCase):
         self.assertGreater(result['sweeps'][0]['elasticity'], 0)
         with self.assertRaises(ValueError):
             self.session.optimise('opentrons_flex')
+
+
+class VerifierIntegrationTests(unittest.TestCase):
+    def test_real_engine_checks_are_independent_when_spec_api_is_available(self):
+        import inspect
+        from labforge.agent.session import verify_claims
+        session = ToolSession(TOOLS, [])
+        session.simulate(load_example('lab_spec'), load_example('workflow'))
+        checked = session.verify([claim(500)])['claims']
+        self.assertEqual(checked[0]['status'], 'refuted')
+        if 'spec' in inspect.signature(verify_claims).parameters:
+            self.assertIn('recomputed by the verifier', checked[0]['verifier_note'])
 
 
 class EvidenceTests(unittest.TestCase):
