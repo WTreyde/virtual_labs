@@ -1,0 +1,2412 @@
+{
+ "task_id": "xchem_campaign_baseline",
+ "arm": "platform",
+ "message": "# Provisional XChem-style lab design and 500-fragment campaign time\n\n**Short answer:** in the model, one 500-fragment campaign takes about **34 days**, from starting expression to analysed data. The planning simulation gave a mean of 2,949,806 s (34.1 days). An independent recheck gave 2,981,398 s (34.5 days). About **384 h (16 days)** of that is shipping and the synchrotron queue, both of which are my assumptions. These are model predictions built mostly on placeholders, not measured performance.\n\nNobody could answer my earlier questions, so every requirement below is my assumption.\n\n## Assumptions\n- **Budget:** none given, so cost was not checked against a budget.\n- **Hours and staff:** instruments run 24 h a day. There is one protein scientist and one crystallographer, each on an 8 h shift.\n- **Hazards:** the protein expression is BSL-1. The only declared hazard is cryogens.\n- **Crystals:** 1 crystal per fragment plus 10% spare mounts, so 550 crystals. That is 10 \u00d7 96-well plates with 55 crystals harvested from each (placeholder: about 60% of drops give a usable crystal), packed into 35 pucks of 16 pins.\n- **Protein:** one expression lot is assumed to be enough for 10 plates. This yield is a placeholder, not a measurement.\n- **Crystal growth:** 3 days (range 2\u201312 days, placeholder). Plates are imaged on days 0, 1 and 3. Each inspection takes 180 s of camera time per plate (Rock Imager datasheet), with one camera.\n- **Soaking:** each plate stays 2 h after soaking before harvest (range 1\u201324 h, placeholder).\n- **Synchrotron:** everything goes in one shipment. Transit takes 2 days (range 1\u20135) and the beamtime queue 14 days (range 3\u201342); both are placeholders. Unattended data collection takes about 2 min per crystal (placeholder). Diffraction stays external; there is no in-house X-ray.\n- **Room:** the door is at the middle of the 9 m wall. A 2.44 m walk-in cold room sits inside the 9 \u00d7 7 m room. Staff carry all plates and pucks; there is no robot arm.\n\n## Harvesting rate (Wright et al. 2021, doi:10.1107/S2059798320014114)\n- **Unassisted manual mounting:** 8 crystals/h, from a survey of six people, including ancillary work.\n- **With the Shifter:** mean 35 s per mount (103 crystals/h) over 8,271 mounts. The paper's abstract gives a range of 100\u2013240/h.\n- **What I used:** 55 crystals \u00f7 103/h = 1,922 s per plate, with a range of 825\u20133,960 s. The upper end (50/h) is my own allowance for less experienced operators; it isn't from the paper.\n- **Without a Shifter:** at the unassisted rate, the same plate would take about 6.9 h.\n- **Modelling:** harvesting is a **manual** step and the crystallographer is occupied for its whole duration.\n\n## Design\nAbout **$996k** for known items. This excludes installation, service, consumables and building work.\n\n| Stage | Equipment |\n|---|---|\n| Expression | Infors Multitron Pro |\n| Cell harvest and clarification | Beckman Avanti JXN-26 |\n| Lysis | Qsonica Q700 (the EmulsiFlex is listed in the catalog as needing a BSL-2 zone) |\n| Purification | \u00c4KTA pure 25 |\n| Quality check | Mini-PROTEAN gel; NanoDrop |\n| Drop setting | mosquito Xtal3 |\n| Imaging | Rock Imager 1000 |\n| Growth and soak storage | Cytomat 2 incubator (42 plate slots) |\n| Soaking | Echo 525 (the only Echo in the catalog listed for crystal soaking) |\n| Fragment library storage | Lab fridge |\n| Harvesting | Crystal Shifter |\n| Puck storage | LN2 storage dewar |\n| Handling | 2 benches |\n| Shipping | 12 \u00d7 CX100 dry shippers (the catalog assumes 3 pucks per shipper, a placeholder) |\n\nLoading pucks into the shippers is modelled as a manual bench step: 300 s per puck, an estimate. The shippers' 12.6-day cold-holding time is shown as a limit, not used as a step time. It covers the 2-day transit, but the 14-day queue would exceed it, so the model assumes the synchrotron transfers the pucks to its own storage while they wait.\n\n## Simulation results\n- **Layout:** no violations (confirmed by the verifier).\n- **Throughput (planning run):** P50 is 275 crystals/day (P10 183, P90 367). The verifier's recheck gave P50 320.8. Both pass my 100/day placeholder target. This is a continuous-running rate, not the time for one campaign.\n- **Bottleneck:**\n  - **The crystallographer** is busy 98% of their shift, which caps output at about 282 crystals/day. Adding a second person or staggering shifts would help.\n  - **The growth incubator** is next, at 82% busy.\n- **For one campaign:** the long poles are the external queue, then crystal growth. The 34-day figure comes from a run that kept releasing new protein lots, so it includes waiting caused by competing lots. One campaign on its own may finish sooner, but I couldn't simulate that separately.\n- **No design revision:** the placeholder target is met and the campaign time is driven by the external queue, which equipment can't shorten.\n\n## Limitations\n- **Growth storage:** the Rock Imager's catalog entry models only its single camera, not its 1,000-slot plate hotel. I therefore kept crystals growing in the separate Cytomat. In a real build the Rock Imager's hotel could do this job, saving about $45k.\n- **Capacity checks:** the per-step capacity check couldn't run because one protein lot fans out into 10 plates.\n- **Model scope:** it doesn't model crystal failure rates.\n- **Calibration:** the verifier's Brier score comes from three claims and says nothing about real-world calibration.\n- **Safety:** cryogens need oxygen monitoring and ventilation, and a separate expression area is needed. This design is not safety-certified.\n\nTo make the estimate useful, the most important inputs to get are your real beamtime queue and shipping times, crystal growth time, and how many crystals one protein lot actually yields.",
+ "lab_spec": {
+  "id": "xchem_fbdd_lab",
+  "name": "XChem-style fragment screening lab (provisional)",
+  "domain": "biology",
+  "description": "Express and purify one target protein, set crystallisation drops, image crystals, soak 500 fragments acoustically, harvest and cryo-cool crystals into pucks, ship to a synchrotron for unattended data collection. Room 9 x 7 m including a cold room. Question: duration of one 500-fragment campaign. Budget, staffing, hours, growth time, shipping/queue times not provided; all are explicit provisional assumptions.",
+  "throughput_target": {
+   "value": 100,
+   "unit": "crystals_per_day",
+   "operating_hours_per_day": 24
+  },
+  "room": {
+   "width_m": 9,
+   "depth_m": 7,
+   "height_m": 3,
+   "doors": [
+    {
+     "x": 4.5,
+     "y": 0
+    }
+   ]
+  },
+  "labware": [
+   "shake_flask",
+   "bottle",
+   "column",
+   "crystallization_plate_96",
+   "sbs_384",
+   "puck"
+  ],
+  "required_capabilities": [
+   "cell_culture",
+   "centrifugation",
+   "cell_lysis",
+   "protein_purification",
+   "protein_qc",
+   "concentration_measurement",
+   "crystallization_setup",
+   "crystal_imaging",
+   "incubation",
+   "crystal_soaking",
+   "crystal_harvesting",
+   "cryo_cooling",
+   "manual_bench",
+   "cold_storage"
+  ],
+  "constraints": {
+   "biosafety_level": 1,
+   "hazards": [
+    "cryogens"
+   ]
+  },
+  "operators": [
+   {
+    "role": "protein_scientist",
+    "count": 1,
+    "shift_hours": 8,
+    "skills": [
+     "cell_culture",
+     "centrifugation",
+     "cell_lysis",
+     "protein_purification",
+     "protein_qc",
+     "concentration_measurement",
+     "manual_bench"
+    ]
+   },
+   {
+    "role": "crystallographer",
+    "count": 1,
+    "shift_hours": 8,
+    "skills": [
+     "crystallization_setup",
+     "crystal_imaging",
+     "crystal_soaking",
+     "crystal_harvesting",
+     "cryo_cooling",
+     "manual_bench",
+     "cold_storage"
+    ]
+   }
+  ],
+  "scenario": "fbdd_crystallography",
+  "notes": [
+   "PROVISIONAL: no budget given; cost is reported but not checked against a budget.",
+   "Throughput target 100 crystals/day is an agent placeholder, not a user requirement; the user asked for campaign duration.",
+   "Assumed 1 soaked crystal per fragment plus 10% spare mounts: 550 crystals = 10 plates x 55 crystals; 550/16 = 34.4 -> 35 UniPucks.",
+   "Expression assumed BSL-1 (E. coli-type host); cryogen hazard: LN2 dewar, Crystal Shifter puck dewar, dry shippers -> O2 monitoring and ventilation required.",
+   "Operators act as plate/puck transporters (manual lab); no robot arm.",
+   "Walk-in cold room (2.44 x 2.44 m) is placed inside the 9 x 7 m room."
+  ]
+ },
+ "workflow": {
+  "id": "xchem_fbdd_wf_v1",
+  "lab_spec_id": "xchem_fbdd_lab",
+  "labware": "crystallization_plate_96",
+  "equipment": [
+   {
+    "instance_id": "shaker_1",
+    "catalog_id": "infors_multitron_pro",
+    "rationale": "Shaken flask expression of one protein lot."
+   },
+   {
+    "instance_id": "centrifuge_1",
+    "catalog_id": "beckman_avanti_jxn26",
+    "rationale": "Cell harvest and lysate clarification (bottle rotor)."
+   },
+   {
+    "instance_id": "sonicator_1",
+    "catalog_id": "qsonica_q700",
+    "rationale": "Cell lysis; chosen over EmulsiFlex which the catalog lists as requiring a BSL-2 zone."
+   },
+   {
+    "instance_id": "akta_1",
+    "catalog_id": "cytiva_akta_pure_25",
+    "rationale": "Affinity + size-exclusion purification."
+   },
+   {
+    "instance_id": "gel_1",
+    "catalog_id": "biorad_mini_protean_tetra",
+    "rationale": "Purity QC (SDS-PAGE run time only)."
+   },
+   {
+    "instance_id": "nanodrop_1",
+    "catalog_id": "thermo_nanodrop_one",
+    "rationale": "Protein concentration measurement."
+   },
+   {
+    "instance_id": "mosquito_1",
+    "catalog_id": "sptlabtech_mosquito_xtal3",
+    "rationale": "Nanolitre drop setting into 96-well crystallisation plates."
+   },
+   {
+    "instance_id": "cold_room_1",
+    "catalog_id": "walk_in_cold_room",
+    "rationale": "User-requested cold room; provides cold_room zone for imager and protein work."
+   },
+   {
+    "instance_id": "imager_1",
+    "catalog_id": "formulatrix_rock_imager_1000",
+    "rationale": "Crystal inspection: one camera (capacity 1), 180 s per plate datasheet."
+   },
+   {
+    "instance_id": "growth_incubator_1",
+    "catalog_id": "thermo_cytomat_2",
+    "rationale": "Modelling surrogate for crystal-growth residence (42 plate slots) because the imager contract's capacity=1 represents the camera, not its 1000-slot hotel."
+   },
+   {
+    "instance_id": "echo_1",
+    "catalog_id": "beckman_echo_525",
+    "rationale": "Acoustic fragment soaking into crystallisation drops (catalog crystal_soaking capability)."
+   },
+   {
+    "instance_id": "fridge_1",
+    "catalog_id": "thermo_lab_fridge",
+    "rationale": "Holds fragment-library Echo source plates and protein aliquots."
+   },
+   {
+    "instance_id": "shifter_1",
+    "catalog_id": "olt_crystal_shifter",
+    "rationale": "Shifter-assisted manual harvesting into pucks; operator attended throughout."
+   },
+   {
+    "instance_id": "ln2_dewar_1",
+    "catalog_id": "ln2_storage_dewar",
+    "rationale": "LN2 storage of filled pucks before shipping."
+   },
+   {
+    "instance_id": "bench_protein",
+    "catalog_id": "lab_bench",
+    "rationale": "Protein prep bench."
+   },
+   {
+    "instance_id": "bench_handling",
+    "catalog_id": "lab_bench",
+    "rationale": "Drop-selection workstation and puck-to-dry-shipper handling bench."
+   },
+   {
+    "instance_id": "cx100_1",
+    "catalog_id": "taylor_wharton_cx100",
+    "rationale": "Dry shipper (catalog placeholder 3 pucks each); 12 needed for 35 pucks."
+   },
+   {
+    "instance_id": "cx100_2",
+    "catalog_id": "taylor_wharton_cx100"
+   },
+   {
+    "instance_id": "cx100_3",
+    "catalog_id": "taylor_wharton_cx100"
+   },
+   {
+    "instance_id": "cx100_4",
+    "catalog_id": "taylor_wharton_cx100"
+   },
+   {
+    "instance_id": "cx100_5",
+    "catalog_id": "taylor_wharton_cx100"
+   },
+   {
+    "instance_id": "cx100_6",
+    "catalog_id": "taylor_wharton_cx100"
+   },
+   {
+    "instance_id": "cx100_7",
+    "catalog_id": "taylor_wharton_cx100"
+   },
+   {
+    "instance_id": "cx100_8",
+    "catalog_id": "taylor_wharton_cx100"
+   },
+   {
+    "instance_id": "cx100_9",
+    "catalog_id": "taylor_wharton_cx100"
+   },
+   {
+    "instance_id": "cx100_10",
+    "catalog_id": "taylor_wharton_cx100"
+   },
+   {
+    "instance_id": "cx100_11",
+    "catalog_id": "taylor_wharton_cx100"
+   },
+   {
+    "instance_id": "cx100_12",
+    "catalog_id": "taylor_wharton_cx100"
+   }
+  ],
+  "steps": [
+   {
+    "id": "express",
+    "name": "Protein expression (one lot)",
+    "capability": "cell_culture",
+    "candidate_instances": [
+     "shaker_1"
+    ],
+    "duration_s": 86400,
+    "after": [],
+    "mode": "automated",
+    "params": {
+     "flow_unit": "expression lot (set of shake flasks)",
+     "duration_per": "per expression lot",
+     "duration_basis": "agent_estimate: growth + induction ~24 h; placeholder"
+    },
+    "duration_uncertainty": {
+     "value": 86400,
+     "low": 57600,
+     "high": 172800,
+     "confidence": "placeholder",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "cell_harvest",
+    "name": "Cell harvest spin",
+    "capability": "centrifugation",
+    "candidate_instances": [
+     "centrifuge_1"
+    ],
+    "duration_s": 1800,
+    "after": [
+     "express"
+    ],
+    "mode": "semi_automated",
+    "operator_role": "protein_scientist",
+    "params": {
+     "flow_unit": "expression lot",
+     "duration_per": "per lot",
+     "duration_basis": "catalog estimate for Avanti JXN-26"
+    },
+    "duration_uncertainty": {
+     "value": 1800,
+     "low": 600,
+     "high": 3600,
+     "confidence": "estimated",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "lysis",
+    "name": "Cell lysis",
+    "capability": "cell_lysis",
+    "candidate_instances": [
+     "sonicator_1"
+    ],
+    "duration_s": 1800,
+    "after": [
+     "cell_harvest"
+    ],
+    "mode": "semi_automated",
+    "operator_role": "protein_scientist",
+    "params": {
+     "flow_unit": "expression lot",
+     "duration_per": "per lot (several sequential vessels at catalog 300 s each)",
+     "duration_basis": "agent_estimate: ~6 x 300 s catalog per-vessel time"
+    },
+    "duration_uncertainty": {
+     "value": 1800,
+     "low": 600,
+     "high": 3600,
+     "confidence": "placeholder",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "clarify",
+    "name": "Lysate clarification spin",
+    "capability": "centrifugation",
+    "candidate_instances": [
+     "centrifuge_1"
+    ],
+    "duration_s": 1800,
+    "after": [
+     "lysis"
+    ],
+    "mode": "semi_automated",
+    "operator_role": "protein_scientist",
+    "params": {
+     "flow_unit": "expression lot",
+     "duration_per": "per lot",
+     "duration_basis": "catalog estimate"
+    },
+    "duration_uncertainty": {
+     "value": 1800,
+     "low": 600,
+     "high": 3600,
+     "confidence": "estimated",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "purify_affinity",
+    "name": "Affinity purification",
+    "capability": "protein_purification",
+    "candidate_instances": [
+     "akta_1"
+    ],
+    "duration_s": 3600,
+    "after": [
+     "clarify"
+    ],
+    "mode": "semi_automated",
+    "operator_role": "protein_scientist",
+    "params": {
+     "flow_unit": "protein lot",
+     "duration_per": "per lot",
+     "duration_basis": "catalog estimate"
+    },
+    "duration_uncertainty": {
+     "value": 3600,
+     "low": 1200,
+     "high": 14400,
+     "confidence": "estimated",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "purify_sec",
+    "name": "Size-exclusion polishing",
+    "capability": "protein_purification",
+    "candidate_instances": [
+     "akta_1"
+    ],
+    "duration_s": 3600,
+    "after": [
+     "purify_affinity"
+    ],
+    "mode": "semi_automated",
+    "operator_role": "protein_scientist",
+    "params": {
+     "flow_unit": "protein lot",
+     "duration_per": "per lot",
+     "duration_basis": "catalog estimate"
+    },
+    "duration_uncertainty": {
+     "value": 3600,
+     "low": 1200,
+     "high": 14400,
+     "confidence": "estimated",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "protein_qc",
+    "name": "Purity QC gel",
+    "capability": "protein_qc",
+    "candidate_instances": [
+     "gel_1"
+    ],
+    "duration_s": 2400,
+    "after": [
+     "purify_sec"
+    ],
+    "mode": "semi_automated",
+    "operator_role": "protein_scientist",
+    "params": {
+     "flow_unit": "protein lot",
+     "duration_per": "per lot (run only; staining/imaging excluded)",
+     "duration_basis": "catalog datasheet 35-45 min run"
+    },
+    "duration_uncertainty": {
+     "value": 2400,
+     "low": 2100,
+     "high": 2700,
+     "confidence": "datasheet",
+     "source": "https://www.bio-rad.com/webroot/web/pdf/lsr/literature/10007296D.pdf"
+    }
+   },
+   {
+    "id": "concentration",
+    "name": "Concentration measurement",
+    "capability": "concentration_measurement",
+    "candidate_instances": [
+     "nanodrop_1"
+    ],
+    "duration_s": 180,
+    "after": [
+     "protein_qc"
+    ],
+    "mode": "manual",
+    "operator_role": "protein_scientist",
+    "params": {
+     "flow_unit": "protein lot",
+     "duration_per": "per lot = 3 readings x 60 s catalog",
+     "duration_basis": "catalog 60 s per sample x 3 assumed readings",
+     "protein_yield": "placeholder: one lot assumed sufficient for 10 x 96-well plates; not measured"
+    },
+    "duration_uncertainty": {
+     "value": 180,
+     "low": 60,
+     "high": 360,
+     "confidence": "estimated",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "drop_setup",
+    "name": "Set crystallisation drops",
+    "capability": "crystallization_setup",
+    "candidate_instances": [
+     "mosquito_1"
+    ],
+    "duration_s": 1200,
+    "after": [
+     "concentration"
+    ],
+    "fan_out": 10,
+    "mode": "semi_automated",
+    "operator_role": "crystallographer",
+    "params": {
+     "flow_unit": "input protein lot -> output 96-well crystallisation plates",
+     "fan_out_basis": "placeholder: 10 plates x ~57.6 usable crystals (60% of 96 drops) covers 550 mounts",
+     "duration_per": "per protein lot = 10 plates x 120 s datasheet"
+    },
+    "duration_uncertainty": {
+     "value": 1200,
+     "low": 600,
+     "high": 3000,
+     "confidence": "datasheet",
+     "source": "https://www.sptlabtech.com/products/mosquito/mosquito-xtal3"
+    }
+   },
+   {
+    "id": "image_t0",
+    "name": "Inspection 1 (day 0)",
+    "capability": "crystal_imaging",
+    "candidate_instances": [
+     "imager_1"
+    ],
+    "duration_s": 180,
+    "after": [
+     "drop_setup"
+    ],
+    "mode": "automated",
+    "params": {
+     "flow_unit": "crystallisation plate",
+     "duration_per": "per plate per inspection (camera time)",
+     "inspection_schedule": "day 0, day 1, day 3 (3 inspections; placeholder schedule)"
+    },
+    "duration_uncertainty": {
+     "value": 180,
+     "low": 180,
+     "high": 180,
+     "confidence": "datasheet",
+     "source": "https://americanlaboratorytrading.com/lab-equipment-products/formulatrix-inc-rock-imager-1000-14143/"
+    }
+   },
+   {
+    "id": "grow_1",
+    "name": "Crystal growth residence day 0-1",
+    "capability": "incubation",
+    "candidate_instances": [
+     "growth_incubator_1"
+    ],
+    "duration_s": 86400,
+    "after": [
+     "image_t0"
+    ],
+    "mode": "automated",
+    "params": {
+     "flow_unit": "crystallisation plate",
+     "duration_per": "residence per plate",
+     "duration_basis": "placeholder growth schedule"
+    },
+    "duration_uncertainty": {
+     "value": 86400,
+     "low": 86400,
+     "high": 86400,
+     "confidence": "placeholder",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "image_d1",
+    "name": "Inspection 2 (day 1)",
+    "capability": "crystal_imaging",
+    "candidate_instances": [
+     "imager_1"
+    ],
+    "duration_s": 180,
+    "after": [
+     "grow_1"
+    ],
+    "mode": "automated",
+    "params": {
+     "flow_unit": "crystallisation plate",
+     "duration_per": "per plate per inspection"
+    },
+    "duration_uncertainty": {
+     "value": 180,
+     "low": 180,
+     "high": 180,
+     "confidence": "datasheet",
+     "source": "https://americanlaboratorytrading.com/lab-equipment-products/formulatrix-inc-rock-imager-1000-14143/"
+    }
+   },
+   {
+    "id": "grow_2",
+    "name": "Crystal growth residence day 1-3+",
+    "capability": "incubation",
+    "candidate_instances": [
+     "growth_incubator_1"
+    ],
+    "duration_s": 172800,
+    "after": [
+     "image_d1"
+    ],
+    "mode": "automated",
+    "params": {
+     "flow_unit": "crystallisation plate",
+     "duration_per": "residence per plate",
+     "duration_basis": "placeholder: total growth 3 d, range ~2-12 d"
+    },
+    "duration_uncertainty": {
+     "value": 172800,
+     "low": 86400,
+     "high": 950400,
+     "confidence": "placeholder",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "image_final",
+    "name": "Inspection 3 (pre-soak)",
+    "capability": "crystal_imaging",
+    "candidate_instances": [
+     "imager_1"
+    ],
+    "duration_s": 180,
+    "after": [
+     "grow_2"
+    ],
+    "mode": "automated",
+    "params": {
+     "flow_unit": "crystallisation plate",
+     "duration_per": "per plate per inspection"
+    },
+    "duration_uncertainty": {
+     "value": 180,
+     "low": 180,
+     "high": 180,
+     "confidence": "datasheet",
+     "source": "https://americanlaboratorytrading.com/lab-equipment-products/formulatrix-inc-rock-imager-1000-14143/"
+    }
+   },
+   {
+    "id": "drop_selection",
+    "name": "Drop selection / soak targeting review",
+    "capability": "manual_bench",
+    "candidate_instances": [
+     "bench_handling"
+    ],
+    "duration_s": 900,
+    "after": [
+     "image_final"
+    ],
+    "mode": "manual",
+    "operator_role": "crystallographer",
+    "params": {
+     "flow_unit": "crystallisation plate",
+     "duration_per": "per plate",
+     "duration_basis": "agent_estimate: image review at workstation"
+    },
+    "duration_uncertainty": {
+     "value": 900,
+     "low": 300,
+     "high": 1800,
+     "confidence": "placeholder",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "soak",
+    "name": "Acoustic fragment soak",
+    "capability": "crystal_soaking",
+    "candidate_instances": [
+     "echo_1"
+    ],
+    "duration_s": 900,
+    "after": [
+     "drop_selection"
+    ],
+    "mode": "semi_automated",
+    "operator_role": "crystallographer",
+    "params": {
+     "flow_unit": "crystallisation plate (~55 soaked drops)",
+     "duration_per": "per plate incl. load",
+     "duration_basis": "catalog estimate; Collins et al. 2017 abstract reports 1000 soaks in under 10 min, so transfer time itself is small",
+     "source_plates": "fragment library in Echo 384 source plates held in fridge_1"
+    },
+    "duration_uncertainty": {
+     "value": 900,
+     "low": 300,
+     "high": 2400,
+     "confidence": "estimated",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "soak_incubate",
+    "name": "Soak residence",
+    "capability": "incubation",
+    "candidate_instances": [
+     "growth_incubator_1"
+    ],
+    "duration_s": 7200,
+    "after": [
+     "soak"
+    ],
+    "mode": "automated",
+    "params": {
+     "flow_unit": "crystallisation plate",
+     "duration_per": "residence per plate",
+     "duration_basis": "placeholder soak time"
+    },
+    "duration_uncertainty": {
+     "value": 7200,
+     "low": 3600,
+     "high": 86400,
+     "confidence": "placeholder",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "harvest",
+    "name": "Shifter-assisted manual harvesting into pucks",
+    "capability": "crystal_harvesting",
+    "candidate_instances": [
+     "shifter_1"
+    ],
+    "duration_s": 1922,
+    "after": [
+     "soak_incubate"
+    ],
+    "mode": "manual",
+    "operator_role": "crystallographer",
+    "params": {
+     "flow_unit": "crystallisation plate in -> 55 mounted crystals (~3.44 UniPucks) out",
+     "crystals_per_plate": 55,
+     "duration_per": "per plate = 55 crystals / 103 per h",
+     "duration_basis": "Wright et al. 2021 sec 3.2.2: Shifter mean 35 s/mount (103/h); abstract range 100-240/h. Unassisted manual baseline 8/h would be 6.9 h/plate. High bound 50/h is an agent extension for less experienced operators."
+    },
+    "duration_uncertainty": {
+     "value": 1922,
+     "low": 825,
+     "high": 3960,
+     "confidence": "literature",
+     "source": "https://doi.org/10.1107/S2059798320014114"
+    },
+    "evidence": [
+     {
+      "claim": "Shifter-assisted mean 35 s per mount (103 crystals/h) from 8271 mounts; unassisted manual baseline 8 crystals/h",
+      "source": "https://doi.org/10.1107/S2059798320014114",
+      "provider": "web"
+     }
+    ]
+   },
+   {
+    "id": "cryo_store",
+    "name": "Transfer filled pucks to LN2 storage dewar",
+    "capability": "cryo_cooling",
+    "candidate_instances": [
+     "ln2_dewar_1"
+    ],
+    "duration_s": 413,
+    "after": [
+     "harvest"
+    ],
+    "mode": "manual",
+    "operator_role": "crystallographer",
+    "params": {
+     "flow_unit": "puck set from one plate (~3.44 pucks)",
+     "duration_per": "per plate-lot = 3.44 pucks x 120 s catalog placeholder"
+    },
+    "duration_uncertainty": {
+     "value": 413,
+     "low": 103,
+     "high": 2064,
+     "confidence": "placeholder",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "load_shipper",
+    "name": "Load pucks into charged dry shipper",
+    "capability": "manual_bench",
+    "candidate_instances": [
+     "bench_handling"
+    ],
+    "duration_s": 1032,
+    "after": [
+     "cryo_store"
+    ],
+    "mode": "manual",
+    "operator_role": "crystallographer",
+    "params": {
+     "flow_unit": "puck set from one plate (~3.44 pucks)",
+     "duration_per": "per plate-lot = 3.44 pucks x 300 s handling",
+     "duration_basis": "agent_estimate based on CX100 catalog per-puck handling placeholder (not its hold time)",
+     "dry_shippers": [
+      "cx100_1",
+      "cx100_2",
+      "cx100_3",
+      "cx100_4",
+      "cx100_5",
+      "cx100_6",
+      "cx100_7",
+      "cx100_8",
+      "cx100_9",
+      "cx100_10",
+      "cx100_11",
+      "cx100_12"
+     ]
+    },
+    "duration_uncertainty": {
+     "value": 1032,
+     "low": 206,
+     "high": 3096,
+     "confidence": "placeholder",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "ship_and_queue",
+    "name": "Ship to synchrotron + beamtime queue",
+    "capability": "external_service",
+    "candidate_instances": [],
+    "duration_s": 172800,
+    "after": [
+     "load_shipper"
+    ],
+    "batch_size": 10,
+    "mode": "external",
+    "params": {
+     "flow_unit": "whole campaign shipment (10 plate-lots, 35 pucks in 12 CX100 shippers)",
+     "duration_per": "per shipment (transit)",
+     "queue_time_s": 1209600,
+     "queue_basis": "placeholder 14 d beamtime queue, range 3-42 d",
+     "shipper_instances": [
+      "cx100_1",
+      "cx100_2",
+      "cx100_3",
+      "cx100_4",
+      "cx100_5",
+      "cx100_6",
+      "cx100_7",
+      "cx100_8",
+      "cx100_9",
+      "cx100_10",
+      "cx100_11",
+      "cx100_12"
+     ],
+     "shipper_hold_time_note": "CX100 working hold 12.6 d must exceed transit + any wait before unloading at the beamline"
+    },
+    "duration_uncertainty": {
+     "value": 172800,
+     "low": 86400,
+     "high": 432000,
+     "confidence": "placeholder",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "data_collection",
+    "name": "Unattended diffraction data collection",
+    "capability": "external_service",
+    "candidate_instances": [],
+    "duration_s": 6600,
+    "after": [
+     "ship_and_queue"
+    ],
+    "mode": "external",
+    "params": {
+     "flow_unit": "puck set from one plate (55 crystals)",
+     "duration_per": "per plate-lot = 55 crystals x 120 s placeholder",
+     "duration_basis": "agent_estimate"
+    },
+    "duration_uncertainty": {
+     "value": 6600,
+     "low": 3300,
+     "high": 19800,
+     "confidence": "placeholder",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "analysis",
+    "name": "Data processing and hit analysis",
+    "capability": "in_silico",
+    "candidate_instances": [],
+    "duration_s": 7200,
+    "after": [
+     "data_collection"
+    ],
+    "mode": "in_silico",
+    "params": {
+     "flow_unit": "datasets from one plate-lot",
+     "count_throughput": true,
+     "units_per_labware": 55,
+     "duration_per": "per plate-lot",
+     "duration_basis": "agent_estimate"
+    },
+    "duration_uncertainty": {
+     "value": 7200,
+     "low": 1800,
+     "high": 28800,
+     "confidence": "placeholder",
+     "source": "agent_estimate"
+    }
+   }
+  ]
+ },
+ "layout": {
+  "id": "xchem_fbdd_wf_v1_layout",
+  "workflow_id": "xchem_fbdd_wf_v1",
+  "room": {
+   "width_m": 9,
+   "depth_m": 7,
+   "height_m": 3
+  },
+  "placements": [
+   {
+    "instance_id": "shaker_1",
+    "position": {
+     "x": 4.869,
+     "y": 4.988,
+     "z": 0.0
+    },
+    "rotation_deg": 0.0
+   },
+   {
+    "instance_id": "centrifuge_1",
+    "position": {
+     "x": 5.824,
+     "y": 3.601,
+     "z": 0.0
+    },
+    "rotation_deg": 270.0
+   },
+   {
+    "instance_id": "sonicator_1",
+    "position": {
+     "x": 5.722,
+     "y": 2.508,
+     "z": 0.9
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "akta_1",
+    "position": {
+     "x": 7.774,
+     "y": 3.22,
+     "z": 0.9
+    },
+    "rotation_deg": 270.0
+   },
+   {
+    "instance_id": "gel_1",
+    "position": {
+     "x": 7.736,
+     "y": 1.912,
+     "z": 0.9
+    },
+    "rotation_deg": 270.0
+   },
+   {
+    "instance_id": "nanodrop_1",
+    "position": {
+     "x": 4.77,
+     "y": 5.952,
+     "z": 0.9
+    },
+    "rotation_deg": 0.0
+   },
+   {
+    "instance_id": "mosquito_1",
+    "position": {
+     "x": 4.476,
+     "y": 3.301,
+     "z": 0.9
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "cold_room_1",
+    "position": {
+     "x": 7.524,
+     "y": 5.78,
+     "z": 0.0
+    },
+    "rotation_deg": 0.0
+   },
+   {
+    "instance_id": "imager_1",
+    "position": {
+     "x": 2.318,
+     "y": 0.689,
+     "z": 0.0
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "growth_incubator_1",
+    "position": {
+     "x": 0.973,
+     "y": 0.636,
+     "z": 0.0
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "echo_1",
+    "position": {
+     "x": 2.927,
+     "y": 6.535,
+     "z": 0.9
+    },
+    "rotation_deg": 0.0
+   },
+   {
+    "instance_id": "fridge_1",
+    "position": {
+     "x": 6.858,
+     "y": 1.017,
+     "z": 0.0
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "shifter_1",
+    "position": {
+     "x": 2.723,
+     "y": 2.589,
+     "z": 0.9
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "ln2_dewar_1",
+    "position": {
+     "x": 3.577,
+     "y": 3.255,
+     "z": 0.0
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "bench_protein",
+    "position": {
+     "x": 0.531,
+     "y": 2.79,
+     "z": 0.0
+    },
+    "rotation_deg": 90.0
+   },
+   {
+    "instance_id": "bench_handling",
+    "position": {
+     "x": 2.505,
+     "y": 4.753,
+     "z": 0.0
+    },
+    "rotation_deg": 0.0
+   },
+   {
+    "instance_id": "cx100_1",
+    "position": {
+     "x": 4.091,
+     "y": 1.439,
+     "z": 0.9
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "cx100_2",
+    "position": {
+     "x": 4.44,
+     "y": 2.684,
+     "z": 0.9
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "cx100_3",
+    "position": {
+     "x": 3.433,
+     "y": 2.231,
+     "z": 0.9
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "cx100_4",
+    "position": {
+     "x": 3.456,
+     "y": 2.609,
+     "z": 0.9
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "cx100_5",
+    "position": {
+     "x": 3.76,
+     "y": 1.928,
+     "z": 0.9
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "cx100_6",
+    "position": {
+     "x": 4.121,
+     "y": 2.411,
+     "z": 0.9
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "cx100_7",
+    "position": {
+     "x": 4.118,
+     "y": 2.086,
+     "z": 0.9
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "cx100_8",
+    "position": {
+     "x": 3.8,
+     "y": 2.572,
+     "z": 0.9
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "cx100_9",
+    "position": {
+     "x": 3.761,
+     "y": 2.248,
+     "z": 0.9
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "cx100_10",
+    "position": {
+     "x": 4.477,
+     "y": 2.287,
+     "z": 0.9
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "cx100_11",
+    "position": {
+     "x": 4.445,
+     "y": 1.955,
+     "z": 0.9
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "cx100_12",
+    "position": {
+     "x": 4.095,
+     "y": 1.764,
+     "z": 0.9
+    },
+    "rotation_deg": 180.0
+   }
+  ],
+  "operators": [
+   {
+    "id": "protein_scientist_1",
+    "role": "protein_scientist",
+    "home": {
+     "x": 4.5,
+     "y": 0
+    }
+   },
+   {
+    "id": "crystallographer_1",
+    "role": "crystallographer",
+    "home": {
+     "x": 4.5,
+     "y": 0
+    }
+   }
+  ],
+  "transfers": [
+   {
+    "from_instance": "shaker_1",
+    "to_instance": "centrifuge_1",
+    "transporter_instance": "protein_scientist_1",
+    "distance_m": 1.66,
+    "path": [
+     {
+      "x": 4.869,
+      "y": 4.558,
+      "z": 0.3
+     },
+     {
+      "x": 4.869,
+      "y": 4.158,
+      "z": 1.0
+     },
+     {
+      "x": 5.05,
+      "y": 4.15,
+      "z": 1.0
+     },
+     {
+      "x": 5.15,
+      "y": 4.25,
+      "z": 1.0
+     },
+     {
+      "x": 5.824,
+      "y": 3.601,
+      "z": 1.0
+     },
+     {
+      "x": 5.824,
+      "y": 3.601,
+      "z": 0.86
+     }
+    ],
+    "est_time_s": 16.7
+   },
+   {
+    "from_instance": "centrifuge_1",
+    "to_instance": "sonicator_1",
+    "transporter_instance": "protein_scientist_1",
+    "distance_m": 3.27,
+    "path": [
+     {
+      "x": 5.824,
+      "y": 3.601,
+      "z": 0.86
+     },
+     {
+      "x": 5.824,
+      "y": 3.601,
+      "z": 1.0
+     },
+     {
+      "x": 6.55,
+      "y": 4.25,
+      "z": 1.0
+     },
+     {
+      "x": 6.55,
+      "y": 2.95,
+      "z": 1.0
+     },
+     {
+      "x": 6.15,
+      "y": 2.55,
+      "z": 1.0
+     },
+     {
+      "x": 5.722,
+      "y": 2.508,
+      "z": 1.0
+     },
+     {
+      "x": 5.722,
+      "y": 2.508,
+      "z": 1.1
+     }
+    ],
+    "est_time_s": 18.3
+   },
+   {
+    "from_instance": "sonicator_1",
+    "to_instance": "centrifuge_1",
+    "transporter_instance": "protein_scientist_1",
+    "distance_m": 3.25,
+    "path": [
+     {
+      "x": 5.722,
+      "y": 2.508,
+      "z": 1.1
+     },
+     {
+      "x": 5.722,
+      "y": 2.508,
+      "z": 1.0
+     },
+     {
+      "x": 6.15,
+      "y": 2.65,
+      "z": 1.0
+     },
+     {
+      "x": 6.25,
+      "y": 2.65,
+      "z": 1.0
+     },
+     {
+      "x": 6.55,
+      "y": 2.95,
+      "z": 1.0
+     },
+     {
+      "x": 6.55,
+      "y": 4.25,
+      "z": 1.0
+     },
+     {
+      "x": 5.824,
+      "y": 3.601,
+      "z": 1.0
+     },
+     {
+      "x": 5.824,
+      "y": 3.601,
+      "z": 0.86
+     }
+    ],
+    "est_time_s": 18.2
+   },
+   {
+    "from_instance": "centrifuge_1",
+    "to_instance": "akta_1",
+    "transporter_instance": "protein_scientist_1",
+    "distance_m": 3.03,
+    "path": [
+     {
+      "x": 5.824,
+      "y": 3.601,
+      "z": 0.86
+     },
+     {
+      "x": 5.824,
+      "y": 3.601,
+      "z": 1.0
+     },
+     {
+      "x": 6.55,
+      "y": 4.25,
+      "z": 1.0
+     },
+     {
+      "x": 6.75,
+      "y": 4.05,
+      "z": 1.0
+     },
+     {
+      "x": 6.75,
+      "y": 3.85,
+      "z": 1.0
+     },
+     {
+      "x": 6.85,
+      "y": 3.75,
+      "z": 1.0
+     },
+     {
+      "x": 6.85,
+      "y": 3.65,
+      "z": 1.0
+     },
+     {
+      "x": 6.95,
+      "y": 3.55,
+      "z": 1.0
+     },
+     {
+      "x": 6.95,
+      "y": 3.45,
+      "z": 1.0
+     },
+     {
+      "x": 7.05,
+      "y": 3.35,
+      "z": 1.0
+     },
+     {
+      "x": 7.05,
+      "y": 3.25,
+      "z": 1.0
+     },
+     {
+      "x": 7.15,
+      "y": 3.15,
+      "z": 1.0
+     },
+     {
+      "x": 7.15,
+      "y": 2.95,
+      "z": 1.0
+     },
+     {
+      "x": 7.202,
+      "y": 2.855,
+      "z": 1.0
+     },
+     {
+      "x": 7.539,
+      "y": 3.07,
+      "z": 1.25
+     }
+    ],
+    "est_time_s": 18.0
+   },
+   {
+    "from_instance": "akta_1",
+    "to_instance": "gel_1",
+    "transporter_instance": "protein_scientist_1",
+    "distance_m": 1.61,
+    "path": [
+     {
+      "x": 7.539,
+      "y": 3.07,
+      "z": 1.25
+     },
+     {
+      "x": 7.202,
+      "y": 2.855,
+      "z": 1.0
+     },
+     {
+      "x": 7.25,
+      "y": 2.35,
+      "z": 1.0
+     },
+     {
+      "x": 7.35,
+      "y": 2.25,
+      "z": 1.0
+     },
+     {
+      "x": 7.35,
+      "y": 2.15,
+      "z": 1.0
+     },
+     {
+      "x": 7.45,
+      "y": 2.05,
+      "z": 1.0
+     },
+     {
+      "x": 7.736,
+      "y": 1.912,
+      "z": 1.0
+     },
+     {
+      "x": 7.736,
+      "y": 1.912,
+      "z": 1.08
+     }
+    ],
+    "est_time_s": 16.6
+   },
+   {
+    "from_instance": "gel_1",
+    "to_instance": "nanodrop_1",
+    "transporter_instance": "protein_scientist_1",
+    "distance_m": 5.85,
+    "path": [
+     {
+      "x": 7.736,
+      "y": 1.912,
+      "z": 1.08
+     },
+     {
+      "x": 7.736,
+      "y": 1.912,
+      "z": 1.0
+     },
+     {
+      "x": 6.55,
+      "y": 2.85,
+      "z": 1.0
+     },
+     {
+      "x": 6.55,
+      "y": 4.25,
+      "z": 1.0
+     },
+     {
+      "x": 6.45,
+      "y": 4.35,
+      "z": 1.0
+     },
+     {
+      "x": 6.05,
+      "y": 4.35,
+      "z": 1.0
+     },
+     {
+      "x": 5.65,
+      "y": 4.75,
+      "z": 1.0
+     },
+     {
+      "x": 5.65,
+      "y": 5.65,
+      "z": 1.0
+     },
+     {
+      "x": 4.77,
+      "y": 5.952,
+      "z": 1.0
+     },
+     {
+      "x": 4.77,
+      "y": 5.952,
+      "z": 1.02
+     }
+    ],
+    "est_time_s": 20.8
+   },
+   {
+    "from_instance": "nanodrop_1",
+    "to_instance": "mosquito_1",
+    "transporter_instance": "crystallographer_1",
+    "distance_m": 3.27,
+    "path": [
+     {
+      "x": 4.77,
+      "y": 5.952,
+      "z": 1.02
+     },
+     {
+      "x": 4.77,
+      "y": 5.952,
+      "z": 1.0
+     },
+     {
+      "x": 4.05,
+      "y": 5.65,
+      "z": 1.0
+     },
+     {
+      "x": 4.05,
+      "y": 4.35,
+      "z": 1.0
+     },
+     {
+      "x": 4.35,
+      "y": 4.05,
+      "z": 1.0
+     },
+     {
+      "x": 4.35,
+      "y": 3.85,
+      "z": 1.0
+     },
+     {
+      "x": 4.476,
+      "y": 3.301,
+      "z": 1.0
+     },
+     {
+      "x": 4.476,
+      "y": 3.301,
+      "z": 1.05
+     }
+    ],
+    "est_time_s": 18.3
+   },
+   {
+    "from_instance": "mosquito_1",
+    "to_instance": "imager_1",
+    "transporter_instance": "protein_scientist_1",
+    "distance_m": 4.6,
+    "path": [
+     {
+      "x": 4.476,
+      "y": 3.301,
+      "z": 1.05
+     },
+     {
+      "x": 4.476,
+      "y": 3.301,
+      "z": 1.0
+     },
+     {
+      "x": 3.05,
+      "y": 3.75,
+      "z": 1.0
+     },
+     {
+      "x": 2.45,
+      "y": 3.15,
+      "z": 1.0
+     },
+     {
+      "x": 2.15,
+      "y": 3.15,
+      "z": 1.0
+     },
+     {
+      "x": 2.15,
+      "y": 2.05,
+      "z": 1.0
+     },
+     {
+      "x": 2.25,
+      "y": 1.95,
+      "z": 1.0
+     },
+     {
+      "x": 2.25,
+      "y": 1.75,
+      "z": 1.0
+     },
+     {
+      "x": 2.318,
+      "y": 1.659,
+      "z": 1.0
+     },
+     {
+      "x": 2.318,
+      "y": 1.259,
+      "z": 1.0
+     }
+    ],
+    "est_time_s": 19.6
+   },
+   {
+    "from_instance": "imager_1",
+    "to_instance": "growth_incubator_1",
+    "transporter_instance": "protein_scientist_1",
+    "distance_m": 2.32,
+    "path": [
+     {
+      "x": 2.318,
+      "y": 1.259,
+      "z": 1.0
+     },
+     {
+      "x": 2.318,
+      "y": 1.659,
+      "z": 1.0
+     },
+     {
+      "x": 1.75,
+      "y": 1.65,
+      "z": 1.0
+     },
+     {
+      "x": 1.55,
+      "y": 1.45,
+      "z": 1.0
+     },
+     {
+      "x": 1.35,
+      "y": 1.45,
+      "z": 1.0
+     },
+     {
+      "x": 1.25,
+      "y": 1.35,
+      "z": 1.0
+     },
+     {
+      "x": 1.15,
+      "y": 1.35,
+      "z": 1.0
+     },
+     {
+      "x": 1.05,
+      "y": 1.25,
+      "z": 1.0
+     },
+     {
+      "x": 0.973,
+      "y": 1.292,
+      "z": 1.0
+     },
+     {
+      "x": 0.973,
+      "y": 0.891,
+      "z": 0.5
+     }
+    ],
+    "est_time_s": 17.3
+   },
+   {
+    "from_instance": "growth_incubator_1",
+    "to_instance": "imager_1",
+    "transporter_instance": "protein_scientist_1",
+    "distance_m": 2.33,
+    "path": [
+     {
+      "x": 0.973,
+      "y": 0.891,
+      "z": 0.5
+     },
+     {
+      "x": 0.973,
+      "y": 1.292,
+      "z": 1.0
+     },
+     {
+      "x": 1.25,
+      "y": 1.25,
+      "z": 1.0
+     },
+     {
+      "x": 1.55,
+      "y": 1.55,
+      "z": 1.0
+     },
+     {
+      "x": 2.25,
+      "y": 1.55,
+      "z": 1.0
+     },
+     {
+      "x": 2.318,
+      "y": 1.659,
+      "z": 1.0
+     },
+     {
+      "x": 2.318,
+      "y": 1.259,
+      "z": 1.0
+     }
+    ],
+    "est_time_s": 17.3
+   },
+   {
+    "from_instance": "imager_1",
+    "to_instance": "bench_handling",
+    "transporter_instance": "crystallographer_1",
+    "distance_m": 3.71,
+    "path": [
+     {
+      "x": 2.318,
+      "y": 1.259,
+      "z": 1.0
+     },
+     {
+      "x": 2.318,
+      "y": 1.659,
+      "z": 1.0
+     },
+     {
+      "x": 2.35,
+      "y": 1.85,
+      "z": 1.0
+     },
+     {
+      "x": 2.15,
+      "y": 2.05,
+      "z": 1.0
+     },
+     {
+      "x": 2.15,
+      "y": 3.15,
+      "z": 1.0
+     },
+     {
+      "x": 2.25,
+      "y": 3.25,
+      "z": 1.0
+     },
+     {
+      "x": 2.25,
+      "y": 3.55,
+      "z": 1.0
+     },
+     {
+      "x": 2.35,
+      "y": 3.65,
+      "z": 1.0
+     },
+     {
+      "x": 2.35,
+      "y": 3.75,
+      "z": 1.0
+     },
+     {
+      "x": 2.45,
+      "y": 3.85,
+      "z": 1.0
+     },
+     {
+      "x": 2.45,
+      "y": 4.05,
+      "z": 1.0
+     },
+     {
+      "x": 2.505,
+      "y": 4.753,
+      "z": 1.0
+     },
+     {
+      "x": 2.505,
+      "y": 4.753,
+      "z": 0.9
+     }
+    ],
+    "est_time_s": 18.7
+   },
+   {
+    "from_instance": "bench_handling",
+    "to_instance": "echo_1",
+    "transporter_instance": "crystallographer_1",
+    "distance_m": 3.62,
+    "path": [
+     {
+      "x": 2.505,
+      "y": 4.753,
+      "z": 0.9
+     },
+     {
+      "x": 2.505,
+      "y": 4.753,
+      "z": 1.0
+     },
+     {
+      "x": 3.55,
+      "y": 4.15,
+      "z": 1.0
+     },
+     {
+      "x": 3.55,
+      "y": 5.35,
+      "z": 1.0
+     },
+     {
+      "x": 3.25,
+      "y": 5.65,
+      "z": 1.0
+     },
+     {
+      "x": 3.05,
+      "y": 5.65,
+      "z": 1.0
+     },
+     {
+      "x": 2.927,
+      "y": 5.795,
+      "z": 1.0
+     },
+     {
+      "x": 2.927,
+      "y": 6.195,
+      "z": 1.25
+     }
+    ],
+    "est_time_s": 18.6
+   },
+   {
+    "from_instance": "echo_1",
+    "to_instance": "growth_incubator_1",
+    "transporter_instance": "protein_scientist_1",
+    "distance_m": 6.7,
+    "path": [
+     {
+      "x": 2.927,
+      "y": 6.195,
+      "z": 1.25
+     },
+     {
+      "x": 2.927,
+      "y": 5.795,
+      "z": 1.0
+     },
+     {
+      "x": 2.85,
+      "y": 5.65,
+      "z": 1.0
+     },
+     {
+      "x": 2.75,
+      "y": 5.65,
+      "z": 1.0
+     },
+     {
+      "x": 2.45,
+      "y": 5.35,
+      "z": 1.0
+     },
+     {
+      "x": 1.55,
+      "y": 5.35,
+      "z": 1.0
+     },
+     {
+      "x": 1.55,
+      "y": 2.55,
+      "z": 1.0
+     },
+     {
+      "x": 1.45,
+      "y": 2.45,
+      "z": 1.0
+     },
+     {
+      "x": 1.45,
+      "y": 2.25,
+      "z": 1.0
+     },
+     {
+      "x": 1.35,
+      "y": 2.15,
+      "z": 1.0
+     },
+     {
+      "x": 1.35,
+      "y": 2.05,
+      "z": 1.0
+     },
+     {
+      "x": 1.25,
+      "y": 1.95,
+      "z": 1.0
+     },
+     {
+      "x": 1.25,
+      "y": 1.85,
+      "z": 1.0
+     },
+     {
+      "x": 1.15,
+      "y": 1.75,
+      "z": 1.0
+     },
+     {
+      "x": 1.15,
+      "y": 1.65,
+      "z": 1.0
+     },
+     {
+      "x": 1.05,
+      "y": 1.55,
+      "z": 1.0
+     },
+     {
+      "x": 1.05,
+      "y": 1.45,
+      "z": 1.0
+     },
+     {
+      "x": 0.95,
+      "y": 1.35,
+      "z": 1.0
+     },
+     {
+      "x": 0.973,
+      "y": 1.292,
+      "z": 1.0
+     },
+     {
+      "x": 0.973,
+      "y": 0.891,
+      "z": 0.5
+     }
+    ],
+    "est_time_s": 21.7
+   },
+   {
+    "from_instance": "growth_incubator_1",
+    "to_instance": "shifter_1",
+    "transporter_instance": "crystallographer_1",
+    "distance_m": 3.81,
+    "path": [
+     {
+      "x": 0.973,
+      "y": 0.891,
+      "z": 0.5
+     },
+     {
+      "x": 0.973,
+      "y": 1.292,
+      "z": 1.0
+     },
+     {
+      "x": 2.15,
+      "y": 2.45,
+      "z": 1.0
+     },
+     {
+      "x": 2.15,
+      "y": 3.15,
+      "z": 1.0
+     },
+     {
+      "x": 2.65,
+      "y": 3.15,
+      "z": 1.0
+     },
+     {
+      "x": 2.723,
+      "y": 3.289,
+      "z": 1.0
+     },
+     {
+      "x": 2.723,
+      "y": 2.889,
+      "z": 1.1
+     }
+    ],
+    "est_time_s": 18.8
+   },
+   {
+    "from_instance": "shifter_1",
+    "to_instance": "ln2_dewar_1",
+    "transporter_instance": "crystallographer_1",
+    "distance_m": 1.25,
+    "path": [
+     {
+      "x": 2.723,
+      "y": 2.889,
+      "z": 1.1
+     },
+     {
+      "x": 2.723,
+      "y": 3.289,
+      "z": 1.0
+     },
+     {
+      "x": 3.577,
+      "y": 3.255,
+      "z": 1.0
+     },
+     {
+      "x": 3.577,
+      "y": 3.255,
+      "z": 0.686
+     }
+    ],
+    "est_time_s": 16.3
+   },
+   {
+    "from_instance": "ln2_dewar_1",
+    "to_instance": "bench_handling",
+    "transporter_instance": "crystallographer_1",
+    "distance_m": 2.2,
+    "path": [
+     {
+      "x": 3.577,
+      "y": 3.255,
+      "z": 0.686
+     },
+     {
+      "x": 3.577,
+      "y": 3.255,
+      "z": 1.0
+     },
+     {
+      "x": 2.95,
+      "y": 3.35,
+      "z": 1.0
+     },
+     {
+      "x": 2.95,
+      "y": 3.45,
+      "z": 1.0
+     },
+     {
+      "x": 2.75,
+      "y": 3.65,
+      "z": 1.0
+     },
+     {
+      "x": 2.75,
+      "y": 3.75,
+      "z": 1.0
+     },
+     {
+      "x": 2.65,
+      "y": 3.85,
+      "z": 1.0
+     },
+     {
+      "x": 2.65,
+      "y": 3.95,
+      "z": 1.0
+     },
+     {
+      "x": 2.55,
+      "y": 4.05,
+      "z": 1.0
+     },
+     {
+      "x": 2.505,
+      "y": 4.753,
+      "z": 1.0
+     },
+     {
+      "x": 2.505,
+      "y": 4.753,
+      "z": 0.9
+     }
+    ],
+    "est_time_s": 17.2
+   }
+  ],
+  "zones": [
+   {
+    "id": "cold_room_1",
+    "kind": "cold_room",
+    "min": {
+     "x": 1.552,
+     "y": 0.0
+    },
+    "max": {
+     "x": 3.084,
+     "y": 1.562
+    }
+   },
+   {
+    "id": "cryogen_1",
+    "kind": "cryogen",
+    "min": {
+     "x": 2.123,
+     "y": 1.028
+    },
+    "max": {
+     "x": 4.888,
+     "y": 3.794
+    }
+   },
+   {
+    "id": "ventilated_1",
+    "kind": "ventilated",
+    "min": {
+     "x": 7.239,
+     "y": 2.653
+    },
+    "max": {
+     "x": 8.309,
+     "y": 3.788
+    }
+   },
+   {
+    "id": "vibration_free_1",
+    "kind": "vibration_free",
+    "min": {
+     "x": 4.034,
+     "y": 4.258
+    },
+    "max": {
+     "x": 5.704,
+     "y": 5.718
+    }
+   },
+   {
+    "id": "vibration_free_2",
+    "kind": "vibration_free",
+    "min": {
+     "x": 5.094,
+     "y": 2.946
+    },
+    "max": {
+     "x": 6.554,
+     "y": 4.256
+    }
+   },
+   {
+    "id": "vibration_free_3",
+    "kind": "vibration_free",
+    "min": {
+     "x": 3.904,
+     "y": 2.766
+    },
+    "max": {
+     "x": 5.048,
+     "y": 3.836
+    }
+   },
+   {
+    "id": "vibration_free_4",
+    "kind": "vibration_free",
+    "min": {
+     "x": 2.358,
+     "y": 5.894
+    },
+    "max": {
+     "x": 3.496,
+     "y": 7
+    }
+   }
+  ],
+  "score": {
+   "total_weighted_distance_m": 373.94,
+   "floor_area_used_m2": 13.99
+  },
+  "violations": []
+ },
+ "sim_result": {
+  "id": "xchem_fbdd_wf_v1_layout_sim",
+  "layout_id": "xchem_fbdd_wf_v1_layout",
+  "simulated_hours": 906.0,
+  "replicates": 10,
+  "throughput": {
+   "value": 275.0,
+   "unit": "crystals_per_day",
+   "target": 100,
+   "meets_target": true,
+   "p10": 183.3,
+   "p50": 275.0,
+   "p90": 366.7,
+   "prob_meets_target": 1.0
+  },
+  "cycle_time_s": 2949805.9,
+  "utilisation": [
+   {
+    "instance_id": "shaker_1",
+    "busy_fraction": 0.081,
+    "mean_queue_wait_s": 2211.1
+   },
+   {
+    "instance_id": "centrifuge_1",
+    "busy_fraction": 0.049,
+    "mean_queue_wait_s": 9306.2
+   },
+   {
+    "instance_id": "sonicator_1",
+    "busy_fraction": 0.022,
+    "mean_queue_wait_s": 10.3
+   },
+   {
+    "instance_id": "akta_1",
+    "busy_fraction": 0.143,
+    "mean_queue_wait_s": 19216.5
+   },
+   {
+    "instance_id": "gel_1",
+    "busy_fraction": 0.004,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "nanodrop_1",
+    "busy_fraction": 0.002,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "mosquito_1",
+    "busy_fraction": 0.005,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "cold_room_1",
+    "busy_fraction": 0.0,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "imager_1",
+    "busy_fraction": 0.033,
+    "mean_queue_wait_s": 6791.2
+   },
+   {
+    "instance_id": "growth_incubator_1",
+    "busy_fraction": 0.819,
+    "mean_queue_wait_s": 12163.7
+   },
+   {
+    "instance_id": "echo_1",
+    "busy_fraction": 0.085,
+    "mean_queue_wait_s": 10410.4
+   },
+   {
+    "instance_id": "fridge_1",
+    "busy_fraction": 0.0,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "shifter_1",
+    "busy_fraction": 0.127,
+    "mean_queue_wait_s": 11146.5
+   },
+   {
+    "instance_id": "ln2_dewar_1",
+    "busy_fraction": 0.043,
+    "mean_queue_wait_s": 371.4
+   },
+   {
+    "instance_id": "bench_protein",
+    "busy_fraction": 0.0,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "bench_handling",
+    "busy_fraction": 0.066,
+    "mean_queue_wait_s": 1696.8
+   },
+   {
+    "instance_id": "cx100_1",
+    "busy_fraction": 0.0,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "cx100_2",
+    "busy_fraction": 0.0,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "cx100_3",
+    "busy_fraction": 0.0,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "cx100_4",
+    "busy_fraction": 0.0,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "cx100_5",
+    "busy_fraction": 0.0,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "cx100_6",
+    "busy_fraction": 0.0,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "cx100_7",
+    "busy_fraction": 0.0,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "cx100_8",
+    "busy_fraction": 0.0,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "cx100_9",
+    "busy_fraction": 0.0,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "cx100_10",
+    "busy_fraction": 0.0,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "cx100_11",
+    "busy_fraction": 0.0,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "cx100_12",
+    "busy_fraction": 0.0,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "protein_scientist_1",
+    "busy_fraction": 0.081,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "crystallographer_1",
+    "busy_fraction": 0.975,
+    "mean_queue_wait_s": 0.0
+   }
+  ],
+  "bottlenecks": [
+   {
+    "kind": "operator_capacity",
+    "instances": [
+     "crystallographer_1"
+    ],
+    "severity": "high",
+    "message": "crystallographer_1 is busy 98% of their shift; it caps throughput near 282 crystals per day.",
+    "suggestion": "Add a second operator or stagger shifts."
+   },
+   {
+    "kind": "instrument_capacity",
+    "instances": [
+     "growth_incubator_1"
+    ],
+    "severity": "medium",
+    "message": "growth_incubator_1 is busy 82% of the time.",
+    "suggestion": "Add a parallel unit or move slow steps elsewhere."
+   },
+   {
+    "kind": "long_transfer",
+    "instances": [
+     "gel_1",
+     "nanodrop_1"
+    ],
+    "severity": "medium",
+    "message": "Labware travels 5.85 m from gel_1 to nanodrop_1."
+   },
+   {
+    "kind": "long_transfer",
+    "instances": [
+     "echo_1",
+     "growth_incubator_1"
+    ],
+    "severity": "medium",
+    "message": "Labware travels 6.7 m from echo_1 to growth_incubator_1."
+   },
+   {
+    "kind": "external_queue",
+    "instances": [],
+    "severity": "low",
+    "message": "External step 'Ship to synchrotron + beamtime queue' takes about 384 h of the 819 h cycle; the layout cannot shorten it.",
+    "suggestion": "Batch shipments and book access early; report turnaround as a range."
+   }
+  ],
+  "sensitivity": [
+   {
+    "parameter": "grow_2.duration_s",
+    "effect": -206.2
+   },
+   {
+    "parameter": "soak_incubate.duration_s",
+    "effect": -45.8
+   },
+   {
+    "parameter": "cryo_store.duration_s",
+    "effect": -45.8
+   },
+   {
+    "parameter": "purify_sec.duration_s",
+    "effect": -45.8
+   },
+   {
+    "parameter": "load_shipper.duration_s",
+    "effect": -45.8
+   },
+   {
+    "parameter": "purify_affinity.duration_s",
+    "effect": 0.0
+   }
+  ]
+ },
+ "claims": [
+  {
+   "id": "c1",
+   "statement": "Simulated P50 throughput of harvested-and-analysed crystals meets the 100 crystals/day placeholder target.",
+   "metric": "throughput.p50",
+   "comparator": ">=",
+   "predicted_value": 100,
+   "confidence": 0.85,
+   "status": "supported",
+   "verified_value": 320.8,
+   "verifier_note": "throughput.p50 = 320.8, recomputed by the verifier."
+  },
+  {
+   "id": "c2",
+   "statement": "The layout has zero violations.",
+   "metric": "layout.violations",
+   "comparator": "==",
+   "predicted_value": 0,
+   "confidence": 0.9,
+   "status": "supported",
+   "verified_value": 0.0,
+   "verifier_note": "layout.violations = 0, recomputed by the verifier."
+  },
+  {
+   "id": "c3",
+   "statement": "Mean end-to-end cycle time per plate-lot (expression to analysed data, incl. shipping and beamtime queue) is at most 35 days (3,024,000 s).",
+   "metric": "cycle_time_s",
+   "comparator": "<=",
+   "predicted_value": 3024000,
+   "confidence": 0.6,
+   "status": "supported",
+   "verified_value": 2981398.2,
+   "verifier_note": "cycle_time_s = 2.9814e+06, recomputed by the verifier."
+  }
+ ],
+ "follow_up_used": true,
+ "first_reply": "I need a few details before I build and simulate the design. These choices change the answer a lot, and I don't want to make them up.\n\n**Requirements:**\n1. **Budget (USD):** What is the equipment budget? If you don't have one yet, you can tell me to make a provisional design and I'll flag cost as unchecked.\n2. **Operating hours and staff:** How many hours a day does the lab run, and on how many days a week? How many operators are there, and how long are their shifts? Crystal harvesting has to be done by a person for its whole duration, even with a Shifter, so harvesting will probably limit the campaign.\n3. **Crystals per fragment:** Is it 1 soaked crystal per fragment (500 crystals, about 32 pucks of 16 pins), or do you want replicates or extra crystals as a buffer for failures?\n4. **Deadline or target rate:** Do you have a target, such as \"finish within N weeks\" or \"harvest X crystals per day\"? Otherwise I'll report the campaign time the model predicts and its bottleneck.\n5. **Hazards and room layout:**\n   - Can I confirm the hazards are cryogens (LN2 dewars and the dry shipper)? Will the protein expression be BSL-1?\n   - How big is the cold room, and where in the 9 \u00d7 7 m room is it?\n   - Where are the doors, and is there anything I should keep clear?\n\n**Assumptions I'll make unless you tell me otherwise:**\n- **Protein and crystallisation:** I'll treat protein yield per expression lot, crystals per plate and the crystal success rate as placeholders with stated ranges. Please share any values you have.\n- **Crystal growth:** It's unclear how long crystals need to grow before soaking. I'll use a placeholder range unless you know your system.\n- **Imaging:** I'll use one Rock Imager camera, taking a few minutes per plate on a fixed schedule. Growth time is counted in storage, not as imaging time.\n- **Synchrotron:** Diffraction stays external, with no in-house X-ray. I need your assumptions for shipping time and beamtime queue, or I'll use placeholders. Also, will you send everything in one shipment or in several batches?\n\nOnce you reply, I'll check the catalog, look up the Wright mounting-rate comparison for harvesting speed, and run the Monte Carlo simulation. I'll then report the predicted campaign time with its uncertainty, what limits it, and a cost check.",
+ "completed": true,
+ "stop_reason": "end_turn"
+}

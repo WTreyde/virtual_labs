@@ -25,6 +25,21 @@ FALLBACK_CAPABILITY_HAZARDS = {
     "biohazard": ["cell_culture", "bioreactor", "cell_lysis", "colony_picking", "centrifugation"],
 }
 INHERENT = {"cryo_cooling": "cryogens"}  # hazards a capability always brings, whatever the spec says
+# Catalog hazards that depend on what is being handled: a liquid handler is only a biohazard in a lab that
+# handles biohazards. Others (cryogens, high-g, lasers) belong to the equipment and always apply.
+USAGE_HAZARDS = {"biohazard", "toxic_reagents", "flammable_solvents"}
+# Equipment that is itself the containment does not need to sit inside one. The catalog's
+# safety.provides_zone says what an item provides; this capability map is only a fallback.
+PROVIDES = {"ventilated_enclosure": {"fume_hood", "ventilated"}}
+# A sealed inert enclosure (glovebox) contains toxic or flammable work at least as well as a fume hood.
+CONTAINS = {"inert": {"fume_hood", "ventilated"}}
+
+
+def provided_zones(item: dict) -> tuple[set[str], set[str]]:
+    """(zones the item provides, zones its contents are contained as if in) for its own work."""
+    stated = (item.get("safety") or {}).get("provides_zone")
+    direct = set(stated) if stated is not None else set().union(*[PROVIDES.get(c, set()) for c in item.get("capabilities", [])])
+    return direct, direct.union(*[CONTAINS.get(z, set()) for z in direct])
 
 
 def load_rules() -> dict:
@@ -58,10 +73,11 @@ def zone_needs(spec: dict, workflow: dict, items: dict[str, dict], rules: dict) 
         if (item.get("transport") or {}).get("kind"):
             continue
         safety = item.get("safety") or {}
+        direct, contained = provided_zones(item)
         out = []
-        if safety.get("requires_zone"):
+        if safety.get("requires_zone") and not set(safety["requires_zone"]) & direct:
             out.append((set(safety["requires_zone"]), f"catalog: {item['id']} requires {'/'.join(safety['requires_zone'])}"))
-        hazards = {h: "catalog" for h in safety.get("hazards", [])}
+        hazards = {h: "catalog" for h in safety.get("hazards", []) if h not in USAGE_HAZARDS or h in spec_hazards}
         for cap in used.get(inst, ()):
             if cap in INHERENT:
                 hazards.setdefault(INHERENT[cap], f"inferred: {cap} uses {INHERENT[cap].replace('_', ' ')}")
@@ -71,6 +87,7 @@ def zone_needs(spec: dict, workflow: dict, items: dict[str, dict], rules: dict) 
         for hz, why in hazards.items():
             if hz in req:
                 out.append((set(req[hz]), why if why != "catalog" else f"catalog: {item['id']} has {hz.replace('_', ' ')}"))
+        out = [(ok, why) for ok, why in out if why.startswith("catalog: " + item["id"] + " requires") or not ok & contained]
         if out:
             needs[inst] = out
     return needs
@@ -89,6 +106,16 @@ def door_box(door: dict, width: float, depth: float, size: float = 1.2) -> tuple
     return x - h, depth - size, x + h, depth
 
 
+def choose_kinds(sets: list[set[str]]) -> list[str]:
+    """Fewest zone kinds that meet every need (greedy hitting set); zones of different kinds may overlap."""
+    open_sets, kinds = [set(x) for x in sets], []
+    while open_sets:
+        kind = choose_kind(open_sets)
+        kinds.append(kind)
+        open_sets = [x for x in open_sets if kind not in x]
+    return kinds
+
+
 def choose_kind(sets: list[set[str]]) -> str:
     counts = {}
     for s in sets:
@@ -98,17 +125,18 @@ def choose_kind(sets: list[set[str]]) -> str:
     return max(first, key=lambda k: (counts[k], -first.index(k)))
 
 
-def derive_zones(placements: dict[str, dict], items: dict[str, dict], zone_kind: dict[str, str],
+def derive_zones(placements: dict[str, dict], items: dict[str, dict], zone_kinds: dict[str, list[str]],
                  width: float, depth: float, margin: float = 0.3) -> list[dict]:
     """One enclosure per hazard group: the members' footprints plus a margin, merged when they touch."""
     from labforge.layout.geometry import aabb
     boxes = {}
-    for inst, kind in zone_kind.items():
+    for inst, kinds in zone_kinds.items():
         if inst not in placements:
             continue
         x0, y0, x1, y1 = aabb(placements[inst], items[inst])
-        boxes.setdefault(kind, []).append([max(0.0, x0 - margin), max(0.0, y0 - margin),
-                                           min(width, x1 + margin), min(depth, y1 + margin)])
+        for kind in ([kinds] if isinstance(kinds, str) else kinds):
+            boxes.setdefault(kind, []).append([max(0.0, x0 - margin), max(0.0, y0 - margin),
+                                               min(width, x1 + margin), min(depth, y1 + margin)])
     zones = []
     for kind in sorted(boxes):
         merged = boxes[kind]

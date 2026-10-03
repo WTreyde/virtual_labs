@@ -1,0 +1,772 @@
+{
+ "task_id": "xchem_48h_hits",
+ "arm": "platform",
+ "message": "# Fragment hit list within 48 hours of soaking: provisional design\n\n**The 48-hour goal is not met in the model.** The design handles the assumed volume easily. But the simulated time from soaking to hit list is about 71\u201377 hours, and I couldn't find a supported equipment change that brings it under 48 hours. I checked the claim \"cycle time \u2264 48 h\" and it came back false, so I'm withdrawing it.\n\nYou couldn't answer my questions, so every number below that isn't cited is my own assumption.\n\n## Assumptions I made\n- **Volume:** 2 soaked 96-drop plates per day, one harvested crystal per drop, so 192 crystals per day.\n- **Scope:**\n  - The design covers fragment dispense \u2192 soak \u2192 harvest \u2192 load into pucks and the dry shipper \u2192 courier \u2192 synchrotron data collection \u2192 analysis.\n  - The earlier steps are out of scope and assumed to happen in an existing facility: protein expression, purification, setting up drops, growing crystals, and imaging plates to pick drops. I left out the Rock Imager for that reason.\n- **The 48-hour clock** starts at fragment dispense and stops when the hit list comes out. It includes shipping and the wait for beamtime.\n- **Synchrotron leg:** courier plus beamtime wait of 24 h (I allowed 12\u201348 h), assuming beamtime is pre-booked. Data collection takes about 3 minutes per crystal, or 48 minutes per 16-pin puck.\n- **Analysis:** 1 hour per puck (0.5\u20134 h).\n- **Soak time:** 2 hours (1\u20134 h).\n- **Room and staff:** a 7 \u00d7 5 m room with a door at (0, 2.5). Two crystallographers on 8-hour shifts. Liquid nitrogen is the only hazard.\n- **Budget:** unknown, so this is a provisional design.\n\n## Harvest rate (Wright et al. 2021, doi:10.1107/S2059798320014114)\n- **Shifter-assisted:** an operator mounting with the Shifter averages 35 s per crystal (103 per hour). For 96 crystals that's 3,360 s, about 56 minutes per plate. I used a range of 1,440 s (240 per hour, the top of the paper's range) to 6,912 s (50 per hour, my own allowance).\n- **Unassisted manual:** 8 crystals per hour, or about 12 hours per plate. This is why I chose the Shifter.\n- **Operator time:** harvesting is modelled as manual, so the operator is occupied for the whole step.\n- **Catalog value not used:** the catalog lists 2 hours per plate for the Shifter, but that figure is a placeholder.\n- **Pucks:** 96 crystals \u00f7 16 pins = 6 pucks per plate.\n\n## Equipment and layout\n| Item | Purpose | Est. USD |\n|---|---|---|\n| Echo 525 (`echo_1`) on a TMC vibration table | Dispenses fragments into the drops. It's the only catalog item that can do soaking. | 246,083 + 6,155 |\n| Bench `soak_bench_1` | Holds plates while they soak. No catalog incubator takes crystallisation plates, so I used a bench to represent the soak time. | 5,530 |\n| Crystal Shifter (`shifter_1`) | Operator harvests and plunge-freezes crystals into pucks | 13,400 (placeholder) |\n| Bench `handling_bench_1` | Operator loads filled pucks into the dry shipper (about 300 s per puck, my estimate) | 5,530 |\n| LN2 storage dewar | Holds pucks before shipping | 2,049 |\n| 4 \u00d7 CX100 dry shippers | Transit containers. Their 12.6-day cold hold time is not used as a step duration. | 4 \u00d7 1,398 |\n| **Total of listed catalog prices** | Excludes installation, building work and consumables | **284,339** |\n\n- **Layout:** the liquid-nitrogen zone (Shifter, dewar, shippers) and the vibration-free zone (Echo) are separated, with no layout violations. Operators carry plates; each move is about 1.4\u20133.5 m and under 20 s.\n- **Gas safety:** the liquid-nitrogen zone needs ventilation and oxygen monitoring. This design is not a safety certification.\n\n## Simulation results (model predictions, not measured)\n| | Result | 48-h goal |\n|---|---|---|\n| Throughput (median) | 576 crystals/day (10th\u201390th percentile: 541\u2013813) | Assumed 192/day target met (probability 1.0 in the model) |\n| Mean soak-to-hit-list time, planning simulation | 255,474 s (about 71 h) | Missed |\n| Mean soak-to-hit-list time, independent re-check | 277,954 s (about 77 h) | Missed |\n\nThe two time figures come from different runs, and neither one gets under 48 hours.\n\n**Why the time runs long:**\n- **Waiting outside the lab:** courier plus beamtime wait is about 24 hours by assumption. Changing the lab layout can't shorten it.\n- **Queues inside the lab:**\n  - Plates wait about 10,900 s on average for the soak bench.\n  - Pucks wait about 2,000 s for the loading bench.\n  - Both crystallographers are 69\u201371% busy on 8-hour shifts, so work stops overnight.\n- **How the simulator feeds plates:** it pushed in about 6 plates per day, not the 2 I assumed. Those queues are partly caused by that overload.\n\n**Change I tried:** I added a second soak bench. It made things worse: about 82 hours, because more plates went in and operators rose to 81\u201384% busy. I went back to the original design. No other equipment change fixes waiting that happens outside the lab or is set by operator shifts.\n\n## What could get you to 48 hours (not modelled or verified)\n1. **Shorten the synchrotron leg.** Book beamtime ahead, use same-day courier, and use unattended data collection. A 24-hour courier plus beamtime wait leaves only about 24 hours for everything else.\n2. **Feed plates in deliberately.** Start 2 plates at the beginning of a shift so they're harvested and loaded into pucks the same day. Use staggered or extended shifts so plates don't sit overnight.\n3. **Process the 6 pucks in parallel** at the synchrotron and in the analysis pipeline, so they don't queue one after another.\n\n## Limitations\n- Most durations are my own estimates. Only the harvest rate comes from a published source.\n- The other papers the search returned (laser tweezers, peak-flow meters and others) aren't relevant and I didn't cite them.\n- The 0.014 accuracy score from the claim check covers only three claims. It doesn't show the model is accurate in practice.\n\nIf you give me your real plates per day, synchrotron and courier times, room size, staffing and budget, I can rerun this.",
+ "lab_spec": {
+  "id": "xchem_soak_to_hits",
+  "name": "Fragment soak-to-hit-list lab (provisional)",
+  "domain": "biology",
+  "description": "Optimise the lab layout so we have a fragment hit list within 48 hours of soaking the crystals. PROVISIONAL: user supplied no throughput, room, budget, hours or staffing; all such values are agent assumptions.",
+  "throughput_target": {
+   "value": 192,
+   "unit": "crystals_per_day",
+   "operating_hours_per_day": 24
+  },
+  "room": {
+   "width_m": 7,
+   "depth_m": 5,
+   "height_m": 3,
+   "doors": [
+    {
+     "x": 0,
+     "y": 2.5
+    }
+   ]
+  },
+  "labware": [
+   "crystallization_plate_96",
+   "puck"
+  ],
+  "required_capabilities": [
+   "crystal_soaking",
+   "crystal_harvesting",
+   "cryo_cooling",
+   "manual_bench",
+   "cold_storage"
+  ],
+  "constraints": {
+   "hazards": [
+    "cryogens"
+   ],
+   "biosafety_level": 1
+  },
+  "operators": [
+   {
+    "role": "crystallographer",
+    "count": 2,
+    "shift_hours": 8,
+    "skills": [
+     "crystal_harvesting",
+     "cryo_cooling",
+     "manual_bench",
+     "crystal_soaking"
+    ]
+   }
+  ],
+  "notes": [
+   "ASSUMPTION: 2 soaked 96-drop plates/day, 1 crystal harvested per drop = 192 crystals/day.",
+   "ASSUMPTION: crystals already grown and selected upstream (expression, purification, drop setup, growth and Rock Imager inspection out of scope; existing facility).",
+   "ASSUMPTION: 48 h clock starts at fragment dispense and stops at hit-list output; includes shipping and synchrotron queue.",
+   "Cryogen zone requires ventilation and O2 monitoring; Echo requires vibration-isolated bench.",
+   "Budget unknown: provisional design only."
+  ],
+  "scenario": "fbdd_crystallography"
+ },
+ "workflow": {
+  "id": "xchem_soak_to_hits_wf_v1",
+  "lab_spec_id": "xchem_soak_to_hits",
+  "labware": "crystallization_plate_96",
+  "equipment": [
+   {
+    "instance_id": "echo_1",
+    "catalog_id": "beckman_echo_525",
+    "rationale": "Only catalog item with crystal_soaking; acoustic fragment transfer into crystallisation drops."
+   },
+   {
+    "instance_id": "vib_table_1",
+    "catalog_id": "tmc_vibration_table",
+    "rationale": "Provides vibration-free zone required by the Echo."
+   },
+   {
+    "instance_id": "soak_bench_1",
+    "catalog_id": "lab_bench",
+    "rationale": "Passive soak residence holding area (no catalog incubation item accepts crystallisation plates)."
+   },
+   {
+    "instance_id": "shifter_1",
+    "catalog_id": "olt_crystal_shifter",
+    "rationale": "Shifter-assisted manual harvesting and plunge into pucks."
+   },
+   {
+    "instance_id": "handling_bench_1",
+    "catalog_id": "lab_bench",
+    "rationale": "Operator bench for loading filled pucks into the charged dry shipper."
+   },
+   {
+    "instance_id": "ln2_dewar_1",
+    "catalog_id": "ln2_storage_dewar",
+    "rationale": "LN2 puck buffer storage before shipping."
+   },
+   {
+    "instance_id": "shipper_1",
+    "catalog_id": "taylor_wharton_cx100",
+    "rationale": "Dry shipper (transit container)."
+   },
+   {
+    "instance_id": "shipper_2",
+    "catalog_id": "taylor_wharton_cx100",
+    "rationale": "Dry shipper (transit container)."
+   },
+   {
+    "instance_id": "shipper_3",
+    "catalog_id": "taylor_wharton_cx100",
+    "rationale": "Dry shipper; rotation while others are in transit."
+   },
+   {
+    "instance_id": "shipper_4",
+    "catalog_id": "taylor_wharton_cx100",
+    "rationale": "Dry shipper; rotation while others are in transit."
+   }
+  ],
+  "steps": [
+   {
+    "id": "soak_dispense",
+    "name": "Acoustic fragment dispense into drops",
+    "capability": "crystal_soaking",
+    "candidate_instances": [
+     "echo_1"
+    ],
+    "duration_s": 900,
+    "after": [],
+    "mode": "automated",
+    "params": {
+     "flow_unit": "crystallization plate (96 drops)",
+     "duration_per": "plate",
+     "duration_basis": "Catalog estimate for Echo 525 crystal_soaking (agent_estimate in catalog), 300-2400 s."
+    },
+    "duration_uncertainty": {
+     "value": 900,
+     "low": 300,
+     "high": 2400,
+     "confidence": "estimated",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "soak_residence",
+    "name": "Soak residence (passive)",
+    "capability": "manual_bench",
+    "candidate_instances": [
+     "soak_bench_1"
+    ],
+    "duration_s": 7200,
+    "after": [
+     "soak_dispense"
+    ],
+    "mode": "automated",
+    "params": {
+     "flow_unit": "crystallization plate",
+     "duration_per": "plate",
+     "residence_not_handling": true,
+     "duration_basis": "Assumed 2 h soak residence, range 1-4 h; target-dependent, no source retrieved."
+    },
+    "duration_uncertainty": {
+     "value": 7200,
+     "low": 3600,
+     "high": 14400,
+     "confidence": "placeholder",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "harvest",
+    "name": "Shifter-assisted manual harvest and plunge into pucks",
+    "capability": "crystal_harvesting",
+    "candidate_instances": [
+     "shifter_1"
+    ],
+    "duration_s": 3360,
+    "after": [
+     "soak_residence"
+    ],
+    "mode": "manual",
+    "operator_role": "crystallographer",
+    "fan_out": 6,
+    "params": {
+     "flow_unit_in": "crystallization plate",
+     "flow_unit_out": "16-pin puck",
+     "crystals_per_plate": 96,
+     "pins_per_puck": 16,
+     "duration_per": "plate (96 crystals)",
+     "duration_basis": "Wright et al. 2021 Shifter mean 35 s/mount (103/h): 96 x 35 s = 3360 s per plate. Low 1440 s = 96 crystals at 240/h (upper abstract rate); high 6912 s = 50/h agent allowance. Unassisted manual baseline 8/h would be 43200 s (12 h) per plate. Catalog placeholder is 7200 s."
+    },
+    "duration_uncertainty": {
+     "value": 3360,
+     "low": 1440,
+     "high": 6912,
+     "confidence": "literature",
+     "source": "https://doi.org/10.1107/S2059798320014114"
+    },
+    "evidence": [
+     {
+      "claim": "Shifter mean 35 s per mount (103/h) from 8271 mounts; unassisted manual baseline 8 crystals/h incl. ancillary work.",
+      "source": "https://doi.org/10.1107/S2059798320014114",
+      "provider": "web"
+     }
+    ]
+   },
+   {
+    "id": "load_shipper",
+    "name": "Load filled puck into charged dry shipper",
+    "capability": "manual_bench",
+    "candidate_instances": [
+     "handling_bench_1"
+    ],
+    "duration_s": 300,
+    "after": [
+     "harvest"
+    ],
+    "mode": "manual",
+    "operator_role": "crystallographer",
+    "params": {
+     "flow_unit": "16-pin puck",
+     "duration_per": "puck",
+     "shipper_instances": [
+      "shipper_1",
+      "shipper_2",
+      "shipper_3",
+      "shipper_4"
+     ],
+     "duration_basis": "Operator handling per puck (catalog agent estimate for CX100 handling), 60-900 s. Not the shipper hold time."
+    },
+    "duration_uncertainty": {
+     "value": 300,
+     "low": 60,
+     "high": 900,
+     "confidence": "placeholder",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "ship_to_synchrotron",
+    "name": "Courier shipping and beamline queue",
+    "capability": "external_service",
+    "candidate_instances": [],
+    "duration_s": 1800,
+    "after": [
+     "load_shipper"
+    ],
+    "mode": "external",
+    "batch_size": 6,
+    "params": {
+     "flow_unit": "dry shipper consignment of 6 pucks (one plate)",
+     "duration_per": "batch of 6 pucks",
+     "queue_time_s": 86400,
+     "queue_time_range_s": [
+      43200,
+      172800
+     ],
+     "shipper_instances": [
+      "shipper_1",
+      "shipper_2",
+      "shipper_3",
+      "shipper_4"
+     ],
+     "duration_basis": "1800 s facility receipt/handling; queue_time_s = assumed 24 h courier + beamline queue (12-48 h). Requires pre-booked beamtime; no source retrieved."
+    },
+    "duration_uncertainty": {
+     "value": 1800,
+     "low": 600,
+     "high": 7200,
+     "confidence": "placeholder",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "diffraction",
+    "name": "Synchrotron data collection (external)",
+    "capability": "external_service",
+    "candidate_instances": [],
+    "duration_s": 2880,
+    "after": [
+     "ship_to_synchrotron"
+    ],
+    "mode": "external",
+    "params": {
+     "flow_unit": "16-pin puck",
+     "duration_per": "puck (16 crystals)",
+     "duration_basis": "Assumed ~3 min per crystal incl. robot mount/centring: 16 x 180 s; range 90-360 s/crystal. No source retrieved."
+    },
+    "duration_uncertainty": {
+     "value": 2880,
+     "low": 1440,
+     "high": 5760,
+     "confidence": "placeholder",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "hit_analysis",
+    "name": "Auto-processing and hit identification -> hit list",
+    "capability": "in_silico",
+    "candidate_instances": [],
+    "duration_s": 3600,
+    "after": [
+     "diffraction"
+    ],
+    "mode": "in_silico",
+    "params": {
+     "flow_unit": "16-pin puck",
+     "duration_per": "puck",
+     "count_throughput": true,
+     "units_per_labware": 16,
+     "duration_basis": "Assumed 1 h per puck of datasets for processing/event-map analysis, range 0.5-4 h. No source retrieved."
+    },
+    "duration_uncertainty": {
+     "value": 3600,
+     "low": 1800,
+     "high": 14400,
+     "confidence": "placeholder",
+     "source": "agent_estimate"
+    }
+   }
+  ]
+ },
+ "layout": {
+  "id": "xchem_soak_to_hits_wf_v1_layout",
+  "workflow_id": "xchem_soak_to_hits_wf_v1",
+  "room": {
+   "width_m": 7,
+   "depth_m": 5,
+   "height_m": 3
+  },
+  "placements": [
+   {
+    "instance_id": "echo_1",
+    "position": {
+     "x": 4.761,
+     "y": 1.9,
+     "z": 0.9
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "vib_table_1",
+    "position": {
+     "x": 4.909,
+     "y": 0.413,
+     "z": 0.0
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "soak_bench_1",
+    "position": {
+     "x": 4.793,
+     "y": 3.674,
+     "z": 0.0
+    },
+    "rotation_deg": 0.0
+   },
+   {
+    "instance_id": "shifter_1",
+    "position": {
+     "x": 2.318,
+     "y": 1.682,
+     "z": 0.9
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "handling_bench_1",
+    "position": {
+     "x": 2.356,
+     "y": 3.371,
+     "z": 0.0
+    },
+    "rotation_deg": 0.0
+   },
+   {
+    "instance_id": "ln2_dewar_1",
+    "position": {
+     "x": 1.38,
+     "y": 1.288,
+     "z": 0.0
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "shipper_1",
+    "position": {
+     "x": 1.865,
+     "y": 0.628,
+     "z": 0.9
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "shipper_2",
+    "position": {
+     "x": 2.215,
+     "y": 0.603,
+     "z": 0.9
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "shipper_3",
+    "position": {
+     "x": 2.052,
+     "y": 0.965,
+     "z": 0.9
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "shipper_4",
+    "position": {
+     "x": 2.386,
+     "y": 0.968,
+     "z": 0.9
+    },
+    "rotation_deg": 180.0
+   }
+  ],
+  "operators": [
+   {
+    "id": "crystallographer_1",
+    "role": "crystallographer",
+    "home": {
+     "x": 0,
+     "y": 2.5
+    }
+   },
+   {
+    "id": "crystallographer_2",
+    "role": "crystallographer",
+    "home": {
+     "x": 0,
+     "y": 2.5
+    }
+   }
+  ],
+  "transfers": [
+   {
+    "from_instance": "echo_1",
+    "to_instance": "soak_bench_1",
+    "transporter_instance": "crystallographer_1",
+    "distance_m": 1.43,
+    "path": [
+     {
+      "x": 4.761,
+      "y": 2.24,
+      "z": 1.25
+     },
+     {
+      "x": 4.761,
+      "y": 2.64,
+      "z": 1.0
+     },
+     {
+      "x": 4.793,
+      "y": 3.674,
+      "z": 1.0
+     },
+     {
+      "x": 4.793,
+      "y": 3.674,
+      "z": 0.9
+     }
+    ],
+    "est_time_s": 16.4
+   },
+   {
+    "from_instance": "soak_bench_1",
+    "to_instance": "shifter_1",
+    "transporter_instance": "crystallographer_1",
+    "distance_m": 3.54,
+    "path": [
+     {
+      "x": 4.793,
+      "y": 3.674,
+      "z": 0.9
+     },
+     {
+      "x": 4.793,
+      "y": 3.674,
+      "z": 1.0
+     },
+     {
+      "x": 4.45,
+      "y": 3.05,
+      "z": 1.0
+     },
+     {
+      "x": 4.15,
+      "y": 2.75,
+      "z": 1.0
+     },
+     {
+      "x": 3.15,
+      "y": 2.75,
+      "z": 1.0
+     },
+     {
+      "x": 3.05,
+      "y": 2.65,
+      "z": 1.0
+     },
+     {
+      "x": 2.95,
+      "y": 2.65,
+      "z": 1.0
+     },
+     {
+      "x": 2.85,
+      "y": 2.55,
+      "z": 1.0
+     },
+     {
+      "x": 2.75,
+      "y": 2.55,
+      "z": 1.0
+     },
+     {
+      "x": 2.65,
+      "y": 2.45,
+      "z": 1.0
+     },
+     {
+      "x": 2.55,
+      "y": 2.45,
+      "z": 1.0
+     },
+     {
+      "x": 2.45,
+      "y": 2.35,
+      "z": 1.0
+     },
+     {
+      "x": 2.318,
+      "y": 2.382,
+      "z": 1.0
+     },
+     {
+      "x": 2.318,
+      "y": 1.982,
+      "z": 1.1
+     }
+    ],
+    "est_time_s": 18.5
+   },
+   {
+    "from_instance": "shifter_1",
+    "to_instance": "handling_bench_1",
+    "transporter_instance": "crystallographer_1",
+    "distance_m": 1.39,
+    "path": [
+     {
+      "x": 2.318,
+      "y": 1.982,
+      "z": 1.1
+     },
+     {
+      "x": 2.318,
+      "y": 2.382,
+      "z": 1.0
+     },
+     {
+      "x": 2.356,
+      "y": 3.371,
+      "z": 1.0
+     },
+     {
+      "x": 2.356,
+      "y": 3.371,
+      "z": 0.9
+     }
+    ],
+    "est_time_s": 16.4
+   }
+  ],
+  "zones": [
+   {
+    "id": "cryogen_1",
+    "kind": "cryogen",
+    "min": {
+     "x": 0.841,
+     "y": 0.192
+    },
+    "max": {
+     "x": 2.918,
+     "y": 2.282
+    }
+   },
+   {
+    "id": "vibration_free_1",
+    "kind": "vibration_free",
+    "min": {
+     "x": 4.192,
+     "y": 1.258
+    },
+    "max": {
+     "x": 5.33,
+     "y": 2.541
+    }
+   }
+  ],
+  "score": {
+   "total_weighted_distance_m": 13.31,
+   "floor_area_used_m2": 4.08
+  },
+  "violations": []
+ },
+ "sim_result": {
+  "id": "xchem_soak_to_hits_wf_v1_layout_sim",
+  "layout_id": "xchem_soak_to_hits_wf_v1_layout",
+  "simulated_hours": 141.0,
+  "replicates": 10,
+  "throughput": {
+   "value": 576.0,
+   "unit": "crystals_per_day",
+   "target": 192,
+   "meets_target": true,
+   "p10": 540.8,
+   "p50": 576.0,
+   "p90": 812.8,
+   "prob_meets_target": 1.0
+  },
+  "cycle_time_s": 255474.4,
+  "utilisation": [
+   {
+    "instance_id": "echo_1",
+    "busy_fraction": 0.068,
+    "mean_queue_wait_s": 291.3
+   },
+   {
+    "instance_id": "vib_table_1",
+    "busy_fraction": 0.0,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "soak_bench_1",
+    "busy_fraction": 0.359,
+    "mean_queue_wait_s": 10922.5
+   },
+   {
+    "instance_id": "shifter_1",
+    "busy_fraction": 0.278,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "handling_bench_1",
+    "busy_fraction": 0.088,
+    "mean_queue_wait_s": 1974.7
+   },
+   {
+    "instance_id": "ln2_dewar_1",
+    "busy_fraction": 0.0,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "shipper_1",
+    "busy_fraction": 0.0,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "shipper_2",
+    "busy_fraction": 0.0,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "shipper_3",
+    "busy_fraction": 0.0,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "shipper_4",
+    "busy_fraction": 0.0,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "crystallographer_1",
+    "busy_fraction": 0.692,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "crystallographer_2",
+    "busy_fraction": 0.707,
+    "mean_queue_wait_s": 0.0
+   }
+  ],
+  "bottlenecks": [
+   {
+    "kind": "operator_capacity",
+    "instances": [
+     "crystallographer_2"
+    ],
+    "severity": "medium",
+    "message": "crystallographer_2 is busy 71% of their shift.",
+    "suggestion": "Add a second operator or stagger shifts."
+   },
+   {
+    "kind": "external_queue",
+    "instances": [],
+    "severity": "low",
+    "message": "External step 'Courier shipping and beamline queue' takes about 24 h of the 71 h cycle; the layout cannot shorten it.",
+    "suggestion": "Batch shipments and book access early; report turnaround as a range."
+   }
+  ],
+  "sensitivity": [
+   {
+    "parameter": "harvest.duration_s",
+    "effect": -432.0
+   },
+   {
+    "parameter": "soak_residence.duration_s",
+    "effect": -256.0
+   },
+   {
+    "parameter": "load_shipper.duration_s",
+    "effect": -96.0
+   },
+   {
+    "parameter": "soak_dispense.duration_s",
+    "effect": -32.0
+   },
+   {
+    "parameter": "operator_walking_time",
+    "effect": 0.0
+   }
+  ]
+ },
+ "claims": [
+  {
+   "id": "c_throughput",
+   "statement": "Simulated P50 throughput meets the assumed 192 crystals/day target.",
+   "metric": "throughput.p50",
+   "comparator": ">=",
+   "predicted_value": 192,
+   "confidence": 0.85,
+   "status": "supported",
+   "verified_value": 576.0,
+   "verifier_note": "throughput.p50 = 576, recomputed by the verifier."
+  },
+  {
+   "id": "c_layout",
+   "statement": "Layout has zero violations.",
+   "metric": "layout.violations",
+   "comparator": "==",
+   "predicted_value": 0,
+   "confidence": 0.9,
+   "status": "supported",
+   "verified_value": 0.0,
+   "verifier_note": "layout.violations = 0, recomputed by the verifier."
+  },
+  {
+   "id": "c_cycle_48h",
+   "statement": "Mean soak-to-hit-list cycle time is within 48 h (172800 s).",
+   "metric": "cycle_time_s",
+   "comparator": "<=",
+   "predicted_value": 172800,
+   "confidence": 0.1,
+   "status": "refuted",
+   "verified_value": 277953.8,
+   "verifier_note": "cycle_time_s = 277954, recomputed by the verifier."
+  }
+ ],
+ "follow_up_used": true,
+ "first_reply": "I need a few details before I design the lab or run a simulation. Without them I'd be making up the requirements.\n\n**What I need from you**\n\n1. **Throughput:** how many crystals do you soak per day, or per campaign? Or give fragments per day, or crystallisation plates per day, and say which unit you mean. Also, about how many crystals do you harvest from each soaked plate?\n2. **The 48-hour window:** does the clock stop when the hit list is out of analysis? Does it include shipping to the synchrotron and waiting for beamtime?\n   - Which synchrotron and shipping arrangement do you use, and what queue time should I assume?\n   - Do you already have beamtime booked?\n\n   Diffraction stays at the synchrotron (I won't add an in-house X-ray machine), so shipping and queue time may take up most of the 48 hours.\n3. **Room:** width and depth in metres, ceiling height, door positions, and any areas where equipment can't go.\n4. **Budget** in USD. If you don't have one yet, I can do a rough design if you say so.\n5. **Operating hours:** hours per day the lab runs, plus how many operators you have, their roles and shift lengths. Harvesting crystals is manual and needs an operator the whole time, even with a Shifter, so staffing will probably set the pace.\n6. **Hazards:** I'm assuming liquid nitrogen and other cryogens, which need ventilation and oxygen monitoring. Are there others, like a biosafety level for protein expression or toxic fragment solvents?\n7. **Scope:**\n   - Does the design cover only soaking to hit list (soak, harvest, cryo-cool, load pucks, ship, collect data, analyse)?\n   - Or should it also include the earlier steps: making the protein, setting up crystallisation plates and growing crystals?\n   - Do you already have equipment I should keep? If so, list it so I can optimise your current layout instead of starting from scratch.\n\n**What I'll do once I have this**\n\n- Search the catalog for equipment.\n- Find published crystal mounting rates for unassisted manual work and for Shifter-assisted work, and convert them using your crystals-per-run number.\n- Place the equipment in the room and run a simulation of the soak-to-hit-list time and throughput.\n- Find the slowest step and suggest one change if it helps, with up to two revisions.\n- Check the timing, budget and layout results, then write you a report.",
+ "completed": true,
+ "stop_reason": "end_turn"
+}
