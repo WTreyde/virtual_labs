@@ -59,32 +59,93 @@ def cost_category(item: dict) -> str | None:
     return "instruments"
 
 
-def price_range(item: dict, basis: str | None = None) -> tuple[float, float, float]:
-    """(low, value, high) price. `basis` "base" (bare unit at list price) or "configured" (typical working system
-    with modules, installation and first-year warranty) uses provenance["price_usd_estimate.<basis>"] when the
-    catalog has it, else the item's default price."""
-    p = item.get("price_usd_estimate", 0.0)
+# --- Evidence-aware price uncertainty -------------------------------------------------------------------------
+# Each price gap widens that item's lognormal spread (log units, combined in quadrature with the source's own
+# P10-P90 range), so confidence comes out of the predictive distribution rather than a hand-set score.
+# Extra spread by source confidence. Assumption (estimated): a list price still varies a little between buyers;
+# purchase records and derived figures more; placeholders a lot.
+SOURCE_SIGMA = {"datasheet": 0.05, "literature": 0.10, "estimated": 0.15, "placeholder": 0.35}
+# Drift of a product's price away from the lab-instrument PPI, per year between the price's source year and the
+# target year. Estimated from catalog price histories: Tecan Fluent 780 2021-2026 drifted ~0.015/yr from the PPI,
+# the OT-2 list price 2020-2025 ~0.18/yr (a repricing); 0.05/yr sits between. Unknown source year counts as 5 yr.
+YEAR_SIGMA_PER_YEAR = 0.05
+UNKNOWN_YEAR_GAP = 5
+# Using a priced model in place of the one actually bought (e.g. Tecan Fluent for a Freedom EVO). Estimated from
+# the spread within one product family in the catalog: Fluent 480 vs 780 differ by ln(316k/210k) ~ 0.41, ~0.32 as
+# a P10-P90 sigma.
+PROXY_MODEL_SIGMA = 0.32
+CONFIDENCE_TOLERANCE = 1.25  # "confidence" = chance the true cost is within x/÷ 1.25 of our P50
+EVIDENCE_WEIGHT = {"datasheet": 1.0, "literature": 0.9, "estimated": 0.7, "placeholder": 0.3}
+
+
+def basis_mismatch_sigma() -> float:
+    """Spread to add when the requested basis (base/configured) has no price and the default must stand in.
+    Learned from the catalog: half the RMS log ratio of configured to base price over items that have both."""
+    from labforge.catalog.store import load_catalog
+    logs = []
+    for item in load_catalog().values():
+        prov = item.get("provenance", {})
+        b, c = prov.get("price_usd_estimate.base"), prov.get("price_usd_estimate.configured")
+        if b and c and b["value"] > 0 and c["value"] > 0:
+            logs.append(math.log(c["value"] / b["value"]))
+    return math.sqrt(sum(x * x for x in logs) / len(logs)) / 2 if logs else 0.3
+
+
+def select_price(item: dict, basis: str | None = None, year: int | None = None) -> tuple[dict | None, bool]:
+    """The price entry to use and whether it matches the requested basis. Among entries for the basis (including
+    dated history such as price_usd_estimate.base.2020) the one whose source year is closest to `year` wins."""
     prov = item.get("provenance", {})
-    prov = (basis and prov.get(f"price_usd_estimate.{basis}")) or prov.get("price_usd_estimate")
-    if prov and "low" in prov and "high" in prov and prov["high"] > prov["low"]:
-        return prov["low"], prov.get("value", p), prov["high"]
-    # No range (or a single number such as one list price): use the confidence band, because real purchase
-    # prices still vary around a list price.
-    if prov:
-        p = prov.get("value", p)
-    lo, hi = PRICE_BAND[(prov or {}).get("confidence") or item.get("data_confidence", "estimated")]
-    return p * lo, p, p * hi
+    if basis:
+        cands = [e for k, e in prov.items() if k == f"price_usd_estimate.{basis}" or k.startswith(f"price_usd_estimate.{basis}.")]
+        if cands:
+            target = year or PRICE_INDEX_REFERENCE_YEAR
+            return min(cands, key=lambda e: (abs(e.get("year", target) - target), -e.get("year", 0))), True
+    entry = prov.get("price_usd_estimate")
+    if entry is None and item.get("price_usd_estimate") is not None:
+        entry = {"value": item["price_usd_estimate"], "confidence": item.get("data_confidence", "estimated")}
+    return entry, basis is None
 
 
-def draw_price(rng: random.Random, low: float, value: float, high: float) -> float:
-    """Lognormal draw with median `value` and spread set by low/high read as P10/P90."""
-    if value <= 0 or low <= 0 or high <= low:
-        return value
-    return value * math.exp(rng.gauss(0, math.log(high / low) / (2 * Z90)))
+def price_range(item: dict, basis: str | None = None, year: int | None = None) -> tuple[float, float, float]:
+    """(low, value, high) of the selected price entry, in its own source year's dollars."""
+    entry, _ = select_price(item, basis, year)
+    if entry is None:
+        return 0.0, 0.0, 0.0
+    v = entry["value"]
+    if entry.get("high", 0) > entry.get("low", 0):
+        return entry["low"], v, entry["high"]
+    lo, hi = PRICE_BAND[entry.get("confidence") or item.get("data_confidence", "estimated")]
+    return v * lo, v, v * hi
+
+
+def item_evidence(item: dict, basis: str | None, year: int | None, match: str = "exact") -> dict:
+    """Price, total spread and the evidence behind it for one item, adjusted to `year` (today's prices if None)."""
+    entry, basis_ok = select_price(item, basis, year)
+    if entry is None:
+        return {"catalog_id": item["id"], "priced": False}
+    lo, v, hi = price_range(item, basis, year)
+    target = year or PRICE_INDEX_REFERENCE_YEAR
+    src_year = entry.get("year")
+    gap = abs(target - src_year) if src_year else UNKNOWN_YEAR_GAP
+    conf = entry.get("confidence") or item.get("data_confidence", "estimated")
+    parts = {
+        "range": math.log(hi / lo) / (2 * Z90) if lo > 0 and hi > lo else 0.0,
+        "source": SOURCE_SIGMA.get(conf, 0.15),
+        "year_gap": YEAR_SIGMA_PER_YEAR * gap,
+        "basis_mismatch": 0.0 if basis_ok else basis_mismatch_sigma(),
+        "proxy_model": PROXY_MODEL_SIGMA if match == "proxy" else 0.0,
+    }
+    sigma = math.sqrt(sum(x * x for x in parts.values()))
+    factor = PRICE_INDEX[min(target, PRICE_INDEX_REFERENCE_YEAR)] / PRICE_INDEX[min(src_year or PRICE_INDEX_REFERENCE_YEAR, PRICE_INDEX_REFERENCE_YEAR)]
+    score = EVIDENCE_WEIGHT.get(conf, 0.7) * (1.0 if basis_ok else 0.6) * math.exp(-gap / 10) * (0.6 if match == "proxy" else 1.0)
+    return {"catalog_id": item["id"], "priced": True, "median_usd": round(v * factor), "sigma": round(sigma, 3),
+            "sigma_parts": {k: round(x, 3) for k, x in parts.items()}, "confidence": conf, "source": entry.get("source"),
+            "source_year": src_year, "target_year": target, "year_gap": gap, "basis_requested": basis,
+            "basis_matched": basis_ok, "model_match": match, "evidence_score": round(score, 2)}
 
 
 def year_factor(year: int | None) -> float:
-    """Multiplier that turns catalog (reference-year) prices into prices of `year`; 1.0 if unknown."""
+    """Multiplier that turns reference-year prices into prices of `year`; 1.0 if unknown."""
     if year is None or year not in PRICE_INDEX:
         return 1.0
     return PRICE_INDEX[year] / PRICE_INDEX[PRICE_INDEX_REFERENCE_YEAR]
@@ -92,23 +153,50 @@ def year_factor(year: int | None) -> float:
 
 def predicted_cost(workflow: dict, includes: list[str], samples: int = 2000, seed: int = 0,
                    build: str = "turnkey", year: int | None = None, basis: str | None = None) -> dict:
-    """P10/P50/P90 cost of the workflow's equipment in the given categories, in `year` dollars if given. `build`
-    picks the integration range ("turnkey" vendor workcell or "self_built" academic lab); it only matters if
-    integration_labour is included."""
+    """P10/P50/P90 cost of the workflow's equipment in the given categories, in `year` dollars (today's if None),
+    with a confidence block. Each item is drawn lognormally around its selected price adjusted from its own source
+    year; its spread grows with every evidence gap (see item_evidence). Workflow equipment may mark
+    "match": "proxy" when the catalog model stands in for the one actually used."""
     rng = random.Random(seed)
-    items = [get_item(e["catalog_id"]) for e in workflow["equipment"]]
-    items = [it for it in items if cost_category(it) in includes]
-    factor = year_factor(year)
+    entries = [(get_item(e["catalog_id"]), e.get("match", "exact")) for e in workflow["equipment"]]
+    entries = [(it, m) for it, m in entries if cost_category(it) in includes]
+    ev = [item_evidence(it, basis, year, m) for it, m in entries]
+    priced = [e for e in ev if e["priced"]]
+    draws = {i: [] for i in range(len(priced))}
     totals = []
     for _ in range(samples):
-        hw = factor * sum(draw_price(rng, *price_range(it, basis)) for it in items)
+        hw = 0.0
+        for i, e in enumerate(priced):
+            x = e["median_usd"] * math.exp(rng.gauss(0, e["sigma"]))
+            draws[i].append(x)
+            hw += x
         if "integration_labour" in includes:
             lo, mode, hi = INTEGRATION_FRACTION[build]
             hw *= 1 + rng.triangular(lo, hi, mode)
         totals.append(hw)
     q = statistics.quantiles(totals, n=10, method="inclusive")
-    return {"p10": round(q[0]), "p50": round(statistics.median(totals)), "p90": round(q[-1]), "n_items": len(items),
-            "price_year_factor": round(factor, 3)}
+    p50 = statistics.median(totals)
+    within = sum(p50 / CONFIDENCE_TOLERANCE <= t <= p50 * CONFIDENCE_TOLERANCE for t in totals) / samples
+    var = [statistics.pvariance(draws[i]) for i in draws]
+    value = sum(e["median_usd"] for e in priced) or 1
+    coverage = sum(e["median_usd"] * e["evidence_score"] for e in priced) / value
+    unpriced = [e["catalog_id"] for e in ev if not e["priced"]]
+    label = "low" if unpriced or within < 0.4 else "medium" if within < 0.7 else "high"
+    drivers = sorted(({"catalog_id": e["catalog_id"], "variance_share": round(v / sum(var), 2) if sum(var) else 0.0,
+                       "main_gap": max(e["sigma_parts"], key=e["sigma_parts"].get)} for e, v in zip(priced, var)),
+                     key=lambda d: -d["variance_share"])[:3]
+    return {"p10": round(q[0]), "p50": round(p50), "p90": round(q[-1]), "n_items": len(entries),
+            "price_year_factor": round(year_factor(year), 3),
+            "confidence": {"within_25pct": round(within, 2), "label": label, "data_coverage": round(coverage, 2),
+                           "unpriced_items": unpriced, "drivers": drivers},
+            "items": ev}
+
+
+def bom_estimate(workflow: dict, year: int | None = None, basis: str | None = "configured",
+                 includes: tuple[str, ...] = ("instruments", "robots", "analytics", "construction")) -> dict:
+    """Equipment cost of a designed lab with a confidence block, for the agent report, verifier and UI.
+    Defaults to configured prices (a lab buys working systems) in today's dollars; services are excluded."""
+    return predicted_cost(workflow, list(includes), year=year, basis=basis)
 
 
 def compare(reported_usd: float, predicted: dict) -> dict:

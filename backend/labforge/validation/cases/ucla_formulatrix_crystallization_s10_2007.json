@@ -29,17 +29,20 @@
       {
         "instance_id": "tecan_fluent_1",
         "catalog_id": "tecan_fluent",
-        "rationale": "Named in the source."
+        "rationale": "Proxy: the source's Tecan Freedom EVO 150 is not in the catalog; its successor family is priced.",
+        "match": "proxy"
       },
       {
         "instance_id": "sptlabtech_mosquito_xtal3_1",
         "catalog_id": "sptlabtech_mosquito_xtal3",
-        "rationale": "Named in the source."
+        "rationale": "Named in the source.",
+        "match": "exact"
       },
       {
         "instance_id": "formulatrix_rock_imager_1000_1",
         "catalog_id": "formulatrix_rock_imager_1000",
-        "rationale": "Named in the source."
+        "rationale": "Named in the source.",
+        "match": "exact"
       }
     ],
     "steps": [
