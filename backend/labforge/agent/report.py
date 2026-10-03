@@ -87,6 +87,11 @@ def render_report(lab_spec: dict, workflow: dict, layout: dict, sim: dict,
             lines.append(f'- {e["claim"]} — {e["source"]}')
     for lookup in evidence or []:
         lines.append(f'- Literature search `{lookup["query"]}`: {lookup["status"]}.')
+        for item in lookup.get('reviewed_items', []):
+            source = item['evidence']['source']
+            if source not in sources:
+                sources.add(source)
+                lines.append(f'- Reviewed public reference (not Amass): {item["title"]} — {source}')
         for item in lookup.get('items', []):
             source = item['evidence']['source']
             if source not in sources:

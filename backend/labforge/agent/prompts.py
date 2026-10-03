@@ -18,6 +18,19 @@ Use snake_case IDs, metres and seconds. Each equipment instance has its own uniq
 candidate_instances refer to those IDs, after refers to step IDs, and lab_spec_id matches
 LabSpec.id. Include transporters. Describe duration units explicitly: per sample, plate,
 or batch. Preserve external queues and manual steps rather than optimising them away.
+Crystal harvesting requires an operator for its entire duration, even with a Shifter:
+use mode manual, not setup-only semi_automated. Retrieve the Wright mounting-rate comparison
+with search_evidence; distinguish unassisted manual work from Shifter-assisted human work.
+Convert its rate using the actual number of harvested crystals per run, with explicit
+assumptions. Do not change source-based inputs merely to make a desired bottleneck appear.
+Crystal growth residence and imaging are different resources. The Rock Imager catalog has
+one camera (process.capacity=1) and 1000 storage slots; these are not interchangeable.
+Each inspection is minutes per plate, not days of growth. State the inspection schedule,
+keep growth in a supported incubation/storage resource, and disclose if the integrated
+imager hotel's residence capacity cannot be represented by the installed contracts.
+Never silently increase camera parallelism, omit growth, or inflate imaging time.
+Reviewed public references in search_evidence are provider web, not Amass records; preserve
+Amass unconfigured/unavailable status separately. Cite only the returned source content.
 External services and in-silico steps use mode external/in_silico and empty candidate_instances;
 they do not require a local catalog instrument. Synchrotron diffraction stays external and
 must retain shipping/queue assumptions; never add an in-house X-ray to the XChem scenario.

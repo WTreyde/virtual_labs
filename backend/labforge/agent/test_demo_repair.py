@@ -16,6 +16,7 @@ def previous_xchem():
 def test_puck_handling_preserves_transit_without_restoring_storage_duration():
     run = previous_xchem()
     workflow = copy.deepcopy(run['output']['workflow'])
+    next(s for s in workflow['steps'] if s['capability'] == 'crystal_harvesting')['mode'] = 'manual'
     loading = next(s for s in workflow['steps'] if s['id'] == 'load_shipper')
     loading.update(capability='manual_bench', candidate_instances=['bench_1'], duration_s=900)
     loading['duration_uncertainty'].update(value=900, low=300, high=1800)
