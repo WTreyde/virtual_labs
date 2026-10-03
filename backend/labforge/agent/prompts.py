@@ -27,6 +27,8 @@ Do not relabel plate counts as compounds/crystals. For external turnaround retai
 params.queue_time_s separately from processing duration; operator_role must match the
 LabSpec operators for manual and semi-automated steps. Do not treat the crystal imager
 capacity or protein yield as measured evidence when they are placeholders.
+For estimated durations use source exactly agent_estimate; put any explanation in
+params.duration_basis, not inside the source field.
 Numbers from sources must retain retrieved evidence. Never invent citations. Unsupported
 numbers are estimates or placeholders, with explicit assumptions and uncertainty ranges;
 uncertainty ranges are modelling assumptions, not empirically calibrated confidence.

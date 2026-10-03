@@ -101,6 +101,25 @@ class SessionTests(unittest.TestCase):
         self.assertIn('subtotal is incomplete', text)
         self.assertIn('Unknown', text)
 
+    def test_nonplate_flow_needs_explicit_counting_sink(self):
+        from labforge.agent.validation import validate_design
+        self.spec['throughput_target']['unit'] = 'compounds_per_day'
+        with self.assertRaisesRegex(ValueError, 'count_throughput'):
+            validate_design(self.spec, self.workflow)
+        self.workflow['steps'][-1]['params'] = {'count_throughput': True, 'units_per_labware': 96}
+        validate_design(self.spec, self.workflow)
+        self.workflow['steps'][-1]['params']['units_per_labware'] = 0
+        with self.assertRaisesRegex(ValueError, 'positive'):
+            validate_design(self.spec, self.workflow)
+
+    def test_unsupported_throughput_stays_unverifiable_and_report_explains_why(self):
+        self.result['simulation_limitations'] = ['Legacy simulator does not convert plate output units.']
+        self.design()
+        checked = self.session.verify([claim()])['claims'][0]
+        self.assertEqual(checked['status'], 'unverifiable')
+        self.assertNotIn('verified_value', checked)
+        self.assertIn('Simulator limitations', self.session.report()['report_markdown'])
+
     def test_fabricated_source_is_rejected(self):
         self.workflow['steps'][0]['evidence'] = [{'claim': 'Fast', 'source': 'invented-doi', 'provider': 'amass'}]
         with self.assertRaises(ValueError):

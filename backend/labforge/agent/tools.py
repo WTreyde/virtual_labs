@@ -5,6 +5,7 @@ Tool functions take and return plain JSON-able dicts that follow /schemas.
 """
 from labforge.catalog.store import search
 from labforge.agent.validation import validate_design
+from labforge.agent.errors import BackendContractError
 from labforge.contracts import validate
 from labforge.catalog.store import get as get_item
 import math
@@ -20,13 +21,24 @@ def _search_catalog(capability: str | None = None, labware: str | None = None, m
 def _layout_and_simulate(lab_spec: dict, workflow: dict) -> dict:
     validate_design(lab_spec, workflow)
     from labforge.layout.placer import generate_layout
-    from labforge.sim.simulate import simulate
+    from labforge.sim import simulate as engine
 
-    layout = generate_layout(lab_spec, workflow)
-    sim = simulate(lab_spec, workflow, layout, replicates=10)
-    validate(layout, "layout")
-    validate(sim, "sim_result")
-    return {"layout": layout, "sim_result": sim, "capacity_checks": capacity_checks(lab_spec, workflow)}
+    try:
+        layout = generate_layout(lab_spec, workflow)
+        sim = engine.simulate(lab_spec, workflow, layout, replicates=10)
+        validate(layout, "layout")
+        validate(sim, "sim_result")
+    except ValueError as exc:
+        if str(exc).startswith(('layout contract violated:', 'sim_result contract violated:')):
+            raise BackendContractError(str(exc)) from exc
+        raise
+    result = {"layout": layout, "sim_result": sim, "capacity_checks": capacity_checks(lab_spec, workflow)}
+    complex_flow = lab_spec['throughput_target']['unit'] != 'plates_per_day' or any(
+        s.get('batch_size', 1) != 1 or s.get('fan_out', 1) != 1 or
+        s.get('mode') in ('manual', 'semi_automated', 'external') for s in workflow['steps'])
+    if complex_flow and not hasattr(engine, 'warmup_hours'):
+        result['simulation_limitations'] = ['Installed legacy simulator does not implement output-unit conversion, batch/fan-out or operator shifts, and has no pipeline warm-up. Complex-flow throughput cannot be verified; use the Strand D simulator.']
+    return result
 
 
 def capacity_checks(spec: dict, workflow: dict) -> dict:

@@ -15,7 +15,7 @@ PIPELINE_STAGES = {
                   ('workup', {'filtration', 'solid_phase_extraction'}),
                   ('purification', {'solid_phase_extraction', 'hplc'}), ('evaporation', {'evaporation'}),
                   ('QC', {'lcms'}), ('screening', {'fluorescence_read'})],
-    'xchem': [('expression', {'cell_culture', 'bioreactor'}), ('harvest', {'centrifugation'}),
+    'xchem': [('expression', {'cell_culture', 'bioreactor', 'shaking'}), ('harvest', {'centrifugation'}),
               ('lysis', {'cell_lysis'}), ('purification', {'protein_purification'}),
               ('protein QC', {'protein_qc'}), ('concentration', {'concentration_measurement'}),
               ('drop setup', {'crystallization_setup'}), ('growth/imaging', {'crystal_imaging'}),
@@ -56,8 +56,14 @@ def check_scenario(name, output, coverage):
     missing_stages = [stage for stage, allowed in PIPELINE_STAGES[name] if not allowed & {s['capability'] for s in steps}]
     if name == 'chemistry':
         checks['two_reactions'] = sum(s['capability'] == 'reaction' for s in steps) >= 2
+    checks['validated_flow_units'] = False
     if checks['design_returned']:
-        validate_design(output['lab_spec'], workflow)
+        try:
+            validate_design(output['lab_spec'], workflow)
+            checks['validated_flow_units'] = True
+        except ValueError:
+            pass
+    checks['supported_simulator'] = not output.get('simulation_limitations')
     if name == 'xchem':
         checks['external_diffraction'] = any(s['mode'] == 'external' and (s['capability'] == 'xray_diffraction' or (s['capability'] == 'external_service' and any(word in s['name'].lower() for word in ('diffraction', 'synchrotron', 'beamline')))) for s in steps if s.get('mode'))
         checks['no_inhouse_xray'] = not any('xray_diffraction' in load_catalog()[e['catalog_id']]['capabilities'] for e in workflow.get('equipment', []))

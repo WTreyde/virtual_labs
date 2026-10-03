@@ -9,7 +9,8 @@ def cell(value):
 
 def render_report(lab_spec: dict, workflow: dict, layout: dict, sim: dict,
                   claims: list[dict] | None = None, evidence: list[dict] | None = None,
-                  claim_history: list[dict] | None = None) -> str:
+                  claim_history: list[dict] | None = None,
+                  simulation_limitations: list[str] | None = None) -> str:
     t = sim['throughput']
     median = t.get('p50', t['value'])
     target = lab_spec['throughput_target']['value']
@@ -44,6 +45,8 @@ def render_report(lab_spec: dict, workflow: dict, layout: dict, sim: dict,
         lines += [f'Equipment budget: USD {budget:,.0f}. Known-price subtotal: USD {total:,.0f}.', '']
         if total > budget:
             lines += ['The known-price subtotal exceeds the budget.', '']
+    if simulation_limitations:
+        lines += ['## Simulator limitations', '', *['- ' + note for note in simulation_limitations], '']
     lines += ['Costs are catalog estimates and exclude installation, service, consumables and building work.', '',
               '## Throughput', '', f'Median {median} {t["unit"]}; P10 {t.get("p10", "unavailable")}; P90 {t.get("p90", "unavailable")}.',
               f'Probability of meeting the simulated target: {t.get("prob_meets_target", "unavailable")}.',
