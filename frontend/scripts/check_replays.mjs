@@ -14,7 +14,10 @@ const browser = await chromium.launch({
 const page = await browser.newPage({ viewport: { width: 1600, height: 900 } });
 const errors = [];
 let apiCalls = 0;
-page.on("pageerror", (e) => errors.push(e.message));
+page.on("pageerror", (e) => errors.push(`page error: ${e.message}`));
+page.on("console", (m) => { if (m.type() === "error") errors.push(`console: ${m.text()}`); });
+page.on("requestfailed", (r) => errors.push(`request failed (${r.failure()?.errorText}): ${r.url()}`));
+page.on("response", (r) => { if (r.status() >= 400 && !r.url().endsWith("/favicon.ico")) errors.push(`HTTP ${r.status()}: ${r.url()}`); });
 page.on("request", (r) => { if (!r.url().startsWith(base)) apiCalls++; });
 
 const finalState = () => page.evaluate(() => ({
@@ -49,7 +52,7 @@ for (const name of names) {
   }
 }
 if (apiCalls) { failed = true; console.log(`FAIL ${apiCalls} backend request(s) during replay`); }
-if (errors.length) { failed = true; console.log("FAIL page errors:", errors); }
+if (errors.length) { failed = true; console.log("FAIL errors during replay:\n  " + [...new Set(errors)].join("\n  ")); }
 console.log(failed ? "Replay check FAILED" : "Replay check passed; final frames in /tmp/replay_<name>_final.png");
 await browser.close();
 process.exit(failed ? 1 : 0);
