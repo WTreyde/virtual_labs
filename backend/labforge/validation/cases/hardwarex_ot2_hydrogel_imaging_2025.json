@@ -42,5 +42,6 @@
     ]
   },
   "price_basis": "base",
-  "condition": "used"
+  "condition": "used",
+  "split": "in_sample"
 }

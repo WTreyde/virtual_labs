@@ -27,7 +27,24 @@
 
 **Is the confidence honest?** On the 6 like-for-like cases (the used OT-2 is excluded), we stated a 53% average chance of landing within ±25% and hit 33%: overconfident, mostly on list prices (real buyers pay below list). The Brier score is 0.152, better than 0.222 for always stating the observed hit rate, so the confidence does rank good and bad predictions. All of this is in-sample: the method was refined on these cases.
 
-**Slide 6 line:** "16 verified real labs; 7 costable. Our band caught 2 of 7, and we run about 1.8x high, mainly because our prices come from configured US federal purchases. Our confidence score ranks predictions correctly (Brier 0.15 vs 0.22 baseline) but is still overconfident, and we show it."
+### Out-of-sample test (the fair one)
+
+After the in-sample work above, the cost model was **frozen at commit 02d7678** and 6 new cases were collected blind (NIH S10 awards for a Biomek i7, two ÄKTA pure systems, a PHERAstar FSX, an NT8 and a Rock Imager 2; none cited anywhere in the catalog). Scored against the frozen model:
+
+| Case | Year | Reported | P10 / P50 / P90 | Multiple | In band |
+|---|---|---|---|---|---|
+| UMich PHERAstar FSX | 2026 | $155,178 | $116k / $192k / $328k | 1.24x | yes |
+| Thomas Jefferson NT8 (LCP) | 2019 | $93,950 | $48k / $72k / $110k | 0.77x | yes |
+| Temple ÄKTA pure L (proxy) | 2016 | $52,599 | $40k / $72k / $134k | 1.37x | yes |
+| Sanford Burnham Biomek i7 Hybrid | 2024 | $594,187 | $183k / $326k / $599k | 0.55x | yes |
+| Eastern Washington ÄKTA pure 25 | 2026 | $176,423 | $69k / $95k / $133k | 0.54x | no |
+| Baylor Rock Imager 2 (proxy) | 2021 | $136,284 | $222k / $436k / $889k | 3.20x | no |
+
+**Out-of-sample: 4 of 6 inside P10–P90; median multiple 1.00x (3 high, 3 low, so no systematic bias); 1 of 6 within ±25%.** The estimates generalise better than the in-sample numbers suggested: the ~1.8x in-sample bias came from those cases' quirks (old prices, a used robot, an unknown ambr model). **The confidence score does not generalise:** it stated a 45% average chance of landing within ±25% against 17% observed, and its Brier score (0.229) is worse than a constant baseline (0.139). Caveat: S10 award amounts can include service or accessories.
+
+After the test, a 2021 NIH Formulatrix "Rock Imager" purchase ($183,143, model unstated, placeholder confidence) was added to the catalog. It brings both Rock Imager cases inside the band (JHU 1.10x, Baylor 1.33x), but that is after the fact for both and does not count as out-of-sample. Current in-sample result with it: 3 of 7 in band, median 1.51x.
+
+**Slide 6 line:** "On 6 labs we had never seen, collected after freezing the model, our 80% cost band caught 4 of 6 with no systematic bias (median 1.00x). Our confidence score did not generalise, so we report the band, not the score."
 
 ## 2. Optimisation for vendors
 

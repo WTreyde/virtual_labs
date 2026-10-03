@@ -1,0 +1,47 @@
+{
+  "id": "baylor_rock_imager_2_s10_2021",
+  "name": "Baylor College of Medicine crystallography core: Formulatrix ROCK IMAGER 2 (NIH S10; 2021)",
+  "domain": "biology",
+  "sources": [
+    "https://api.reporter.nih.gov/v2/projects/search (project_num 1S10OD030246-01)"
+  ],
+  "build": "turnkey",
+  "brief": "A crystallography core replaces a 2008 imaging system with an automated crystallization-plate imager with a dual light path, capable of visible, ultraviolet and multi-fluorescence imaging of high-throughput screening plates.",
+  "reported": {
+    "cost": {
+      "value_usd": 136284,
+      "original": "US$136,284 (NIH S10 award, FY2021)",
+      "year": 2021,
+      "includes": [
+        "analytics"
+      ],
+      "excludes_note": "NIH S10 award for the imager alone; any institutional match is not stated."
+    }
+  },
+  "verified": true,
+  "notes": "Out-of-sample: found after the cost model was frozen at commit 02d7678 and scored blind against it (results in docs/validation.md). Later model or catalog changes do not count as out-of-sample for this case. price_basis=configured, from the wording \"ROCK IMAGER 2 with Dual Light Path and capable of both ultraviolet (UV) and multi-fluorescence imaging\" (options included). Verified 3 Oct 2026 via NIH RePORTER API (1S10OD030246-01, award_amount 136284; https://reporter.nih.gov/project-details/10176250). Quote: \"This application is requesting funds to purchase a Formulatrix ROCK IMAGER 2 with Dual Light Path and capable of both ultraviolet (UV) and multi-fluorescence imaging\". Proxy match: Rock Imager 2 vs catalog formulatrix_rock_imager_1000 (the 1000 is the larger-capacity model; the ROCK IMAGER 2 capacity is not stated in the abstract).",
+  "workflow": {
+    "id": "baylor_rock_imager_2_s10_2021_wf",
+    "lab_spec_id": "baylor_rock_imager_2_s10_2021",
+    "equipment": [
+      {
+        "instance_id": "formulatrix_rock_imager_1000_1",
+        "catalog_id": "formulatrix_rock_imager_1000",
+        "rationale": "Closest catalog model to the bought model (proxy).",
+        "match": "proxy"
+      }
+    ],
+    "steps": [
+      {
+        "id": "use",
+        "name": "Placeholder step (cost comparison only)",
+        "capability": "manual_bench",
+        "candidate_instances": [],
+        "duration_s": 0
+      }
+    ]
+  },
+  "price_basis": "configured",
+  "condition": "new",
+  "split": "out_of_sample"
+}

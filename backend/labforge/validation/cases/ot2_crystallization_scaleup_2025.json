@@ -43,5 +43,6 @@
       }
     ]
   },
-  "price_basis": "base"
+  "price_basis": "base",
+  "split": "in_sample"
 }

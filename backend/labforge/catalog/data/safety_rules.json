@@ -1,12 +1,174 @@
 {
-  "_comment": "Strand B owns this file; strand D's layout validator reads it. Distances in metres.",
+  "_comment": "Strand B owns this file; strand D's layout validator reads zone_requirements, capability_hazards, min_walkway_width_m, min_egress_width_m and human_robot_separation_m. Other keys are sourced rules for the validator to adopt. Distances in metres. Sources and confidence in _sources.",
   "zone_requirements": {
-    "flammable_solvents": ["fume_hood", "ventilated"],
-    "toxic_reagents": ["fume_hood"],
-    "cryogens": ["cryogen"],
-    "biohazard": ["bsl2"]
+    "flammable_solvents": [
+      "fume_hood",
+      "ventilated"
+    ],
+    "toxic_reagents": [
+      "fume_hood"
+    ],
+    "cryogens": [
+      "cryogen"
+    ],
+    "biohazard": [
+      "bsl2"
+    ]
+  },
+  "capability_hazards": {
+    "flammable_solvents": [
+      "reaction",
+      "heating_stirring",
+      "evaporation",
+      "liquid_dosing",
+      "powder_dosing",
+      "filtration",
+      "solid_phase_extraction",
+      "inert_atmosphere",
+      "ventilated_enclosure"
+    ],
+    "toxic_reagents": [
+      "reaction",
+      "powder_dosing",
+      "liquid_dosing"
+    ],
+    "cryogens": [
+      "cryo_cooling"
+    ],
+    "biohazard": [
+      "cell_culture",
+      "bioreactor",
+      "cell_lysis",
+      "colony_picking",
+      "centrifugation"
+    ]
   },
   "min_walkway_width_m": 1.0,
   "min_egress_width_m": 1.2,
-  "human_robot_separation_m": 0.5
+  "human_robot_separation_m": 0.5,
+  "recommended_aisle_width_m": 1.525,
+  "absolute_min_aisle_width_m": 0.92,
+  "code_min_exit_access_width_m": 0.711,
+  "min_door_clear_width_m": 0.813,
+  "fume_hood": {
+    "min_distance_from_door_m": 3.05,
+    "not_adjacent_to_single_exit_access": true,
+    "no_desks_in_front": true
+  },
+  "biosafety_cabinet": {
+    "rear_clearance_m": 0.15,
+    "side_clearance_m": 0.3,
+    "front_open_space_m": 1.02,
+    "from_opposing_bench_or_traffic_m": 1.52,
+    "from_door_behind_m": 1.52,
+    "from_door_swing_side_m": 1.02,
+    "from_door_hinge_side_m": 0.3,
+    "between_facing_cabinets_m": 3.05,
+    "top_clearance_m": 0.3,
+    "away_from": [
+      "fume_hood",
+      "air_supply_diffusers",
+      "centrifuges",
+      "vacuum_pumps",
+      "doors"
+    ]
+  },
+  "cryogen_area": {
+    "oxygen_alarm_below_percent": 19.5,
+    "requires": [
+      "ventilation",
+      "oxygen_depletion_monitor"
+    ],
+    "ln2_expansion_ratio": [
+      700,
+      900
+    ],
+    "no_confined_spaces": true
+  },
+  "hazard_clearance_m": {
+    "high_g": 0.3
+  },
+  "robot_arm_non_collaborative": {
+    "safeguarding": [
+      "fixed_barrier",
+      "interlocked_guard",
+      "presence_sensing_device"
+    ],
+    "reduced_speed_in_envelope_m_s": 0.25,
+    "separation_formula": "S = K*T + C (ISO 13855): K = 2.0 m/s (hand/arm) or 1.6 m/s if S > 0.5 m; C = 8*(d-14) mm for a light curtain of resolution d mm"
+  },
+  "flammable_liquids_nfpa45_gal": {
+    "_unit": "US gallons; per 100 ft2 / per lab unit; class B (moderate) labs, Class I liquids",
+    "in_use_per_100ft2": 5,
+    "in_use_per_lab": 300,
+    "in_use_and_storage_per_100ft2": 10,
+    "in_use_and_storage_per_lab": 480,
+    "storage": "listed safety cans or flammable storage cabinets",
+    "cabinet": "one per lab, remote from exits, not under fume hoods, not in corridors, not vented"
+  },
+  "_sources": {
+    "min_walkway_width_m": {
+      "value": 1.0,
+      "confidence": "estimated",
+      "note": "Kept between the NIH absolute minimum (0.92 m) and the recommended working aisle (1.525 m); changing it would change every layout's violations, so a validator owner decision.",
+      "source": "https://nibs-s3-wbdg3-production.s3.us-east-1.amazonaws.com/FFC/NIH/NIHDesignManual.pdf"
+    },
+    "recommended_aisle_width_m": {
+      "confidence": "datasheet",
+      "quote": "Laboratory module widths are normally determined by an appropriate aisle width of 1 525 mm plus bench or equipment space equal to 914 mm on each side of this aisle.",
+      "source": "https://nibs-s3-wbdg3-production.s3.us-east-1.amazonaws.com/FFC/NIH/NIHDesignManual.pdf (NIH DRM 2003, Fig B.5)"
+    },
+    "absolute_min_aisle_width_m": {
+      "confidence": "datasheet",
+      "quote": "A minimum 0.92 m clear aisle space shall be maintained around laboratory benches and furniture.",
+      "source": "https://nibs-s3-wbdg3-production.s3.us-east-1.amazonaws.com/FFC/NIH/NIHDesignManual.pdf (NIH DRM D.10.7)"
+    },
+    "min_egress_width_m": {
+      "value": 1.2,
+      "confidence": "estimated",
+      "note": "Stricter than codes: OSHA exit access >= 0.711 m, ADA walking surface 0.914 m, Stanford: 'A pathway clearance of 36 inches must be maintained at the face of access/exit doors.'",
+      "source": "https://www.ecfr.gov/current/title-29/subtitle-B/chapter-XVII/part-1910/subpart-E/section-1910.36"
+    },
+    "code_min_exit_access_width_m": {
+      "confidence": "datasheet",
+      "quote": "An exit access must be at least 28 inches (71.1 cm) wide at all points.",
+      "source": "https://www.ecfr.gov/current/title-29/subtitle-B/chapter-XVII/part-1910/subpart-E/section-1910.36"
+    },
+    "min_door_clear_width_m": {
+      "confidence": "literature",
+      "note": "IBC 1010.1.1 32 in (813 mm) minimum clear width, from a code summary; ADA 404.2.3 also 32 in.",
+      "source": "https://codes.iccsafe.org/s/IBC2021P1/chapter-10-means-of-egress/IBC2021P1-Ch10-Sec1010.1.1"
+    },
+    "fume_hood": {
+      "confidence": "literature",
+      "quote": "For new installations, laboratory hoods shall not be located adjacent to a single means of access to an exit or to high-traffic areas. (NFPA 45 6.9.2, via TSI LC-125); 3.05 m from doors is Stanford's recommendation ('more than 10 feet from any door or doorway').",
+      "source": "https://greenlabs.caltech.edu/documents/29173/LC-125_Lab-Guidelines-and-Standards_RevC_US.pdf ; https://ehs.stanford.edu/manual/laboratory-standard-design-guidelines"
+    },
+    "biosafety_cabinet": {
+      "confidence": "literature",
+      "note": "Distances from University of Michigan EHS table citing NIH BSC placement requirements; BMBL 6th ed.: place BSCs remote from entry and away from fume hoods, supply registers, centrifuges and vacuum pumps.",
+      "source": "https://ehs.umich.edu/wp-content/uploads/2018/05/PlacementBSC.pdf ; https://ors.od.nih.gov/sr/dohs/Documents/biosafety-in-microbiological-and-biomedical-laboratories.PDF"
+    },
+    "cryogen_area": {
+      "confidence": "literature",
+      "quote": "Oxygen deficiency monitor units must provide an oxygen readout and a local audible and visible alarm when the oxygen level falls below 19.5 percent.",
+      "source": "https://www-group.slac.stanford.edu/esh/eshmanual/references/cryogenicsReqODH.pdf"
+    },
+    "hazard_clearance_m.high_g": {
+      "confidence": "datasheet",
+      "quote": "Maintain a 30-cm (1-ft) clearance area around the centrifuge while it is running.",
+      "source": "https://www.chem.purdue.edu/chemsafety/docs/equip/Manual_BeckmanAvantiJ-E.pdf"
+    },
+    "human_robot_separation_m": {
+      "value": 0.5,
+      "confidence": "estimated",
+      "note": "No standard gives a fixed distance; ISO 13855 computes it from stopping time (see robot_arm_non_collaborative). OSHA requires guards or presence sensing around the envelope.",
+      "source": "https://www.osha.gov/otm/section-4-safety-hazards/chapter-4 ; https://www.pilz.com/en-US/support/law-standards-norms/iso-standards/efficiency-guards/en-iso-13855"
+    },
+    "flammable_liquids_nfpa45_gal": {
+      "confidence": "literature",
+      "note": "NFPA 45 table as republished by AIChE CEP (Jul 2017); check the current NFPA 45 edition before citing as code. Cabinet rules: NIH DRM D.10.8.",
+      "source": "https://www.aiche.org/sites/default/files/cep/20170754.pdf"
+    }
+  }
 }
