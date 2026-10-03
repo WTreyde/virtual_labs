@@ -8,6 +8,7 @@ Read first: `ARCHITECTURE.md`, `docs/pipelines.md`, your strand brief in `docs/s
 - Before every commit run `make check` (backend tests, example validation, frontend typecheck). Do not commit if it fails.
 - Commit small and often, and push at least every hour: `git pull --rebase origin main && make check && git push`.
 - Never force-push `main`. Never commit secrets; keys live in `.env` (gitignored).
+- Never push to `snapshot/*` branches. `snapshot/mvp-2026-10-03` is the frozen fallback demo; only the integrator touches it.
 - Mark unknown or guessed numbers honestly (`confidence: "estimated"` or `"placeholder"`); this project is judged on knowing what it does not know.
 
 ## Inbox (your next tasks)
