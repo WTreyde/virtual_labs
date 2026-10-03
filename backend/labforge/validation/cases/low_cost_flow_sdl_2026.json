@@ -1,0 +1,21 @@
+{
+  "id": "low_cost_flow_sdl_2026",
+  "name": "Low-cost 3D-printed self-driving lab for reaction optimisation (2026)",
+  "domain": "chemistry",
+  "sources": [
+    "https://www.chemistryworld.com/news/human-in-the-loop-approach-could-cut-costs-of-robotic-labs-by-90/4023311.article",
+    "https://www.nature.com/articles/s44160-026-01053-0"
+  ],
+  "brief": "A self-driving lab for optimising organic reaction conditions: pumps dose reagents into a reactor, a liquid sample collector takes aliquots, and an existing in-house analytical instrument (HPLC, NMR or Raman) measures yield in a closed loop. One fume hood, academic budget.",
+  "reported": {
+    "cost": {
+      "value_usd": 5000,
+      "original": "$5000, a 90% reduction on the team's earlier $50,000 version",
+      "year": 2026,
+      "includes": ["instruments", "robots"],
+      "excludes_note": "Analytical instruments are not included in the reported figure."
+    }
+  },
+  "verified": false,
+  "notes": "From a Chemistry World news summary. TODO(Max): confirm from the primary paper which platform this is (possibly RoboChem Flex), the exact cost breakdown, and throughput."
+}

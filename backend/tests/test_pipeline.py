@@ -47,3 +47,21 @@ def test_gateway_offline_chat():
     client = TestClient(app)
     out = client.post("/chat", json={"messages": [{"role": "user", "content": "hi"}]}).json()
     assert errors(out["layout"], "layout") == []
+
+
+def test_instrument_optimisation_finds_the_limit():
+    from labforge.sim.whatif import optimise_instrument
+    layout = generate_layout(SPEC, WORKFLOW)
+    lh = optimise_instrument(SPEC, WORKFLOW, layout, "lh_1", hours=24, replicates=3)
+    reader = optimise_instrument(SPEC, WORKFLOW, layout, "reader_1", hours=24, replicates=3)
+    assert lh["sweeps"][0]["elasticity"] > 0.5  # the liquid handler is the bottleneck
+    assert reader["sweeps"][0]["elasticity"] < 0.1  # a faster reader changes nothing
+
+
+def test_validation_cost_band():
+    from labforge.validation.cost import compare, predicted_cost
+    from labforge.validation.runner import load_cases, run_case
+    pred = predicted_cost(WORKFLOW, ["instruments", "robots", "analytics"])
+    assert pred["p10"] < pred["p50"] < pred["p90"]
+    assert compare(pred["p50"], pred)["within_p10_p90"]
+    assert all(run_case(c)["status"] in ("compared", "no_design_yet") for c in load_cases())

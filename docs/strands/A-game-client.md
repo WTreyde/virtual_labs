@@ -14,3 +14,7 @@ Already working: `make frontend` shows the example lab as shaded isometric boxes
 7. LabDesignBench leaderboard view: platform vs vanilla Claude per task.
 
 Not playable: no walking character needed (team decision). Do not edit backend files; ask Albert/Maxim for API changes.
+
+## Added after judge feedback (see docs/validation.md)
+8. Vendor view: clicking an instrument offers "How could this instrument be better?", calling `POST /optimise` with its `instance_id`; chart throughput vs cycle-time multiplier (P10–P90 band) and show `headroom_note` in the dialogue box.
+9. Validation view: scatter of predicted (P10–P90 bar) vs reported cost for each case from `GET /validation`, log scale, unverified cases greyed out.

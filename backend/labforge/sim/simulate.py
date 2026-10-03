@@ -40,10 +40,12 @@ def sample_duration(step: dict, rng: random.Random) -> float:
     return rng.triangular(low, high, v) if high > low else v
 
 
-def run_once(workflow: dict, layout: dict, hours: float, rng: random.Random, record: bool = False):
+def run_once(workflow: dict, layout: dict, hours: float, rng: random.Random, record: bool = False,
+             capacity_overrides: dict[str, int] | None = None):
     env = simpy.Environment()
     steps = topo_order(workflow["steps"])
     caps = {e["instance_id"]: get_item(e["catalog_id"]).get("process", {}).get("capacity", 1) for e in workflow["equipment"]}
+    caps.update(capacity_overrides or {})
     res = {i: simpy.Resource(env, capacity=c) for i, c in caps.items()}
     for op in layout.get("operators", []):
         res[op["id"]] = simpy.Resource(env, capacity=1)
@@ -105,11 +107,12 @@ def run_once(workflow: dict, layout: dict, hours: float, rng: random.Random, rec
     return len(finished), finished, util, waits, timeline
 
 
-def simulate(spec: dict, workflow: dict, layout: dict, hours: float = 72, replicates: int = 20, seed: int = 0) -> dict:
+def simulate(spec: dict, workflow: dict, layout: dict, hours: float = 72, replicates: int = 20, seed: int = 0,
+             capacity_overrides: dict[str, int] | None = None) -> dict:
     rng = random.Random(seed)
     per_day = spec["throughput_target"].get("operating_hours_per_day", 24)
     target = spec["throughput_target"]["value"]
-    runs = [run_once(workflow, layout, hours, rng, record=(k == 0)) for k in range(replicates)]
+    runs = [run_once(workflow, layout, hours, rng, record=(k == 0), capacity_overrides=capacity_overrides) for k in range(replicates)]
     tputs = sorted(r[0] / hours * per_day for r in runs)
     q = statistics.quantiles(tputs, n=10, method="inclusive") if len(tputs) > 1 else tputs * 9
     util = {i: statistics.mean(r[2][i] for r in runs) for i in runs[0][2]}
