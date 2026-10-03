@@ -6629,7 +6629,8 @@
     "category": "instrument",
     "capabilities": [
       "crystal_imaging",
-      "plate_storage"
+      "plate_storage",
+      "incubation"
     ],
     "footprint": {
       "width_m": 0.932,
@@ -6656,9 +6657,14 @@
       "capacity": 1,
       "durations_s": {
         "crystal_imaging": 180
+      },
+      "temperature_c": {
+        "min": 4,
+        "max": 25,
+        "variant": "compressor model 4-19 C; Peltier model ambient -5/+7 C (covers 20 C)"
       }
     },
-    "storage_slots": 1000,
+    "storage_slots": 970,
     "power_w": 750,
     "lead_time_weeks": 16,
     "integration": [
@@ -6731,11 +6737,13 @@
         "note": "Whole 96-well plate imaged in 3 min"
       },
       "storage_slots": {
-        "value": 1000,
-        "confidence": "datasheet",
-        "source": "https://americanlaboratorytrading.com/lab-equipment-products/formulatrix-inc-rock-imager-1000-14143/ ; up to 1000 SBS plates (250 option)",
+        "value": 970,
         "low": 250,
-        "high": 1000
+        "high": 1000,
+        "confidence": "datasheet",
+        "source": "https://formulatrix.com/protein-crystallization-systems/rock-imager-protein-images/ ; https://help.formulatrix.com/rock-imager/3.0/Content/Rock_Imager_Models/Rock_Imager-1000.htm",
+        "year": 2026,
+        "note": "Vendor table: RI1000 970 SBS / 1500 LCP plates; manual: 'up to 1000 SBS-footprint plates'; base configurations start at 250. Plates are incubated in the hotel and imaged 'on a user-defined schedule' (crystal growth happens inside). Quotes via page summaries, not verbatim."
       },
       "power_w": {
         "value": 750,
@@ -6776,6 +6784,15 @@
         "year": 2021,
         "source": "https://www.usaspending.gov/award/CONT_AWD_75N96021P00363_7529_-NONE-_-NONE-",
         "note": "configured price: NIH Sep 2021 purchase from Formulatrix LLC, 'FORMULATRIX - ROCK IMAGER LAB EQUIPMENT', $183,143. Model, optics and quantity not stated (could be a smaller Rock Imager), so placeholder confidence and its wide band apply. Added after the out-of-sample test; independent of the JHU and Baylor cases."
+      },
+      "process.temperature_c": {
+        "value": 20,
+        "low": 4,
+        "high": 25,
+        "confidence": "datasheet",
+        "source": "https://formulatrix.com/protein-crystallization-systems/rock-imager-protein-images/ ; https://help.formulatrix.com/rock-imager/3.0/Content/Rock_Imager_Models/Rock_Imager-1000.htm",
+        "year": 2026,
+        "note": "Compressor model 'regulates temperature from 4 C to 19 C' (ambient 16-30 C); Peltier model 5 C below to 7 C above room temperature (+/-0.5 C). So 20 C growth needs the Peltier model and 4 C the compressor model; one setpoint per unit. Stability figures conflict (0.1 vs 0.5 C)."
       }
     },
     "scraped_at": "2026-10-03T13:31:44+00:00",
