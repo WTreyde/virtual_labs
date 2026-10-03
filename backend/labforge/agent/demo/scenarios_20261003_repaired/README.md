@@ -43,3 +43,12 @@ ANTHROPIC_MODEL=claude-opus-5-5 PYTHONPATH=backend .venv/bin/python \
   -m labforge.agent.demo_scenarios --env-file /absolute/path/to/.env \
   --out /tmp/labforge-repaired --live
 ```
+
+## Pending verifier compatibility
+
+A temporary merge of Maxim’s pending `886e2b8` guard failed its own
+`test_storage_hold_time_is_not_restored_onto_a_loading_step`: the test looks for a
+`cold_storage` duration above one day, but catalog PR #19 moved that value to
+`process.hold_time_s`. It raises `StopIteration` before reaching the verifier.
+Maxim should use a historical catalog fixture or the separate hold-time field in that
+test. The merge was aborted; this PR’s merged-main `make check` passes.
