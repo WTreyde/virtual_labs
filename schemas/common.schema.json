@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "common.schema.json",
+  "title": "Shared definitions",
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+    "capability": {
+      "description": "What a piece of equipment can do. Workflow steps require one capability; catalog items provide one or more.",
+      "type": "string",
+      "enum": [
+        "liquid_handling", "reagent_dispensing", "plate_transport_arm", "plate_transport_mobile",
+        "plate_transport_rail", "plate_storage", "incubation", "shaking", "centrifugation",
+        "plate_sealing", "plate_peeling", "absorbance_read", "fluorescence_read", "luminescence_read",
+        "imaging", "thermocycling", "colony_picking", "powder_dosing", "liquid_dosing", "reaction",
+        "heating_stirring", "filtration", "evaporation", "hplc", "lcms", "nmr", "barcode_reading",
+        "delidding", "waste", "manual_bench"
+      ]
+    },
+    "labware": {
+      "type": "string",
+      "enum": ["sbs_96", "sbs_384", "sbs_1536", "deep_well_96", "tip_rack", "vial_rack", "petri_dish", "tube_rack", "reservoir", "other"]
+    },
+    "vec2": {
+      "type": "object",
+      "required": ["x", "y"],
+      "properties": { "x": { "type": "number" }, "y": { "type": "number" } },
+      "additionalProperties": false
+    },
+    "vec3": {
+      "type": "object",
+      "required": ["x", "y", "z"],
+      "properties": { "x": { "type": "number" }, "y": { "type": "number" }, "z": { "type": "number" } },
+      "additionalProperties": false
+    }
+  }
+}

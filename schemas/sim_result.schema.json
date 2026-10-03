@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sim_result.schema.json",
+  "title": "SimResult",
+  "description": "Output of a discrete-event run of the workflow on a layout.",
+  "type": "object",
+  "required": ["id", "layout_id", "simulated_hours", "throughput", "utilisation", "bottlenecks"],
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "layout_id": { "$ref": "common.schema.json#/$defs/id" },
+    "simulated_hours": { "type": "number" },
+    "throughput": {
+      "type": "object",
+      "required": ["value", "unit"],
+      "properties": {
+        "value": { "type": "number" },
+        "unit": { "type": "string" },
+        "target": { "type": "number" },
+        "meets_target": { "type": "boolean" }
+      }
+    },
+    "cycle_time_s": { "type": "number", "description": "Mean time from first step start to last step end for one labware unit." },
+    "utilisation": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["instance_id", "busy_fraction"],
+        "properties": {
+          "instance_id": { "$ref": "common.schema.json#/$defs/id" },
+          "busy_fraction": { "type": "number", "minimum": 0, "maximum": 1 },
+          "mean_queue_wait_s": { "type": "number" }
+        }
+      }
+    },
+    "bottlenecks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "message", "severity"],
+        "properties": {
+          "kind": { "type": "string", "enum": ["instrument_capacity", "transporter_capacity", "long_transfer", "storage_full"] },
+          "instances": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/id" } },
+          "severity": { "type": "string", "enum": ["low", "medium", "high"] },
+          "message": { "type": "string" },
+          "suggestion": { "type": "string" }
+        }
+      }
+    },
+    "timeline": {
+      "description": "Optional event log for animating the 3D view.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["t_s", "labware_id", "event"],
+        "properties": {
+          "t_s": { "type": "number" },
+          "labware_id": { "type": "string" },
+          "event": { "type": "string", "enum": ["step_start", "step_end", "transfer_start", "transfer_end", "queued"] },
+          "instance_id": { "type": "string" },
+          "step_id": { "type": "string" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "catalog_item.schema.json",
+  "title": "CatalogItem",
+  "description": "One commercially available instrument or robot, with the specs the layout engine and simulator need.",
+  "type": "object",
+  "required": ["id", "vendor", "model", "category", "capabilities", "footprint", "access_points"],
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "vendor": { "type": "string" },
+    "model": { "type": "string" },
+    "category": { "type": "string", "enum": ["instrument", "transporter", "storage", "furniture"] },
+    "capabilities": { "type": "array", "minItems": 1, "items": { "$ref": "common.schema.json#/$defs/capability" } },
+    "footprint": {
+      "type": "object",
+      "description": "Bounding box in metres. width along local x, depth along local y.",
+      "required": ["width_m", "depth_m", "height_m"],
+      "properties": {
+        "width_m": { "type": "number", "exclusiveMinimum": 0 },
+        "depth_m": { "type": "number", "exclusiveMinimum": 0 },
+        "height_m": { "type": "number", "exclusiveMinimum": 0 },
+        "clearance_m": { "type": "number", "minimum": 0, "default": 0.3, "description": "Free space needed around the unit for service and doors." },
+        "mount": { "type": "string", "enum": ["floor", "bench", "ceiling", "rail"], "default": "bench" }
+      }
+    },
+    "access_points": {
+      "description": "Where labware enters/leaves, in the item's local frame (origin at footprint centre, metres).",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "position"],
+        "properties": {
+          "id": { "type": "string" },
+          "position": { "$ref": "common.schema.json#/$defs/vec3" },
+          "labware": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/labware" } }
+        }
+      }
+    },
+    "process": {
+      "description": "For instruments: how long one unit of work takes and how many run in parallel.",
+      "type": "object",
+      "properties": {
+        "capacity": { "type": "integer", "minimum": 1, "default": 1, "description": "Labware units processed at once (e.g. incubator slots)." },
+        "durations_s": {
+          "type": "object",
+          "description": "Typical time per labware for each capability, keyed by capability.",
+          "additionalProperties": { "type": "number", "minimum": 0 }
+        },
+        "setup_s": { "type": "number", "minimum": 0, "default": 0 }
+      }
+    },
+    "transport": {
+      "description": "For transporters only.",
+      "type": "object",
+      "properties": {
+        "kind": { "type": "string", "enum": ["arm", "rail", "mobile", "human"] },
+        "reach_m": { "type": "number", "description": "Arm reach radius from its base, or null for mobile/human." },
+        "speed_m_s": { "type": "number", "exclusiveMinimum": 0 },
+        "pick_place_s": { "type": "number", "minimum": 0, "description": "Fixed overhead per transfer (grip + release)." },
+        "payload_kg": { "type": "number" }
+      }
+    },
+    "storage_slots": { "type": "integer", "minimum": 0 },
+    "power_w": { "type": "number" },
+    "price_usd_estimate": { "type": "number" },
+    "lead_time_weeks": { "type": "number" },
+    "integration": { "type": "array", "items": { "type": "string" }, "description": "Control interfaces, e.g. SiLA2, OPC-UA, vendor SDK." },
+    "visual": {
+      "type": "object",
+      "properties": { "color": { "type": "string" }, "model_url": { "type": "string", "description": "Optional GLB model for the 3D viewer." } }
+    },
+    "source_urls": { "type": "array", "items": { "type": "string" } },
+    "data_confidence": { "type": "string", "enum": ["datasheet", "estimated", "placeholder"], "default": "estimated" }
+  }
+}

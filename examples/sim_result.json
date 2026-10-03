@@ -1,0 +1,70 @@
+{
+  "id": "enzyme_screen_sim_v1",
+  "layout_id": "enzyme_screen_layout_v1",
+  "simulated_hours": 72,
+  "throughput": {
+    "value": 46.2,
+    "unit": "plates_per_day",
+    "target": 40,
+    "meets_target": true
+  },
+  "cycle_time_s": 5640,
+  "utilisation": [
+    {
+      "instance_id": "lh_1",
+      "busy_fraction": 0.96,
+      "mean_queue_wait_s": 410
+    },
+    {
+      "instance_id": "arm_1",
+      "busy_fraction": 0.08,
+      "mean_queue_wait_s": 3
+    },
+    {
+      "instance_id": "sealer_1",
+      "busy_fraction": 0.01,
+      "mean_queue_wait_s": 0
+    },
+    {
+      "instance_id": "incubator_1",
+      "busy_fraction": 0.04,
+      "mean_queue_wait_s": 0
+    },
+    {
+      "instance_id": "reader_1",
+      "busy_fraction": 0.05,
+      "mean_queue_wait_s": 0
+    },
+    {
+      "instance_id": "hotel_1",
+      "busy_fraction": 0.0,
+      "mean_queue_wait_s": 0
+    }
+  ],
+  "bottlenecks": [
+    {
+      "kind": "instrument_capacity",
+      "instances": [
+        "lh_1"
+      ],
+      "severity": "high",
+      "message": "Liquid handler is busy 96% of the time; it caps throughput at about 48 plates/day.",
+      "suggestion": "Add a second Opentrons Flex within the arm's reach to roughly double headroom."
+    }
+  ],
+  "timeline": [
+    {
+      "t_s": 0,
+      "labware_id": "plate_001",
+      "event": "transfer_start",
+      "instance_id": "arm_1"
+    },
+    {
+      "t_s": 14.4,
+      "labware_id": "plate_001",
+      "event": "step_start",
+      "instance_id": "lh_1",
+      "step_id": "dispense"
+    }
+  ]
+}

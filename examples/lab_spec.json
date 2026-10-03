@@ -1,0 +1,38 @@
+{
+  "id": "enzyme_screen",
+  "name": "Enzyme variant screening",
+  "domain": "biology",
+  "description": "Automated enzyme variant screening: 40 x 96-well plates per day, reagent dispensing, sealing, 37 C incubation for 1 h, absorbance readout.",
+  "throughput_target": {
+    "value": 40,
+    "unit": "plates_per_day",
+    "operating_hours_per_day": 24
+  },
+  "room": {
+    "width_m": 6,
+    "depth_m": 4,
+    "height_m": 3,
+    "doors": [
+      {
+        "x": 0,
+        "y": 2
+      }
+    ]
+  },
+  "labware": [
+    "sbs_96"
+  ],
+  "required_capabilities": [
+    "plate_storage",
+    "liquid_handling",
+    "plate_sealing",
+    "incubation",
+    "absorbance_read",
+    "plate_transport_arm"
+  ],
+  "constraints": {
+    "budget_usd": 400000,
+    "biosafety_level": 1,
+    "max_human_interventions_per_day": 2
+  }
+}

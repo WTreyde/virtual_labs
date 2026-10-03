@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "layout.schema.json",
+  "title": "Layout",
+  "description": "Where each equipment instance sits in the room and which transporter serves each transfer edge.",
+  "type": "object",
+  "required": ["id", "workflow_id", "room", "placements", "transfers"],
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "workflow_id": { "$ref": "common.schema.json#/$defs/id" },
+    "room": {
+      "type": "object",
+      "required": ["width_m", "depth_m"],
+      "properties": { "width_m": { "type": "number" }, "depth_m": { "type": "number" }, "height_m": { "type": "number" } }
+    },
+    "placements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["instance_id", "position", "rotation_deg"],
+        "properties": {
+          "instance_id": { "$ref": "common.schema.json#/$defs/id" },
+          "position": { "$ref": "common.schema.json#/$defs/vec3", "description": "Footprint centre in room frame; z is the base height (0 floor, ~0.9 bench)." },
+          "rotation_deg": { "type": "number", "description": "Rotation about the vertical axis, counter-clockwise." },
+          "locked": { "type": "boolean", "default": false, "description": "Set when the user pins it in the UI; the optimiser will not move it." }
+        }
+      }
+    },
+    "transfers": {
+      "description": "One entry per pair of equipment instances that exchange labware.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from_instance", "to_instance", "transporter_instance", "distance_m"],
+        "properties": {
+          "from_instance": { "$ref": "common.schema.json#/$defs/id" },
+          "to_instance": { "$ref": "common.schema.json#/$defs/id" },
+          "transporter_instance": { "$ref": "common.schema.json#/$defs/id" },
+          "distance_m": { "type": "number", "minimum": 0 },
+          "est_time_s": { "type": "number", "minimum": 0 },
+          "path": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/vec3" }, "description": "Polyline for the 3D viewer." }
+        }
+      }
+    },
+    "score": {
+      "type": "object",
+      "properties": {
+        "total_weighted_distance_m": { "type": "number" },
+        "floor_area_used_m2": { "type": "number" }
+      }
+    },
+    "violations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "message"],
+        "properties": {
+          "kind": { "type": "string", "enum": ["overlap", "out_of_room", "unreachable_transfer", "clearance", "keep_out"] },
+          "instances": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/id" } },
+          "message": { "type": "string" }
+        }
+      }
+    }
+  }
+}

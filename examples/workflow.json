@@ -1,0 +1,118 @@
+{
+  "id": "enzyme_screen_wf_v1",
+  "lab_spec_id": "enzyme_screen",
+  "labware": "sbs_96",
+  "equipment": [
+    {
+      "instance_id": "hotel_1",
+      "catalog_id": "generic_plate_hotel",
+      "rationale": "Input/output stack for empty and finished plates."
+    },
+    {
+      "instance_id": "lh_1",
+      "catalog_id": "opentrons_flex",
+      "rationale": "Low cost liquid handler with an open Python API."
+    },
+    {
+      "instance_id": "sealer_1",
+      "catalog_id": "agilent_plateloc",
+      "rationale": "Seals plates before incubation to stop evaporation."
+    },
+    {
+      "instance_id": "incubator_1",
+      "catalog_id": "liconic_stx44",
+      "rationale": "44 slots covers 1 h incubation at 40 plates/day."
+    },
+    {
+      "instance_id": "reader_1",
+      "catalog_id": "bmg_clariostar",
+      "rationale": "Absorbance readout; also covers fluorescence for later assays."
+    },
+    {
+      "instance_id": "arm_1",
+      "catalog_id": "ur5e",
+      "rationale": "Central arm moves plates between all stations."
+    }
+  ],
+  "steps": [
+    {
+      "id": "load",
+      "name": "Pick empty plate",
+      "capability": "plate_storage",
+      "candidate_instances": [
+        "hotel_1"
+      ],
+      "duration_s": 0,
+      "after": []
+    },
+    {
+      "id": "dispense",
+      "name": "Dispense enzyme and substrate",
+      "capability": "liquid_handling",
+      "candidate_instances": [
+        "lh_1"
+      ],
+      "duration_s": 1800,
+      "after": [
+        "load"
+      ],
+      "params": {
+        "volume_ul": 100
+      }
+    },
+    {
+      "id": "seal",
+      "name": "Heat seal",
+      "capability": "plate_sealing",
+      "candidate_instances": [
+        "sealer_1"
+      ],
+      "duration_s": 10,
+      "after": [
+        "dispense"
+      ]
+    },
+    {
+      "id": "incubate",
+      "name": "Incubate",
+      "capability": "incubation",
+      "candidate_instances": [
+        "incubator_1"
+      ],
+      "duration_s": 3600,
+      "after": [
+        "seal"
+      ],
+      "params": {
+        "temperature_c": 37
+      }
+    },
+    {
+      "id": "read",
+      "name": "Read absorbance",
+      "capability": "absorbance_read",
+      "candidate_instances": [
+        "reader_1"
+      ],
+      "duration_s": 90,
+      "after": [
+        "incubate"
+      ],
+      "params": {
+        "wavelength_nm": 405
+      }
+    },
+    {
+      "id": "unload",
+      "name": "Return finished plate",
+      "capability": "plate_storage",
+      "candidate_instances": [
+        "hotel_1"
+      ],
+      "duration_s": 0,
+      "after": [
+        "read"
+      ]
+    }
+  ]
+}
