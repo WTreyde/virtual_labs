@@ -1,6 +1,6 @@
 # Inbox: Roshan (Strand A: game client and report)
 
-Last updated: 2026-10-03 18:45 BST by the integrator. Main at `1fef7ae` (plus this inbox commit).
+Last updated: 2026-10-03 23:15 BST by the integrator. Main at `7a6bc3a` (plus this inbox commit).
 
 The integrator rewrites this file on every integration pass (every 30 min until the 09:00 freeze on 4 Oct).
 Work the open items top to bottom. Done items drop off once your merged work on main shows them done.
@@ -9,26 +9,44 @@ Don't edit this file; report progress in your PR description.
 ## Open items
 
 ```
-Your #39 items 1-2 are merged (panel and honesty). Thanks.
-User decision (3 Oct 18:33): on the XChem page, the fix is no longer "add a second hotel". The pitch says
-the twin caught the planner leaving the 1,000-slot Rock Imager at 4% busy while the 44-slot hotel is at
-85%, and that growing plates in the imager costs $0. The demo driver clicks the hotel, then the imager.
-1. Replaces old item 3. On #/case/fbdd:
-   - The imager's stat card must show its utilisation prominently (e.g. "Rock Imager: 4% busy,
-     1,000 plate slots") next to the hotel's 85%, read from the replay data, not hard-coded.
-   - "The fix" card: don't present the second hotel as the fix. Show the imager option. Once Albert's
-     imager what-if lands, show it from fbdd.summary.json key "imager_growth_whatif" (planned and
-     verified throughput). Until then show it as "not yet simulated", without numbers.
-2. Public demo mode: read GET /health `live_chat`. When it's false, the "Design your own" card and
-   #/design say "Live design is off in this public demo" instead of a chat box that errors.
-3. frontend/scripts/cache_offline.py fails with KeyError: output on *.summary.json. Skip those files.
-4. #/schedule: the x-axis title and the "urgent_retest deadline 8 h" label overlap.
-5. A "Download agent skill" button next to "Report for your boss" (SKILL.md and tools.json from
-   backend/labforge/orchestrator/samples/<case>/, copied into public/ for offline use).
-6. Bench tab (from Maxim's #38): show arm.model on each tile; when generated_at is missing, show
-   "Answers recorded before <run.answered_before>; scored <scored_at>"; tasks with run_failed show as
-   "not run". Add runs_failed?, model?, scored_at? and run? to the Leaderboard type.
-7. Validation tab (from Max's #42): show the band; label the confidence score "experimental" (it
-   doesn't yet beat a constant baseline). Show not_costable cases as such, not as $0.
-Run make check and npm run check:replays, then push and open a PR into main.
+Your #47 (items 1-3) is merged. The team tested the demo tonight; their P0s come first, then your
+remaining 18:45 items, then the P1s. All of frontend/ is yours, so most of the list is here.
+
+P0
+1. Live agent: switch the chat to POST /chat/stream (stream_turn, SSE) instead of POST /chat. Read
+   GET /health: when live_agent is false, show a clear banner with health.live_agent_note (e.g. "Live
+   agent off: no API key loaded ...") instead of silently showing the offline example. live_chat:false
+   (public Space) keeps your current "Live design is off" message.
+2. Validation tab: GET /validation now always returns 200 with one row per case (28), in seconds.
+   Rows can have status "no_design_yet" (with reason), "error" (with reason) or "not_costable". When
+   the fetch itself fails with an HTTP error, say "The backend returned an error (<status>)", not
+   "Needs the backend". Render the predicted-vs-reported scatter from the compared rows; agent-made
+   designs carry design_provenance (show "designed by the agent, cost withheld" on hover).
+3. Bench tab (#/bench):
+   - isTamper in views.ts: rename to "input check failed" and show the check's note. Say "tamper
+     attempt caught" only for a real override attempt (note mentions sim_config, catalog_overrides or
+     simulator_overrides) or changed catalog values. Nobody tampered in the current run.
+   - One plain-language line per task: what the brief asks and what trap it tests (task brief, trap,
+     expected_behaviour in backend/labforge/bench/tasks/*.json, plus the leaderboard description).
+   - Nicer table: readable chips, a legend for pass / fail / not checkable, sticky header.
+   - Leaderboard numbers now (Maxim #44, 21 tasks, one run): platform 74% vs vanilla 59%.
+Then your open 18:45 items: 4 schedule label overlap, 5 Download agent skill button, 6 bench model and
+dates, 7 validation band and "experimental" label.
+P1 (team feedback)
+4. Text-heavy areas: larger font, more line height, higher contrast.
+5. LabForge logo at the top in a bright, highly visible colour.
+6. Landing page: two buttons only, "Design your own lab" and "Case studies".
+7. Case pages: keep the case's problem statement on screen.
+8. Rename "Report for your boss" to "Report".
+9. Evidence list: show only items with a real link; drop "reviewed"/"unavailable"-only entries.
+10. Chemistry equipment panel: the close "x" on the left panel is too small; make it a big target.
+11. Agent log under the total box: collapsible per step and tool call, with timings (Albert is adding
+    structured events; agree the shape in your PRs).
+12. Time labels: "Day 3, 14:05:22" (day into the run plus HH:MM:SS).
+13. Schedule view: show human device names (catalog vendor and model, or the step name), not reader_1.
+14. BOM: render layout proposed_mitigations as a "Proposed: ..." row with the price marked estimated
+    (Maxim #44).
+P2
+15. Idle technicians: once Maxim adds a break area to the layout, animate idle walk/sit/coffee there.
+Run make check and npm run check:replays, then push and open a PR into main. Small PRs are fine.
 ```

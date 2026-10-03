@@ -144,11 +144,10 @@ def optimise(req: DesignRequest):
 VALIDATION_DESIGN_DIR = Path(__file__).resolve().parent / "validation" / "designs"
 
 
-def _stored_design(case_id: str) -> dict | None:
+def _stored_design(case_id: str) -> dict:
+    """{"workflow": ...} when a design was generated; a file without one records why (e.g. status no_design)."""
     path = VALIDATION_DESIGN_DIR / f"{case_id}.json"
-    if not path.is_file():
-        return None
-    return json.loads(path.read_text()).get("workflow")
+    return json.loads(path.read_text()) if path.is_file() else {}
 
 
 @app.get("/validation")
@@ -158,13 +157,17 @@ def validation():
     rows = []
     for case in load_cases():
         try:
-            workflow = case.get("workflow") or _stored_design(case["id"])
+            stored = {} if case.get("workflow") else _stored_design(case["id"])
+            workflow = case.get("workflow") or stored.get("workflow")
             if workflow is None:
                 rows.append({"id": case["id"], "name": case["name"], "verified": case["verified"],
                              "includes": case["reported"]["cost"]["includes"], "status": "no_design_yet",
-                             "reason": "No stored design yet; it is generated offline, not on page load."})
+                             "reason": stored.get("reason") or "No stored design yet; designs are generated offline, never on page load."})
                 continue
-            rows.append(run_case({**case, "workflow": workflow}))
+            row = run_case({**case, "workflow": workflow})
+            if stored.get("provenance"):
+                row["design_provenance"] = stored["provenance"]  # agent-made: model, date, commit, cost withheld
+            rows.append(row)
         except Exception as exc:  # one bad case must not blank the whole tab
             rows.append({"id": case.get("id"), "name": case.get("name"), "verified": case.get("verified"),
                          "status": "error", "reason": f"{type(exc).__name__}: {exc}"[:300]})
