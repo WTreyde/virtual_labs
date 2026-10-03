@@ -180,7 +180,8 @@
         "labware": [
           "sbs_96",
           "sbs_384",
-          "deep_well_96"
+          "deep_well_96",
+          "crystallization_plate_96"
         ]
       }
     ],
@@ -188,6 +189,12 @@
       "capacity": 44,
       "durations_s": {
         "incubation": 3600
+      },
+      "access_time_s": 15.3,
+      "temperature_c": {
+        "min": 4,
+        "max": 25,
+        "variant": "STX44-HC or STX44-DC2"
       }
     },
     "storage_slots": 44,
@@ -213,6 +220,42 @@
         "source": "https://www.labmakelaar.eu/shop/all/saleable/ovens-incubators-and-climate/incubator/incubators/liconic-instruments-stx44-hrsa-incubators-for-robotic-integration/",
         "note": "No new price found. Source is a USED STX44-HRSA at EUR 14,000 (~$16.4K, 2026) = lower bound. $40K new is extrapolated from the comparable Thermo Cytomat 2C (NIH 2020, $44,787); close to a placeholder.",
         "year": 2026
+      },
+      "process.capacity": {
+        "value": 44,
+        "low": 34,
+        "high": 44,
+        "confidence": "datasheet",
+        "source": "https://www.liconic.com/files_flyer/STX44_Flyer_2024.pdf",
+        "year": 2024,
+        "note": "Capacity table: 44 MTP at 17 mm plate height; 34 at 23 mm. Crystallisation plates (SWISSCI MRC/SD-2, about 14-15 mm) are not named by LiCONiC: ~44 is inferred from the 17 mm pitch and needs confirming with the vendor."
+      },
+      "storage_slots": {
+        "value": 44,
+        "low": 34,
+        "high": 44,
+        "confidence": "datasheet",
+        "source": "https://www.liconic.com/files_flyer/STX44_Flyer_2024.pdf",
+        "year": 2024,
+        "note": "Capacity table: 44 MTP at 17 mm plate height; 34 at 23 mm. Crystallisation plates (SWISSCI MRC/SD-2, about 14-15 mm) are not named by LiCONiC: ~44 is inferred from the 17 mm pitch and needs confirming with the vendor."
+      },
+      "process.access_time_s": {
+        "value": 15.3,
+        "low": 14.1,
+        "high": 16.4,
+        "confidence": "datasheet",
+        "source": "https://legacysite.liconic.com/old/products/automated-incubators/stx/print/print_stx44-sa.pdf",
+        "year": 2011,
+        "note": "'Mean Access Time: 15.3 sec.', 'Mean Load Time: 14.1 sec.', 'Mean UnLoad Time: 16.4 sec.' (2011 SA datasheet; the 2024 flyer gives no times). Robot access through the small robotic gate (top gate stand-alone, bottom gate bench-top)."
+      },
+      "process.temperature_c": {
+        "value": 20,
+        "low": 4,
+        "high": 25,
+        "confidence": "datasheet",
+        "source": "https://www.liconic.com/files_flyer/STX44_Flyer_2024.pdf",
+        "year": 2024,
+        "note": "Climate options: HC (humid cooler) and DC2 (dry storage) run 4-25 C, so 20 C crystal growth needs one of these; the IC incubator variant runs 33-50 C and cannot. HR/DR2/AR (4-50 C) also cover 20 C. 'The lower reachable operation temperature depends on the instrument's ambient temperature.' Stability +/-0.5 C (HC), +/-1 C (DC2) per the 2011 datasheet. LiCONiC recommends its STR44 (stationary cassettes, less vibration) for protein crystallisation; the STX44 has a moving carousel."
       }
     }
   },
@@ -7032,7 +7075,7 @@
       },
       "hold_time_s": 1088640
     },
-    "storage_slots": 3,
+    "storage_slots": 7,
     "integration": [
       "None (passive vessel)"
     ],
@@ -7091,12 +7134,13 @@
         "source": "agent_estimate"
       },
       "storage_slots": {
-        "value": 3,
-        "low": 1,
+        "value": 7,
+        "low": 7,
         "high": 7,
-        "confidence": "placeholder",
-        "source": "agent_estimate",
-        "note": "Pucks per shipment. The stock canister takes vials (85 x 1.2/2.0 mL); UniPucks need separate puck shipping canes, whose count per CX100 was not found."
+        "confidence": "estimated",
+        "year": 2026,
+        "source": "https://www.mitegen.com/product/shelved-puck-shipping-cane/ ; https://www.mitegen.com/product/cryo-express-dry-shipper-cx100/",
+        "note": "Pucks per shipment. MiTeGen shelved puck shipping cane (M-CP-111-065, for 'dryshippers, such as the CX100'): 'Seven pucks (Uni-pucks, ALS pucks or Cryo-EM) may be shipped or stored in this cane.' The CX100 has 'No. of Canisters: 1' and its stock canister does not take pucks, so one cane = 7 UniPucks (inferred; no page states '7 per CX100'). Diamond's loan puck sets are 7 UniPucks per shelved canister (search snippet)."
       },
       "price_usd_estimate": {
         "value": 1398,
