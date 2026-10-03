@@ -145,13 +145,24 @@ def test_worked_example_layout_still_validates_after_rederive():
     assert errors(rederive(spec, wf, load_example("layout")), "layout") == []
 
 
-def test_storage_hold_time_is_not_restored_onto_a_loading_step():
-    # A dry shipper's catalog cold_storage duration is its ~12-day hold time; loading pucks takes 2 minutes.
-    from labforge.catalog.store import load_catalog
+# A dry shipper that states its ~12-day hold time as a cold_storage duration. Self-contained, so the test
+# does not depend on how the real catalog records hold times.
+TEST_SHIPPER = {"id": "test_dry_shipper", "vendor": "test", "model": "dry shipper", "category": "storage",
+                "capabilities": ["cold_storage"],
+                "footprint": {"width_m": 0.5, "depth_m": 0.5, "height_m": 0.7, "clearance_m": 0.2, "mount": "floor"},
+                "access_points": [{"id": "lid", "position": {"x": 0, "y": -0.25, "z": 0.7}}],
+                "process": {"capacity": 1, "durations_s": {"cold_storage": 1036800}}, "data_confidence": "estimated"}
+
+
+def test_storage_hold_time_is_not_restored_onto_a_loading_step(monkeypatch):
+    # Loading pucks into the shipper takes 2 minutes; its catalog duration is how long it keeps them cold.
+    from labforge.catalog import store
     from labforge.verify.tamper import restore_protected
-    cat = load_catalog()
-    shipper = next(i for i, it in cat.items() if it["category"] == "storage"
-                   and (it.get("process") or {}).get("durations_s", {}).get("cold_storage", 0) > 86400)
+    cat = {**store.load_catalog(), TEST_SHIPPER["id"]: TEST_SHIPPER}
+    for module in ("labforge.catalog.store", "labforge.verify.tamper", "labforge.verify.verifier",
+                   "labforge.layout.placer", "labforge.sim.simulate"):  # every module that imports it by name
+        monkeypatch.setattr(f"{module}.load_catalog", lambda: cat)
+    shipper = TEST_SHIPPER["id"]
     wf = {"id": "ship_wf", "lab_spec_id": "ship", "labware": "puck",
           "equipment": [{"instance_id": "lh_1", "catalog_id": "opentrons_flex"}, {"instance_id": "shipper_1", "catalog_id": shipper}],
           "steps": [{"id": "prep", "name": "prep", "capability": "liquid_handling", "candidate_instances": ["lh_1"], "duration_s": 1800},
