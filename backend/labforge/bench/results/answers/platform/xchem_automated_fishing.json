@@ -1,25 +1,25 @@
 {
  "task_id": "xchem_automated_fishing",
  "arm": "platform",
- "message": "# 1,000 crystals a day with one operator: can't be done with the equipment in the catalog\n\nWith one operator, the simulated design harvests about **241 crystals a day** at the median. That is roughly a quarter of the 1,000 target. None of the simulated runs reached 1,000 crystals a day.\n\n**Why I didn't treat harvesting as fully automated:** the catalog has no automated harvester. The only harvesting device is the Oxford Lab Technologies Crystal Shifter. It moves the plate under the microscope, but a person still mounts each crystal by hand. So harvesting is a manual step that needs the operator the whole time. If I modelled it as automated, the design would look feasible when it isn't. A paper on a fully automated harvester, CrystalDirect, turned up in the literature search. It isn't in the catalog, and I didn't use its content as evidence. To model it, I'd need a catalog entry with its harvesting capability, time per plate or per crystal, size, price and how much the operator has to do.\n\n## Assumptions (no answers were available)\n- **Scope:** harvesting only. Soaked 96-well plates arrive ready from upstream. Filled pucks go into a dry shipper and are sent to an outside synchrotron. No in-house X-ray.\n- **Crystals per plate:** 96 (one per well). With 16-pin pucks that is 6 pucks per plate, and 1,000 crystals is about 10.4 plates a day.\n- **Hours:** one 8-hour shift, which is also the lab's working day. The operator also carries plates and pucks; there's no robot to move them.\n- **Mounting time per plate:** 3,360 s, from the Shifter-assisted mean of 35 s per mount \u00d7 96 crystals.\n  - Source: Wright et al. 2021, doi:10.1107/S2059798320014114, section 3.2.2. This is a reviewed public web reference, not an Amass record.\n  - The low end, 2,880 s, uses the paper's median of 30 s per mount.\n  - The high end, 5,040 s, is my own allowance for differences between operators and crystals.\n  - I didn't use the paper's unassisted manual rate of 8 crystals/hour, because the Shifter is installed. That rate would make things about 13 times worse.\n  - The mounting time leaves out plate changes and breaks, so it's optimistic.\n- **Loading pucks into the shipper:** 300 s per puck, with a range of 60\u2013900 s. This is a catalog placeholder, not measured. I didn't use the shipper's 12.6-day cold hold time as a step time.\n- **Shipping and synchrotron queue:** 2 days. That's my estimate; the real value is unknown and could be anywhere from 1 to 14 days.\n- **Room:** 5 m \u00d7 4 m, with no budget given, so the design is provisional. The hazard is liquid nitrogen, which needs ventilation and oxygen monitoring. Nothing here is a safety certification.\n\n## Equipment (provisional, about $22,400 in catalog estimates)\n- Crystal Shifter: about $13,400 (placeholder price)\n- LN2 storage dewar: about $2,000\n- Handling bench: about $5,500\n- CX100 dry shipper: about $1,400\n\nThese prices exclude installation, consumables and building work.\n\n## Results (model predictions, not measured)\n- **Throughput:** 241 crystals/day at the median (P10 207, P90 268). Chance of meeting the target: 0.\n- **Check by a separate verifier run:** median 213 crystals/day. That's a different model run, so the planning figure of 241 isn't independently confirmed. Both are far below 1,000.\n- **Layout:** no violations. The equipment takes up about 1.8 m\u00b2 of floor.\n- **Bottleneck:** the operator is busy 100% of the shift. The Shifter itself is busy only about 29% of the time. Harvesting is the step that most affects throughput, followed by loading pucks into the shipper.\n\n## Why I didn't revise the design\nEach design change I'm allowed to test is an equipment change, and none would help. The limit is one person's hands, not the equipment. A second Shifter would just sit idle. Even at the paper's fastest rates and with no breaks, mounting 1,000 crystals takes about 8.3\u20139.7 hours of one person's time. That's more than a full shift before handling any plates, pucks or dewars.\n\n## What could reach 1,000 a day (not modelled here)\n- **More operators:** about 4\u20135 Shifter operators at the simulated rate per person, or more shifts. This can't be done under your one-operator rule.\n- **A truly automated harvester:** it would first need to be added to the catalog with sourced times and prices.\n\nThe report I generated matches these figures. The bottleneck finding comes from a model with estimated inputs, not from a lab measurement.",
+ "message": "# Harvesting 1,000 crystals a day with one operator can't be done with the equipment available here\n\n## Why I couldn't model fully automated harvesting\nThe equipment catalog has no automated harvester. The only harvesting option is the Oxford Lab Technologies Crystal Shifter, a motorised microscope stage that holds the plate while a person mounts each crystal. A fully automated system, CrystalDirect, appears only as a paper in the literature search; it isn't in the catalog, so I didn't add it. I modelled harvesting as **manual with Shifter help, with the operator working throughout.**\n\n## Assumptions I made\n- **Target:** 1,000 *successful* crystals per day. Wright et al. (2021, doi:10.1107/S2059798320014114) report that 86% of mounts succeeded, so that's about 1,163 attempts a day. Failed mounts aren't counted.\n- **Mounting time:** 35 s per crystal, the paper's average; the catalog range is 15\u201336 s. This includes plunge-cooling into the puck (the sample holder), so there's no separate cooling step.\n- **Plates:** 32 attempts per soaked plate, filling two 16-crystal pucks. That gives 1,120 s of hands-on harvesting per plate and about 27.5 successful crystals per plate.\n- **Storing pucks:** moving the two pucks into the liquid-nitrogen dewar takes 240 s. This is a placeholder (catalog figure of 120 s per puck), with a range of 60\u20131,200 s.\n- **Operator and room:** one operator on an 8-hour shift, in a 4 \u00d7 3 m room with one door. The room size is my guess.\n- **Budget:** none given, so this design is provisional.\n- **Scope:** harvesting only. Upstream soaking and downstream shipping to the synchrotron aren't modelled.\n- **Hazard:** liquid nitrogen. The area needs ventilation and oxygen monitoring. This design isn't a safety certification.\n\n## Design\n| Item | Catalog ID | Est. USD |\n|---|---|---|\n| Crystal Shifter | olt_crystal_shifter | 13,400 (placeholder price) |\n| Work bench | lab_bench | 5,530 |\n| Liquid-nitrogen storage dewar | ln2_storage_dewar | 2,049 |\n| **Total** | | **\u2248 $20,979** (excludes installation, consumables, pucks and pins) |\n\nThe layout fits the room with no violations.\n\n## Simulation result\n- **Median: 183.5 successful crystals/day** (pessimistic case 148.3, optimistic case 270.0). The separate check recalculated the median as 185.\n- **Chance of reaching 1,000/day in the model: 0.**\n- **Bottleneck:** the operator, who is busy 100% of the shift. The Shifter is used only about 19% of the time.\n\nMy claim that the design meets 1,000/day was **refuted, and I withdraw it**. The checks did confirm that the median is at most 200 and that the layout has zero violations.\n\n## Why no version of this works\nThese are straight calculations from the paper's rates, not simulation results:\n- **Best case with the Shifter:** 103 attempts/hour \u00d7 8 h \u00d7 86% success \u2248 **709 crystals/day**. That assumes nonstop mounting with no plate changes, puck handling or breaks, and it still misses the target.\n- **Needed:** about 1,163 attempts \u00d7 35 s \u2248 **11.3 hours of continuous mounting** a day. That's beyond one 8-hour shift.\n- **Unassisted manual mounting:** 8 crystals/hour, from a six-person survey in the same paper, which included ancillary work. That gives about **64 per day**.\n\nThe simulation comes out well below the 709 best case. It also counts puck storage, walking and the shift itself, and its sensitivity analysis shows the puck-storage time (my placeholder) has a large effect.\n\nAdding Shifters or making them faster wouldn't help, because the person is the limit. That's why I didn't try any revisions.\n\n## What would be needed to reach 1,000/day\n1. **More operator time:** several operators each working a Shifter in parallel, or several shifts. This breaks your single-operator requirement, and I haven't simulated it.\n2. **A truly automated harvester** (for example, a system like CrystalDirect). The catalog would need to include its throughput, how much the operator has to do, success rate, size and price before I could model it.\n\nAll figures are model predictions based on literature rates and placeholders, not measured lab performance.",
  "lab_spec": {
   "id": "xchem_harvest_1op",
-  "name": "XChem crystal harvesting, single operator (provisional)",
+  "name": "Soaked-crystal harvesting, single operator (provisional)",
   "domain": "biology",
-  "description": "Harvest 1,000 soaked crystals per day with a single operator. User asked to assume harvesting is fully automated; no fully automated harvester exists in the catalog, so harvesting is modelled as manual Shifter-assisted mounting. Provisional design: room, budget, hours and crystals per plate are agent assumptions because no follow-up answers were available.",
+  "description": "Harvest 1,000 soaked crystals per day with a single operator. User asked to assume fully automated harvesting; no automated harvester exists in the catalog, so Shifter-assisted manual harvesting is modelled. Provisional: room, budget, hours not supplied.",
   "throughput_target": {
    "value": 1000,
    "unit": "crystals_per_day",
    "operating_hours_per_day": 8
   },
   "room": {
-   "width_m": 5,
-   "depth_m": 4,
+   "width_m": 4,
+   "depth_m": 3,
    "height_m": 3,
    "doors": [
     {
      "x": 0,
-     "y": 2
+     "y": 1.5
     }
    ]
   },
@@ -29,13 +29,10 @@
   ],
   "required_capabilities": [
    "crystal_harvesting",
-   "manual_bench",
-   "cold_storage",
-   "cryo_cooling"
+   "cryo_cooling",
+   "manual_bench"
   ],
   "constraints": {
-   "biosafety_level": 1,
-   "max_human_interventions_per_day": 1000,
    "hazards": [
     "cryogens"
    ]
@@ -48,184 +45,143 @@
     "skills": [
      "crystal_harvesting",
      "cryo_cooling",
-     "manual_bench",
-     "cold_storage"
+     "manual_bench"
     ]
    }
   ],
+  "scenario": "fbdd_crystallography",
   "notes": [
-   "ASSUMPTION: scope is harvesting only; soaked 96-well crystallisation plates arrive from upstream soaking (not modelled).",
-   "ASSUMPTION: 96 harvested crystals per plate (one per well); 16-pin pucks so 6 pucks per plate.",
-   "ASSUMPTION: one 8 h operator shift per day is also the lab operating window.",
-   "ASSUMPTION: room 5 m x 4 m, door at (0,2); no budget given, so BOM is provisional.",
-   "Hazard: LN2 cryogens; needs ventilation and O2 monitoring (not certified by this design).",
-   "Operator also acts as the transporter for plates and pucks; there is no robot transporter."
-  ],
-  "scenario": "fbdd_crystallography"
+   "ASSUMPTION: target = 1000 successful crystals/day; 86% mount success (Wright et al. 2021 via catalog provenance) => ~1163 attempts/day.",
+   "ASSUMPTION: 32 mount attempts per soaked plate; 2 x 16-pin pucks per plate.",
+   "ASSUMPTION: one operator, 8 h shift; room 4 x 3 m; budget unknown (provisional design).",
+   "Upstream soaking and downstream shipping/synchrotron out of scope.",
+   "Cryogen zone needs ventilation and O2 monitoring; no safety certification implied."
+  ]
  },
  "workflow": {
-  "id": "xchem_harvest_1op_wf_v1",
+  "id": "xchem_harvest_wf_v1",
   "lab_spec_id": "xchem_harvest_1op",
   "labware": "crystallization_plate_96",
   "equipment": [
    {
-    "instance_id": "shifter_1",
-    "catalog_id": "olt_crystal_shifter",
-    "rationale": "Only catalog crystal_harvesting device; motorised stage for operator-performed mounting (not autonomous)."
-   },
-   {
-    "instance_id": "ln2_dewar_1",
-    "catalog_id": "ln2_storage_dewar",
-    "rationale": "LN2 supply and buffer storage for filled pucks before shipping."
-   },
-   {
     "instance_id": "bench_1",
     "catalog_id": "lab_bench",
-    "rationale": "Handling bench for loading filled pucks onto canes into the dry shipper."
+    "rationale": "Bench supporting the Shifter and plate staging."
    },
    {
-    "instance_id": "dry_shipper_1",
-    "catalog_id": "taylor_wharton_cx100",
-    "rationale": "Storage/transit container for pucks shipped to the synchrotron."
+    "instance_id": "shifter_1",
+    "catalog_id": "olt_crystal_shifter",
+    "rationale": "Only crystal_harvesting item in catalog; operator-attended, 35 s per crystal."
+   },
+   {
+    "instance_id": "dewar_1",
+    "catalog_id": "ln2_storage_dewar",
+    "rationale": "LN2 storage for filled pucks."
    }
   ],
   "steps": [
    {
-    "id": "soaked_plate_in",
-    "name": "Soaked plate arrives from upstream soaking",
-    "capability": "external_service",
-    "candidate_instances": [],
-    "duration_s": 0,
-    "after": [],
-    "mode": "external",
-    "params": {
-     "flow_unit": "crystallization_plate_96 (soaked)",
-     "queue_time_s": 0,
-     "duration_basis": "Boundary of scope; upstream soaking assumed always ready so harvesting is the tested constraint."
-    }
-   },
-   {
     "id": "harvest",
-    "name": "Shifter-assisted manual crystal mounting and plunge into puck",
+    "name": "Shifter-assisted manual harvest + plunge-cool (32 mount attempts per plate)",
     "capability": "crystal_harvesting",
     "candidate_instances": [
      "shifter_1"
     ],
-    "duration_s": 3360,
-    "after": [
-     "soaked_plate_in"
-    ],
+    "duration_s": 1120,
+    "after": [],
     "mode": "manual",
     "operator_role": "crystal_harvester",
+    "params": {
+     "flow_unit": "soaked crystallization plate",
+     "units_per_run": 32,
+     "unit_basis": "crystal mount attempt",
+     "per_unit_duration_s": 35,
+     "duration_basis": "35 s per crystal (catalog, Wright et al. 2021 mean) x 32 attempts = 1120 s per plate; includes plunge-cooling into puck",
+     "expected_success_rate": 0.86,
+     "pucks_per_plate": 2
+    },
     "duration_uncertainty": {
-     "value": 3360,
-     "low": 2880,
-     "high": 5040,
+     "value": 1120,
+     "low": 480,
+     "high": 1152,
      "confidence": "literature",
      "source": "https://doi.org/10.1107/S2059798320014114"
     },
-    "params": {
-     "flow_unit": "crystallization_plate_96 in, harvested crystals out",
-     "duration_per": "one plate (batch_size 1)",
-     "crystals_harvested_per_plate": 96,
-     "duration_basis": "Wright et al. 2021 s3.2.2 Shifter mean 35 s/mount x 96 crystals = 3360 s per plate; low = median 30 s x 96 = 2880 s; high 5040 s (52.5 s/mount) is an agent modelling assumption for operator/crystal-system variability. Excludes plate changeover, breaks and ancillary tasks (optimistic). Unassisted manual rate (8/h) not used because a Shifter is installed."
-    }
+    "evidence": [
+     {
+      "claim": "Shifter mean 35 s per mount (103/h), range 100-240 crystals/h; 86% of mounts successful",
+      "source": "https://doi.org/10.1107/S2059798320014114",
+      "provider": "web"
+     }
+    ]
    },
    {
-    "id": "load_shipper",
-    "name": "Load filled puck onto cane into charged dry shipper",
-    "capability": "manual_bench",
+    "id": "store_pucks",
+    "name": "Transfer 2 filled pucks to LN2 storage dewar",
+    "capability": "cryo_cooling",
     "candidate_instances": [
-     "bench_1"
+     "dewar_1"
     ],
-    "duration_s": 300,
+    "duration_s": 240,
     "after": [
      "harvest"
     ],
     "mode": "manual",
     "operator_role": "crystal_harvester",
-    "fan_out": 6,
+    "params": {
+     "flow_unit": "2 x 16-pin pucks from one plate",
+     "units_per_run": 2,
+     "unit_basis": "puck",
+     "duration_basis": "catalog placeholder 120 s per puck x 2 pucks",
+     "count_throughput": true,
+     "units_per_labware": 27.52,
+     "count_basis": "32 attempts x 0.86 success = 27.52 successful crystals per plate; failed mounts not counted"
+    },
     "duration_uncertainty": {
-     "value": 300,
+     "value": 240,
      "low": 60,
-     "high": 900,
+     "high": 1200,
      "confidence": "placeholder",
      "source": "agent_estimate"
-    },
-    "params": {
-     "flow_unit": "puck (16 pins)",
-     "fan_out_basis": "96 crystals per plate / 16 pins per puck = 6 pucks per plate",
-     "duration_per": "one puck",
-     "dry_shipper_instance": "dry_shipper_1",
-     "duration_basis": "Catalog placeholder operator handling time per puck for CX100 (not hold time)."
-    }
-   },
-   {
-    "id": "ship_and_diffract",
-    "name": "Ship dry shipper to synchrotron; external diffraction",
-    "capability": "external_service",
-    "candidate_instances": [],
-    "duration_s": 3600,
-    "after": [
-     "load_shipper"
-    ],
-    "mode": "external",
-    "params": {
-     "flow_unit": "puck",
-     "dry_shipper_instance": "dry_shipper_1",
-     "queue_time_s": 172800,
-     "queue_basis": "agent_estimate: 2 days courier transit plus beamline queue; real value unknown (range 1-14 days). Shipper hold time 12.6 days working (catalog) exceeds this.",
-     "duration_basis": "agent_estimate placeholder for external handoff; synchrotron remains external, no in-house X-ray.",
-     "count_throughput": true,
-     "units_per_labware": 16
     }
    }
   ]
  },
  "layout": {
-  "id": "xchem_harvest_1op_wf_v1_layout",
-  "workflow_id": "xchem_harvest_1op_wf_v1",
+  "id": "xchem_harvest_wf_v1_layout",
+  "workflow_id": "xchem_harvest_wf_v1",
   "room": {
-   "width_m": 5,
-   "depth_m": 4,
+   "width_m": 4,
+   "depth_m": 3,
    "height_m": 3
   },
   "placements": [
    {
-    "instance_id": "shifter_1",
-    "position": {
-     "x": 2.546,
-     "y": 3.393,
-     "z": 0.9
-    },
-    "rotation_deg": 0.0
-   },
-   {
-    "instance_id": "ln2_dewar_1",
-    "position": {
-     "x": 1.701,
-     "y": 3.062,
-     "z": 0.0
-    },
-    "rotation_deg": 0.0
-   },
-   {
     "instance_id": "bench_1",
     "position": {
-     "x": 4.159,
-     "y": 3.095,
+     "x": 3.461,
+     "y": 2.091,
      "z": 0.0
     },
     "rotation_deg": 270.0
    },
    {
-    "instance_id": "dry_shipper_1",
+    "instance_id": "shifter_1",
     "position": {
-     "x": 1.828,
-     "y": 3.721,
+     "x": 1.674,
+     "y": 0.427,
      "z": 0.9
     },
-    "rotation_deg": 0.0
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "dewar_1",
+    "position": {
+     "x": 0.833,
+     "y": 0.523,
+     "z": 0.0
+    },
+    "rotation_deg": 180.0
    }
   ],
   "operators": [
@@ -234,64 +190,49 @@
     "role": "crystal_harvester",
     "home": {
      "x": 0,
-     "y": 2
+     "y": 1.5
     }
    }
   ],
   "transfers": [
    {
     "from_instance": "shifter_1",
-    "to_instance": "bench_1",
+    "to_instance": "dewar_1",
     "transporter_instance": "crystal_harvester_1",
-    "distance_m": 2.16,
+    "distance_m": 2.46,
     "path": [
      {
-      "x": 2.546,
-      "y": 3.093,
+      "x": 1.674,
+      "y": 0.727,
       "z": 1.1
      },
      {
-      "x": 2.546,
-      "y": 2.693,
+      "x": 1.674,
+      "y": 1.127,
       "z": 1.0
      },
      {
-      "x": 2.75,
-      "y": 2.65,
+      "x": 1.55,
+      "y": 1.05,
       "z": 1.0
      },
      {
-      "x": 2.85,
-      "y": 2.75,
+      "x": 0.35,
+      "y": 1.05,
       "z": 1.0
      },
      {
-      "x": 2.95,
-      "y": 2.75,
+      "x": 0.833,
+      "y": 0.523,
       "z": 1.0
      },
      {
-      "x": 3.15,
-      "y": 2.95,
-      "z": 1.0
-     },
-     {
-      "x": 3.45,
-      "y": 2.95,
-      "z": 1.0
-     },
-     {
-      "x": 4.159,
-      "y": 3.095,
-      "z": 1.0
-     },
-     {
-      "x": 4.159,
-      "y": 3.095,
-      "z": 0.9
+      "x": 0.833,
+      "y": 0.523,
+      "z": 0.686
      }
     ],
-    "est_time_s": 17.2
+    "est_time_s": 17.5
    }
   ],
   "zones": [
@@ -299,57 +240,52 @@
     "id": "cryogen_1",
     "kind": "cryogen",
     "min": {
-     "x": 1.162,
-     "y": 2.523
+     "x": 0.294,
+     "y": 0.0
     },
     "max": {
-     "x": 3.146,
-     "y": 4
+     "x": 2.274,
+     "y": 1.062
     }
    }
   ],
   "score": {
-   "total_weighted_distance_m": 2.16,
-   "floor_area_used_m2": 1.76
+   "total_weighted_distance_m": 2.46,
+   "floor_area_used_m2": 1.71
   },
   "violations": []
  },
  "sim_result": {
-  "id": "xchem_harvest_1op_wf_v1_layout_sim",
-  "layout_id": "xchem_harvest_1op_wf_v1_layout",
-  "simulated_hours": 172.0,
+  "id": "xchem_harvest_wf_v1_layout_sim",
+  "layout_id": "xchem_harvest_wf_v1_layout",
+  "simulated_hours": 97.0,
   "replicates": 10,
   "throughput": {
-   "value": 240.9,
+   "value": 183.5,
    "unit": "crystals_per_day",
    "target": 1000,
    "meets_target": false,
-   "p10": 206.9,
-   "p50": 240.9,
-   "p90": 268.4,
+   "p10": 148.3,
+   "p50": 183.5,
+   "p90": 270.0,
    "prob_meets_target": 0.0
   },
-  "cycle_time_s": 482989.6,
+  "cycle_time_s": 32456.5,
   "utilisation": [
    {
-    "instance_id": "shifter_1",
-    "busy_fraction": 0.29,
-    "mean_queue_wait_s": 10666.4
-   },
-   {
-    "instance_id": "ln2_dewar_1",
-    "busy_fraction": 0.0,
-    "mean_queue_wait_s": 0.0
-   },
-   {
     "instance_id": "bench_1",
-    "busy_fraction": 0.021,
-    "mean_queue_wait_s": 1463.7
-   },
-   {
-    "instance_id": "dry_shipper_1",
     "busy_fraction": 0.0,
     "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "shifter_1",
+    "busy_fraction": 0.192,
+    "mean_queue_wait_s": 127.6
+   },
+   {
+    "instance_id": "dewar_1",
+    "busy_fraction": 0.137,
+    "mean_queue_wait_s": 4085.5
    },
    {
     "instance_id": "crystal_harvester_1",
@@ -364,58 +300,3404 @@
      "crystal_harvester_1"
     ],
     "severity": "high",
-    "message": "crystal_harvester_1 is busy 100% of their shift; it caps throughput near 241 crystals per day.",
+    "message": "crystal_harvester_1 is busy 100% of their shift; it caps throughput near 183 crystals per day.",
     "suggestion": "Add a second operator or stagger shifts."
-   },
-   {
-    "kind": "external_queue",
-    "instances": [],
-    "severity": "low",
-    "message": "External step 'Ship dry shipper to synchrotron; external diffraction' takes about 49 h of the 134 h cycle; the layout cannot shorten it.",
-    "suggestion": "Batch shipments and book access early; report turnaround as a range."
    }
   ],
   "sensitivity": [
    {
-    "parameter": "harvest.duration_s",
-    "effect": -121.8
+    "parameter": "store_pucks.duration_s",
+    "effect": -183.5
    },
    {
-    "parameter": "load_shipper.duration_s",
-    "effect": -59.6
+    "parameter": "harvest.duration_s",
+    "effect": -166.6
    },
    {
     "parameter": "operator_walking_time",
-    "effect": -8.0
+    "effect": -1.5
+   }
+  ],
+  "timeline": [
+   {
+    "t_s": 0,
+    "labware_id": "plate_00001",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 817.1,
+    "labware_id": "plate_00001",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 817.1,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 1594.2,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 1594.2,
+    "labware_id": "plate_00001",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 1612.6,
+    "labware_id": "plate_00001",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 1612.6,
+    "labware_id": "plate_00003",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 2388.3,
+    "labware_id": "plate_00003",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 2388.3,
+    "labware_id": "plate_00001",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 2953.3,
+    "labware_id": "plate_00001",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 2953.3,
+    "labware_id": "plate_00004",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 3742.2,
+    "labware_id": "plate_00004",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 3742.2,
+    "labware_id": "plate_00002",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 3761.3,
+    "labware_id": "plate_00002",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 3761.3,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 4539.7,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 4539.7,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 5061.3,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 5061.3,
+    "labware_id": "plate_00006",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 5847.7,
+    "labware_id": "plate_00006",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 5847.7,
+    "labware_id": "plate_00003",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 5865.8,
+    "labware_id": "plate_00003",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 5865.8,
+    "labware_id": "plate_00007",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 6621.4,
+    "labware_id": "plate_00007",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 6621.4,
+    "labware_id": "plate_00003",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 7176.7,
+    "labware_id": "plate_00003",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 7176.7,
+    "labware_id": "plate_00008",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 7936.0,
+    "labware_id": "plate_00008",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 7936.0,
+    "labware_id": "plate_00004",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 7954.5,
+    "labware_id": "plate_00004",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 7954.5,
+    "labware_id": "plate_00009",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 8754.5,
+    "labware_id": "plate_00009",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 8754.5,
+    "labware_id": "plate_00004",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 9315.8,
+    "labware_id": "plate_00004",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 9315.8,
+    "labware_id": "plate_00010",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 10100.6,
+    "labware_id": "plate_00010",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 10100.6,
+    "labware_id": "plate_00005",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 10119.2,
+    "labware_id": "plate_00005",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 10119.2,
+    "labware_id": "plate_00011",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 10929.7,
+    "labware_id": "plate_00011",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 10929.7,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 11492.0,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 11492.0,
+    "labware_id": "plate_00012",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 12304.8,
+    "labware_id": "plate_00012",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 12304.8,
+    "labware_id": "plate_00006",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 12323.0,
+    "labware_id": "plate_00006",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 12323.0,
+    "labware_id": "plate_00013",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 13129.0,
+    "labware_id": "plate_00013",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 13129.0,
+    "labware_id": "plate_00006",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 13672.6,
+    "labware_id": "plate_00006",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 13672.6,
+    "labware_id": "plate_00007",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 13690.9,
+    "labware_id": "plate_00007",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 13690.9,
+    "labware_id": "plate_00014",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 14504.9,
+    "labware_id": "plate_00014",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 14504.9,
+    "labware_id": "plate_00007",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 15035.8,
+    "labware_id": "plate_00007",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 15035.8,
+    "labware_id": "plate_00008",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 15054.1,
+    "labware_id": "plate_00008",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 15054.1,
+    "labware_id": "plate_00015",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 15870.7,
+    "labware_id": "plate_00015",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 15870.7,
+    "labware_id": "plate_00008",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 16440.9,
+    "labware_id": "plate_00008",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 16440.9,
+    "labware_id": "plate_00009",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 16460.7,
+    "labware_id": "plate_00009",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 16460.7,
+    "labware_id": "plate_00016",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 17208.1,
+    "labware_id": "plate_00016",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 17208.1,
+    "labware_id": "plate_00009",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 17758.0,
+    "labware_id": "plate_00009",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 17758.0,
+    "labware_id": "plate_00010",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 17776.5,
+    "labware_id": "plate_00010",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 17776.5,
+    "labware_id": "plate_00017",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 18594.8,
+    "labware_id": "plate_00017",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 18594.8,
+    "labware_id": "plate_00010",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 19144.6,
+    "labware_id": "plate_00010",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 19144.6,
+    "labware_id": "plate_00011",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 19164.4,
+    "labware_id": "plate_00011",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 19164.4,
+    "labware_id": "plate_00018",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 19910.2,
+    "labware_id": "plate_00018",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 19910.2,
+    "labware_id": "plate_00011",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 20439.1,
+    "labware_id": "plate_00011",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 20439.1,
+    "labware_id": "plate_00012",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 20457.8,
+    "labware_id": "plate_00012",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 20457.8,
+    "labware_id": "plate_00019",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 21272.8,
+    "labware_id": "plate_00019",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 21272.8,
+    "labware_id": "plate_00012",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 21837.8,
+    "labware_id": "plate_00012",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 21837.8,
+    "labware_id": "plate_00013",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 21856.5,
+    "labware_id": "plate_00013",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 21856.5,
+    "labware_id": "plate_00020",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 22663.2,
+    "labware_id": "plate_00020",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 22663.2,
+    "labware_id": "plate_00013",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 23200.6,
+    "labware_id": "plate_00013",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 23200.6,
+    "labware_id": "plate_00014",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 23220.5,
+    "labware_id": "plate_00014",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 23220.5,
+    "labware_id": "plate_00021",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 23967.1,
+    "labware_id": "plate_00021",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 23967.1,
+    "labware_id": "plate_00014",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 24527.2,
+    "labware_id": "plate_00014",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 24527.2,
+    "labware_id": "plate_00015",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 24546.9,
+    "labware_id": "plate_00015",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 24546.9,
+    "labware_id": "plate_00022",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 25353.2,
+    "labware_id": "plate_00022",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 25353.2,
+    "labware_id": "plate_00015",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 25888.2,
+    "labware_id": "plate_00015",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 25888.2,
+    "labware_id": "plate_00016",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 25907.9,
+    "labware_id": "plate_00016",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 25907.9,
+    "labware_id": "plate_00023",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 26653.9,
+    "labware_id": "plate_00023",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 26653.9,
+    "labware_id": "plate_00016",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 27225.2,
+    "labware_id": "plate_00016",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 27225.2,
+    "labware_id": "plate_00017",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 27244.1,
+    "labware_id": "plate_00017",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 27244.1,
+    "labware_id": "plate_00024",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 28048.5,
+    "labware_id": "plate_00024",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 28048.5,
+    "labware_id": "plate_00017",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 28606.2,
+    "labware_id": "plate_00017",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 28606.2,
+    "labware_id": "plate_00018",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 28624.9,
+    "labware_id": "plate_00018",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 28624.9,
+    "labware_id": "plate_00025",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 86965.8,
+    "labware_id": "plate_00025",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 86965.8,
+    "labware_id": "plate_00018",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 87488.3,
+    "labware_id": "plate_00018",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 87488.3,
+    "labware_id": "plate_00019",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 87507.8,
+    "labware_id": "plate_00019",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 87507.8,
+    "labware_id": "plate_00026",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 88249.8,
+    "labware_id": "plate_00026",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 88249.8,
+    "labware_id": "plate_00019",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 88791.4,
+    "labware_id": "plate_00019",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 88791.4,
+    "labware_id": "plate_00020",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 88810.5,
+    "labware_id": "plate_00020",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 88810.5,
+    "labware_id": "plate_00027",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 89560.9,
+    "labware_id": "plate_00027",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 89560.9,
+    "labware_id": "plate_00020",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 90101.1,
+    "labware_id": "plate_00020",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 90101.1,
+    "labware_id": "plate_00021",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 90119.7,
+    "labware_id": "plate_00021",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 90119.7,
+    "labware_id": "plate_00028",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 90871.0,
+    "labware_id": "plate_00028",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 90871.0,
+    "labware_id": "plate_00021",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 91393.1,
+    "labware_id": "plate_00021",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 91393.1,
+    "labware_id": "plate_00022",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 91412.3,
+    "labware_id": "plate_00022",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 91412.3,
+    "labware_id": "plate_00029",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 92180.8,
+    "labware_id": "plate_00029",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 92180.8,
+    "labware_id": "plate_00022",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 92710.2,
+    "labware_id": "plate_00022",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 92710.2,
+    "labware_id": "plate_00023",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 92729.6,
+    "labware_id": "plate_00023",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 92729.6,
+    "labware_id": "plate_00030",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 93539.3,
+    "labware_id": "plate_00030",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 93539.3,
+    "labware_id": "plate_00023",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 94099.8,
+    "labware_id": "plate_00023",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 94099.8,
+    "labware_id": "plate_00024",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 94119.4,
+    "labware_id": "plate_00024",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 94119.4,
+    "labware_id": "plate_00031",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 94868.7,
+    "labware_id": "plate_00031",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 94868.7,
+    "labware_id": "plate_00024",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 95408.9,
+    "labware_id": "plate_00024",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 95408.9,
+    "labware_id": "plate_00025",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 95428.2,
+    "labware_id": "plate_00025",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 95428.2,
+    "labware_id": "plate_00032",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 96243.3,
+    "labware_id": "plate_00032",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 96243.3,
+    "labware_id": "plate_00025",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 96799.0,
+    "labware_id": "plate_00025",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 96799.0,
+    "labware_id": "plate_00026",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 96817.8,
+    "labware_id": "plate_00026",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 96817.8,
+    "labware_id": "plate_00033",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 97566.7,
+    "labware_id": "plate_00033",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 97566.7,
+    "labware_id": "plate_00026",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 98117.8,
+    "labware_id": "plate_00026",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 98117.8,
+    "labware_id": "plate_00027",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 98136.3,
+    "labware_id": "plate_00027",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 98136.3,
+    "labware_id": "plate_00034",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 98887.7,
+    "labware_id": "plate_00034",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 98887.7,
+    "labware_id": "plate_00027",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 99430.2,
+    "labware_id": "plate_00027",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 99430.2,
+    "labware_id": "plate_00028",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 99449.2,
+    "labware_id": "plate_00028",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 99449.2,
+    "labware_id": "plate_00035",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 100193.5,
+    "labware_id": "plate_00035",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 100193.5,
+    "labware_id": "plate_00028",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 100760.0,
+    "labware_id": "plate_00028",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 100760.0,
+    "labware_id": "plate_00029",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 100779.1,
+    "labware_id": "plate_00029",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 100779.1,
+    "labware_id": "plate_00036",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 101528.7,
+    "labware_id": "plate_00036",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 101528.7,
+    "labware_id": "plate_00029",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 102049.6,
+    "labware_id": "plate_00029",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 102049.6,
+    "labware_id": "plate_00030",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 102068.0,
+    "labware_id": "plate_00030",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 102068.0,
+    "labware_id": "plate_00037",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 102869.4,
+    "labware_id": "plate_00037",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 102869.4,
+    "labware_id": "plate_00030",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 103393.0,
+    "labware_id": "plate_00030",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 103393.0,
+    "labware_id": "plate_00031",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 103411.5,
+    "labware_id": "plate_00031",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 103411.5,
+    "labware_id": "plate_00038",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 104224.1,
+    "labware_id": "plate_00038",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 104224.1,
+    "labware_id": "plate_00031",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 104770.5,
+    "labware_id": "plate_00031",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 104770.5,
+    "labware_id": "plate_00032",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 104789.2,
+    "labware_id": "plate_00032",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 104789.2,
+    "labware_id": "plate_00039",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 105535.8,
+    "labware_id": "plate_00039",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 105535.8,
+    "labware_id": "plate_00032",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 106097.4,
+    "labware_id": "plate_00032",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 106097.4,
+    "labware_id": "plate_00033",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 106116.8,
+    "labware_id": "plate_00033",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 106116.8,
+    "labware_id": "plate_00040",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 106889.0,
+    "labware_id": "plate_00040",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 106889.0,
+    "labware_id": "plate_00033",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 107442.0,
+    "labware_id": "plate_00033",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 107442.0,
+    "labware_id": "plate_00034",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 107460.9,
+    "labware_id": "plate_00034",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 107460.9,
+    "labware_id": "plate_00041",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 108229.4,
+    "labware_id": "plate_00041",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 108229.4,
+    "labware_id": "plate_00034",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 108762.3,
+    "labware_id": "plate_00034",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 108762.3,
+    "labware_id": "plate_00035",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 108781.1,
+    "labware_id": "plate_00035",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 108781.1,
+    "labware_id": "plate_00042",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 109533.3,
+    "labware_id": "plate_00042",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 109533.3,
+    "labware_id": "plate_00035",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 110095.1,
+    "labware_id": "plate_00035",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 110095.1,
+    "labware_id": "plate_00036",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 110113.3,
+    "labware_id": "plate_00036",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 110113.3,
+    "labware_id": "plate_00043",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 110868.8,
+    "labware_id": "plate_00043",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 110868.8,
+    "labware_id": "plate_00036",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 111397.2,
+    "labware_id": "plate_00036",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 111397.2,
+    "labware_id": "plate_00037",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 111417.0,
+    "labware_id": "plate_00037",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 111417.0,
+    "labware_id": "plate_00044",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 112169.9,
+    "labware_id": "plate_00044",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 112169.9,
+    "labware_id": "plate_00037",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 112739.0,
+    "labware_id": "plate_00037",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 112739.0,
+    "labware_id": "plate_00038",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 112757.4,
+    "labware_id": "plate_00038",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 112757.4,
+    "labware_id": "plate_00045",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 113560.2,
+    "labware_id": "plate_00045",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 113560.2,
+    "labware_id": "plate_00038",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 114118.0,
+    "labware_id": "plate_00038",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 114118.0,
+    "labware_id": "plate_00039",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 114137.4,
+    "labware_id": "plate_00039",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 114137.4,
+    "labware_id": "plate_00046",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 114907.2,
+    "labware_id": "plate_00046",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 114907.2,
+    "labware_id": "plate_00039",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 173077.0,
+    "labware_id": "plate_00039",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 173077.0,
+    "labware_id": "plate_00040",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 173095.2,
+    "labware_id": "plate_00040",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 173095.2,
+    "labware_id": "plate_00047",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 173870.1,
+    "labware_id": "plate_00047",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 173870.1,
+    "labware_id": "plate_00040",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 174392.8,
+    "labware_id": "plate_00040",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 174392.8,
+    "labware_id": "plate_00041",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 174411.3,
+    "labware_id": "plate_00041",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 174411.3,
+    "labware_id": "plate_00048",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 175193.5,
+    "labware_id": "plate_00048",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 175193.5,
+    "labware_id": "plate_00041",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 175717.1,
+    "labware_id": "plate_00041",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 175717.1,
+    "labware_id": "plate_00042",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 175736.1,
+    "labware_id": "plate_00042",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 175736.1,
+    "labware_id": "plate_00049",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 176540.4,
+    "labware_id": "plate_00049",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 176540.4,
+    "labware_id": "plate_00042",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 177089.9,
+    "labware_id": "plate_00042",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 177089.9,
+    "labware_id": "plate_00043",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 177109.0,
+    "labware_id": "plate_00043",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 177109.0,
+    "labware_id": "plate_00050",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 177913.1,
+    "labware_id": "plate_00050",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 177913.1,
+    "labware_id": "plate_00043",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 178454.7,
+    "labware_id": "plate_00043",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 178454.7,
+    "labware_id": "plate_00044",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 178473.2,
+    "labware_id": "plate_00044",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 178473.2,
+    "labware_id": "plate_00051",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 179218.8,
+    "labware_id": "plate_00051",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 179218.8,
+    "labware_id": "plate_00044",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 179766.6,
+    "labware_id": "plate_00044",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 179766.6,
+    "labware_id": "plate_00045",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 179784.8,
+    "labware_id": "plate_00045",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 179784.8,
+    "labware_id": "plate_00052",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 180541.9,
+    "labware_id": "plate_00052",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 180541.9,
+    "labware_id": "plate_00045",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 181074.3,
+    "labware_id": "plate_00045",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 181074.3,
+    "labware_id": "plate_00046",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 181093.9,
+    "labware_id": "plate_00046",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 181093.9,
+    "labware_id": "plate_00053",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 181839.7,
+    "labware_id": "plate_00053",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 181839.7,
+    "labware_id": "plate_00046",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 182364.9,
+    "labware_id": "plate_00046",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 182364.9,
+    "labware_id": "plate_00047",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 182384.2,
+    "labware_id": "plate_00047",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 182384.2,
+    "labware_id": "plate_00054",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 183191.8,
+    "labware_id": "plate_00054",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 183191.8,
+    "labware_id": "plate_00047",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 183713.8,
+    "labware_id": "plate_00047",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 183713.8,
+    "labware_id": "plate_00048",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 183732.3,
+    "labware_id": "plate_00048",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 183732.3,
+    "labware_id": "plate_00055",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 184502.6,
+    "labware_id": "plate_00055",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 184502.6,
+    "labware_id": "plate_00048",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 185038.5,
+    "labware_id": "plate_00048",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 185038.5,
+    "labware_id": "plate_00049",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 185057.7,
+    "labware_id": "plate_00049",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 185057.7,
+    "labware_id": "plate_00056",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 185827.6,
+    "labware_id": "plate_00056",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 185827.6,
+    "labware_id": "plate_00049",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 186367.3,
+    "labware_id": "plate_00049",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 186367.3,
+    "labware_id": "plate_00050",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 186386.4,
+    "labware_id": "plate_00050",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 186386.4,
+    "labware_id": "plate_00057",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 187191.3,
+    "labware_id": "plate_00057",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 187191.3,
+    "labware_id": "plate_00050",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 187712.7,
+    "labware_id": "plate_00050",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 187712.7,
+    "labware_id": "plate_00051",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 187731.6,
+    "labware_id": "plate_00051",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 187731.6,
+    "labware_id": "plate_00058",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 188535.1,
+    "labware_id": "plate_00058",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 188535.1,
+    "labware_id": "plate_00051",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 189065.0,
+    "labware_id": "plate_00051",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 189065.0,
+    "labware_id": "plate_00052",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 189084.1,
+    "labware_id": "plate_00052",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 189084.1,
+    "labware_id": "plate_00059",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 189882.2,
+    "labware_id": "plate_00059",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 189882.2,
+    "labware_id": "plate_00052",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 190408.1,
+    "labware_id": "plate_00052",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 190408.1,
+    "labware_id": "plate_00053",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 190426.8,
+    "labware_id": "plate_00053",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 190426.8,
+    "labware_id": "plate_00060",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 191199.4,
+    "labware_id": "plate_00060",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 191199.4,
+    "labware_id": "plate_00053",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 191763.4,
+    "labware_id": "plate_00053",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 191763.4,
+    "labware_id": "plate_00054",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 191782.0,
+    "labware_id": "plate_00054",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 191782.0,
+    "labware_id": "plate_00061",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 192589.7,
+    "labware_id": "plate_00061",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 192589.7,
+    "labware_id": "plate_00054",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 193140.2,
+    "labware_id": "plate_00054",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 193140.2,
+    "labware_id": "plate_00055",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 193159.7,
+    "labware_id": "plate_00055",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 193159.7,
+    "labware_id": "plate_00062",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 193974.3,
+    "labware_id": "plate_00062",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 193974.3,
+    "labware_id": "plate_00055",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 194532.5,
+    "labware_id": "plate_00055",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 194532.5,
+    "labware_id": "plate_00056",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 194552.1,
+    "labware_id": "plate_00056",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 194552.1,
+    "labware_id": "plate_00063",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 195304.8,
+    "labware_id": "plate_00063",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 195304.8,
+    "labware_id": "plate_00056",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 195830.2,
+    "labware_id": "plate_00056",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 195830.2,
+    "labware_id": "plate_00057",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 195848.4,
+    "labware_id": "plate_00057",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 195848.4,
+    "labware_id": "plate_00064",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 196628.6,
+    "labware_id": "plate_00064",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 196628.6,
+    "labware_id": "plate_00057",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 197201.9,
+    "labware_id": "plate_00057",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 197201.9,
+    "labware_id": "plate_00058",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 197221.3,
+    "labware_id": "plate_00058",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 197221.3,
+    "labware_id": "plate_00065",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 197968.0,
+    "labware_id": "plate_00065",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 197968.0,
+    "labware_id": "plate_00058",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 198531.2,
+    "labware_id": "plate_00058",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 198531.2,
+    "labware_id": "plate_00059",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 198549.7,
+    "labware_id": "plate_00059",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 198549.7,
+    "labware_id": "plate_00066",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 199304.8,
+    "labware_id": "plate_00066",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 199304.8,
+    "labware_id": "plate_00059",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 199868.2,
+    "labware_id": "plate_00059",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 199868.2,
+    "labware_id": "plate_00060",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 199888.1,
+    "labware_id": "plate_00060",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 199888.1,
+    "labware_id": "plate_00067",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 200650.0,
+    "labware_id": "plate_00067",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 200650.0,
+    "labware_id": "plate_00060",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 201188.4,
+    "labware_id": "plate_00060",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 201188.4,
+    "labware_id": "plate_00061",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 201208.2,
+    "labware_id": "plate_00061",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 201208.2,
+    "labware_id": "plate_00068",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 259618.8,
+    "labware_id": "plate_00068",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 259618.8,
+    "labware_id": "plate_00061",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 260179.0,
+    "labware_id": "plate_00061",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 260179.0,
+    "labware_id": "plate_00062",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 260197.3,
+    "labware_id": "plate_00062",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 260197.3,
+    "labware_id": "plate_00069",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 260979.2,
+    "labware_id": "plate_00069",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 260979.2,
+    "labware_id": "plate_00062",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 261524.3,
+    "labware_id": "plate_00062",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 261524.3,
+    "labware_id": "plate_00063",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 261542.9,
+    "labware_id": "plate_00063",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 261542.9,
+    "labware_id": "plate_00070",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 262311.3,
+    "labware_id": "plate_00070",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 262311.3,
+    "labware_id": "plate_00063",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 262882.4,
+    "labware_id": "plate_00063",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 262882.4,
+    "labware_id": "plate_00064",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 262901.9,
+    "labware_id": "plate_00064",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 262901.9,
+    "labware_id": "plate_00071",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 263704.6,
+    "labware_id": "plate_00071",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 263704.6,
+    "labware_id": "plate_00064",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 264250.7,
+    "labware_id": "plate_00064",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 264250.7,
+    "labware_id": "plate_00065",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 264269.3,
+    "labware_id": "plate_00065",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 264269.3,
+    "labware_id": "plate_00072",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 265052.1,
+    "labware_id": "plate_00072",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 265052.1,
+    "labware_id": "plate_00065",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 265625.9,
+    "labware_id": "plate_00065",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 265625.9,
+    "labware_id": "plate_00066",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 265644.1,
+    "labware_id": "plate_00066",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 265644.1,
+    "labware_id": "plate_00073",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 266432.7,
+    "labware_id": "plate_00073",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 266432.7,
+    "labware_id": "plate_00066",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 266971.5,
+    "labware_id": "plate_00066",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 266971.5,
+    "labware_id": "plate_00067",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 266990.8,
+    "labware_id": "plate_00067",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 266990.8,
+    "labware_id": "plate_00074",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 267807.9,
+    "labware_id": "plate_00074",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 267807.9,
+    "labware_id": "plate_00067",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 268380.1,
+    "labware_id": "plate_00067",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 268380.1,
+    "labware_id": "plate_00068",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 268399.5,
+    "labware_id": "plate_00068",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 268399.5,
+    "labware_id": "plate_00075",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 269192.5,
+    "labware_id": "plate_00075",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 269192.5,
+    "labware_id": "plate_00068",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 269730.6,
+    "labware_id": "plate_00068",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 269730.6,
+    "labware_id": "plate_00069",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 269749.9,
+    "labware_id": "plate_00069",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 269749.9,
+    "labware_id": "plate_00076",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 270555.6,
+    "labware_id": "plate_00076",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 270555.6,
+    "labware_id": "plate_00069",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 271100.1,
+    "labware_id": "plate_00069",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 271100.1,
+    "labware_id": "plate_00070",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 271118.9,
+    "labware_id": "plate_00070",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 271118.9,
+    "labware_id": "plate_00077",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 271862.7,
+    "labware_id": "plate_00077",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 271862.7,
+    "labware_id": "plate_00070",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 272423.3,
+    "labware_id": "plate_00070",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 272423.3,
+    "labware_id": "plate_00071",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 272442.9,
+    "labware_id": "plate_00071",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 272442.9,
+    "labware_id": "plate_00078",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 273250.9,
+    "labware_id": "plate_00078",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 273250.9,
+    "labware_id": "plate_00071",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 273772.5,
+    "labware_id": "plate_00071",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 273772.5,
+    "labware_id": "plate_00072",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 273791.4,
+    "labware_id": "plate_00072",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 273791.4,
+    "labware_id": "plate_00079",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 274571.0,
+    "labware_id": "plate_00079",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 274571.0,
+    "labware_id": "plate_00072",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 275120.0,
+    "labware_id": "plate_00072",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 275120.0,
+    "labware_id": "plate_00073",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 275138.9,
+    "labware_id": "plate_00073",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 275138.9,
+    "labware_id": "plate_00080",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 275929.4,
+    "labware_id": "plate_00080",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 275929.4,
+    "labware_id": "plate_00073",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 276486.3,
+    "labware_id": "plate_00073",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 276486.3,
+    "labware_id": "plate_00074",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 276505.1,
+    "labware_id": "plate_00074",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 276505.1,
+    "labware_id": "plate_00081",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 277248.3,
+    "labware_id": "plate_00081",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 277248.3,
+    "labware_id": "plate_00074",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 277792.6,
+    "labware_id": "plate_00074",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 277792.6,
+    "labware_id": "plate_00075",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 277811.0,
+    "labware_id": "plate_00075",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 277811.0,
+    "labware_id": "plate_00082",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 278582.9,
+    "labware_id": "plate_00082",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 278582.9,
+    "labware_id": "plate_00075",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 279107.2,
+    "labware_id": "plate_00075",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 279107.2,
+    "labware_id": "plate_00076",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 279126.0,
+    "labware_id": "plate_00076",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 279126.0,
+    "labware_id": "plate_00083",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 279876.5,
+    "labware_id": "plate_00083",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 279876.5,
+    "labware_id": "plate_00076",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 280430.2,
+    "labware_id": "plate_00076",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 280430.2,
+    "labware_id": "plate_00077",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 280448.7,
+    "labware_id": "plate_00077",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 280448.7,
+    "labware_id": "plate_00084",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 281260.0,
+    "labware_id": "plate_00084",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 281260.0,
+    "labware_id": "plate_00077",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 281828.4,
+    "labware_id": "plate_00077",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 281828.4,
+    "labware_id": "plate_00078",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 281847.8,
+    "labware_id": "plate_00078",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 281847.8,
+    "labware_id": "plate_00085",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 282638.1,
+    "labware_id": "plate_00085",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 282638.1,
+    "labware_id": "plate_00078",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 283166.9,
+    "labware_id": "plate_00078",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 283166.9,
+    "labware_id": "plate_00079",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 283185.0,
+    "labware_id": "plate_00079",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 283185.0,
+    "labware_id": "plate_00086",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 283955.1,
+    "labware_id": "plate_00086",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 283955.1,
+    "labware_id": "plate_00079",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 284508.6,
+    "labware_id": "plate_00079",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 284508.6,
+    "labware_id": "plate_00080",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 284527.3,
+    "labware_id": "plate_00080",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 284527.3,
+    "labware_id": "plate_00087",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 285325.1,
+    "labware_id": "plate_00087",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 285325.1,
+    "labware_id": "plate_00080",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 285897.8,
+    "labware_id": "plate_00080",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 285897.8,
+    "labware_id": "plate_00081",
+    "event": "transfer_start",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 285916.4,
+    "labware_id": "plate_00081",
+    "event": "transfer_end",
+    "instance_id": "crystal_harvester_1"
+   },
+   {
+    "t_s": 285916.4,
+    "labware_id": "plate_00088",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 286703.0,
+    "labware_id": "plate_00088",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 286703.0,
+    "labware_id": "plate_00081",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
+   },
+   {
+    "t_s": 287232.2,
+    "labware_id": "plate_00081",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "store_pucks"
    }
   ]
  },
  "claims": [
   {
-   "id": "c_throughput",
-   "statement": "Simulated P50 throughput of the single-operator Shifter design is below the 1,000 crystals/day target.",
+   "id": "c1",
+   "statement": "Median simulated throughput meets the 1000 successful crystals/day target",
    "metric": "throughput.p50",
-   "comparator": "<=",
+   "comparator": ">=",
    "predicted_value": 1000,
-   "confidence": 0.95,
-   "status": "supported",
-   "verified_value": 213.3,
-   "verifier_note": "throughput.p50 = 213.3, recomputed by the verifier."
+   "confidence": 0.02,
+   "status": "refuted",
+   "verified_value": 185.0,
+   "verifier_note": "throughput.p50 = 185, recomputed by the verifier."
   },
   {
-   "id": "c_layout",
-   "statement": "The layout has zero violations.",
+   "id": "c2",
+   "statement": "Median simulated throughput is at most 200 crystals/day",
+   "metric": "throughput.p50",
+   "comparator": "<=",
+   "predicted_value": 200,
+   "confidence": 0.9,
+   "status": "supported",
+   "verified_value": 185.0,
+   "verifier_note": "throughput.p50 = 185, recomputed by the verifier."
+  },
+  {
+   "id": "c3",
+   "statement": "Layout has zero violations",
    "metric": "layout.violations",
    "comparator": "==",
    "predicted_value": 0,
-   "confidence": 0.9,
+   "confidence": 0.95,
    "status": "supported",
    "verified_value": 0.0,
    "verifier_note": "layout.violations = 0, recomputed by the verifier."
   }
  ],
  "follow_up_used": true,
- "first_reply": "I can't model harvesting as fully automated. The only harvesting device in the catalog, the Oxford Lab Technologies Crystal Shifter (`olt_crystal_shifter`), is a motorised microscope stage. It moves each drop into position, but a person still mounts every crystal by hand at the microscope. So I'll treat harvesting as a manual step that needs the operator for its full duration. If I modelled it as automated, the result would look feasible when it isn't.\n\n**What the published rates mean for one operator**\n\nThe source is Wright et al. (2021), *Acta Cryst D*, doi:10.1107/S2059798320014114, section 3.2.2. This is a reviewed public web reference, not an Amass record.\n\n| Mode | Published rate | Operator time for 1,000 crystals |\n|---|---|---|\n| Fully manual (no Shifter) | 8 crystals/h (six-person survey, including side tasks) | about 125 h |\n| With the Shifter, mean | 103/h (35 s per mount, from 8,271 mounts) | about 9.7 h |\n| With the Shifter, median | 30 s per mount (about 120/h) | about 8.3 h |\n\n- **Even with the Shifter, one operator probably can't reach 1,000 a day.** It would take about 8\u201310 hours of non-stop mounting, before any plate changes, puck handling, breaks, drop selection, soaking or dewar work.\n- **Rates vary.** The paper says they depend on the operator and the crystal system, so these aren't guarantees.\n- **The catalog's own duration is a placeholder.** It lists about 2 h per 96-well plate (roughly 1 minute per crystal), which would make 1,000 crystals take about 21 h. That's an agent estimate, not vendor data.\n\n**Questions before I build and simulate the design**\n\n1. **Hours:** How long is the operator's shift, and how many hours a day does the lab run?\n2. **Staffing:** Is one operator a hard limit, or could I test 2\u20133 harvesters, or a second shift, as a design change?\n3. **Scope:** Is this harvesting only (soaked plates arrive, crystals go out in pucks), or the full XChem chain? The full chain runs from expression and purification through drop setup, growth and imaging, soaking, harvesting, puck loading, and external shipping and synchrotron diffraction.\n4. **Crystals per plate:** How many crystals do you harvest from each crystallisation plate? I need this to turn the per-crystal rate into time per plate.\n5. **Room:** What are the width and depth in metres? Please include doors and any areas to keep clear.\n6. **Budget:** What's the budget in USD? If you don't have one yet, I can do a provisional design if you say so.\n7. **Hazards:** I'm assuming liquid nitrogen and other cryogens, so I'll plan for ventilation and oxygen monitoring. Are there others, such as toxic fragments or solvents, or any biosafety level?\n8. **Shipping:** If puck shipping is in scope, how long are your shipping and synchrotron queue times?\n\nOnce I have these, I'll check the catalog for the other equipment, build the workflow and run the simulation. Harvesting will be a manual step using the Wright rate per crystal, with its uncertainty spelled out. I'll then report the simulated throughput range and the main bottleneck.",
+ "first_reply": "Before I design anything, I need to correct one assumption and get a few missing details.\n\n**1. I can't model harvesting as fully automated**\n\nIn this design system, crystal harvesting needs an operator for the whole step, even with the Shifter (the harvesting aid in the catalog). The Shifter's catalog time is **35 seconds per crystal, not per plate**, with a person working throughout. So I'll model harvesting as a manual step done with Shifter assistance. If you have a specific fully automated harvester in mind, please name it and I'll search the catalog for it. If it's not in the catalog, I won't make one up.\n\n**What that means for 1,000 crystals a day with one operator:**\n- 1,000 crystals \u00d7 35 s = 35,000 s, which is about **9.7 hours of hands-on harvesting**. This is a straight calculation, not a simulation result.\n- That's more than an 8-hour shift before counting cryo-cooling, loading crystals into pucks, dry-shipper packing, breaks or swapping plates.\n- Not every mounting attempt gives a usable crystal. If your target means 1,000 *successful* crystals, the number of attempts and the hands-on time go up further.\n\nSo 1,000 a day with one 8-hour operator very likely can't be done. I'll confirm with a simulation once I have the details below.\n\n**2. Questions**\n\n1. **Target definition:** Is it 1,000 *successfully harvested* crystals per day, or 1,000 attempts? Do you have an expected success rate, or should I treat it as an uncertain assumption?\n2. **Operating hours:** How long is the operator's shift (e.g., 8 h, 10 h, or more than one shift)? Is \"single operator\" a hard limit, or could I compare 1 vs. 2 vs. 3 operators?\n3. **Scope:** Is this harvesting only, or the full XChem chain (protein production, crystallisation, growth and imaging, soaking, harvesting, cryo-cooling and puck loading, shipping to an external synchrotron)? If harvesting only, how do soaked plates arrive (how many per day, crystals per plate)?\n4. **Room:** Width \u00d7 depth in metres, door positions, and any areas where equipment can't go.\n5. **Budget:** A figure in USD, or explicit permission for a provisional design without a budget.\n6. **Hazards:** I'll assume liquid nitrogen (needing ventilation and oxygen monitoring). Are there others, such as biohazards from the expression work?\n\nOnce I have these, I'll search the catalog, build the design and simulate it. I'll report the expected throughput range and the bottleneck, and propose at most two revisions, for example adding operators or harvesting stations.",
  "completed": true,
- "stop_reason": "end_turn"
+ "stop_reason": "end_turn",
+ "answered_at": "2026-10-03T17:18:20+00:00",
+ "model": "claude-opus-5-5"
 }

@@ -1,16 +1,16 @@
 {
  "task_id": "xchem_campaign_baseline",
  "arm": "platform",
- "message": "# Provisional XChem-style lab design and 500-fragment campaign time\n\n**Short answer:** in the model, one 500-fragment campaign takes about **34 days**, from starting expression to analysed data. The planning simulation gave a mean of 2,949,806 s (34.1 days). An independent recheck gave 2,981,398 s (34.5 days). About **384 h (16 days)** of that is shipping and the synchrotron queue, both of which are my assumptions. These are model predictions built mostly on placeholders, not measured performance.\n\nNobody could answer my earlier questions, so every requirement below is my assumption.\n\n## Assumptions\n- **Budget:** none given, so cost was not checked against a budget.\n- **Hours and staff:** instruments run 24 h a day. There is one protein scientist and one crystallographer, each on an 8 h shift.\n- **Hazards:** the protein expression is BSL-1. The only declared hazard is cryogens.\n- **Crystals:** 1 crystal per fragment plus 10% spare mounts, so 550 crystals. That is 10 \u00d7 96-well plates with 55 crystals harvested from each (placeholder: about 60% of drops give a usable crystal), packed into 35 pucks of 16 pins.\n- **Protein:** one expression lot is assumed to be enough for 10 plates. This yield is a placeholder, not a measurement.\n- **Crystal growth:** 3 days (range 2\u201312 days, placeholder). Plates are imaged on days 0, 1 and 3. Each inspection takes 180 s of camera time per plate (Rock Imager datasheet), with one camera.\n- **Soaking:** each plate stays 2 h after soaking before harvest (range 1\u201324 h, placeholder).\n- **Synchrotron:** everything goes in one shipment. Transit takes 2 days (range 1\u20135) and the beamtime queue 14 days (range 3\u201342); both are placeholders. Unattended data collection takes about 2 min per crystal (placeholder). Diffraction stays external; there is no in-house X-ray.\n- **Room:** the door is at the middle of the 9 m wall. A 2.44 m walk-in cold room sits inside the 9 \u00d7 7 m room. Staff carry all plates and pucks; there is no robot arm.\n\n## Harvesting rate (Wright et al. 2021, doi:10.1107/S2059798320014114)\n- **Unassisted manual mounting:** 8 crystals/h, from a survey of six people, including ancillary work.\n- **With the Shifter:** mean 35 s per mount (103 crystals/h) over 8,271 mounts. The paper's abstract gives a range of 100\u2013240/h.\n- **What I used:** 55 crystals \u00f7 103/h = 1,922 s per plate, with a range of 825\u20133,960 s. The upper end (50/h) is my own allowance for less experienced operators; it isn't from the paper.\n- **Without a Shifter:** at the unassisted rate, the same plate would take about 6.9 h.\n- **Modelling:** harvesting is a **manual** step and the crystallographer is occupied for its whole duration.\n\n## Design\nAbout **$996k** for known items. This excludes installation, service, consumables and building work.\n\n| Stage | Equipment |\n|---|---|\n| Expression | Infors Multitron Pro |\n| Cell harvest and clarification | Beckman Avanti JXN-26 |\n| Lysis | Qsonica Q700 (the EmulsiFlex is listed in the catalog as needing a BSL-2 zone) |\n| Purification | \u00c4KTA pure 25 |\n| Quality check | Mini-PROTEAN gel; NanoDrop |\n| Drop setting | mosquito Xtal3 |\n| Imaging | Rock Imager 1000 |\n| Growth and soak storage | Cytomat 2 incubator (42 plate slots) |\n| Soaking | Echo 525 (the only Echo in the catalog listed for crystal soaking) |\n| Fragment library storage | Lab fridge |\n| Harvesting | Crystal Shifter |\n| Puck storage | LN2 storage dewar |\n| Handling | 2 benches |\n| Shipping | 12 \u00d7 CX100 dry shippers (the catalog assumes 3 pucks per shipper, a placeholder) |\n\nLoading pucks into the shippers is modelled as a manual bench step: 300 s per puck, an estimate. The shippers' 12.6-day cold-holding time is shown as a limit, not used as a step time. It covers the 2-day transit, but the 14-day queue would exceed it, so the model assumes the synchrotron transfers the pucks to its own storage while they wait.\n\n## Simulation results\n- **Layout:** no violations (confirmed by the verifier).\n- **Throughput (planning run):** P50 is 275 crystals/day (P10 183, P90 367). The verifier's recheck gave P50 320.8. Both pass my 100/day placeholder target. This is a continuous-running rate, not the time for one campaign.\n- **Bottleneck:**\n  - **The crystallographer** is busy 98% of their shift, which caps output at about 282 crystals/day. Adding a second person or staggering shifts would help.\n  - **The growth incubator** is next, at 82% busy.\n- **For one campaign:** the long poles are the external queue, then crystal growth. The 34-day figure comes from a run that kept releasing new protein lots, so it includes waiting caused by competing lots. One campaign on its own may finish sooner, but I couldn't simulate that separately.\n- **No design revision:** the placeholder target is met and the campaign time is driven by the external queue, which equipment can't shorten.\n\n## Limitations\n- **Growth storage:** the Rock Imager's catalog entry models only its single camera, not its 1,000-slot plate hotel. I therefore kept crystals growing in the separate Cytomat. In a real build the Rock Imager's hotel could do this job, saving about $45k.\n- **Capacity checks:** the per-step capacity check couldn't run because one protein lot fans out into 10 plates.\n- **Model scope:** it doesn't model crystal failure rates.\n- **Calibration:** the verifier's Brier score comes from three claims and says nothing about real-world calibration.\n- **Safety:** cryogens need oxygen monitoring and ventilation, and a separate expression area is needed. This design is not safety-certified.\n\nTo make the estimate useful, the most important inputs to get are your real beamtime queue and shipping times, crystal growth time, and how many crystals one protein lot actually yields.",
+ "message": "# 500-fragment campaign: provisional design, timing not independently confirmed\n\n**Short answer:** I can't give you an independently checked campaign time. My planning simulation and the independent verifier disagree sharply, and I've used both allowed design revisions. My best estimate is **about 3 weeks** from starting expression to finished data analysis. That is my own arithmetic from the model's inputs, not a simulator result. Under the stated ranges it could be about 2 to over 7 weeks. Growth time and synchrotron turnaround dominate; time at the bench is small.\n\n## Campaign time: three numbers to keep separate\n| Source | Result |\n|---|---|\n| Planning simulation (final design) | **Pace:** median 118.6 successful crystals/day (P10 79.3, P90 161.1). The 100/day target was my placeholder, met in 70% of runs. **Time per plate:** mean about 656 h (~27 days) from expression to analysis. That run keeps starting new protein batches, so it includes queueing that a single campaign wouldn't have. |\n| Independent verifier | **Pace:** median 0 crystals/day, meaning nothing finished in its run. **Time per plate:** 12.7 million s (~148 days). |\n| My arithmetic for one campaign (estimate, not a tool result) | About 1\u20132 days protein \u2192 5 days crystal growth \u2192 about 1\u20132 days drop selection, soaking and harvesting \u2192 9 days shipping and beamtime wait \u2192 about 1 day data collection \u2192 hours of analysis. **Total \u2248 19\u201320 calendar days.** |\n\n**Retraction:** I claimed the median throughput meets the 100 crystals/day target. The verifier refuted that, so I withdraw it. The verifier reset five protein steps to catalog durations (cell harvest, lysis, clarification and both purification runs). Only lysis was clearly different: I used 4 tubes \u00d7 300 s, and the catalog gives 300 s per lot. The other four already matched, so it's unclear why the result changes this much. The verifier did confirm zero layout violations and a time per plate of more than 25 days.\n\n## Assumptions (none were given by you)\n- **Output:** one successful mounted crystal per fragment, so 500 crystals.\n- **Mounting rate:** 35 s per attempt with the Shifter; 86% of mounts succeed, per Wright et al. 2021 (https://doi.org/10.1107/S2059798320014114).\n  - 500 \u00f7 0.86 \u2248 584 attempts, run as 8 plates \u00d7 73 soaked drops.\n  - That gives about 62.8 successful crystals per plate and about 502 in total. Failed mounts are not counted.\n- **Harvesting time:** 584 \u00d7 35 s \u2248 5.7 h, with a person present throughout.\n  - The paper's unassisted manual baseline (8 crystals/h, including ancillary work) would need about 73 person-hours for the same attempts.\n  - The paper gives a range of 100\u2013240 crystals/h, so rates vary by person and crystal.\n- **Protein and crystals (placeholders):**\n  - One expression batch is enough for 8 crystallisation plates.\n  - 80% of drops contain a usable crystal.\n  - Crystals are ready to soak by day 5 (range day 4\u201312).\n- **Imaging:** days 0, 1, 3 and 5, at 3 min per plate on the Rock Imager's single camera.\n- **Synchrotron (placeholders):**\n  - 2 days transit plus 7 days waiting for beamtime (range 3\u201330 days).\n  - Data collection at 180 s per crystal.\n  - About 32 pucks (16-pin) in 11 CX100 dry shippers, at an assumed 3 pucks each.\n  - The shipper's 12.6-day hold time only covers the trip if the wait is shorter than that.\n- **Lab and staff:**\n  - One protein scientist and two crystallographers, 8 h/day; weekends are not modelled.\n  - Assumed E. coli host at biosafety level 1.\n  - One door assumed at (0, 3.5).\n  - Cold room assumed to be an existing 2.44 \u00d7 2.44 m corner.\n\n## Design (provisional, no budget check)\n- **Equipment:**\n  - Expression and protein: Infors Multitron shaker, Eppendorf 5810R centrifuge, Qsonica sonicator, \u00c4KTA pure 25, SDS-PAGE gel kit and NanoDrop.\n  - Crystals: Mosquito drop setter, LiCONiC STX44 for crystal growth, Rock Imager 1000 and Echo 525 for soaking.\n  - Harvest and shipping: Crystal Shifter, LN2 dewar, a bench and 11 dry shippers.\n  - People move all labware; there are no robot arms or other plate movers.\n- **Cost:** about **$917k** for priced items. This excludes installation, service, consumables, the fragment library, beamtime and the existing cold room.\n- **Revisions:**\n  - The first layout had blocked walkways. I swapped the Avanti centrifuge for the Eppendorf.\n  - I then modelled the cold room as a fixed corner instead of a movable item.\n  - The final layout has **0 violations**.\n\n## Limits of this result\n- **Growth storage:** physically, plates would probably grow inside the Rock Imager's 1000-slot storage. The model can't represent that without tying up its single camera, so growth uses the STX44. In the model that unit is 94% busy and is the main bottleneck (about 126 crystals/day); it may not be a real one.\n- **Bench workload:** the two crystallographers are about 79% busy, mainly with drop selection, soaking and harvesting.\n- **Placement:** the layout's cold-zone placement of the imager doesn't match the assumed cold-room corner, so check where it physically goes.\n- **Safety:** liquid nitrogen areas need ventilation and oxygen monitoring. Nothing here is safety-certified.\n\n## What would firm up the answer\nYour real figures for these, in order of impact:\n1. Synchrotron turnaround.\n2. Days until crystals are ready to soak.\n3. Protein yield per batch (how many plates one batch supports).\n4. Staffing and working days.\n\nWith those I can rerun the model and fix the verifier discrepancy.",
  "lab_spec": {
   "id": "xchem_fbdd_lab",
   "name": "XChem-style fragment screening lab (provisional)",
   "domain": "biology",
-  "description": "Express and purify one target protein, set crystallisation drops, image crystals, soak 500 fragments acoustically, harvest and cryo-cool crystals into pucks, ship to a synchrotron for unattended data collection. Room 9 x 7 m including a cold room. Question: duration of one 500-fragment campaign. Budget, staffing, hours, growth time, shipping/queue times not provided; all are explicit provisional assumptions.",
+  "description": "Express and purify one target protein, set crystallisation drops, image crystals, soak 500 fragments acoustically, harvest and cryo-cool crystals into pucks, ship to a synchrotron for unattended data collection. Room 9 x 7 m including a cold room. Question: how long does one 500-fragment campaign take? No budget, staffing, hours or logistics were supplied; all such values are agent assumptions.",
   "throughput_target": {
    "value": 100,
    "unit": "crystals_per_day",
-   "operating_hours_per_day": 24
+   "operating_hours_per_day": 8
   },
   "room": {
    "width_m": 9,
@@ -18,14 +18,28 @@
    "height_m": 3,
    "doors": [
     {
-     "x": 4.5,
-     "y": 0
+     "x": 0,
+     "y": 3.5
+    }
+   ],
+   "keep_out_zones": [
+    {
+     "min": {
+      "x": 0,
+      "y": 4.56
+     },
+     "max": {
+      "x": 2.44,
+      "y": 7
+     },
+     "reason": "ASSUMED location/size of the user's existing cold room (8 x 8 ft); not supplied by user."
     }
    ]
   },
   "labware": [
    "shake_flask",
    "bottle",
+   "tube_rack",
    "column",
    "crystallization_plate_96",
    "sbs_384",
@@ -44,13 +58,17 @@
    "crystal_soaking",
    "crystal_harvesting",
    "cryo_cooling",
+   "cold_storage",
    "manual_bench",
-   "cold_storage"
+   "external_service",
+   "in_silico"
   ],
   "constraints": {
    "biosafety_level": 1,
    "hazards": [
-    "cryogens"
+    "cryogens",
+    "high_g_centrifuge",
+    "laser"
    ]
   },
   "operators": [
@@ -65,191 +83,172 @@
      "protein_purification",
      "protein_qc",
      "concentration_measurement",
-     "manual_bench"
+     "crystallization_setup"
     ]
    },
    {
     "role": "crystallographer",
-    "count": 1,
+    "count": 2,
     "shift_hours": 8,
     "skills": [
      "crystallization_setup",
-     "crystal_imaging",
+     "manual_bench",
      "crystal_soaking",
      "crystal_harvesting",
-     "cryo_cooling",
-     "manual_bench",
-     "cold_storage"
+     "cryo_cooling"
     ]
    }
   ],
-  "scenario": "fbdd_crystallography",
   "notes": [
-   "PROVISIONAL: no budget given; cost is reported but not checked against a budget.",
-   "Throughput target 100 crystals/day is an agent placeholder, not a user requirement; the user asked for campaign duration.",
-   "Assumed 1 soaked crystal per fragment plus 10% spare mounts: 550 crystals = 10 plates x 55 crystals; 550/16 = 34.4 -> 35 UniPucks.",
-   "Expression assumed BSL-1 (E. coli-type host); cryogen hazard: LN2 dewar, Crystal Shifter puck dewar, dry shippers -> O2 monitoring and ventilation required.",
-   "Operators act as plate/puck transporters (manual lab); no robot arm.",
-   "Walk-in cold room (2.44 x 2.44 m) is placed inside the 9 x 7 m room."
-  ]
+   "ASSUMPTION: budget not given; provisional design, no budget check.",
+   "ASSUMPTION: 8 h/day staffed; weekends not modelled.",
+   "ASSUMPTION: E. coli expression at BSL1 (host not given).",
+   "ASSUMPTION: pacing target of 100 successful crystals/day is a placeholder (not a user requirement).",
+   "ASSUMPTION: one successful mounted crystal per fragment (500 total); failed mounts re-attempted from spare soaked drops.",
+   "ASSUMPTION: existing cold room modelled as keep-out corner 2.44 x 2.44 m; not purchased in BOM.",
+   "Cryogen areas need ventilation and O2 monitoring; not certified by this model."
+  ],
+  "scenario": "fbdd_crystallography"
  },
  "workflow": {
-  "id": "xchem_fbdd_wf_v1",
+  "id": "xchem_fbdd_wf_v3",
   "lab_spec_id": "xchem_fbdd_lab",
   "labware": "crystallization_plate_96",
   "equipment": [
    {
     "instance_id": "shaker_1",
     "catalog_id": "infors_multitron_pro",
-    "rationale": "Shaken flask expression of one protein lot."
+    "rationale": "Shake-flask expression culture."
    },
    {
     "instance_id": "centrifuge_1",
-    "catalog_id": "beckman_avanti_jxn26",
-    "rationale": "Cell harvest and lysate clarification (bottle rotor)."
+    "catalog_id": "eppendorf_5810r",
+    "rationale": "Cell harvest and clarification (smaller than Avanti JXN-26)."
    },
    {
     "instance_id": "sonicator_1",
     "catalog_id": "qsonica_q700",
-    "rationale": "Cell lysis; chosen over EmulsiFlex which the catalog lists as requiring a BSL-2 zone."
+    "rationale": "Cell lysis; EmulsiFlex requires a BSL2 zone."
    },
    {
     "instance_id": "akta_1",
     "catalog_id": "cytiva_akta_pure_25",
-    "rationale": "Affinity + size-exclusion purification."
+    "rationale": "Affinity and SEC runs."
    },
    {
     "instance_id": "gel_1",
     "catalog_id": "biorad_mini_protean_tetra",
-    "rationale": "Purity QC (SDS-PAGE run time only)."
+    "rationale": "SDS-PAGE purity QC."
    },
    {
     "instance_id": "nanodrop_1",
     "catalog_id": "thermo_nanodrop_one",
-    "rationale": "Protein concentration measurement."
+    "rationale": "Protein concentration."
    },
    {
     "instance_id": "mosquito_1",
     "catalog_id": "sptlabtech_mosquito_xtal3",
-    "rationale": "Nanolitre drop setting into 96-well crystallisation plates."
+    "rationale": "Drop setup, 2 min/plate."
    },
    {
-    "instance_id": "cold_room_1",
-    "catalog_id": "walk_in_cold_room",
-    "rationale": "User-requested cold room; provides cold_room zone for imager and protein work."
+    "instance_id": "growth_hotel_1",
+    "catalog_id": "liconic_stx44",
+    "rationale": "Supported incubation resource for growth residence (44 slots). Modelling proxy for the Rock Imager hotel, whose 1000-slot residence cannot be represented without consuming the single camera."
    },
    {
     "instance_id": "imager_1",
     "catalog_id": "formulatrix_rock_imager_1000",
-    "rationale": "Crystal inspection: one camera (capacity 1), 180 s per plate datasheet."
-   },
-   {
-    "instance_id": "growth_incubator_1",
-    "catalog_id": "thermo_cytomat_2",
-    "rationale": "Modelling surrogate for crystal-growth residence (42 plate slots) because the imager contract's capacity=1 represents the camera, not its 1000-slot hotel."
+    "rationale": "One camera, 3 min/plate inspection."
    },
    {
     "instance_id": "echo_1",
     "catalog_id": "beckman_echo_525",
-    "rationale": "Acoustic fragment soaking into crystallisation drops (catalog crystal_soaking capability)."
-   },
-   {
-    "instance_id": "fridge_1",
-    "catalog_id": "thermo_lab_fridge",
-    "rationale": "Holds fragment-library Echo source plates and protein aliquots."
+    "rationale": "Acoustic fragment soaking."
    },
    {
     "instance_id": "shifter_1",
     "catalog_id": "olt_crystal_shifter",
-    "rationale": "Shifter-assisted manual harvesting into pucks; operator attended throughout."
+    "rationale": "Operator-attended harvesting, 35 s per mount attempt."
    },
    {
     "instance_id": "ln2_dewar_1",
     "catalog_id": "ln2_storage_dewar",
-    "rationale": "LN2 storage of filled pucks before shipping."
+    "rationale": "LN2 storage of filled pucks."
    },
    {
-    "instance_id": "bench_protein",
+    "instance_id": "bench_1",
     "catalog_id": "lab_bench",
-    "rationale": "Protein prep bench."
+    "rationale": "Drop selection review and puck loading into shippers."
    },
    {
-    "instance_id": "bench_handling",
-    "catalog_id": "lab_bench",
-    "rationale": "Drop-selection workstation and puck-to-dry-shipper handling bench."
-   },
-   {
-    "instance_id": "cx100_1",
+    "instance_id": "dry_shipper_01",
     "catalog_id": "taylor_wharton_cx100",
-    "rationale": "Dry shipper (catalog placeholder 3 pucks each); 12 needed for 35 pucks."
+    "rationale": "Dry shipper, 3 pucks each (placeholder)."
    },
    {
-    "instance_id": "cx100_2",
+    "instance_id": "dry_shipper_02",
     "catalog_id": "taylor_wharton_cx100"
    },
    {
-    "instance_id": "cx100_3",
+    "instance_id": "dry_shipper_03",
     "catalog_id": "taylor_wharton_cx100"
    },
    {
-    "instance_id": "cx100_4",
+    "instance_id": "dry_shipper_04",
     "catalog_id": "taylor_wharton_cx100"
    },
    {
-    "instance_id": "cx100_5",
+    "instance_id": "dry_shipper_05",
     "catalog_id": "taylor_wharton_cx100"
    },
    {
-    "instance_id": "cx100_6",
+    "instance_id": "dry_shipper_06",
     "catalog_id": "taylor_wharton_cx100"
    },
    {
-    "instance_id": "cx100_7",
+    "instance_id": "dry_shipper_07",
     "catalog_id": "taylor_wharton_cx100"
    },
    {
-    "instance_id": "cx100_8",
+    "instance_id": "dry_shipper_08",
     "catalog_id": "taylor_wharton_cx100"
    },
    {
-    "instance_id": "cx100_9",
+    "instance_id": "dry_shipper_09",
     "catalog_id": "taylor_wharton_cx100"
    },
    {
-    "instance_id": "cx100_10",
+    "instance_id": "dry_shipper_10",
     "catalog_id": "taylor_wharton_cx100"
    },
    {
-    "instance_id": "cx100_11",
-    "catalog_id": "taylor_wharton_cx100"
-   },
-   {
-    "instance_id": "cx100_12",
+    "instance_id": "dry_shipper_11",
     "catalog_id": "taylor_wharton_cx100"
    }
   ],
   "steps": [
    {
-    "id": "express",
-    "name": "Protein expression (one lot)",
+    "id": "expression",
+    "name": "Expression culture (shake flasks)",
     "capability": "cell_culture",
     "candidate_instances": [
      "shaker_1"
     ],
-    "duration_s": 86400,
+    "duration_s": 43200,
     "after": [],
-    "mode": "automated",
+    "mode": "semi_automated",
+    "operator_role": "protein_scientist",
+    "duration_uncertainty": {
+     "value": 43200,
+     "low": 14400,
+     "high": 172800,
+     "confidence": "estimated",
+     "source": "agent_estimate"
+    },
     "params": {
      "flow_unit": "expression lot (set of shake flasks)",
-     "duration_per": "per expression lot",
-     "duration_basis": "agent_estimate: growth + induction ~24 h; placeholder"
-    },
-    "duration_uncertainty": {
-     "value": 86400,
-     "low": 57600,
-     "high": 172800,
-     "confidence": "placeholder",
-     "source": "agent_estimate"
+     "units_per_run": 1,
+     "duration_basis": "Catalog estimate per culture run."
     }
    },
    {
@@ -259,106 +258,105 @@
     "candidate_instances": [
      "centrifuge_1"
     ],
-    "duration_s": 1800,
+    "duration_s": 600,
     "after": [
-     "express"
+     "expression"
     ],
     "mode": "semi_automated",
     "operator_role": "protein_scientist",
-    "params": {
-     "flow_unit": "expression lot",
-     "duration_per": "per lot",
-     "duration_basis": "catalog estimate for Avanti JXN-26"
-    },
     "duration_uncertainty": {
-     "value": 1800,
-     "low": 600,
-     "high": 3600,
+     "value": 600,
+     "low": 180,
+     "high": 1800,
      "confidence": "estimated",
      "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "expression lot (bottles)",
+     "units_per_run": 1,
+     "duration_basis": "Catalog per spin."
     }
    },
    {
     "id": "lysis",
-    "name": "Cell lysis",
+    "name": "Cell lysis (sonication, operator attended)",
     "capability": "cell_lysis",
     "candidate_instances": [
      "sonicator_1"
     ],
-    "duration_s": 1800,
+    "duration_s": 1200,
     "after": [
      "cell_harvest"
     ],
-    "mode": "semi_automated",
+    "mode": "manual",
     "operator_role": "protein_scientist",
-    "params": {
-     "flow_unit": "expression lot",
-     "duration_per": "per lot (several sequential vessels at catalog 300 s each)",
-     "duration_basis": "agent_estimate: ~6 x 300 s catalog per-vessel time"
-    },
     "duration_uncertainty": {
-     "value": 1800,
-     "low": 600,
+     "value": 1200,
+     "low": 240,
      "high": 3600,
      "confidence": "placeholder",
      "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "expression lot",
+     "units_per_run": 4,
+     "duration_basis": "Catalog 300 s per tube x 4 tubes per lot."
     }
    },
    {
-    "id": "clarify",
+    "id": "clarification",
     "name": "Lysate clarification spin",
     "capability": "centrifugation",
     "candidate_instances": [
      "centrifuge_1"
     ],
-    "duration_s": 1800,
+    "duration_s": 600,
     "after": [
      "lysis"
     ],
     "mode": "semi_automated",
     "operator_role": "protein_scientist",
-    "params": {
-     "flow_unit": "expression lot",
-     "duration_per": "per lot",
-     "duration_basis": "catalog estimate"
-    },
     "duration_uncertainty": {
-     "value": 1800,
-     "low": 600,
-     "high": 3600,
+     "value": 600,
+     "low": 180,
+     "high": 1800,
      "confidence": "estimated",
      "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "expression lot",
+     "units_per_run": 1,
+     "duration_basis": "Catalog per spin."
     }
    },
    {
     "id": "purify_affinity",
-    "name": "Affinity purification",
+    "name": "Affinity purification run",
     "capability": "protein_purification",
     "candidate_instances": [
      "akta_1"
     ],
     "duration_s": 3600,
     "after": [
-     "clarify"
+     "clarification"
     ],
     "mode": "semi_automated",
     "operator_role": "protein_scientist",
-    "params": {
-     "flow_unit": "protein lot",
-     "duration_per": "per lot",
-     "duration_basis": "catalog estimate"
-    },
     "duration_uncertainty": {
      "value": 3600,
      "low": 1200,
      "high": 14400,
      "confidence": "estimated",
      "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "expression lot",
+     "units_per_run": 1
     }
    },
    {
     "id": "purify_sec",
-    "name": "Size-exclusion polishing",
+    "name": "Size-exclusion polishing run",
     "capability": "protein_purification",
     "candidate_instances": [
      "akta_1"
@@ -369,22 +367,21 @@
     ],
     "mode": "semi_automated",
     "operator_role": "protein_scientist",
-    "params": {
-     "flow_unit": "protein lot",
-     "duration_per": "per lot",
-     "duration_basis": "catalog estimate"
-    },
     "duration_uncertainty": {
      "value": 3600,
      "low": 1200,
      "high": 14400,
      "confidence": "estimated",
      "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "expression lot",
+     "units_per_run": 1
     }
    },
    {
     "id": "protein_qc",
-    "name": "Purity QC gel",
+    "name": "SDS-PAGE purity QC",
     "capability": "protein_qc",
     "candidate_instances": [
      "gel_1"
@@ -395,22 +392,21 @@
     ],
     "mode": "semi_automated",
     "operator_role": "protein_scientist",
-    "params": {
-     "flow_unit": "protein lot",
-     "duration_per": "per lot (run only; staining/imaging excluded)",
-     "duration_basis": "catalog datasheet 35-45 min run"
-    },
     "duration_uncertainty": {
      "value": 2400,
      "low": 2100,
      "high": 2700,
      "confidence": "datasheet",
      "source": "https://www.bio-rad.com/webroot/web/pdf/lsr/literature/10007296D.pdf"
+    },
+    "params": {
+     "flow_unit": "expression lot",
+     "units_per_run": 1
     }
    },
    {
     "id": "concentration",
-    "name": "Concentration measurement",
+    "name": "Concentration measurement and aliquot for plates",
     "capability": "concentration_measurement",
     "candidate_instances": [
      "nanodrop_1"
@@ -421,50 +417,49 @@
     ],
     "mode": "manual",
     "operator_role": "protein_scientist",
-    "params": {
-     "flow_unit": "protein lot",
-     "duration_per": "per lot = 3 readings x 60 s catalog",
-     "duration_basis": "catalog 60 s per sample x 3 assumed readings",
-     "protein_yield": "placeholder: one lot assumed sufficient for 10 x 96-well plates; not measured"
-    },
+    "fan_out": 8,
     "duration_uncertainty": {
      "value": 180,
      "low": 60,
      "high": 360,
      "confidence": "estimated",
      "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "expression lot in, crystallisation-plate aliquots out",
+     "units_per_run": 3,
+     "duration_basis": "Catalog 60 s per sample x 3.",
+     "fan_out_basis": "PLACEHOLDER protein yield: one lot -> 8 x 96-drop plates."
     }
    },
    {
     "id": "drop_setup",
-    "name": "Set crystallisation drops",
+    "name": "Crystallisation drop setup",
     "capability": "crystallization_setup",
     "candidate_instances": [
      "mosquito_1"
     ],
-    "duration_s": 1200,
+    "duration_s": 120,
     "after": [
      "concentration"
     ],
-    "fan_out": 10,
     "mode": "semi_automated",
     "operator_role": "crystallographer",
-    "params": {
-     "flow_unit": "input protein lot -> output 96-well crystallisation plates",
-     "fan_out_basis": "placeholder: 10 plates x ~57.6 usable crystals (60% of 96 drops) covers 550 mounts",
-     "duration_per": "per protein lot = 10 plates x 120 s datasheet"
-    },
     "duration_uncertainty": {
-     "value": 1200,
-     "low": 600,
-     "high": 3000,
+     "value": 120,
+     "low": 60,
+     "high": 300,
      "confidence": "datasheet",
      "source": "https://www.sptlabtech.com/products/mosquito/mosquito-xtal3"
+    },
+    "params": {
+     "flow_unit": "crystallisation plate (96 drops)",
+     "units_per_run": 1
     }
    },
    {
-    "id": "image_t0",
-    "name": "Inspection 1 (day 0)",
+    "id": "image_d0",
+    "name": "Imaging day 0",
     "capability": "crystal_imaging",
     "candidate_instances": [
      "imager_1"
@@ -474,17 +469,16 @@
      "drop_setup"
     ],
     "mode": "automated",
-    "params": {
-     "flow_unit": "crystallisation plate",
-     "duration_per": "per plate per inspection (camera time)",
-     "inspection_schedule": "day 0, day 1, day 3 (3 inspections; placeholder schedule)"
-    },
     "duration_uncertainty": {
      "value": 180,
-     "low": 180,
-     "high": 180,
+     "low": 150,
+     "high": 300,
      "confidence": "datasheet",
      "source": "https://americanlaboratorytrading.com/lab-equipment-products/formulatrix-inc-rock-imager-1000-14143/"
+    },
+    "params": {
+     "flow_unit": "crystallisation plate",
+     "schedule": "inspections at days 0, 1, 3, 5"
     }
    },
    {
@@ -492,29 +486,27 @@
     "name": "Crystal growth residence day 0-1",
     "capability": "incubation",
     "candidate_instances": [
-     "growth_incubator_1"
+     "growth_hotel_1"
     ],
     "duration_s": 86400,
     "after": [
-     "image_t0"
+     "image_d0"
     ],
     "mode": "automated",
-    "params": {
-     "flow_unit": "crystallisation plate",
-     "duration_per": "residence per plate",
-     "duration_basis": "placeholder growth schedule"
-    },
     "duration_uncertainty": {
      "value": 86400,
      "low": 86400,
      "high": 86400,
      "confidence": "placeholder",
      "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "crystallisation plate"
     }
    },
    {
     "id": "image_d1",
-    "name": "Inspection 2 (day 1)",
+    "name": "Imaging day 1",
     "capability": "crystal_imaging",
     "candidate_instances": [
      "imager_1"
@@ -524,46 +516,43 @@
      "grow_1"
     ],
     "mode": "automated",
-    "params": {
-     "flow_unit": "crystallisation plate",
-     "duration_per": "per plate per inspection"
-    },
     "duration_uncertainty": {
      "value": 180,
-     "low": 180,
-     "high": 180,
+     "low": 150,
+     "high": 300,
      "confidence": "datasheet",
      "source": "https://americanlaboratorytrading.com/lab-equipment-products/formulatrix-inc-rock-imager-1000-14143/"
+    },
+    "params": {
+     "flow_unit": "crystallisation plate"
     }
    },
    {
     "id": "grow_2",
-    "name": "Crystal growth residence day 1-3+",
+    "name": "Crystal growth residence day 1-3",
     "capability": "incubation",
     "candidate_instances": [
-     "growth_incubator_1"
+     "growth_hotel_1"
     ],
     "duration_s": 172800,
     "after": [
      "image_d1"
     ],
     "mode": "automated",
-    "params": {
-     "flow_unit": "crystallisation plate",
-     "duration_per": "residence per plate",
-     "duration_basis": "placeholder: total growth 3 d, range ~2-12 d"
-    },
     "duration_uncertainty": {
      "value": 172800,
-     "low": 86400,
-     "high": 950400,
+     "low": 172800,
+     "high": 172800,
      "confidence": "placeholder",
      "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "crystallisation plate"
     }
    },
    {
-    "id": "image_final",
-    "name": "Inspection 3 (pre-soak)",
+    "id": "image_d3",
+    "name": "Imaging day 3",
     "capability": "crystal_imaging",
     "candidate_instances": [
      "imager_1"
@@ -573,42 +562,87 @@
      "grow_2"
     ],
     "mode": "automated",
-    "params": {
-     "flow_unit": "crystallisation plate",
-     "duration_per": "per plate per inspection"
-    },
     "duration_uncertainty": {
      "value": 180,
-     "low": 180,
-     "high": 180,
+     "low": 150,
+     "high": 300,
      "confidence": "datasheet",
      "source": "https://americanlaboratorytrading.com/lab-equipment-products/formulatrix-inc-rock-imager-1000-14143/"
+    },
+    "params": {
+     "flow_unit": "crystallisation plate"
+    }
+   },
+   {
+    "id": "grow_3",
+    "name": "Crystal growth residence day 3-5",
+    "capability": "incubation",
+    "candidate_instances": [
+     "growth_hotel_1"
+    ],
+    "duration_s": 172800,
+    "after": [
+     "image_d3"
+    ],
+    "mode": "automated",
+    "duration_uncertainty": {
+     "value": 172800,
+     "low": 86400,
+     "high": 777600,
+     "confidence": "placeholder",
+     "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "crystallisation plate",
+     "duration_basis": "PLACEHOLDER soak-ready by day 5 (range day 4-12)."
+    }
+   },
+   {
+    "id": "image_d5",
+    "name": "Imaging day 5 (pre-soak)",
+    "capability": "crystal_imaging",
+    "candidate_instances": [
+     "imager_1"
+    ],
+    "duration_s": 180,
+    "after": [
+     "grow_3"
+    ],
+    "mode": "automated",
+    "duration_uncertainty": {
+     "value": 180,
+     "low": 150,
+     "high": 300,
+     "confidence": "datasheet",
+     "source": "https://americanlaboratorytrading.com/lab-equipment-products/formulatrix-inc-rock-imager-1000-14143/"
+    },
+    "params": {
+     "flow_unit": "crystallisation plate"
     }
    },
    {
     "id": "drop_selection",
-    "name": "Drop selection / soak targeting review",
+    "name": "Image review and drop selection",
     "capability": "manual_bench",
     "candidate_instances": [
-     "bench_handling"
+     "bench_1"
     ],
-    "duration_s": 900,
+    "duration_s": 1800,
     "after": [
-     "image_final"
+     "image_d5"
     ],
     "mode": "manual",
     "operator_role": "crystallographer",
+    "duration_uncertainty": {
+     "value": 1800,
+     "low": 600,
+     "high": 3600,
+     "confidence": "estimated",
+     "source": "agent_estimate"
+    },
     "params": {
      "flow_unit": "crystallisation plate",
-     "duration_per": "per plate",
-     "duration_basis": "agent_estimate: image review at workstation"
-    },
-    "duration_uncertainty": {
-     "value": 900,
-     "low": 300,
-     "high": 1800,
-     "confidence": "placeholder",
-     "source": "agent_estimate"
+     "duration_basis": "Per-plate human review; PLACEHOLDER 80% of drops usable."
     }
    },
    {
@@ -624,102 +658,103 @@
     ],
     "mode": "semi_automated",
     "operator_role": "crystallographer",
-    "params": {
-     "flow_unit": "crystallisation plate (~55 soaked drops)",
-     "duration_per": "per plate incl. load",
-     "duration_basis": "catalog estimate; Collins et al. 2017 abstract reports 1000 soaks in under 10 min, so transfer time itself is small",
-     "source_plates": "fragment library in Echo 384 source plates held in fridge_1"
-    },
     "duration_uncertainty": {
      "value": 900,
      "low": 300,
      "high": 2400,
      "confidence": "estimated",
      "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "crystallisation plate",
+     "units_per_run": 73,
+     "duration_basis": "Catalog 900 s per plate; 73 soaked drops/plate, 584 total for 500 fragments + repeats."
     }
    },
    {
-    "id": "soak_incubate",
+    "id": "soak_residence",
     "name": "Soak residence",
     "capability": "incubation",
     "candidate_instances": [
-     "growth_incubator_1"
+     "growth_hotel_1"
     ],
     "duration_s": 7200,
     "after": [
      "soak"
     ],
     "mode": "automated",
-    "params": {
-     "flow_unit": "crystallisation plate",
-     "duration_per": "residence per plate",
-     "duration_basis": "placeholder soak time"
-    },
     "duration_uncertainty": {
      "value": 7200,
-     "low": 3600,
-     "high": 86400,
+     "low": 1800,
+     "high": 14400,
      "confidence": "placeholder",
      "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "crystallisation plate"
     }
    },
    {
     "id": "harvest",
-    "name": "Shifter-assisted manual harvesting into pucks",
+    "name": "Shifter-assisted crystal harvesting and plunge-cooling into pucks",
     "capability": "crystal_harvesting",
     "candidate_instances": [
      "shifter_1"
     ],
-    "duration_s": 1922,
+    "duration_s": 2555,
     "after": [
-     "soak_incubate"
+     "soak_residence"
     ],
     "mode": "manual",
     "operator_role": "crystallographer",
-    "params": {
-     "flow_unit": "crystallisation plate in -> 55 mounted crystals (~3.44 UniPucks) out",
-     "crystals_per_plate": 55,
-     "duration_per": "per plate = 55 crystals / 103 per h",
-     "duration_basis": "Wright et al. 2021 sec 3.2.2: Shifter mean 35 s/mount (103/h); abstract range 100-240/h. Unassisted manual baseline 8/h would be 6.9 h/plate. High bound 50/h is an agent extension for less experienced operators."
-    },
     "duration_uncertainty": {
-     "value": 1922,
-     "low": 825,
-     "high": 3960,
+     "value": 2555,
+     "low": 1095,
+     "high": 2628,
      "confidence": "literature",
      "source": "https://doi.org/10.1107/S2059798320014114"
     },
     "evidence": [
      {
-      "claim": "Shifter-assisted mean 35 s per mount (103 crystals/h) from 8271 mounts; unassisted manual baseline 8 crystals/h",
+      "claim": "Shifter mean 35 s per mount (103/h); range 100-240 crystals/h; unassisted manual baseline 8 crystals/h; 86% of mounts judged successful.",
       "source": "https://doi.org/10.1107/S2059798320014114",
       "provider": "web"
      }
-    ]
+    ],
+    "params": {
+     "flow_unit": "crystallisation plate in, ~4 x 16-pin pucks out",
+     "units_per_run": 73,
+     "physical_batch_basis": "mount attempt",
+     "duration_basis": "35 s x 73 attempts = 2555 s; bounds 15 x 73 = 1095, 36 x 73 = 2628 s.",
+     "attempted_mounts_per_plate": 73,
+     "mount_success_fraction": 0.86,
+     "expected_successful_crystals_per_plate": 62.78
+    }
    },
    {
-    "id": "cryo_store",
+    "id": "pucks_to_dewar",
     "name": "Transfer filled pucks to LN2 storage dewar",
     "capability": "cryo_cooling",
     "candidate_instances": [
      "ln2_dewar_1"
     ],
-    "duration_s": 413,
+    "duration_s": 480,
     "after": [
      "harvest"
     ],
     "mode": "manual",
     "operator_role": "crystallographer",
-    "params": {
-     "flow_unit": "puck set from one plate (~3.44 pucks)",
-     "duration_per": "per plate-lot = 3.44 pucks x 120 s catalog placeholder"
-    },
     "duration_uncertainty": {
-     "value": 413,
-     "low": 103,
-     "high": 2064,
+     "value": 480,
+     "low": 120,
+     "high": 2400,
      "confidence": "placeholder",
      "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "puck set (~4 pucks)",
+     "units_per_run": 4,
+     "duration_basis": "Catalog 120 s per puck x 4."
     }
    },
    {
@@ -727,134 +762,94 @@
     "name": "Load pucks into charged dry shipper",
     "capability": "manual_bench",
     "candidate_instances": [
-     "bench_handling"
+     "bench_1"
     ],
-    "duration_s": 1032,
+    "duration_s": 1200,
     "after": [
-     "cryo_store"
+     "pucks_to_dewar"
     ],
     "mode": "manual",
     "operator_role": "crystallographer",
-    "params": {
-     "flow_unit": "puck set from one plate (~3.44 pucks)",
-     "duration_per": "per plate-lot = 3.44 pucks x 300 s handling",
-     "duration_basis": "agent_estimate based on CX100 catalog per-puck handling placeholder (not its hold time)",
-     "dry_shippers": [
-      "cx100_1",
-      "cx100_2",
-      "cx100_3",
-      "cx100_4",
-      "cx100_5",
-      "cx100_6",
-      "cx100_7",
-      "cx100_8",
-      "cx100_9",
-      "cx100_10",
-      "cx100_11",
-      "cx100_12"
-     ]
-    },
     "duration_uncertainty": {
-     "value": 1032,
-     "low": 206,
-     "high": 3096,
+     "value": 1200,
+     "low": 240,
+     "high": 3600,
      "confidence": "placeholder",
      "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "puck set (~4 pucks)",
+     "units_per_run": 4,
+     "duration_basis": "300 s per puck handling estimate x 4; not the shipper hold time."
     }
    },
    {
-    "id": "ship_and_queue",
-    "name": "Ship to synchrotron + beamtime queue",
+    "id": "ship_and_collect",
+    "name": "Ship to synchrotron; unattended data collection",
     "capability": "external_service",
     "candidate_instances": [],
-    "duration_s": 172800,
+    "duration_s": 11340,
     "after": [
      "load_shipper"
     ],
-    "batch_size": 10,
     "mode": "external",
+    "duration_uncertainty": {
+     "value": 11340,
+     "low": 3780,
+     "high": 37800,
+     "confidence": "placeholder",
+     "source": "agent_estimate"
+    },
     "params": {
-     "flow_unit": "whole campaign shipment (10 plate-lots, 35 pucks in 12 CX100 shippers)",
-     "duration_per": "per shipment (transit)",
-     "queue_time_s": 1209600,
-     "queue_basis": "placeholder 14 d beamtime queue, range 3-42 d",
+     "flow_unit": "puck set (~4 pucks, ~63 crystals)",
+     "duration_basis": "180 s per crystal (60-600) x ~63.",
+     "queue_time_s": 777600,
+     "queue_basis": "PLACEHOLDER 2 d transit + 7 d beamtime wait (3-30 d).",
      "shipper_instances": [
-      "cx100_1",
-      "cx100_2",
-      "cx100_3",
-      "cx100_4",
-      "cx100_5",
-      "cx100_6",
-      "cx100_7",
-      "cx100_8",
-      "cx100_9",
-      "cx100_10",
-      "cx100_11",
-      "cx100_12"
+      "dry_shipper_01",
+      "dry_shipper_02",
+      "dry_shipper_03",
+      "dry_shipper_04",
+      "dry_shipper_05",
+      "dry_shipper_06",
+      "dry_shipper_07",
+      "dry_shipper_08",
+      "dry_shipper_09",
+      "dry_shipper_10",
+      "dry_shipper_11"
      ],
-     "shipper_hold_time_note": "CX100 working hold 12.6 d must exceed transit + any wait before unloading at the beamline"
-    },
-    "duration_uncertainty": {
-     "value": 172800,
-     "low": 86400,
-     "high": 432000,
-     "confidence": "placeholder",
-     "source": "agent_estimate"
-    }
-   },
-   {
-    "id": "data_collection",
-    "name": "Unattended diffraction data collection",
-    "capability": "external_service",
-    "candidate_instances": [],
-    "duration_s": 6600,
-    "after": [
-     "ship_and_queue"
-    ],
-    "mode": "external",
-    "params": {
-     "flow_unit": "puck set from one plate (55 crystals)",
-     "duration_per": "per plate-lot = 55 crystals x 120 s placeholder",
-     "duration_basis": "agent_estimate"
-    },
-    "duration_uncertainty": {
-     "value": 6600,
-     "low": 3300,
-     "high": 19800,
-     "confidence": "placeholder",
-     "source": "agent_estimate"
+     "shipper_capacity_basis": "3 pucks/CX100 placeholder; 32 pucks -> 11 shippers; 12.6 d working hold time."
     }
    },
    {
     "id": "analysis",
-    "name": "Data processing and hit analysis",
+    "name": "Auto-processing and hit identification",
     "capability": "in_silico",
     "candidate_instances": [],
-    "duration_s": 7200,
+    "duration_s": 3600,
     "after": [
-     "data_collection"
+     "ship_and_collect"
     ],
     "mode": "in_silico",
-    "params": {
-     "flow_unit": "datasets from one plate-lot",
-     "count_throughput": true,
-     "units_per_labware": 55,
-     "duration_per": "per plate-lot",
-     "duration_basis": "agent_estimate"
-    },
     "duration_uncertainty": {
-     "value": 7200,
+     "value": 3600,
      "low": 1800,
-     "high": 28800,
-     "confidence": "placeholder",
+     "high": 14400,
+     "confidence": "estimated",
      "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "datasets from one plate",
+     "count_throughput": true,
+     "units_per_labware": 62.78,
+     "units_basis": "73 attempts x 0.86 success; failed mounts not counted."
     }
    }
   ]
  },
  "layout": {
-  "id": "xchem_fbdd_wf_v1_layout",
-  "workflow_id": "xchem_fbdd_wf_v1",
+  "id": "xchem_fbdd_wf_v3_layout",
+  "workflow_id": "xchem_fbdd_wf_v3",
   "room": {
    "width_m": 9,
    "depth_m": 7,
@@ -864,35 +859,35 @@
    {
     "instance_id": "shaker_1",
     "position": {
-     "x": 4.869,
-     "y": 4.988,
+     "x": 5.7,
+     "y": 0.991,
      "z": 0.0
-    },
-    "rotation_deg": 0.0
-   },
-   {
-    "instance_id": "centrifuge_1",
-    "position": {
-     "x": 5.824,
-     "y": 3.601,
-     "z": 0.0
-    },
-    "rotation_deg": 270.0
-   },
-   {
-    "instance_id": "sonicator_1",
-    "position": {
-     "x": 5.722,
-     "y": 2.508,
-     "z": 0.9
     },
     "rotation_deg": 180.0
    },
    {
+    "instance_id": "centrifuge_1",
+    "position": {
+     "x": 5.958,
+     "y": 2.704,
+     "z": 0.0
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "sonicator_1",
+    "position": {
+     "x": 5.768,
+     "y": 4.368,
+     "z": 0.9
+    },
+    "rotation_deg": 0.0
+   },
+   {
     "instance_id": "akta_1",
     "position": {
-     "x": 7.774,
-     "y": 3.22,
+     "x": 7.063,
+     "y": 4.744,
      "z": 0.9
     },
     "rotation_deg": 270.0
@@ -900,17 +895,17 @@
    {
     "instance_id": "gel_1",
     "position": {
-     "x": 7.736,
-     "y": 1.912,
+     "x": 4.936,
+     "y": 4.545,
      "z": 0.9
     },
-    "rotation_deg": 270.0
+    "rotation_deg": 0.0
    },
    {
     "instance_id": "nanodrop_1",
     "position": {
-     "x": 4.77,
-     "y": 5.952,
+     "x": 4.884,
+     "y": 3.561,
      "z": 0.9
     },
     "rotation_deg": 0.0
@@ -918,35 +913,26 @@
    {
     "instance_id": "mosquito_1",
     "position": {
-     "x": 4.476,
-     "y": 3.301,
+     "x": 5.634,
+     "y": 3.56,
      "z": 0.9
     },
-    "rotation_deg": 180.0
+    "rotation_deg": 270.0
    },
    {
-    "instance_id": "cold_room_1",
+    "instance_id": "growth_hotel_1",
     "position": {
-     "x": 7.524,
-     "y": 5.78,
-     "z": 0.0
+     "x": 3.703,
+     "y": 2.647,
+     "z": 0.9
     },
-    "rotation_deg": 0.0
+    "rotation_deg": 90.0
    },
    {
     "instance_id": "imager_1",
     "position": {
-     "x": 2.318,
-     "y": 0.689,
-     "z": 0.0
-    },
-    "rotation_deg": 180.0
-   },
-   {
-    "instance_id": "growth_incubator_1",
-    "position": {
-     "x": 0.973,
-     "y": 0.636,
+     "x": 3.694,
+     "y": 0.773,
      "z": 0.0
     },
     "rotation_deg": 180.0
@@ -954,164 +940,137 @@
    {
     "instance_id": "echo_1",
     "position": {
-     "x": 2.927,
-     "y": 6.535,
+     "x": 7.217,
+     "y": 3.496,
      "z": 0.9
     },
-    "rotation_deg": 0.0
-   },
-   {
-    "instance_id": "fridge_1",
-    "position": {
-     "x": 6.858,
-     "y": 1.017,
-     "z": 0.0
-    },
-    "rotation_deg": 180.0
+    "rotation_deg": 270.0
    },
    {
     "instance_id": "shifter_1",
     "position": {
-     "x": 2.723,
-     "y": 2.589,
+     "x": 2.128,
+     "y": 3.588,
      "z": 0.9
     },
-    "rotation_deg": 180.0
+    "rotation_deg": 90.0
    },
    {
     "instance_id": "ln2_dewar_1",
     "position": {
-     "x": 3.577,
-     "y": 3.255,
-     "z": 0.0
-    },
-    "rotation_deg": 180.0
-   },
-   {
-    "instance_id": "bench_protein",
-    "position": {
-     "x": 0.531,
-     "y": 2.79,
+     "x": 1.319,
+     "y": 1.601,
      "z": 0.0
     },
     "rotation_deg": 90.0
    },
    {
-    "instance_id": "bench_handling",
+    "instance_id": "bench_1",
     "position": {
-     "x": 2.505,
-     "y": 4.753,
+     "x": 7.647,
+     "y": 1.441,
      "z": 0.0
     },
-    "rotation_deg": 0.0
+    "rotation_deg": 270.0
    },
    {
-    "instance_id": "cx100_1",
+    "instance_id": "dry_shipper_01",
     "position": {
-     "x": 4.091,
-     "y": 1.439,
+     "x": 2.058,
+     "y": 1.834,
      "z": 0.9
     },
     "rotation_deg": 180.0
    },
    {
-    "instance_id": "cx100_2",
+    "instance_id": "dry_shipper_02",
     "position": {
-     "x": 4.44,
-     "y": 2.684,
+     "x": 1.77,
+     "y": 2.569,
+     "z": 0.9
+    },
+    "rotation_deg": 90.0
+   },
+   {
+    "instance_id": "dry_shipper_03",
+    "position": {
+     "x": 2.089,
+     "y": 2.544,
+     "z": 0.9
+    },
+    "rotation_deg": 90.0
+   },
+   {
+    "instance_id": "dry_shipper_04",
+    "position": {
+     "x": 2.144,
+     "y": 2.175,
+     "z": 0.9
+    },
+    "rotation_deg": 90.0
+   },
+   {
+    "instance_id": "dry_shipper_05",
+    "position": {
+     "x": 2.182,
+     "y": 2.879,
+     "z": 0.9
+    },
+    "rotation_deg": 90.0
+   },
+   {
+    "instance_id": "dry_shipper_06",
+    "position": {
+     "x": 1.422,
+     "y": 2.592,
+     "z": 0.9
+    },
+    "rotation_deg": 90.0
+   },
+   {
+    "instance_id": "dry_shipper_07",
+    "position": {
+     "x": 1.764,
+     "y": 2.895,
+     "z": 0.9
+    },
+    "rotation_deg": 90.0
+   },
+   {
+    "instance_id": "dry_shipper_08",
+    "position": {
+     "x": 2.49,
+     "y": 2.221,
      "z": 0.9
     },
     "rotation_deg": 180.0
    },
    {
-    "instance_id": "cx100_3",
+    "instance_id": "dry_shipper_09",
     "position": {
-     "x": 3.433,
-     "y": 2.231,
+     "x": 1.504,
+     "y": 2.255,
      "z": 0.9
     },
-    "rotation_deg": 180.0
+    "rotation_deg": 90.0
    },
    {
-    "instance_id": "cx100_4",
+    "instance_id": "dry_shipper_10",
     "position": {
-     "x": 3.456,
-     "y": 2.609,
+     "x": 1.828,
+     "y": 2.237,
      "z": 0.9
     },
-    "rotation_deg": 180.0
+    "rotation_deg": 90.0
    },
    {
-    "instance_id": "cx100_5",
+    "instance_id": "dry_shipper_11",
     "position": {
-     "x": 3.76,
-     "y": 1.928,
+     "x": 2.413,
+     "y": 2.552,
      "z": 0.9
     },
-    "rotation_deg": 180.0
-   },
-   {
-    "instance_id": "cx100_6",
-    "position": {
-     "x": 4.121,
-     "y": 2.411,
-     "z": 0.9
-    },
-    "rotation_deg": 180.0
-   },
-   {
-    "instance_id": "cx100_7",
-    "position": {
-     "x": 4.118,
-     "y": 2.086,
-     "z": 0.9
-    },
-    "rotation_deg": 180.0
-   },
-   {
-    "instance_id": "cx100_8",
-    "position": {
-     "x": 3.8,
-     "y": 2.572,
-     "z": 0.9
-    },
-    "rotation_deg": 180.0
-   },
-   {
-    "instance_id": "cx100_9",
-    "position": {
-     "x": 3.761,
-     "y": 2.248,
-     "z": 0.9
-    },
-    "rotation_deg": 180.0
-   },
-   {
-    "instance_id": "cx100_10",
-    "position": {
-     "x": 4.477,
-     "y": 2.287,
-     "z": 0.9
-    },
-    "rotation_deg": 180.0
-   },
-   {
-    "instance_id": "cx100_11",
-    "position": {
-     "x": 4.445,
-     "y": 1.955,
-     "z": 0.9
-    },
-    "rotation_deg": 180.0
-   },
-   {
-    "instance_id": "cx100_12",
-    "position": {
-     "x": 4.095,
-     "y": 1.764,
-     "z": 0.9
-    },
-    "rotation_deg": 180.0
+    "rotation_deg": 90.0
    }
   ],
   "operators": [
@@ -1119,16 +1078,24 @@
     "id": "protein_scientist_1",
     "role": "protein_scientist",
     "home": {
-     "x": 4.5,
-     "y": 0
+     "x": 0,
+     "y": 3.5
     }
    },
    {
     "id": "crystallographer_1",
     "role": "crystallographer",
     "home": {
-     "x": 4.5,
-     "y": 0
+     "x": 0,
+     "y": 3.5
+    }
+   },
+   {
+    "id": "crystallographer_2",
+    "role": "crystallographer",
+    "home": {
+     "x": 0,
+     "y": 3.5
     }
    }
   ],
@@ -1137,866 +1104,802 @@
     "from_instance": "shaker_1",
     "to_instance": "centrifuge_1",
     "transporter_instance": "protein_scientist_1",
-    "distance_m": 1.66,
+    "distance_m": 3.29,
     "path": [
      {
-      "x": 4.869,
-      "y": 4.558,
+      "x": 5.7,
+      "y": 1.421,
       "z": 0.3
      },
      {
-      "x": 4.869,
-      "y": 4.158,
+      "x": 5.7,
+      "y": 1.821,
       "z": 1.0
      },
      {
-      "x": 5.05,
-      "y": 4.15,
+      "x": 5.85,
+      "y": 1.95,
       "z": 1.0
      },
      {
-      "x": 5.15,
-      "y": 4.25,
+      "x": 5.95,
+      "y": 1.95,
       "z": 1.0
      },
      {
-      "x": 5.824,
-      "y": 3.601,
+      "x": 6.15,
+      "y": 2.15,
       "z": 1.0
      },
      {
-      "x": 5.824,
-      "y": 3.601,
-      "z": 0.86
+      "x": 6.55,
+      "y": 2.15,
+      "z": 1.0
+     },
+     {
+      "x": 6.55,
+      "y": 3.25,
+      "z": 1.0
+     },
+     {
+      "x": 5.958,
+      "y": 2.704,
+      "z": 1.0
+     },
+     {
+      "x": 5.958,
+      "y": 2.704,
+      "z": 0.35
      }
     ],
-    "est_time_s": 16.7
+    "est_time_s": 18.3
    },
    {
     "from_instance": "centrifuge_1",
     "to_instance": "sonicator_1",
     "transporter_instance": "protein_scientist_1",
-    "distance_m": 3.27,
+    "distance_m": 3.43,
     "path": [
      {
-      "x": 5.824,
-      "y": 3.601,
-      "z": 0.86
+      "x": 5.958,
+      "y": 2.704,
+      "z": 0.35
      },
      {
-      "x": 5.824,
-      "y": 3.601,
-      "z": 1.0
-     },
-     {
-      "x": 6.55,
-      "y": 4.25,
-      "z": 1.0
-     },
-     {
-      "x": 6.55,
-      "y": 2.95,
+      "x": 5.958,
+      "y": 2.704,
       "z": 1.0
      },
      {
       "x": 6.15,
-      "y": 2.55,
+      "y": 4.85,
       "z": 1.0
      },
      {
-      "x": 5.722,
-      "y": 2.508,
+      "x": 5.45,
+      "y": 4.85,
       "z": 1.0
      },
      {
-      "x": 5.722,
-      "y": 2.508,
+      "x": 5.768,
+      "y": 4.368,
+      "z": 1.0
+     },
+     {
+      "x": 5.768,
+      "y": 4.368,
       "z": 1.1
      }
     ],
-    "est_time_s": 18.3
+    "est_time_s": 18.4
    },
    {
     "from_instance": "sonicator_1",
     "to_instance": "centrifuge_1",
     "transporter_instance": "protein_scientist_1",
-    "distance_m": 3.25,
+    "distance_m": 3.43,
     "path": [
      {
-      "x": 5.722,
-      "y": 2.508,
+      "x": 5.768,
+      "y": 4.368,
       "z": 1.1
      },
      {
-      "x": 5.722,
-      "y": 2.508,
+      "x": 5.768,
+      "y": 4.368,
+      "z": 1.0
+     },
+     {
+      "x": 5.45,
+      "y": 4.85,
       "z": 1.0
      },
      {
       "x": 6.15,
-      "y": 2.65,
+      "y": 4.85,
       "z": 1.0
      },
      {
-      "x": 6.25,
-      "y": 2.65,
+      "x": 5.958,
+      "y": 2.704,
       "z": 1.0
      },
      {
-      "x": 6.55,
-      "y": 2.95,
-      "z": 1.0
-     },
-     {
-      "x": 6.55,
-      "y": 4.25,
-      "z": 1.0
-     },
-     {
-      "x": 5.824,
-      "y": 3.601,
-      "z": 1.0
-     },
-     {
-      "x": 5.824,
-      "y": 3.601,
-      "z": 0.86
+      "x": 5.958,
+      "y": 2.704,
+      "z": 0.35
      }
     ],
-    "est_time_s": 18.2
+    "est_time_s": 18.4
    },
    {
     "from_instance": "centrifuge_1",
     "to_instance": "akta_1",
     "transporter_instance": "protein_scientist_1",
-    "distance_m": 3.03,
+    "distance_m": 2.22,
     "path": [
      {
-      "x": 5.824,
-      "y": 3.601,
-      "z": 0.86
+      "x": 5.958,
+      "y": 2.704,
+      "z": 0.35
      },
      {
-      "x": 5.824,
-      "y": 3.601,
+      "x": 5.958,
+      "y": 2.704,
       "z": 1.0
      },
      {
-      "x": 6.55,
-      "y": 4.25,
-      "z": 1.0
-     },
-     {
-      "x": 6.75,
-      "y": 4.05,
-      "z": 1.0
-     },
-     {
-      "x": 6.75,
-      "y": 3.85,
-      "z": 1.0
-     },
-     {
-      "x": 6.85,
-      "y": 3.75,
-      "z": 1.0
-     },
-     {
-      "x": 6.85,
-      "y": 3.65,
-      "z": 1.0
-     },
-     {
-      "x": 6.95,
+      "x": 6.15,
       "y": 3.55,
       "z": 1.0
      },
      {
-      "x": 6.95,
-      "y": 3.45,
+      "x": 6.45,
+      "y": 3.85,
       "z": 1.0
      },
      {
-      "x": 7.05,
-      "y": 3.35,
+      "x": 6.491,
+      "y": 4.379,
       "z": 1.0
      },
      {
-      "x": 7.05,
-      "y": 3.25,
-      "z": 1.0
-     },
-     {
-      "x": 7.15,
-      "y": 3.15,
-      "z": 1.0
-     },
-     {
-      "x": 7.15,
-      "y": 2.95,
-      "z": 1.0
-     },
-     {
-      "x": 7.202,
-      "y": 2.855,
-      "z": 1.0
-     },
-     {
-      "x": 7.539,
-      "y": 3.07,
+      "x": 6.828,
+      "y": 4.594,
       "z": 1.25
      }
     ],
-    "est_time_s": 18.0
+    "est_time_s": 17.2
    },
    {
     "from_instance": "akta_1",
     "to_instance": "gel_1",
     "transporter_instance": "protein_scientist_1",
-    "distance_m": 1.61,
+    "distance_m": 2.96,
     "path": [
      {
-      "x": 7.539,
-      "y": 3.07,
+      "x": 6.828,
+      "y": 4.594,
       "z": 1.25
      },
      {
-      "x": 7.202,
-      "y": 2.855,
+      "x": 6.491,
+      "y": 4.379,
       "z": 1.0
      },
      {
-      "x": 7.25,
-      "y": 2.35,
+      "x": 6.35,
+      "y": 4.45,
       "z": 1.0
      },
      {
-      "x": 7.35,
-      "y": 2.25,
+      "x": 6.35,
+      "y": 4.55,
       "z": 1.0
      },
      {
-      "x": 7.35,
-      "y": 2.15,
+      "x": 6.15,
+      "y": 4.75,
       "z": 1.0
      },
      {
-      "x": 7.45,
-      "y": 2.05,
+      "x": 6.15,
+      "y": 4.85,
       "z": 1.0
      },
      {
-      "x": 7.736,
-      "y": 1.912,
+      "x": 4.65,
+      "y": 4.85,
       "z": 1.0
      },
      {
-      "x": 7.736,
-      "y": 1.912,
+      "x": 4.936,
+      "y": 4.545,
+      "z": 1.0
+     },
+     {
+      "x": 4.936,
+      "y": 4.545,
       "z": 1.08
      }
     ],
-    "est_time_s": 16.6
+    "est_time_s": 18.0
    },
    {
     "from_instance": "gel_1",
     "to_instance": "nanodrop_1",
     "transporter_instance": "protein_scientist_1",
-    "distance_m": 5.85,
+    "distance_m": 2.0,
     "path": [
      {
-      "x": 7.736,
-      "y": 1.912,
+      "x": 4.936,
+      "y": 4.545,
       "z": 1.08
      },
      {
-      "x": 7.736,
-      "y": 1.912,
+      "x": 4.936,
+      "y": 4.545,
       "z": 1.0
      },
      {
-      "x": 6.55,
-      "y": 2.85,
+      "x": 4.65,
+      "y": 4.15,
       "z": 1.0
      },
      {
-      "x": 6.55,
-      "y": 4.25,
+      "x": 4.45,
+      "y": 3.95,
       "z": 1.0
      },
      {
-      "x": 6.45,
-      "y": 4.35,
+      "x": 4.45,
+      "y": 3.25,
       "z": 1.0
      },
      {
-      "x": 6.05,
-      "y": 4.35,
+      "x": 4.884,
+      "y": 3.561,
       "z": 1.0
      },
      {
-      "x": 5.65,
-      "y": 4.75,
-      "z": 1.0
-     },
-     {
-      "x": 5.65,
-      "y": 5.65,
-      "z": 1.0
-     },
-     {
-      "x": 4.77,
-      "y": 5.952,
-      "z": 1.0
-     },
-     {
-      "x": 4.77,
-      "y": 5.952,
+      "x": 4.884,
+      "y": 3.561,
       "z": 1.02
      }
     ],
-    "est_time_s": 20.8
+    "est_time_s": 17.0
    },
    {
     "from_instance": "nanodrop_1",
     "to_instance": "mosquito_1",
     "transporter_instance": "crystallographer_1",
-    "distance_m": 3.27,
+    "distance_m": 4.84,
     "path": [
      {
-      "x": 4.77,
-      "y": 5.952,
+      "x": 4.884,
+      "y": 3.561,
       "z": 1.02
      },
      {
-      "x": 4.77,
-      "y": 5.952,
+      "x": 4.884,
+      "y": 3.561,
       "z": 1.0
      },
      {
-      "x": 4.05,
-      "y": 5.65,
+      "x": 5.35,
+      "y": 2.75,
       "z": 1.0
      },
      {
-      "x": 4.05,
-      "y": 4.35,
+      "x": 5.35,
+      "y": 2.15,
       "z": 1.0
      },
      {
-      "x": 4.35,
-      "y": 4.05,
+      "x": 6.55,
+      "y": 2.15,
       "z": 1.0
      },
      {
-      "x": 4.35,
-      "y": 3.85,
+      "x": 6.55,
+      "y": 3.25,
       "z": 1.0
      },
      {
-      "x": 4.476,
-      "y": 3.301,
+      "x": 6.35,
+      "y": 3.45,
       "z": 1.0
      },
      {
-      "x": 4.476,
-      "y": 3.301,
+      "x": 6.25,
+      "y": 3.45,
+      "z": 1.0
+     },
+     {
+      "x": 5.634,
+      "y": 3.56,
+      "z": 1.0
+     },
+     {
+      "x": 5.634,
+      "y": 3.56,
       "z": 1.05
      }
     ],
-    "est_time_s": 18.3
+    "est_time_s": 19.8
    },
    {
     "from_instance": "mosquito_1",
     "to_instance": "imager_1",
     "transporter_instance": "protein_scientist_1",
-    "distance_m": 4.6,
+    "distance_m": 5.53,
     "path": [
      {
-      "x": 4.476,
-      "y": 3.301,
+      "x": 5.634,
+      "y": 3.56,
       "z": 1.05
      },
      {
-      "x": 4.476,
-      "y": 3.301,
+      "x": 5.634,
+      "y": 3.56,
       "z": 1.0
      },
      {
-      "x": 3.05,
-      "y": 3.75,
+      "x": 6.25,
+      "y": 3.45,
       "z": 1.0
      },
      {
-      "x": 2.45,
-      "y": 3.15,
+      "x": 6.35,
+      "y": 3.45,
       "z": 1.0
      },
      {
-      "x": 2.15,
-      "y": 3.15,
-      "z": 1.0
-     },
-     {
-      "x": 2.15,
-      "y": 2.05,
-      "z": 1.0
-     },
-     {
-      "x": 2.25,
-      "y": 1.95,
-      "z": 1.0
-     },
-     {
-      "x": 2.25,
-      "y": 1.75,
-      "z": 1.0
-     },
-     {
-      "x": 2.318,
-      "y": 1.659,
-      "z": 1.0
-     },
-     {
-      "x": 2.318,
-      "y": 1.259,
-      "z": 1.0
-     }
-    ],
-    "est_time_s": 19.6
-   },
-   {
-    "from_instance": "imager_1",
-    "to_instance": "growth_incubator_1",
-    "transporter_instance": "protein_scientist_1",
-    "distance_m": 2.32,
-    "path": [
-     {
-      "x": 2.318,
-      "y": 1.259,
-      "z": 1.0
-     },
-     {
-      "x": 2.318,
-      "y": 1.659,
-      "z": 1.0
-     },
-     {
-      "x": 1.75,
-      "y": 1.65,
-      "z": 1.0
-     },
-     {
-      "x": 1.55,
-      "y": 1.45,
-      "z": 1.0
-     },
-     {
-      "x": 1.35,
-      "y": 1.45,
-      "z": 1.0
-     },
-     {
-      "x": 1.25,
-      "y": 1.35,
-      "z": 1.0
-     },
-     {
-      "x": 1.15,
-      "y": 1.35,
-      "z": 1.0
-     },
-     {
-      "x": 1.05,
-      "y": 1.25,
-      "z": 1.0
-     },
-     {
-      "x": 0.973,
-      "y": 1.292,
-      "z": 1.0
-     },
-     {
-      "x": 0.973,
-      "y": 0.891,
-      "z": 0.5
-     }
-    ],
-    "est_time_s": 17.3
-   },
-   {
-    "from_instance": "growth_incubator_1",
-    "to_instance": "imager_1",
-    "transporter_instance": "protein_scientist_1",
-    "distance_m": 2.33,
-    "path": [
-     {
-      "x": 0.973,
-      "y": 0.891,
-      "z": 0.5
-     },
-     {
-      "x": 0.973,
-      "y": 1.292,
-      "z": 1.0
-     },
-     {
-      "x": 1.25,
-      "y": 1.25,
-      "z": 1.0
-     },
-     {
-      "x": 1.55,
-      "y": 1.55,
-      "z": 1.0
-     },
-     {
-      "x": 2.25,
-      "y": 1.55,
-      "z": 1.0
-     },
-     {
-      "x": 2.318,
-      "y": 1.659,
-      "z": 1.0
-     },
-     {
-      "x": 2.318,
-      "y": 1.259,
-      "z": 1.0
-     }
-    ],
-    "est_time_s": 17.3
-   },
-   {
-    "from_instance": "imager_1",
-    "to_instance": "bench_handling",
-    "transporter_instance": "crystallographer_1",
-    "distance_m": 3.71,
-    "path": [
-     {
-      "x": 2.318,
-      "y": 1.259,
-      "z": 1.0
-     },
-     {
-      "x": 2.318,
-      "y": 1.659,
-      "z": 1.0
-     },
-     {
-      "x": 2.35,
-      "y": 1.85,
-      "z": 1.0
-     },
-     {
-      "x": 2.15,
-      "y": 2.05,
-      "z": 1.0
-     },
-     {
-      "x": 2.15,
-      "y": 3.15,
-      "z": 1.0
-     },
-     {
-      "x": 2.25,
+      "x": 6.55,
       "y": 3.25,
       "z": 1.0
      },
      {
-      "x": 2.25,
-      "y": 3.55,
-      "z": 1.0
-     },
-     {
-      "x": 2.35,
-      "y": 3.65,
-      "z": 1.0
-     },
-     {
-      "x": 2.35,
-      "y": 3.75,
-      "z": 1.0
-     },
-     {
-      "x": 2.45,
-      "y": 3.85,
-      "z": 1.0
-     },
-     {
-      "x": 2.45,
-      "y": 4.05,
-      "z": 1.0
-     },
-     {
-      "x": 2.505,
-      "y": 4.753,
-      "z": 1.0
-     },
-     {
-      "x": 2.505,
-      "y": 4.753,
-      "z": 0.9
-     }
-    ],
-    "est_time_s": 18.7
-   },
-   {
-    "from_instance": "bench_handling",
-    "to_instance": "echo_1",
-    "transporter_instance": "crystallographer_1",
-    "distance_m": 3.62,
-    "path": [
-     {
-      "x": 2.505,
-      "y": 4.753,
-      "z": 0.9
-     },
-     {
-      "x": 2.505,
-      "y": 4.753,
-      "z": 1.0
-     },
-     {
-      "x": 3.55,
-      "y": 4.15,
-      "z": 1.0
-     },
-     {
-      "x": 3.55,
-      "y": 5.35,
-      "z": 1.0
-     },
-     {
-      "x": 3.25,
-      "y": 5.65,
-      "z": 1.0
-     },
-     {
-      "x": 3.05,
-      "y": 5.65,
-      "z": 1.0
-     },
-     {
-      "x": 2.927,
-      "y": 5.795,
-      "z": 1.0
-     },
-     {
-      "x": 2.927,
-      "y": 6.195,
-      "z": 1.25
-     }
-    ],
-    "est_time_s": 18.6
-   },
-   {
-    "from_instance": "echo_1",
-    "to_instance": "growth_incubator_1",
-    "transporter_instance": "protein_scientist_1",
-    "distance_m": 6.7,
-    "path": [
-     {
-      "x": 2.927,
-      "y": 6.195,
-      "z": 1.25
-     },
-     {
-      "x": 2.927,
-      "y": 5.795,
-      "z": 1.0
-     },
-     {
-      "x": 2.85,
-      "y": 5.65,
-      "z": 1.0
-     },
-     {
-      "x": 2.75,
-      "y": 5.65,
-      "z": 1.0
-     },
-     {
-      "x": 2.45,
-      "y": 5.35,
-      "z": 1.0
-     },
-     {
-      "x": 1.55,
-      "y": 5.35,
-      "z": 1.0
-     },
-     {
-      "x": 1.55,
-      "y": 2.55,
-      "z": 1.0
-     },
-     {
-      "x": 1.45,
-      "y": 2.45,
-      "z": 1.0
-     },
-     {
-      "x": 1.45,
-      "y": 2.25,
-      "z": 1.0
-     },
-     {
-      "x": 1.35,
+      "x": 6.55,
       "y": 2.15,
       "z": 1.0
      },
      {
-      "x": 1.35,
+      "x": 4.45,
+      "y": 2.15,
+      "z": 1.0
+     },
+     {
+      "x": 4.35,
       "y": 2.05,
       "z": 1.0
      },
      {
-      "x": 1.25,
+      "x": 4.25,
+      "y": 2.05,
+      "z": 1.0
+     },
+     {
+      "x": 4.15,
       "y": 1.95,
       "z": 1.0
      },
      {
-      "x": 1.25,
+      "x": 4.05,
+      "y": 1.95,
+      "z": 1.0
+     },
+     {
+      "x": 3.95,
       "y": 1.85,
       "z": 1.0
      },
      {
-      "x": 1.15,
+      "x": 3.85,
+      "y": 1.85,
+      "z": 1.0
+     },
+     {
+      "x": 3.75,
       "y": 1.75,
       "z": 1.0
      },
      {
-      "x": 1.15,
+      "x": 3.694,
+      "y": 1.743,
+      "z": 1.0
+     },
+     {
+      "x": 3.694,
+      "y": 1.343,
+      "z": 1.0
+     }
+    ],
+    "est_time_s": 20.5
+   },
+   {
+    "from_instance": "imager_1",
+    "to_instance": "growth_hotel_1",
+    "transporter_instance": "protein_scientist_1",
+    "distance_m": 3.26,
+    "path": [
+     {
+      "x": 3.694,
+      "y": 1.343,
+      "z": 1.0
+     },
+     {
+      "x": 3.694,
+      "y": 1.743,
+      "z": 1.0
+     },
+     {
+      "x": 3.55,
+      "y": 1.85,
+      "z": 1.0
+     },
+     {
+      "x": 3.45,
+      "y": 1.85,
+      "z": 1.0
+     },
+     {
+      "x": 3.25,
+      "y": 2.05,
+      "z": 1.0
+     },
+     {
+      "x": 3.15,
+      "y": 2.05,
+      "z": 1.0
+     },
+     {
+      "x": 3.15,
+      "y": 3.15,
+      "z": 1.0
+     },
+     {
+      "x": 3.35,
+      "y": 3.15,
+      "z": 1.0
+     },
+     {
+      "x": 3.45,
+      "y": 3.25,
+      "z": 1.0
+     },
+     {
+      "x": 3.65,
+      "y": 3.25,
+      "z": 1.0
+     },
+     {
+      "x": 3.703,
+      "y": 3.397,
+      "z": 1.0
+     },
+     {
+      "x": 3.703,
+      "y": 2.997,
+      "z": 1.1
+     }
+    ],
+    "est_time_s": 18.3
+   },
+   {
+    "from_instance": "growth_hotel_1",
+    "to_instance": "imager_1",
+    "transporter_instance": "protein_scientist_1",
+    "distance_m": 3.27,
+    "path": [
+     {
+      "x": 3.703,
+      "y": 2.997,
+      "z": 1.1
+     },
+     {
+      "x": 3.703,
+      "y": 3.397,
+      "z": 1.0
+     },
+     {
+      "x": 3.65,
+      "y": 3.25,
+      "z": 1.0
+     },
+     {
+      "x": 3.55,
+      "y": 3.25,
+      "z": 1.0
+     },
+     {
+      "x": 3.45,
+      "y": 3.15,
+      "z": 1.0
+     },
+     {
+      "x": 3.15,
+      "y": 3.15,
+      "z": 1.0
+     },
+     {
+      "x": 3.15,
+      "y": 2.05,
+      "z": 1.0
+     },
+     {
+      "x": 3.35,
+      "y": 1.85,
+      "z": 1.0
+     },
+     {
+      "x": 3.45,
+      "y": 1.85,
+      "z": 1.0
+     },
+     {
+      "x": 3.55,
+      "y": 1.75,
+      "z": 1.0
+     },
+     {
+      "x": 3.694,
+      "y": 1.743,
+      "z": 1.0
+     },
+     {
+      "x": 3.694,
+      "y": 1.343,
+      "z": 1.0
+     }
+    ],
+    "est_time_s": 18.3
+   },
+   {
+    "from_instance": "imager_1",
+    "to_instance": "bench_1",
+    "transporter_instance": "crystallographer_1",
+    "distance_m": 4.42,
+    "path": [
+     {
+      "x": 3.694,
+      "y": 1.343,
+      "z": 1.0
+     },
+     {
+      "x": 3.694,
+      "y": 1.743,
+      "z": 1.0
+     },
+     {
+      "x": 6.45,
+      "y": 1.75,
+      "z": 1.0
+     },
+     {
+      "x": 6.55,
       "y": 1.65,
       "z": 1.0
      },
      {
-      "x": 1.05,
-      "y": 1.55,
+      "x": 6.85,
+      "y": 1.65,
       "z": 1.0
      },
      {
-      "x": 1.05,
-      "y": 1.45,
+      "x": 7.647,
+      "y": 1.441,
       "z": 1.0
      },
      {
-      "x": 0.95,
-      "y": 1.35,
-      "z": 1.0
-     },
-     {
-      "x": 0.973,
-      "y": 1.292,
-      "z": 1.0
-     },
-     {
-      "x": 0.973,
-      "y": 0.891,
-      "z": 0.5
+      "x": 7.647,
+      "y": 1.441,
+      "z": 0.9
      }
     ],
-    "est_time_s": 21.7
+    "est_time_s": 19.4
    },
    {
-    "from_instance": "growth_incubator_1",
-    "to_instance": "shifter_1",
+    "from_instance": "bench_1",
+    "to_instance": "echo_1",
     "transporter_instance": "crystallographer_1",
-    "distance_m": 3.81,
+    "distance_m": 3.07,
     "path": [
      {
-      "x": 0.973,
-      "y": 0.891,
-      "z": 0.5
+      "x": 7.647,
+      "y": 1.441,
+      "z": 0.9
      },
      {
-      "x": 0.973,
-      "y": 1.292,
+      "x": 7.647,
+      "y": 1.441,
       "z": 1.0
      },
      {
-      "x": 2.15,
-      "y": 2.45,
+      "x": 7.05,
+      "y": 1.75,
       "z": 1.0
      },
      {
-      "x": 2.15,
+      "x": 6.75,
+      "y": 2.05,
+      "z": 1.0
+     },
+     {
+      "x": 6.75,
+      "y": 2.85,
+      "z": 1.0
+     },
+     {
+      "x": 6.65,
+      "y": 2.95,
+      "z": 1.0
+     },
+     {
+      "x": 6.65,
+      "y": 3.05,
+      "z": 1.0
+     },
+     {
+      "x": 6.55,
       "y": 3.15,
       "z": 1.0
      },
      {
-      "x": 2.65,
+      "x": 6.55,
+      "y": 3.25,
+      "z": 1.0
+     },
+     {
+      "x": 6.45,
+      "y": 3.35,
+      "z": 1.0
+     },
+     {
+      "x": 6.477,
+      "y": 3.496,
+      "z": 1.0
+     },
+     {
+      "x": 6.877,
+      "y": 3.496,
+      "z": 1.25
+     }
+    ],
+    "est_time_s": 18.1
+   },
+   {
+    "from_instance": "echo_1",
+    "to_instance": "growth_hotel_1",
+    "transporter_instance": "protein_scientist_1",
+    "distance_m": 5.55,
+    "path": [
+     {
+      "x": 6.877,
+      "y": 3.496,
+      "z": 1.25
+     },
+     {
+      "x": 6.477,
+      "y": 3.496,
+      "z": 1.0
+     },
+     {
+      "x": 6.45,
+      "y": 3.35,
+      "z": 1.0
+     },
+     {
+      "x": 6.55,
+      "y": 3.25,
+      "z": 1.0
+     },
+     {
+      "x": 6.55,
+      "y": 2.15,
+      "z": 1.0
+     },
+     {
+      "x": 5.35,
+      "y": 2.15,
+      "z": 1.0
+     },
+     {
+      "x": 4.35,
       "y": 3.15,
       "z": 1.0
      },
      {
-      "x": 2.723,
-      "y": 3.289,
+      "x": 4.15,
+      "y": 3.15,
       "z": 1.0
      },
      {
-      "x": 2.723,
-      "y": 2.889,
+      "x": 4.05,
+      "y": 3.25,
+      "z": 1.0
+     },
+     {
+      "x": 3.85,
+      "y": 3.25,
+      "z": 1.0
+     },
+     {
+      "x": 3.703,
+      "y": 3.397,
+      "z": 1.0
+     },
+     {
+      "x": 3.703,
+      "y": 2.997,
       "z": 1.1
      }
     ],
-    "est_time_s": 18.8
+    "est_time_s": 20.6
+   },
+   {
+    "from_instance": "growth_hotel_1",
+    "to_instance": "shifter_1",
+    "transporter_instance": "crystallographer_1",
+    "distance_m": 1.77,
+    "path": [
+     {
+      "x": 3.703,
+      "y": 2.997,
+      "z": 1.1
+     },
+     {
+      "x": 3.703,
+      "y": 3.397,
+      "z": 1.0
+     },
+     {
+      "x": 3.25,
+      "y": 3.35,
+      "z": 1.0
+     },
+     {
+      "x": 3.15,
+      "y": 3.45,
+      "z": 1.0
+     },
+     {
+      "x": 3.05,
+      "y": 3.45,
+      "z": 1.0
+     },
+     {
+      "x": 2.95,
+      "y": 3.55,
+      "z": 1.0
+     },
+     {
+      "x": 2.828,
+      "y": 3.588,
+      "z": 1.0
+     },
+     {
+      "x": 2.428,
+      "y": 3.588,
+      "z": 1.1
+     }
+    ],
+    "est_time_s": 16.8
    },
    {
     "from_instance": "shifter_1",
     "to_instance": "ln2_dewar_1",
     "transporter_instance": "crystallographer_1",
-    "distance_m": 1.25,
+    "distance_m": 4.96,
     "path": [
      {
-      "x": 2.723,
-      "y": 2.889,
+      "x": 2.428,
+      "y": 3.588,
       "z": 1.1
      },
      {
-      "x": 2.723,
-      "y": 3.289,
-      "z": 1.0
-     },
-     {
-      "x": 3.577,
-      "y": 3.255,
-      "z": 1.0
-     },
-     {
-      "x": 3.577,
-      "y": 3.255,
-      "z": 0.686
-     }
-    ],
-    "est_time_s": 16.3
-   },
-   {
-    "from_instance": "ln2_dewar_1",
-    "to_instance": "bench_handling",
-    "transporter_instance": "crystallographer_1",
-    "distance_m": 2.2,
-    "path": [
-     {
-      "x": 3.577,
-      "y": 3.255,
-      "z": 0.686
-     },
-     {
-      "x": 3.577,
-      "y": 3.255,
-      "z": 1.0
-     },
-     {
-      "x": 2.95,
-      "y": 3.35,
-      "z": 1.0
-     },
-     {
-      "x": 2.95,
-      "y": 3.45,
+      "x": 2.828,
+      "y": 3.588,
       "z": 1.0
      },
      {
@@ -2016,26 +1919,120 @@
      },
      {
       "x": 2.65,
-      "y": 3.95,
+      "y": 4.15,
+      "z": 1.0
+     },
+     {
+      "x": 1.55,
+      "y": 4.15,
+      "z": 1.0
+     },
+     {
+      "x": 1.55,
+      "y": 3.45,
+      "z": 1.0
+     },
+     {
+      "x": 1.05,
+      "y": 2.95,
+      "z": 1.0
+     },
+     {
+      "x": 1.05,
+      "y": 2.15,
+      "z": 1.0
+     },
+     {
+      "x": 1.319,
+      "y": 1.601,
+      "z": 1.0
+     },
+     {
+      "x": 1.319,
+      "y": 1.601,
+      "z": 0.686
+     }
+    ],
+    "est_time_s": 20.0
+   },
+   {
+    "from_instance": "ln2_dewar_1",
+    "to_instance": "bench_1",
+    "transporter_instance": "crystallographer_1",
+    "distance_m": 8.64,
+    "path": [
+     {
+      "x": 1.319,
+      "y": 1.601,
+      "z": 0.686
+     },
+     {
+      "x": 1.319,
+      "y": 1.601,
+      "z": 1.0
+     },
+     {
+      "x": 0.85,
+      "y": 2.05,
+      "z": 1.0
+     },
+     {
+      "x": 0.85,
+      "y": 1.15,
       "z": 1.0
      },
      {
       "x": 2.55,
-      "y": 4.05,
+      "y": 1.15,
       "z": 1.0
      },
      {
-      "x": 2.505,
-      "y": 4.753,
+      "x": 2.95,
+      "y": 1.55,
       "z": 1.0
      },
      {
-      "x": 2.505,
-      "y": 4.753,
+      "x": 4.85,
+      "y": 1.55,
+      "z": 1.0
+     },
+     {
+      "x": 4.95,
+      "y": 1.65,
+      "z": 1.0
+     },
+     {
+      "x": 6.65,
+      "y": 1.65,
+      "z": 1.0
+     },
+     {
+      "x": 6.75,
+      "y": 1.55,
+      "z": 1.0
+     },
+     {
+      "x": 6.85,
+      "y": 1.55,
+      "z": 1.0
+     },
+     {
+      "x": 6.95,
+      "y": 1.45,
+      "z": 1.0
+     },
+     {
+      "x": 7.647,
+      "y": 1.441,
+      "z": 1.0
+     },
+     {
+      "x": 7.647,
+      "y": 1.441,
       "z": 0.9
      }
     ],
-    "est_time_s": 17.2
+    "est_time_s": 23.6
    }
   ],
   "zones": [
@@ -2043,133 +2040,109 @@
     "id": "cold_room_1",
     "kind": "cold_room",
     "min": {
-     "x": 1.552,
+     "x": 2.928,
      "y": 0.0
     },
     "max": {
-     "x": 3.084,
-     "y": 1.562
+     "x": 4.46,
+     "y": 1.646
     }
    },
    {
     "id": "cryogen_1",
     "kind": "cryogen",
     "min": {
-     "x": 2.123,
-     "y": 1.028
+     "x": 0.78,
+     "y": 1.062
     },
     "max": {
-     "x": 4.888,
-     "y": 3.794
+     "x": 2.901,
+     "y": 4.188
     }
    },
    {
     "id": "ventilated_1",
     "kind": "ventilated",
     "min": {
-     "x": 7.239,
-     "y": 2.653
+     "x": 6.528,
+     "y": 4.176
     },
     "max": {
-     "x": 8.309,
-     "y": 3.788
+     "x": 7.598,
+     "y": 5.311
     }
    },
    {
     "id": "vibration_free_1",
     "kind": "vibration_free",
     "min": {
-     "x": 4.034,
-     "y": 4.258
+     "x": 4.865,
+     "y": 0.261
     },
     "max": {
-     "x": 5.704,
-     "y": 5.718
+     "x": 6.535,
+     "y": 1.721
     }
    },
    {
     "id": "vibration_free_2",
     "kind": "vibration_free",
     "min": {
-     "x": 5.094,
-     "y": 2.946
+     "x": 5.099,
+     "y": 2.134
     },
     "max": {
-     "x": 6.554,
-     "y": 4.256
-    }
-   },
-   {
-    "id": "vibration_free_3",
-    "kind": "vibration_free",
-    "min": {
-     "x": 3.904,
-     "y": 2.766
-    },
-    "max": {
-     "x": 5.048,
-     "y": 3.836
-    }
-   },
-   {
-    "id": "vibration_free_4",
-    "kind": "vibration_free",
-    "min": {
-     "x": 2.358,
-     "y": 5.894
-    },
-    "max": {
-     "x": 3.496,
-     "y": 7
+     "x": 7.858,
+     "y": 4.133
     }
    }
   ],
   "score": {
-   "total_weighted_distance_m": 373.94,
-   "floor_area_used_m2": 13.99
+   "total_weighted_distance_m": 484.2,
+   "floor_area_used_m2": 6.07
   },
   "violations": []
  },
  "sim_result": {
-  "id": "xchem_fbdd_wf_v1_layout_sim",
-  "layout_id": "xchem_fbdd_wf_v1_layout",
-  "simulated_hours": 906.0,
+  "id": "xchem_fbdd_wf_v3_layout_sim",
+  "layout_id": "xchem_fbdd_wf_v3_layout",
+  "simulated_hours": 852.0,
   "replicates": 10,
   "throughput": {
-   "value": 275.0,
+   "value": 118.6,
    "unit": "crystals_per_day",
    "target": 100,
    "meets_target": true,
-   "p10": 183.3,
-   "p50": 275.0,
-   "p90": 366.7,
-   "prob_meets_target": 1.0
+   "p10": 79.3,
+   "p50": 118.6,
+   "p90": 161.1,
+   "prob_meets_target": 0.7
   },
-  "cycle_time_s": 2949805.9,
+  "cycle_time_s": 2360958.9,
   "utilisation": [
    {
     "instance_id": "shaker_1",
-    "busy_fraction": 0.081,
-    "mean_queue_wait_s": 2211.1
+    "busy_fraction": 0.055,
+    "mean_queue_wait_s": 5589.2
    },
    {
     "instance_id": "centrifuge_1",
-    "busy_fraction": 0.049,
-    "mean_queue_wait_s": 9306.2
+    "busy_fraction": 0.002,
+    "mean_queue_wait_s": 0.0
    },
    {
     "instance_id": "sonicator_1",
-    "busy_fraction": 0.022,
-    "mean_queue_wait_s": 10.3
+    "busy_fraction": 0.02,
+    "mean_queue_wait_s": 5171.0
    },
    {
     "instance_id": "akta_1",
-    "busy_fraction": 0.143,
-    "mean_queue_wait_s": 19216.5
+    "busy_fraction": 0.179,
+    "mean_queue_wait_s": 23714.1
    },
    {
     "instance_id": "gel_1",
-    "busy_fraction": 0.004,
+    "busy_fraction": 0.006,
     "mean_queue_wait_s": 0.0
    },
    {
@@ -2179,234 +2152,3525 @@
    },
    {
     "instance_id": "mosquito_1",
-    "busy_fraction": 0.005,
-    "mean_queue_wait_s": 0.0
+    "busy_fraction": 0.004,
+    "mean_queue_wait_s": 7.4
    },
    {
-    "instance_id": "cold_room_1",
-    "busy_fraction": 0.0,
-    "mean_queue_wait_s": 0.0
+    "instance_id": "growth_hotel_1",
+    "busy_fraction": 0.943,
+    "mean_queue_wait_s": 12452.4
    },
    {
     "instance_id": "imager_1",
-    "busy_fraction": 0.033,
-    "mean_queue_wait_s": 6791.2
-   },
-   {
-    "instance_id": "growth_incubator_1",
-    "busy_fraction": 0.819,
-    "mean_queue_wait_s": 12163.7
+    "busy_fraction": 0.062,
+    "mean_queue_wait_s": 7059.9
    },
    {
     "instance_id": "echo_1",
-    "busy_fraction": 0.085,
-    "mean_queue_wait_s": 10410.4
-   },
-   {
-    "instance_id": "fridge_1",
-    "busy_fraction": 0.0,
-    "mean_queue_wait_s": 0.0
+    "busy_fraction": 0.093,
+    "mean_queue_wait_s": 1027.5
    },
    {
     "instance_id": "shifter_1",
-    "busy_fraction": 0.127,
-    "mean_queue_wait_s": 11146.5
+    "busy_fraction": 0.146,
+    "mean_queue_wait_s": 1140.8
    },
    {
     "instance_id": "ln2_dewar_1",
-    "busy_fraction": 0.043,
-    "mean_queue_wait_s": 371.4
+    "busy_fraction": 0.076,
+    "mean_queue_wait_s": 27.1
    },
    {
-    "instance_id": "bench_protein",
+    "instance_id": "bench_1",
+    "busy_fraction": 0.131,
+    "mean_queue_wait_s": 136.5
+   },
+   {
+    "instance_id": "dry_shipper_01",
     "busy_fraction": 0.0,
     "mean_queue_wait_s": 0.0
    },
    {
-    "instance_id": "bench_handling",
-    "busy_fraction": 0.066,
-    "mean_queue_wait_s": 1696.8
-   },
-   {
-    "instance_id": "cx100_1",
+    "instance_id": "dry_shipper_02",
     "busy_fraction": 0.0,
     "mean_queue_wait_s": 0.0
    },
    {
-    "instance_id": "cx100_2",
+    "instance_id": "dry_shipper_03",
     "busy_fraction": 0.0,
     "mean_queue_wait_s": 0.0
    },
    {
-    "instance_id": "cx100_3",
+    "instance_id": "dry_shipper_04",
     "busy_fraction": 0.0,
     "mean_queue_wait_s": 0.0
    },
    {
-    "instance_id": "cx100_4",
+    "instance_id": "dry_shipper_05",
     "busy_fraction": 0.0,
     "mean_queue_wait_s": 0.0
    },
    {
-    "instance_id": "cx100_5",
+    "instance_id": "dry_shipper_06",
     "busy_fraction": 0.0,
     "mean_queue_wait_s": 0.0
    },
    {
-    "instance_id": "cx100_6",
+    "instance_id": "dry_shipper_07",
     "busy_fraction": 0.0,
     "mean_queue_wait_s": 0.0
    },
    {
-    "instance_id": "cx100_7",
+    "instance_id": "dry_shipper_08",
     "busy_fraction": 0.0,
     "mean_queue_wait_s": 0.0
    },
    {
-    "instance_id": "cx100_8",
+    "instance_id": "dry_shipper_09",
     "busy_fraction": 0.0,
     "mean_queue_wait_s": 0.0
    },
    {
-    "instance_id": "cx100_9",
+    "instance_id": "dry_shipper_10",
     "busy_fraction": 0.0,
     "mean_queue_wait_s": 0.0
    },
    {
-    "instance_id": "cx100_10",
-    "busy_fraction": 0.0,
-    "mean_queue_wait_s": 0.0
-   },
-   {
-    "instance_id": "cx100_11",
-    "busy_fraction": 0.0,
-    "mean_queue_wait_s": 0.0
-   },
-   {
-    "instance_id": "cx100_12",
+    "instance_id": "dry_shipper_11",
     "busy_fraction": 0.0,
     "mean_queue_wait_s": 0.0
    },
    {
     "instance_id": "protein_scientist_1",
-    "busy_fraction": 0.081,
+    "busy_fraction": 0.172,
     "mean_queue_wait_s": 0.0
    },
    {
     "instance_id": "crystallographer_1",
-    "busy_fraction": 0.975,
+    "busy_fraction": 0.793,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "crystallographer_2",
+    "busy_fraction": 0.785,
     "mean_queue_wait_s": 0.0
    }
   ],
   "bottlenecks": [
    {
+    "kind": "instrument_capacity",
+    "instances": [
+     "growth_hotel_1"
+    ],
+    "severity": "high",
+    "message": "growth_hotel_1 is busy 94% of the time; it caps throughput near 126 crystals per day.",
+    "suggestion": "Add a parallel unit or move slow steps elsewhere."
+   },
+   {
     "kind": "operator_capacity",
     "instances": [
      "crystallographer_1"
     ],
-    "severity": "high",
-    "message": "crystallographer_1 is busy 98% of their shift; it caps throughput near 282 crystals per day.",
+    "severity": "medium",
+    "message": "crystallographer_1 is busy 79% of their shift.",
     "suggestion": "Add a second operator or stagger shifts."
    },
    {
-    "kind": "instrument_capacity",
+    "kind": "operator_capacity",
     "instances": [
-     "growth_incubator_1"
+     "crystallographer_2"
     ],
     "severity": "medium",
-    "message": "growth_incubator_1 is busy 82% of the time.",
-    "suggestion": "Add a parallel unit or move slow steps elsewhere."
+    "message": "crystallographer_2 is busy 79% of their shift.",
+    "suggestion": "Add a second operator or stagger shifts."
    },
    {
     "kind": "long_transfer",
     "instances": [
-     "gel_1",
-     "nanodrop_1"
+     "mosquito_1",
+     "imager_1"
     ],
     "severity": "medium",
-    "message": "Labware travels 5.85 m from gel_1 to nanodrop_1."
+    "message": "Labware travels 5.53 m from mosquito_1 to imager_1."
    },
    {
     "kind": "long_transfer",
     "instances": [
      "echo_1",
-     "growth_incubator_1"
+     "growth_hotel_1"
     ],
     "severity": "medium",
-    "message": "Labware travels 6.7 m from echo_1 to growth_incubator_1."
+    "message": "Labware travels 5.55 m from echo_1 to growth_hotel_1."
+   },
+   {
+    "kind": "long_transfer",
+    "instances": [
+     "ln2_dewar_1",
+     "bench_1"
+    ],
+    "severity": "medium",
+    "message": "Labware travels 8.64 m from ln2_dewar_1 to bench_1."
    },
    {
     "kind": "external_queue",
     "instances": [],
     "severity": "low",
-    "message": "External step 'Ship to synchrotron + beamtime queue' takes about 384 h of the 819 h cycle; the layout cannot shorten it.",
+    "message": "External step 'Ship to synchrotron; unattended data collection' takes about 219 h of the 656 h cycle; the layout cannot shorten it.",
     "suggestion": "Batch shipments and book access early; report turnaround as a range."
    }
   ],
   "sensitivity": [
    {
-    "parameter": "grow_2.duration_s",
-    "effect": -206.2
+    "parameter": "grow_3.duration_s",
+    "effect": -103.8
    },
    {
-    "parameter": "soak_incubate.duration_s",
-    "effect": -45.8
+    "parameter": "lysis.duration_s",
+    "effect": -59.3
    },
    {
-    "parameter": "cryo_store.duration_s",
-    "effect": -45.8
+    "parameter": "pucks_to_dewar.duration_s",
+    "effect": 3.5
    },
    {
-    "parameter": "purify_sec.duration_s",
-    "effect": -45.8
-   },
-   {
-    "parameter": "load_shipper.duration_s",
-    "effect": -45.8
+    "parameter": "expression.duration_s",
+    "effect": -3.5
    },
    {
     "parameter": "purify_affinity.duration_s",
+    "effect": 3.5
+   },
+   {
+    "parameter": "purify_sec.duration_s",
     "effect": 0.0
+   }
+  ],
+  "timeline": [
+   {
+    "t_s": 0,
+    "labware_id": "plate_00001",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 300.0,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 600.0,
+    "labware_id": "plate_00003",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 900.0,
+    "labware_id": "plate_00004",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 1200.0,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 1500.0,
+    "labware_id": "plate_00006",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 1800.0,
+    "labware_id": "plate_00007",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 2100.0,
+    "labware_id": "plate_00008",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 2400.0,
+    "labware_id": "plate_00009",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 2700.0,
+    "labware_id": "plate_00010",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 3000.0,
+    "labware_id": "plate_00011",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 3300.0,
+    "labware_id": "plate_00012",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 43877.5,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 44964.8,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 45723.0,
+    "labware_id": "plate_00007",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 45792.7,
+    "labware_id": "plate_00008",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 45878.4,
+    "labware_id": "plate_00004",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 46778.5,
+    "labware_id": "plate_00012",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 47279.7,
+    "labware_id": "plate_00001",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 47483.6,
+    "labware_id": "plate_00003",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 48850.2,
+    "labware_id": "plate_00006",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 49884.1,
+    "labware_id": "plate_00010",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 49899.6,
+    "labware_id": "plate_00009",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 50069.0,
+    "labware_id": "plate_00011",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 86400.0,
+    "labware_id": "plate_00002",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 86421.7,
+    "labware_id": "plate_00002",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 86421.7,
+    "labware_id": "plate_00013",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 86721.7,
+    "labware_id": "plate_00014",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 87021.7,
+    "labware_id": "plate_00005",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 87042.9,
+    "labware_id": "plate_00005",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 87042.9,
+    "labware_id": "plate_00015",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 87342.9,
+    "labware_id": "plate_00007",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 87365.8,
+    "labware_id": "plate_00007",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 87365.8,
+    "labware_id": "plate_00016",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 87665.8,
+    "labware_id": "plate_00008",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 87687.4,
+    "labware_id": "plate_00008",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 87687.4,
+    "labware_id": "plate_00017",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 87987.4,
+    "labware_id": "plate_00004",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 88008.6,
+    "labware_id": "plate_00004",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 88008.6,
+    "labware_id": "plate_00018",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 88308.6,
+    "labware_id": "plate_00012",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 88330.6,
+    "labware_id": "plate_00012",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 88330.6,
+    "labware_id": "plate_00019",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 88630.6,
+    "labware_id": "plate_00001",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 88653.1,
+    "labware_id": "plate_00001",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 88653.1,
+    "labware_id": "plate_00020",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 88953.1,
+    "labware_id": "plate_00003",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 88974.2,
+    "labware_id": "plate_00003",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 88974.2,
+    "labware_id": "plate_00021",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 89274.2,
+    "labware_id": "plate_00006",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 89296.9,
+    "labware_id": "plate_00006",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 89296.9,
+    "labware_id": "plate_00022",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 89596.9,
+    "labware_id": "plate_00010",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 89618.8,
+    "labware_id": "plate_00010",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 89618.8,
+    "labware_id": "plate_00023",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 89918.8,
+    "labware_id": "plate_00009",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 89940.1,
+    "labware_id": "plate_00009",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 89940.1,
+    "labware_id": "plate_00024",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 90240.1,
+    "labware_id": "plate_00011",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 90261.7,
+    "labware_id": "plate_00011",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 90261.7,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 90561.7,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 90861.7,
+    "labware_id": "plate_00007",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 91161.7,
+    "labware_id": "plate_00008",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 91357.7,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 91461.7,
+    "labware_id": "plate_00004",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 91633.1,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 91761.7,
+    "labware_id": "plate_00012",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 91944.8,
+    "labware_id": "plate_00007",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 92061.7,
+    "labware_id": "plate_00001",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 92249.6,
+    "labware_id": "plate_00008",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 92361.7,
+    "labware_id": "plate_00003",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 92552.3,
+    "labware_id": "plate_00004",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 92661.7,
+    "labware_id": "plate_00006",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 92842.4,
+    "labware_id": "plate_00012",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 92961.7,
+    "labware_id": "plate_00010",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 93094.4,
+    "labware_id": "plate_00001",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 93261.7,
+    "labware_id": "plate_00009",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 93369.3,
+    "labware_id": "plate_00003",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 93561.7,
+    "labware_id": "plate_00011",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 93668.0,
+    "labware_id": "plate_00006",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 93861.7,
+    "labware_id": "plate_00002",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 93882.9,
+    "labware_id": "plate_00002",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 93882.9,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 94017.3,
+    "labware_id": "plate_00010",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 94299.5,
+    "labware_id": "plate_00009",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 94579.0,
+    "labware_id": "plate_00011",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 95510.7,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 95510.7,
+    "labware_id": "plate_00005",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 95532.6,
+    "labware_id": "plate_00005",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 95532.6,
+    "labware_id": "plate_00002",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 95555.3,
+    "labware_id": "plate_00002",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 95555.3,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 97111.2,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 97111.2,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 97411.2,
+    "labware_id": "plate_00007",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 97433.9,
+    "labware_id": "plate_00007",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 97433.9,
+    "labware_id": "plate_00005",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 97455.3,
+    "labware_id": "plate_00005",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 97455.3,
+    "labware_id": "plate_00007",
+    "event": "step_start",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 98899.7,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 99110.5,
+    "labware_id": "plate_00007",
+    "event": "step_end",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 99110.5,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 99410.5,
+    "labware_id": "plate_00002",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 99431.7,
+    "labware_id": "plate_00002",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 99431.7,
+    "labware_id": "plate_00008",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 99454.2,
+    "labware_id": "plate_00008",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 99454.2,
+    "labware_id": "plate_00007",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 99475.6,
+    "labware_id": "plate_00007",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 99475.6,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "akta_1",
+    "step_id": "purify_affinity"
+   },
+   {
+    "t_s": 99775.6,
+    "labware_id": "plate_00008",
+    "event": "step_start",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 100814.0,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 101370.8,
+    "labware_id": "plate_00008",
+    "event": "step_end",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 101370.8,
+    "labware_id": "plate_00007",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 101670.8,
+    "labware_id": "plate_00004",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 101692.5,
+    "labware_id": "plate_00004",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 101692.5,
+    "labware_id": "plate_00008",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 101714.5,
+    "labware_id": "plate_00008",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 101714.5,
+    "labware_id": "plate_00004",
+    "event": "step_start",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 103106.0,
+    "labware_id": "plate_00007",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 103267.0,
+    "labware_id": "plate_00004",
+    "event": "step_end",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 103267.0,
+    "labware_id": "plate_00008",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 103567.0,
+    "labware_id": "plate_00012",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 103588.2,
+    "labware_id": "plate_00012",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 103588.2,
+    "labware_id": "plate_00004",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 103610.7,
+    "labware_id": "plate_00004",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 103610.7,
+    "labware_id": "plate_00012",
+    "event": "step_start",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 104997.1,
+    "labware_id": "plate_00008",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 105275.6,
+    "labware_id": "plate_00012",
+    "event": "step_end",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 105275.6,
+    "labware_id": "plate_00004",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 105423.7,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "akta_1",
+    "step_id": "purify_affinity"
+   },
+   {
+    "t_s": 105575.6,
+    "labware_id": "plate_00001",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 105596.7,
+    "labware_id": "plate_00001",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 105596.7,
+    "labware_id": "plate_00012",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 105619.6,
+    "labware_id": "plate_00012",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 105619.6,
+    "labware_id": "plate_00005",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 105639.8,
+    "labware_id": "plate_00005",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 105639.8,
+    "labware_id": "plate_00001",
+    "event": "step_start",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 106940.1,
+    "labware_id": "plate_00004",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 107200.1,
+    "labware_id": "plate_00001",
+    "event": "step_end",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 107200.1,
+    "labware_id": "plate_00012",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 107500.1,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "akta_1",
+    "step_id": "purify_affinity"
+   },
+   {
+    "t_s": 107800.1,
+    "labware_id": "plate_00003",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 107822.2,
+    "labware_id": "plate_00003",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 107822.2,
+    "labware_id": "plate_00001",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 107843.6,
+    "labware_id": "plate_00001",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 107843.6,
+    "labware_id": "plate_00003",
+    "event": "step_start",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 108854.9,
+    "labware_id": "plate_00012",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 109426.5,
+    "labware_id": "plate_00003",
+    "event": "step_end",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 109426.5,
+    "labware_id": "plate_00001",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 109726.5,
+    "labware_id": "plate_00006",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 109749.2,
+    "labware_id": "plate_00006",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 109749.2,
+    "labware_id": "plate_00003",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 109771.7,
+    "labware_id": "plate_00003",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 109771.7,
+    "labware_id": "plate_00006",
+    "event": "step_start",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 111192.5,
+    "labware_id": "plate_00001",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 111367.2,
+    "labware_id": "plate_00006",
+    "event": "step_end",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 111367.2,
+    "labware_id": "plate_00003",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 111667.2,
+    "labware_id": "plate_00010",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 111689.2,
+    "labware_id": "plate_00010",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 111689.2,
+    "labware_id": "plate_00006",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 111711.3,
+    "labware_id": "plate_00006",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 111711.3,
+    "labware_id": "plate_00010",
+    "event": "step_start",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 113089.3,
+    "labware_id": "plate_00003",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 113277.4,
+    "labware_id": "plate_00010",
+    "event": "step_end",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 113277.4,
+    "labware_id": "plate_00006",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 113430.0,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "akta_1",
+    "step_id": "purify_affinity"
+   },
+   {
+    "t_s": 113577.4,
+    "labware_id": "plate_00009",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 113598.8,
+    "labware_id": "plate_00009",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 113598.8,
+    "labware_id": "plate_00010",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 113620.2,
+    "labware_id": "plate_00010",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 113620.2,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "akta_1",
+    "step_id": "purify_sec"
+   },
+   {
+    "t_s": 113920.2,
+    "labware_id": "plate_00009",
+    "event": "step_start",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 114947.2,
+    "labware_id": "plate_00006",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 117103.1,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "akta_1",
+    "step_id": "purify_sec"
+   },
+   {
+    "t_s": 130952.3,
+    "labware_id": "plate_00014",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 131391.1,
+    "labware_id": "plate_00018",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 131916.3,
+    "labware_id": "plate_00013",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 132096.8,
+    "labware_id": "plate_00019",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 132856.1,
+    "labware_id": "plate_00016",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 133207.8,
+    "labware_id": "plate_00020",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 134330.7,
+    "labware_id": "plate_00023",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 134642.0,
+    "labware_id": "plate_00015",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 134959.8,
+    "labware_id": "plate_00017",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 136042.5,
+    "labware_id": "plate_00022",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 136385.0,
+    "labware_id": "plate_00021",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 136864.3,
+    "labware_id": "plate_00024",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 173081.4,
+    "labware_id": "plate_00009",
+    "event": "step_end",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 173081.4,
+    "labware_id": "plate_00010",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 173381.4,
+    "labware_id": "plate_00007",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 173402.3,
+    "labware_id": "plate_00007",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 173402.3,
+    "labware_id": "plate_00002",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 173424.0,
+    "labware_id": "plate_00002",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 173424.0,
+    "labware_id": "plate_00025",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 173724.0,
+    "labware_id": "plate_00014",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 173746.2,
+    "labware_id": "plate_00014",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 173746.2,
+    "labware_id": "plate_00026",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 174046.2,
+    "labware_id": "plate_00018",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 174069.0,
+    "labware_id": "plate_00018",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 174069.0,
+    "labware_id": "plate_00027",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 174369.0,
+    "labware_id": "plate_00013",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 174390.6,
+    "labware_id": "plate_00013",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 174390.6,
+    "labware_id": "plate_00028",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 174690.6,
+    "labware_id": "plate_00019",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 174712.7,
+    "labware_id": "plate_00019",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 174712.7,
+    "labware_id": "plate_00029",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 174874.8,
+    "labware_id": "plate_00010",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 175012.7,
+    "labware_id": "plate_00016",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 175034.2,
+    "labware_id": "plate_00016",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 175034.2,
+    "labware_id": "plate_00030",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 175334.2,
+    "labware_id": "plate_00020",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 175357.0,
+    "labware_id": "plate_00020",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 175357.0,
+    "labware_id": "plate_00031",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 175657.0,
+    "labware_id": "plate_00023",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 175678.2,
+    "labware_id": "plate_00023",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 175678.2,
+    "labware_id": "plate_00032",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 175978.2,
+    "labware_id": "plate_00015",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 176001.2,
+    "labware_id": "plate_00015",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 176001.2,
+    "labware_id": "plate_00033",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 176301.2,
+    "labware_id": "plate_00017",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 176322.7,
+    "labware_id": "plate_00017",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 176322.7,
+    "labware_id": "plate_00034",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 176622.7,
+    "labware_id": "plate_00022",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 176644.4,
+    "labware_id": "plate_00022",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 176644.4,
+    "labware_id": "plate_00035",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 176944.4,
+    "labware_id": "plate_00021",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 176966.2,
+    "labware_id": "plate_00021",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 176966.2,
+    "labware_id": "plate_00036",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 177266.2,
+    "labware_id": "plate_00024",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 177288.6,
+    "labware_id": "plate_00024",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 177288.6,
+    "labware_id": "plate_00011",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 177309.7,
+    "labware_id": "plate_00011",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 177309.7,
+    "labware_id": "plate_00009",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 177332.7,
+    "labware_id": "plate_00009",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 177332.7,
+    "labware_id": "plate_00007",
+    "event": "step_start",
+    "instance_id": "akta_1",
+    "step_id": "purify_affinity"
+   },
+   {
+    "t_s": 177632.7,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "gel_1",
+    "step_id": "protein_qc"
+   },
+   {
+    "t_s": 177932.7,
+    "labware_id": "plate_00014",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 178232.7,
+    "labware_id": "plate_00018",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 178532.7,
+    "labware_id": "plate_00013",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 178832.7,
+    "labware_id": "plate_00019",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 178988.6,
+    "labware_id": "plate_00014",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 179132.7,
+    "labware_id": "plate_00016",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 179272.7,
+    "labware_id": "plate_00018",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 179432.7,
+    "labware_id": "plate_00020",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 179543.2,
+    "labware_id": "plate_00013",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 179732.7,
+    "labware_id": "plate_00023",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 179841.8,
+    "labware_id": "plate_00019",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 180032.7,
+    "labware_id": "plate_00015",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 180092.7,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "gel_1",
+    "step_id": "protein_qc"
+   },
+   {
+    "t_s": 180157.3,
+    "labware_id": "plate_00016",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 180332.7,
+    "labware_id": "plate_00017",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 180443.4,
+    "labware_id": "plate_00020",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 180632.7,
+    "labware_id": "plate_00022",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 180800.1,
+    "labware_id": "plate_00023",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 180932.7,
+    "labware_id": "plate_00021",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 181039.4,
+    "labware_id": "plate_00015",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 181232.7,
+    "labware_id": "plate_00024",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 181372.7,
+    "labware_id": "plate_00017",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 181532.7,
+    "labware_id": "plate_00011",
+    "event": "step_start",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 181694.7,
+    "labware_id": "plate_00022",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 181969.6,
+    "labware_id": "plate_00021",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 182314.0,
+    "labware_id": "plate_00024",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "cell_harvest"
+   },
+   {
+    "t_s": 182767.7,
+    "labware_id": "plate_00007",
+    "event": "step_end",
+    "instance_id": "akta_1",
+    "step_id": "purify_affinity"
+   },
+   {
+    "t_s": 183137.7,
+    "labware_id": "plate_00011",
+    "event": "step_end",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 183137.7,
+    "labware_id": "plate_00009",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 183437.7,
+    "labware_id": "plate_00002",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 183458.8,
+    "labware_id": "plate_00002",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 183458.8,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "akta_1",
+    "step_id": "purify_sec"
+   },
+   {
+    "t_s": 183758.8,
+    "labware_id": "plate_00014",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 183780.6,
+    "labware_id": "plate_00014",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 183780.6,
+    "labware_id": "plate_00011",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 183803.5,
+    "labware_id": "plate_00011",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 183803.5,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "nanodrop_1",
+    "step_id": "concentration"
+   },
+   {
+    "t_s": 184051.2,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "nanodrop_1",
+    "step_id": "concentration"
+   },
+   {
+    "t_s": 184051.2,
+    "labware_id": "plate_00014",
+    "event": "step_start",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 184051.2,
+    "labware_id": "plate_00037",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 184051.2,
+    "labware_id": "plate_00038",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_2"
+   },
+   {
+    "t_s": 184075.3,
+    "labware_id": "plate_00038",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_2"
+   },
+   {
+    "t_s": 184075.3,
+    "labware_id": "plate_00039",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_2"
+   },
+   {
+    "t_s": 184076.0,
+    "labware_id": "plate_00037",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 184076.0,
+    "labware_id": "plate_00038",
+    "event": "step_start",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 184100.3,
+    "labware_id": "plate_00039",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_2"
+   },
+   {
+    "t_s": 184100.3,
+    "labware_id": "plate_00037",
+    "event": "step_start",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 184252.3,
+    "labware_id": "plate_00039",
+    "event": "step_start",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 184252.3,
+    "labware_id": "plate_00038",
+    "event": "step_end",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 184275.2,
+    "labware_id": "plate_00040",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_2"
+   },
+   {
+    "t_s": 184275.2,
+    "labware_id": "plate_00037",
+    "event": "step_end",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 184298.3,
+    "labware_id": "plate_00040",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_2"
+   },
+   {
+    "t_s": 184298.3,
+    "labware_id": "plate_00041",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_2"
+   },
+   {
+    "t_s": 184321.3,
+    "labware_id": "plate_00041",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_2"
+   },
+   {
+    "t_s": 184321.3,
+    "labware_id": "plate_00040",
+    "event": "step_start",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 184429.3,
+    "labware_id": "plate_00041",
+    "event": "step_start",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 184429.3,
+    "labware_id": "plate_00039",
+    "event": "step_end",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 184485.9,
+    "labware_id": "plate_00042",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_2"
+   },
+   {
+    "t_s": 184485.9,
+    "labware_id": "plate_00040",
+    "event": "step_end",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 184510.9,
+    "labware_id": "plate_00042",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_2"
+   },
+   {
+    "t_s": 184510.9,
+    "labware_id": "plate_00043",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_2"
+   },
+   {
+    "t_s": 184533.9,
+    "labware_id": "plate_00043",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_2"
+   },
+   {
+    "t_s": 184533.9,
+    "labware_id": "plate_00042",
+    "event": "step_start",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 184601.1,
+    "labware_id": "plate_00043",
+    "event": "step_start",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 184601.1,
+    "labware_id": "plate_00041",
+    "event": "step_end",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 184709.3,
+    "labware_id": "plate_00044",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_2"
+   },
+   {
+    "t_s": 184709.3,
+    "labware_id": "plate_00042",
+    "event": "step_end",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 184732.6,
+    "labware_id": "plate_00044",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_2"
+   },
+   {
+    "t_s": 184732.6,
+    "labware_id": "plate_00044",
+    "event": "step_start",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 184777.6,
+    "labware_id": "plate_00043",
+    "event": "step_end",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 184810.9,
+    "labware_id": "plate_00009",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 184899.0,
+    "labware_id": "plate_00044",
+    "event": "step_end",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 185647.7,
+    "labware_id": "plate_00014",
+    "event": "step_end",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 185647.7,
+    "labware_id": "plate_00011",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 185947.7,
+    "labware_id": "plate_00038",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 185973.2,
+    "labware_id": "plate_00038",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 185973.2,
+    "labware_id": "plate_00038",
+    "event": "step_start",
+    "instance_id": "imager_1",
+    "step_id": "image_d0"
+   },
+   {
+    "t_s": 185973.2,
+    "labware_id": "plate_00018",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 185995.0,
+    "labware_id": "plate_00018",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 185995.0,
+    "labware_id": "plate_00014",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 186018.2,
+    "labware_id": "plate_00014",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 186018.2,
+    "labware_id": "plate_00018",
+    "event": "step_start",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 186190.6,
+    "labware_id": "plate_00038",
+    "event": "step_end",
+    "instance_id": "imager_1",
+    "step_id": "image_d0"
+   },
+   {
+    "t_s": 186883.3,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "akta_1",
+    "step_id": "purify_sec"
+   },
+   {
+    "t_s": 187338.7,
+    "labware_id": "plate_00011",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 187600.5,
+    "labware_id": "plate_00018",
+    "event": "step_end",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 187600.5,
+    "labware_id": "plate_00014",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 187900.5,
+    "labware_id": "plate_00037",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 187925.9,
+    "labware_id": "plate_00037",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 187925.9,
+    "labware_id": "plate_00037",
+    "event": "step_start",
+    "instance_id": "imager_1",
+    "step_id": "image_d0"
+   },
+   {
+    "t_s": 187925.9,
+    "labware_id": "plate_00038",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 187948.1,
+    "labware_id": "plate_00038",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 187948.1,
+    "labware_id": "plate_00038",
+    "event": "step_start",
+    "instance_id": "growth_hotel_1",
+    "step_id": "grow_1"
+   },
+   {
+    "t_s": 187948.1,
+    "labware_id": "plate_00008",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 187968.4,
+    "labware_id": "plate_00008",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 187968.4,
+    "labware_id": "plate_00005",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 187991.1,
+    "labware_id": "plate_00005",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 187991.1,
+    "labware_id": "plate_00013",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 188014.0,
+    "labware_id": "plate_00013",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 188014.0,
+    "labware_id": "plate_00018",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 188035.8,
+    "labware_id": "plate_00018",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 188035.8,
+    "labware_id": "plate_00008",
+    "event": "step_start",
+    "instance_id": "akta_1",
+    "step_id": "purify_affinity"
+   },
+   {
+    "t_s": 188125.6,
+    "labware_id": "plate_00037",
+    "event": "step_end",
+    "instance_id": "imager_1",
+    "step_id": "image_d0"
+   },
+   {
+    "t_s": 188335.8,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "gel_1",
+    "step_id": "protein_qc"
+   },
+   {
+    "t_s": 188635.8,
+    "labware_id": "plate_00013",
+    "event": "step_start",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 189390.8,
+    "labware_id": "plate_00014",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 190240.8,
+    "labware_id": "plate_00013",
+    "event": "step_end",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 190240.8,
+    "labware_id": "plate_00018",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 190540.8,
+    "labware_id": "plate_00039",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 190566.7,
+    "labware_id": "plate_00039",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 190566.7,
+    "labware_id": "plate_00039",
+    "event": "step_start",
+    "instance_id": "imager_1",
+    "step_id": "image_d0"
+   },
+   {
+    "t_s": 190566.7,
+    "labware_id": "plate_00037",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 190589.1,
+    "labware_id": "plate_00037",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 190589.1,
+    "labware_id": "plate_00037",
+    "event": "step_start",
+    "instance_id": "growth_hotel_1",
+    "step_id": "grow_1"
+   },
+   {
+    "t_s": 190589.1,
+    "labware_id": "plate_00019",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 190611.6,
+    "labware_id": "plate_00019",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 190611.6,
+    "labware_id": "plate_00013",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 190634.9,
+    "labware_id": "plate_00013",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 190634.9,
+    "labware_id": "plate_00019",
+    "event": "step_start",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 190765.4,
+    "labware_id": "plate_00039",
+    "event": "step_end",
+    "instance_id": "imager_1",
+    "step_id": "image_d0"
+   },
+   {
+    "t_s": 190790.5,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "gel_1",
+    "step_id": "protein_qc"
+   },
+   {
+    "t_s": 191973.9,
+    "labware_id": "plate_00018",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 192323.2,
+    "labware_id": "plate_00019",
+    "event": "step_end",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 192323.2,
+    "labware_id": "plate_00013",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 192623.2,
+    "labware_id": "plate_00040",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 192648.4,
+    "labware_id": "plate_00040",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 192648.4,
+    "labware_id": "plate_00040",
+    "event": "step_start",
+    "instance_id": "imager_1",
+    "step_id": "image_d0"
+   },
+   {
+    "t_s": 192648.4,
+    "labware_id": "plate_00039",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 192670.8,
+    "labware_id": "plate_00039",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 192670.8,
+    "labware_id": "plate_00039",
+    "event": "step_start",
+    "instance_id": "growth_hotel_1",
+    "step_id": "grow_1"
+   },
+   {
+    "t_s": 192670.8,
+    "labware_id": "plate_00005",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 192691.3,
+    "labware_id": "plate_00005",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 192691.3,
+    "labware_id": "plate_00016",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 192712.5,
+    "labware_id": "plate_00016",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 192712.5,
+    "labware_id": "plate_00019",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 192735.5,
+    "labware_id": "plate_00019",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 192735.5,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "nanodrop_1",
+    "step_id": "concentration"
+   },
+   {
+    "t_s": 192852.3,
+    "labware_id": "plate_00040",
+    "event": "step_end",
+    "instance_id": "imager_1",
+    "step_id": "image_d0"
+   },
+   {
+    "t_s": 192990.4,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "nanodrop_1",
+    "step_id": "concentration"
+   },
+   {
+    "t_s": 192990.4,
+    "labware_id": "plate_00016",
+    "event": "step_start",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 192990.4,
+    "labware_id": "plate_00045",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 192990.4,
+    "labware_id": "plate_00046",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_2"
+   },
+   {
+    "t_s": 193013.2,
+    "labware_id": "plate_00045",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 193013.2,
+    "labware_id": "plate_00047",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 193014.2,
+    "labware_id": "plate_00046",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_2"
+   },
+   {
+    "t_s": 193014.2,
+    "labware_id": "plate_00045",
+    "event": "step_start",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 193037.2,
+    "labware_id": "plate_00047",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 193037.2,
+    "labware_id": "plate_00046",
+    "event": "step_start",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 193186.0,
+    "labware_id": "plate_00047",
+    "event": "step_start",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 193186.0,
+    "labware_id": "plate_00045",
+    "event": "step_end",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 193207.9,
+    "labware_id": "plate_00048",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 193207.9,
+    "labware_id": "plate_00046",
+    "event": "step_end",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 193232.2,
+    "labware_id": "plate_00048",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 193232.2,
+    "labware_id": "plate_00049",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 193255.0,
+    "labware_id": "plate_00049",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 193255.0,
+    "labware_id": "plate_00048",
+    "event": "step_start",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 193360.1,
+    "labware_id": "plate_00049",
+    "event": "step_start",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 193360.1,
+    "labware_id": "plate_00047",
+    "event": "step_end",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 193424.9,
+    "labware_id": "plate_00050",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 193424.9,
+    "labware_id": "plate_00048",
+    "event": "step_end",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 193448.1,
+    "labware_id": "plate_00050",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 193448.1,
+    "labware_id": "plate_00051",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 193471.0,
+    "labware_id": "plate_00051",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 193471.0,
+    "labware_id": "plate_00050",
+    "event": "step_start",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 193530.6,
+    "labware_id": "plate_00051",
+    "event": "step_start",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 193530.6,
+    "labware_id": "plate_00049",
+    "event": "step_end",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 193641.1,
+    "labware_id": "plate_00052",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 193641.1,
+    "labware_id": "plate_00050",
+    "event": "step_end",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 193642.9,
+    "labware_id": "plate_00008",
+    "event": "step_end",
+    "instance_id": "akta_1",
+    "step_id": "purify_affinity"
+   },
+   {
+    "t_s": 193664.1,
+    "labware_id": "plate_00052",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 193664.1,
+    "labware_id": "plate_00052",
+    "event": "step_start",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 193700.5,
+    "labware_id": "plate_00051",
+    "event": "step_end",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 193831.5,
+    "labware_id": "plate_00052",
+    "event": "step_end",
+    "instance_id": "mosquito_1",
+    "step_id": "drop_setup"
+   },
+   {
+    "t_s": 194085.0,
+    "labware_id": "plate_00013",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 194638.0,
+    "labware_id": "plate_00016",
+    "event": "step_end",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 194638.0,
+    "labware_id": "plate_00019",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 194938.0,
+    "labware_id": "plate_00041",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 194963.8,
+    "labware_id": "plate_00041",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 194963.8,
+    "labware_id": "plate_00041",
+    "event": "step_start",
+    "instance_id": "imager_1",
+    "step_id": "image_d0"
+   },
+   {
+    "t_s": 194963.8,
+    "labware_id": "plate_00040",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 194986.4,
+    "labware_id": "plate_00040",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 194986.4,
+    "labware_id": "plate_00040",
+    "event": "step_start",
+    "instance_id": "growth_hotel_1",
+    "step_id": "grow_1"
+   },
+   {
+    "t_s": 194986.4,
+    "labware_id": "plate_00007",
+    "event": "step_start",
+    "instance_id": "akta_1",
+    "step_id": "purify_sec"
+   },
+   {
+    "t_s": 195179.2,
+    "labware_id": "plate_00041",
+    "event": "step_end",
+    "instance_id": "imager_1",
+    "step_id": "image_d0"
+   },
+   {
+    "t_s": 195286.4,
+    "labware_id": "plate_00020",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 195307.9,
+    "labware_id": "plate_00020",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 195307.9,
+    "labware_id": "plate_00016",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 195329.8,
+    "labware_id": "plate_00016",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 195329.8,
+    "labware_id": "plate_00042",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 195354.3,
+    "labware_id": "plate_00042",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 195354.3,
+    "labware_id": "plate_00042",
+    "event": "step_start",
+    "instance_id": "imager_1",
+    "step_id": "image_d0"
+   },
+   {
+    "t_s": 195354.3,
+    "labware_id": "plate_00041",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 195377.4,
+    "labware_id": "plate_00041",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 195377.4,
+    "labware_id": "plate_00041",
+    "event": "step_start",
+    "instance_id": "growth_hotel_1",
+    "step_id": "grow_1"
+   },
+   {
+    "t_s": 195377.4,
+    "labware_id": "plate_00020",
+    "event": "step_start",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 195566.8,
+    "labware_id": "plate_00042",
+    "event": "step_end",
+    "instance_id": "imager_1",
+    "step_id": "image_d0"
+   },
+   {
+    "t_s": 196423.0,
+    "labware_id": "plate_00019",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 196912.9,
+    "labware_id": "plate_00020",
+    "event": "step_end",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 196912.9,
+    "labware_id": "plate_00016",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 197212.9,
+    "labware_id": "plate_00043",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 197237.9,
+    "labware_id": "plate_00043",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 197237.9,
+    "labware_id": "plate_00043",
+    "event": "step_start",
+    "instance_id": "imager_1",
+    "step_id": "image_d0"
+   },
+   {
+    "t_s": 197237.9,
+    "labware_id": "plate_00042",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 197260.5,
+    "labware_id": "plate_00042",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 197260.5,
+    "labware_id": "plate_00042",
+    "event": "step_start",
+    "instance_id": "growth_hotel_1",
+    "step_id": "grow_1"
+   },
+   {
+    "t_s": 197260.5,
+    "labware_id": "plate_00023",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 197282.9,
+    "labware_id": "plate_00023",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 197282.9,
+    "labware_id": "plate_00020",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 197304.1,
+    "labware_id": "plate_00020",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 197304.1,
+    "labware_id": "plate_00023",
+    "event": "step_start",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 197438.4,
+    "labware_id": "plate_00043",
+    "event": "step_end",
+    "instance_id": "imager_1",
+    "step_id": "image_d0"
+   },
+   {
+    "t_s": 198419.1,
+    "labware_id": "plate_00007",
+    "event": "step_end",
+    "instance_id": "akta_1",
+    "step_id": "purify_sec"
+   },
+   {
+    "t_s": 198655.2,
+    "labware_id": "plate_00016",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 198897.4,
+    "labware_id": "plate_00023",
+    "event": "step_end",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 198897.4,
+    "labware_id": "plate_00020",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 199197.4,
+    "labware_id": "plate_00044",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 199222.7,
+    "labware_id": "plate_00044",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 199222.7,
+    "labware_id": "plate_00044",
+    "event": "step_start",
+    "instance_id": "imager_1",
+    "step_id": "image_d0"
+   },
+   {
+    "t_s": 199222.7,
+    "labware_id": "plate_00043",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 199244.3,
+    "labware_id": "plate_00043",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 199244.3,
+    "labware_id": "plate_00043",
+    "event": "step_start",
+    "instance_id": "growth_hotel_1",
+    "step_id": "grow_1"
+   },
+   {
+    "t_s": 199244.3,
+    "labware_id": "plate_00004",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 199264.1,
+    "labware_id": "plate_00004",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 199264.1,
+    "labware_id": "plate_00007",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 199285.4,
+    "labware_id": "plate_00007",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 199285.4,
+    "labware_id": "plate_00015",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 199307.3,
+    "labware_id": "plate_00015",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 199307.3,
+    "labware_id": "plate_00023",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 199330.0,
+    "labware_id": "plate_00023",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 199330.0,
+    "labware_id": "plate_00004",
+    "event": "step_start",
+    "instance_id": "akta_1",
+    "step_id": "purify_affinity"
+   },
+   {
+    "t_s": 199439.7,
+    "labware_id": "plate_00044",
+    "event": "step_end",
+    "instance_id": "imager_1",
+    "step_id": "image_d0"
+   },
+   {
+    "t_s": 199630.0,
+    "labware_id": "plate_00007",
+    "event": "step_start",
+    "instance_id": "gel_1",
+    "step_id": "protein_qc"
+   },
+   {
+    "t_s": 199930.0,
+    "labware_id": "plate_00015",
+    "event": "step_start",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 200570.9,
+    "labware_id": "plate_00020",
+    "event": "step_end",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 202108.2,
+    "labware_id": "plate_00007",
+    "event": "step_end",
+    "instance_id": "gel_1",
+    "step_id": "protein_qc"
+   },
+   {
+    "t_s": 204963.8,
+    "labware_id": "plate_00004",
+    "event": "step_end",
+    "instance_id": "akta_1",
+    "step_id": "purify_affinity"
+   },
+   {
+    "t_s": 217221.5,
+    "labware_id": "plate_00025",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 218128.4,
+    "labware_id": "plate_00027",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 219472.6,
+    "labware_id": "plate_00033",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 219894.1,
+    "labware_id": "plate_00035",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 220133.0,
+    "labware_id": "plate_00031",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 220828.9,
+    "labware_id": "plate_00026",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 220858.1,
+    "labware_id": "plate_00029",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 221064.8,
+    "labware_id": "plate_00036",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 221090.1,
+    "labware_id": "plate_00028",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 221400.2,
+    "labware_id": "plate_00034",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 221442.2,
+    "labware_id": "plate_00030",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 222824.2,
+    "labware_id": "plate_00032",
+    "event": "step_end",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 259216.8,
+    "labware_id": "plate_00015",
+    "event": "step_end",
+    "instance_id": "sonicator_1",
+    "step_id": "lysis"
+   },
+   {
+    "t_s": 259216.8,
+    "labware_id": "plate_00023",
+    "event": "step_start",
+    "instance_id": "centrifuge_1",
+    "step_id": "clarification"
+   },
+   {
+    "t_s": 259516.8,
+    "labware_id": "plate_00045",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 259542.5,
+    "labware_id": "plate_00045",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 259542.5,
+    "labware_id": "plate_00045",
+    "event": "step_start",
+    "instance_id": "imager_1",
+    "step_id": "image_d0"
+   },
+   {
+    "t_s": 259542.5,
+    "labware_id": "plate_00044",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 259564.6,
+    "labware_id": "plate_00044",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 259564.6,
+    "labware_id": "plate_00044",
+    "event": "step_start",
+    "instance_id": "growth_hotel_1",
+    "step_id": "grow_1"
+   },
+   {
+    "t_s": 259564.6,
+    "labware_id": "plate_00007",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 259584.7,
+    "labware_id": "plate_00007",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 259584.7,
+    "labware_id": "plate_00008",
+    "event": "step_start",
+    "instance_id": "akta_1",
+    "step_id": "purify_sec"
+   },
+   {
+    "t_s": 259748.0,
+    "labware_id": "plate_00045",
+    "event": "step_end",
+    "instance_id": "imager_1",
+    "step_id": "image_d0"
+   },
+   {
+    "t_s": 259884.7,
+    "labware_id": "plate_00053",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
+   },
+   {
+    "t_s": 260184.7,
+    "labware_id": "plate_00025",
+    "event": "transfer_start",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 260207.1,
+    "labware_id": "plate_00025",
+    "event": "transfer_end",
+    "instance_id": "protein_scientist_1"
+   },
+   {
+    "t_s": 260207.1,
+    "labware_id": "plate_00054",
+    "event": "step_start",
+    "instance_id": "shaker_1",
+    "step_id": "expression"
    }
   ]
  },
  "claims": [
   {
    "id": "c1",
-   "statement": "Simulated P50 throughput of harvested-and-analysed crystals meets the 100 crystals/day placeholder target.",
+   "statement": "Median simulated throughput meets the placeholder target of 100 successful crystals/day.",
    "metric": "throughput.p50",
    "comparator": ">=",
    "predicted_value": 100,
-   "confidence": 0.85,
-   "status": "supported",
-   "verified_value": 320.8,
-   "verifier_note": "throughput.p50 = 320.8, recomputed by the verifier."
+   "confidence": 0.75,
+   "status": "refuted",
+   "verified_value": 0.0,
+   "verifier_note": "throughput.p50 = 0, recomputed by the verifier with catalog durations restored for cell_harvest, lysis, clarification, purify_affinity, purify_sec."
   },
   {
    "id": "c2",
-   "statement": "The layout has zero violations.",
+   "statement": "The final layout has no violations.",
    "metric": "layout.violations",
    "comparator": "==",
    "predicted_value": 0,
    "confidence": 0.9,
    "status": "supported",
    "verified_value": 0.0,
-   "verifier_note": "layout.violations = 0, recomputed by the verifier."
+   "verifier_note": "layout.violations = 0, recomputed by the verifier with catalog durations restored for cell_harvest, lysis, clarification, purify_affinity, purify_sec."
   },
   {
    "id": "c3",
-   "statement": "Mean end-to-end cycle time per plate-lot (expression to analysed data, incl. shipping and beamtime queue) is at most 35 days (3,024,000 s).",
+   "statement": "Mean simulated cycle time per crystallisation plate (expression to analysis) is at least 25 days.",
    "metric": "cycle_time_s",
-   "comparator": "<=",
-   "predicted_value": 3024000,
-   "confidence": 0.6,
+   "comparator": ">=",
+   "predicted_value": 2160000,
+   "confidence": 0.7,
    "status": "supported",
-   "verified_value": 2981398.2,
-   "verifier_note": "cycle_time_s = 2.9814e+06, recomputed by the verifier."
+   "verified_value": 12749282.4,
+   "verifier_note": "cycle_time_s = 1.27493e+07, recomputed by the verifier with catalog durations restored for cell_harvest, lysis, clarification, purify_affinity, purify_sec."
   }
  ],
  "follow_up_used": true,
- "first_reply": "I need a few details before I build and simulate the design. These choices change the answer a lot, and I don't want to make them up.\n\n**Requirements:**\n1. **Budget (USD):** What is the equipment budget? If you don't have one yet, you can tell me to make a provisional design and I'll flag cost as unchecked.\n2. **Operating hours and staff:** How many hours a day does the lab run, and on how many days a week? How many operators are there, and how long are their shifts? Crystal harvesting has to be done by a person for its whole duration, even with a Shifter, so harvesting will probably limit the campaign.\n3. **Crystals per fragment:** Is it 1 soaked crystal per fragment (500 crystals, about 32 pucks of 16 pins), or do you want replicates or extra crystals as a buffer for failures?\n4. **Deadline or target rate:** Do you have a target, such as \"finish within N weeks\" or \"harvest X crystals per day\"? Otherwise I'll report the campaign time the model predicts and its bottleneck.\n5. **Hazards and room layout:**\n   - Can I confirm the hazards are cryogens (LN2 dewars and the dry shipper)? Will the protein expression be BSL-1?\n   - How big is the cold room, and where in the 9 \u00d7 7 m room is it?\n   - Where are the doors, and is there anything I should keep clear?\n\n**Assumptions I'll make unless you tell me otherwise:**\n- **Protein and crystallisation:** I'll treat protein yield per expression lot, crystals per plate and the crystal success rate as placeholders with stated ranges. Please share any values you have.\n- **Crystal growth:** It's unclear how long crystals need to grow before soaking. I'll use a placeholder range unless you know your system.\n- **Imaging:** I'll use one Rock Imager camera, taking a few minutes per plate on a fixed schedule. Growth time is counted in storage, not as imaging time.\n- **Synchrotron:** Diffraction stays external, with no in-house X-ray. I need your assumptions for shipping time and beamtime queue, or I'll use placeholders. Also, will you send everything in one shipment or in several batches?\n\nOnce you reply, I'll check the catalog, look up the Wright mounting-rate comparison for harvesting speed, and run the Monte Carlo simulation. I'll then report the predicted campaign time with its uncertainty, what limits it, and a cost check.",
+ "first_reply": "Before I design and simulate this, I need a few details. The campaign time will mostly depend on how many people do manual harvesting, how many hours they work, and the synchrotron turnaround, so I don't want to guess those.\n\n**Must have**\n1. **Budget (USD)** for equipment. If you don't have one yet, you can tell me to make a provisional design without one.\n2. **Operating hours and staff.** How many hours per day and days per week will people be on site? How many operators are there, and how many of them can harvest crystals? Harvesting needs a person the whole time, even with a Shifter. The Shifter's catalog duration is about 35 s per crystal, not per plate.\n3. **Target and stopping rule.**\n   - **Crystals per fragment:** is it one mounted crystal per fragment, so 500 or more successful mounts? Or do you want duplicates?\n   - **Pace:** do you have a target rate, in crystals per day?\n   - **Failed mounts:** should I re-attempt failed mounts until all 500 are done, or stop after a set number of attempts? I'll count only successful crystals as output.\n4. **Room layout.**\n   - Where is the cold room inside the 9 \u00d7 7 m space, and how big is it?\n   - Where are the doors?\n   - Are there areas equipment can't go, such as fixed benches or fume hoods?\n5. **Hazards and safety rules.**\n   - **Liquid nitrogen and dry shippers:** do you need ventilation and oxygen monitoring?\n   - **Expression host:** what is it (e.g. E. coli or insect cells), and what biosafety level?\n   - **Other:** are there other hazards, such as a high-speed centrifuge or a laser?\n\n**Useful, or I'll use clearly labelled estimates with ranges**\n6. **Protein supply.** How many expression and purification batches will you run, and roughly how much usable protein comes from each batch? I'll treat this as an uncertain estimate, not a measured fact.\n7. **Crystal success rate.** About what share of drops give usable crystals, and how many crystallisation plates do you expect to need?\n8. **Synchrotron logistics.**\n   - How long does shipping take each way?\n   - How long do you wait for a beamtime slot?\n   - How many pucks fit in one dry shipper?\n   - Is data collection unattended, with results returned in batches?\n   Unless you tell me otherwise, I'll keep all of these as external queue times.\n9. **Imaging schedule.** How often should each plate be imaged during growth (e.g. days 0, 1, 3, 7, 14)? Do you already own any equipment, such as an Echo dispenser, Rock Imager or Shifter?\n\nOnce I have at least items 1\u20135, I'll check the catalog and build the equipment list and layout. Then I'll run the simulation and report campaign time as a likely range (P10/P50/P90) with the bottleneck identified. These will be model predictions, not measured lab performance.",
  "completed": true,
- "stop_reason": "end_turn"
+ "stop_reason": "end_turn",
+ "answered_at": "2026-10-03T17:27:45+00:00",
+ "model": "claude-opus-5-5"
 }
