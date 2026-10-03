@@ -1,0 +1,29 @@
+{
+  "id": "polaris_polybot_2026",
+  "name": "PoLARIS cloud polymer lab incl. Argonne Polybot (UChicago/Argonne, NSF 2026)",
+  "domain": "materials",
+  "sources": [
+    "https://news.uchicago.edu/story/ai-powered-robotic-labs-uchicago-argonne-receive-20-million-nsf-grant",
+    "https://pme.uchicago.edu/news-events/news/remotely-operated-robotic-lab-receives-20-million-national-science-foundation"
+  ],
+  "brief": "A remotely accessible, robot-operated polymer and soft-materials laboratory: more than 20 autonomous stations (synthesis, formulation, characterisation including a synchrotron beamline) spread over five labs at two sites, coordinated by AI agents and a data layer, running 100 to 300 experiments a day for external users.",
+  "reported": {
+    "cost": {
+      "value_usd": 20000000,
+      "original": "a $20 million grant (NSF)",
+      "year": 2026,
+      "includes": [],
+      "excludes_note": "A grant award, not a hardware cost. Source does not say what it covers; for a multi-year project it very likely includes staff, software, data infrastructure and integration as well as instruments. Do not compare against a hardware-only prediction. Existing instruments (Advanced Photon Source, existing labs) are reused, not purchased."
+    },
+    "throughput": {
+      "value": 200,
+      "low": 100,
+      "high": 300,
+      "unit": "experiments_per_day",
+      "confidence": "literature"
+    },
+    "throughput_unit": "experiments_per_day"
+  },
+  "verified": false,
+  "notes": "Kept unverified as a cost case: a US$20M NSF grant of unstated coverage (likely staff and infrastructure). Useful for scale and throughput only. Verified 3 Oct 2026 from the UChicago news release (3 Aug 2026): \"A $20 million grant will remove many of these barriers, developing a remotely accessible, robot-operated laboratory ...\"; \"PoLARIS will execute at more than 20 stations ... spread across five labs at UChicago and Argonne\"; \"Once fully operational, PoLARIS will be capable of running anywhere from 100 to 300 experiments a day.\" Weak like-for-like value: use as a scale sanity check and throughput check only. The throughput P50 of 200 is simply the midpoint of the reported 100-300 range."
+}

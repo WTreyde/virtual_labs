@@ -1,0 +1,53 @@
+{
+  "id": "ot2_protein_purification_2024",
+  "name": "Low-cost Opentrons OT-2 pipeline for high-throughput enzyme expression and purification (Sci. Rep. 2024)",
+  "domain": "biology",
+  "sources": [
+    "https://doi.org/10.1038/s41598-024-64938-0",
+    "https://pmc.ncbi.nlm.nih.gov/articles/PMC11196671/"
+  ],
+  "brief": "A semi-automated protein production pipeline: one benchtop liquid-handling robot with magnetic module and common biochemistry equipment (shaker-incubator, centrifuge) transforms E. coli, inoculates cultures, lyses cells and does Ni-bead purification with protease elution, producing 96 purified enzymes in parallel, scalable to hundreds of proteins per week per user.",
+  "reported": {
+    "cost": {
+      "value_usd": 25000,
+      "low_usd": 20000,
+      "high_usd": 30000,
+      "original": "~ $20,000-30,000 USD for the OT-2 robot equipped with pipettes and accessory modules (at the time of writing, 2024)",
+      "year": 2024,
+      "includes": [
+        "instruments",
+        "robots"
+      ],
+      "excludes_note": "Robot with pipettes and modules only; shakers, centrifuge, plates, reagents and gene synthesis (the costliest step) excluded. Midpoint used for value_usd."
+    },
+    "throughput": {
+      "value": 96,
+      "confidence": "literature"
+    },
+    "throughput_unit": "proteins per batch (hundreds per week per user)"
+  },
+  "verified": true,
+  "notes": "Single-instrument price check: the reported figure is one OT-2 with pipettes/modules, so this tests the catalog price band, not whole-lab design. includes covers 'instruments' because the catalog files liquid handlers there. Verified 3 Oct 2026 via Europe PMC full text (PMC11196671): \"the OT-2 from Opentrons costs ~ $20,000-30,000 USD (at the time of writing) for the robot equipped with pipettes and accessory modules.\" Same text: Hamilton/Tecan systems \"> $150,000 USD\"; KingFisher ~$80,000. This is a robot price quoted for context, not a total-lab figure, so use as a lower-bound sanity check.",
+  "workflow": {
+    "id": "ot2_protein_purification_2024_wf",
+    "lab_spec_id": "ot2_protein_purification_2024",
+    "equipment": [
+      {
+        "instance_id": "lh_1",
+        "catalog_id": "opentrons_ot2",
+        "rationale": "The single OT-2 the paper prices."
+      }
+    ],
+    "steps": [
+      {
+        "id": "run",
+        "name": "Automated protocol on the OT-2",
+        "capability": "liquid_handling",
+        "candidate_instances": [
+          "lh_1"
+        ],
+        "duration_s": 3600
+      }
+    ]
+  }
+}

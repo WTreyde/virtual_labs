@@ -1,0 +1,26 @@
+{
+  "id": "clslab_liquid_dye_demo",
+  "name": "CLSLab:Liquid, open-source self-driving dye colour-matching demo (Baird & Sparks)",
+  "domain": "materials",
+  "sources": [
+    "https://github.com/sparks-baird/self-driving-lab-demo",
+    "https://raw.githubusercontent.com/sparks-baird/self-driving-lab-demo/main/README.md",
+    "https://pubmed.ncbi.nlm.nih.gov/37267112/"
+  ],
+  "brief": "A desktop self-driving lab for teaching: peristaltic pump channels dose dilute coloured dyes from reservoirs into a sample cell, a multichannel spectrophotometer reads the colour, and a Raspberry Pi Pico W microcontroller runs a Bayesian optimiser to match a target colour. It fits in about three square feet of desk space and is set up in a few hours.",
+  "reported": {
+    "cost": {
+      "value_usd": 300,
+      "high_usd": 300,
+      "original": "costs less than 300 USD",
+      "year": 2023,
+      "includes": [
+        "instruments",
+        "robots"
+      ],
+      "excludes_note": "Upper bound ('less than'). Stated for the whole optimisation task from shopping cart to first autonomous drive; does not say whether consumables (dyes) or a host computer are included. The bill of materials is in the repository and was not read."
+    }
+  },
+  "verified": true,
+  "notes": "Verified 3 Oct 2026 against the project README (primary source, author repo): \"We extend the light-mixing demo to a color-matching materials optimization problem using dilute colored dyes. This optimization task costs less than 300 USD, requires less than three square feet of desk space, and less than three hours of total setup time from the shopping cart to the first 'autonomous drive.'\" Educational demo, a lower bound on what any real chemistry SDL costs; the sibling CLSLab:Light (<$100) is optics, not chemistry, so excluded. Peer-reviewed protocol for CLSLab:Light is PMID 37267112; Liquid is only documented in the repo. Year 2023 is approximate (repo date)."
+}

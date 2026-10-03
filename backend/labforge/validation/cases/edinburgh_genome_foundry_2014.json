@@ -1,0 +1,23 @@
+{
+  "id": "edinburgh_genome_foundry_2014",
+  "name": "Edinburgh Genome Foundry (automated DNA assembly biofoundry, University of Edinburgh)",
+  "domain": "biology",
+  "sources": [
+    "https://www.discover.ukri.org/susan-rosser/index.html",
+    "https://biology.ed.ac.uk/research/facilities/edinburgh-genome-foundry/what-we-offer"
+  ],
+  "brief": "A university DNA foundry offering automated design-build-test of DNA constructs: robotic liquid handling for DNA assembly, transformation and purification, qPCR, replica plating, colony picking and high-throughput micro-fermentation, serving academic and industry synthetic biology users.",
+  "reported": {
+    "cost": {
+      "value_usd": 9000000,
+      "low_usd": 8000000,
+      "high_usd": 10000000,
+      "original": "GBP 5.7 million to set up the Edinburgh Genome Foundry (BBSRC, 2014)",
+      "year": 2014,
+      "includes": [],
+      "excludes_note": "The source says only 'to set up'; it does not state whether this is equipment only or includes staff, running costs and refurbishment. USD conversion at roughly 1.5-1.6 USD/GBP (2014), an assumption."
+    }
+  },
+  "verified": false,
+  "notes": "Kept unverified: the grant amount is confirmed but no source says what it paid for, so it cannot be compared like-for-like. Verified 3 Oct 2026. UKRI profile of Prof Susan Rosser: \"...in 2014 BBSRC investment when Rosser was awarded over GBP 13 million ... and GBP 5.7 million to set up the Edinburgh Genome Foundry (EGF) at the University of Edinburgh.\" Grant, not a hardware BOM, so categories unknown (includes left empty); poor like-for-like. Grant verified, coverage not. Wider context: five UK foundries share GBP 18M BBSRC (GenomeWeb, search snippet, not opened). Facility page lists services but no equipment makes/models, so no equipment mapping."
+}

@@ -1,0 +1,466 @@
+{
+  "lab_id": "screening_cell",
+  "_comment": "Demo input for POST /prioritise (docs/prioritisation.md). Three projects share one screening cell: the LC-MS-bound chemistry library screen, a liquid-handler-bound enzyme campaign, and an urgent hit re-test with a deadline. Step durations are planning estimates (see each step's params.duration_source), not measurements.",
+  "projects": [
+    {
+      "id": "chem_library_screen",
+      "workflow": {
+        "id": "chem_library_screen_wf",
+        "lab_spec_id": "screening_cell",
+        "labware": "sbs_96",
+        "equipment": [
+          {
+            "instance_id": "arm_1",
+            "catalog_id": "ur5e",
+            "rationale": "Central arm."
+          },
+          {
+            "instance_id": "disp_1",
+            "catalog_id": "thermo_multidrop_combi",
+            "rationale": "Bulk dispenser: protein and substrate addition."
+          },
+          {
+            "instance_id": "echo_1",
+            "catalog_id": "beckman_echo_650",
+            "rationale": "Acoustic dispenser: nL compound transfer into assay plates."
+          },
+          {
+            "instance_id": "hotel_1",
+            "catalog_id": "generic_plate_hotel",
+            "rationale": "Input/output stack for plates."
+          },
+          {
+            "instance_id": "inc_1",
+            "catalog_id": "liconic_stx44",
+            "rationale": "Incubator, 44 plate slots."
+          },
+          {
+            "instance_id": "lcms_1",
+            "catalog_id": "waters_acquity_uplc_qda",
+            "rationale": "UPLC-MS with plate autosampler for library QC."
+          },
+          {
+            "instance_id": "lh_1",
+            "catalog_id": "opentrons_flex",
+            "rationale": "Liquid handler: normalisation and enzyme assay dispensing."
+          },
+          {
+            "instance_id": "reader_1",
+            "catalog_id": "bmg_pherastar_fsx",
+            "rationale": "TR-FRET / FP / absorbance reader shared by all projects."
+          }
+        ],
+        "steps": [
+          {
+            "id": "load",
+            "name": "Pick library plate (96 compounds)",
+            "capability": "plate_storage",
+            "candidate_instances": [
+              "hotel_1"
+            ],
+            "duration_s": 0,
+            "after": [],
+            "params": {
+              "duration_source": "docs/pipelines.md (rough planning estimate)"
+            }
+          },
+          {
+            "id": "qc",
+            "name": "LC-MS QC of 96 products",
+            "capability": "lcms",
+            "candidate_instances": [
+              "lcms_1"
+            ],
+            "duration_s": 14400,
+            "after": [
+              "load"
+            ],
+            "params": {
+              "duration_source": "96 samples x ~2.5 min, docs/pipelines.md step 7 (estimate; 2-3 min/sample)"
+            }
+          },
+          {
+            "id": "normalise",
+            "name": "Normalise in DMSO",
+            "capability": "liquid_handling",
+            "candidate_instances": [
+              "lh_1"
+            ],
+            "duration_s": 900,
+            "after": [
+              "qc"
+            ],
+            "params": {
+              "duration_source": "~15 min per plate, docs/pipelines.md step 8 (estimate)"
+            }
+          },
+          {
+            "id": "dose",
+            "name": "Acoustic transfer to 384-well assay plate",
+            "capability": "acoustic_dispensing",
+            "candidate_instances": [
+              "echo_1"
+            ],
+            "duration_s": 300,
+            "after": [
+              "normalise"
+            ],
+            "params": {
+              "duration_source": "~2-5 min per plate, docs/pipelines.md step 10 (estimate)"
+            }
+          },
+          {
+            "id": "protein",
+            "name": "Add protein and substrate",
+            "capability": "reagent_dispensing",
+            "candidate_instances": [
+              "disp_1"
+            ],
+            "duration_s": 60,
+            "after": [
+              "dose"
+            ],
+            "params": {
+              "duration_source": "~1 min per plate, docs/pipelines.md step 11 (estimate)"
+            }
+          },
+          {
+            "id": "incubate",
+            "name": "Incubate",
+            "capability": "incubation",
+            "candidate_instances": [
+              "inc_1"
+            ],
+            "duration_s": 3600,
+            "after": [
+              "protein"
+            ],
+            "params": {
+              "duration_source": "30-60 min, docs/pipelines.md step 12 (upper value)"
+            }
+          },
+          {
+            "id": "read",
+            "name": "TR-FRET read",
+            "capability": "fluorescence_read",
+            "candidate_instances": [
+              "reader_1"
+            ],
+            "duration_s": 300,
+            "after": [
+              "incubate"
+            ],
+            "params": {
+              "duration_source": "2-5 min per plate, docs/pipelines.md step 13 (estimate)"
+            }
+          },
+          {
+            "id": "unload",
+            "name": "Return plate",
+            "capability": "plate_storage",
+            "candidate_instances": [
+              "hotel_1"
+            ],
+            "duration_s": 0,
+            "after": [
+              "read"
+            ],
+            "params": {
+              "duration_source": "docs/pipelines.md (rough planning estimate)"
+            }
+          }
+        ]
+      },
+      "units": 8,
+      "weight": 1,
+      "_note": "768-member library = 8 x 96-well plates; LC-MS QC (~4 h/plate) dominates."
+    },
+    {
+      "id": "enzyme_campaign",
+      "workflow": {
+        "id": "enzyme_campaign_wf",
+        "lab_spec_id": "screening_cell",
+        "labware": "sbs_96",
+        "equipment": [
+          {
+            "instance_id": "arm_1",
+            "catalog_id": "ur5e",
+            "rationale": "Central arm."
+          },
+          {
+            "instance_id": "hotel_1",
+            "catalog_id": "generic_plate_hotel",
+            "rationale": "Input/output stack for plates."
+          },
+          {
+            "instance_id": "inc_1",
+            "catalog_id": "liconic_stx44",
+            "rationale": "Incubator, 44 plate slots."
+          },
+          {
+            "instance_id": "lh_1",
+            "catalog_id": "opentrons_flex",
+            "rationale": "Liquid handler: normalisation and enzyme assay dispensing."
+          },
+          {
+            "instance_id": "reader_1",
+            "catalog_id": "bmg_pherastar_fsx",
+            "rationale": "TR-FRET / FP / absorbance reader shared by all projects."
+          },
+          {
+            "instance_id": "sealer_1",
+            "catalog_id": "agilent_plateloc",
+            "rationale": "Seals plates before incubation."
+          }
+        ],
+        "steps": [
+          {
+            "id": "load",
+            "name": "Pick empty plate",
+            "capability": "plate_storage",
+            "candidate_instances": [
+              "hotel_1"
+            ],
+            "duration_s": 0,
+            "after": [],
+            "params": {
+              "duration_source": "docs/pipelines.md (rough planning estimate)"
+            }
+          },
+          {
+            "id": "dispense",
+            "name": "Dispense enzyme variants and substrate",
+            "capability": "liquid_handling",
+            "candidate_instances": [
+              "lh_1"
+            ],
+            "duration_s": 1800,
+            "after": [
+              "load"
+            ],
+            "params": {
+              "duration_source": "30 min per plate, examples/workflow.json enzyme screen (estimate)"
+            }
+          },
+          {
+            "id": "seal",
+            "name": "Seal",
+            "capability": "plate_sealing",
+            "candidate_instances": [
+              "sealer_1"
+            ],
+            "duration_s": 10,
+            "after": [
+              "dispense"
+            ],
+            "params": {
+              "duration_source": "placeholder: a few seconds per plate"
+            }
+          },
+          {
+            "id": "incubate",
+            "name": "Incubate",
+            "capability": "incubation",
+            "candidate_instances": [
+              "inc_1"
+            ],
+            "duration_s": 3600,
+            "after": [
+              "seal"
+            ],
+            "params": {
+              "duration_source": "1 h, examples/workflow.json enzyme screen"
+            }
+          },
+          {
+            "id": "read",
+            "name": "Absorbance kinetic read",
+            "capability": "absorbance_read",
+            "candidate_instances": [
+              "reader_1"
+            ],
+            "duration_s": 180,
+            "after": [
+              "incubate"
+            ],
+            "params": {
+              "duration_source": "~3 min per plate (estimate)"
+            }
+          },
+          {
+            "id": "unload",
+            "name": "Return plate",
+            "capability": "plate_storage",
+            "candidate_instances": [
+              "hotel_1"
+            ],
+            "duration_s": 0,
+            "after": [
+              "read"
+            ],
+            "params": {
+              "duration_source": "docs/pipelines.md (rough planning estimate)"
+            }
+          }
+        ]
+      },
+      "units": 24,
+      "weight": 1,
+      "_note": "24 plates of enzyme variants; liquid handler dominates (30 min/plate)."
+    },
+    {
+      "id": "urgent_retest",
+      "workflow": {
+        "id": "urgent_retest_wf",
+        "lab_spec_id": "screening_cell",
+        "labware": "sbs_96",
+        "equipment": [
+          {
+            "instance_id": "arm_1",
+            "catalog_id": "ur5e",
+            "rationale": "Central arm."
+          },
+          {
+            "instance_id": "disp_1",
+            "catalog_id": "thermo_multidrop_combi",
+            "rationale": "Bulk dispenser: protein and substrate addition."
+          },
+          {
+            "instance_id": "echo_1",
+            "catalog_id": "beckman_echo_650",
+            "rationale": "Acoustic dispenser: nL compound transfer into assay plates."
+          },
+          {
+            "instance_id": "hotel_1",
+            "catalog_id": "generic_plate_hotel",
+            "rationale": "Input/output stack for plates."
+          },
+          {
+            "instance_id": "inc_1",
+            "catalog_id": "liconic_stx44",
+            "rationale": "Incubator, 44 plate slots."
+          },
+          {
+            "instance_id": "lcms_1",
+            "catalog_id": "waters_acquity_uplc_qda",
+            "rationale": "UPLC-MS with plate autosampler for library QC."
+          },
+          {
+            "instance_id": "reader_1",
+            "catalog_id": "bmg_pherastar_fsx",
+            "rationale": "TR-FRET / FP / absorbance reader shared by all projects."
+          }
+        ],
+        "steps": [
+          {
+            "id": "load",
+            "name": "Pick hit source plate",
+            "capability": "plate_storage",
+            "candidate_instances": [
+              "hotel_1"
+            ],
+            "duration_s": 0,
+            "after": [],
+            "params": {
+              "duration_source": "docs/pipelines.md (rough planning estimate)"
+            }
+          },
+          {
+            "id": "reqc",
+            "name": "LC-MS identity/purity re-check of 24 resupplied hits",
+            "capability": "lcms",
+            "candidate_instances": [
+              "lcms_1"
+            ],
+            "duration_s": 3600,
+            "after": [
+              "load"
+            ],
+            "params": {
+              "duration_source": "24 samples x ~2.5 min, docs/pipelines.md step 7 (estimate)"
+            }
+          },
+          {
+            "id": "dose",
+            "name": "Acoustic 10-point dose-response transfer",
+            "capability": "acoustic_dispensing",
+            "candidate_instances": [
+              "echo_1"
+            ],
+            "duration_s": 300,
+            "after": [
+              "reqc"
+            ],
+            "params": {
+              "duration_source": "~2-5 min per plate, docs/pipelines.md step 10 (estimate)"
+            }
+          },
+          {
+            "id": "protein",
+            "name": "Add protein and substrate",
+            "capability": "reagent_dispensing",
+            "candidate_instances": [
+              "disp_1"
+            ],
+            "duration_s": 60,
+            "after": [
+              "dose"
+            ],
+            "params": {
+              "duration_source": "~1 min per plate (estimate)"
+            }
+          },
+          {
+            "id": "incubate",
+            "name": "Incubate",
+            "capability": "incubation",
+            "candidate_instances": [
+              "inc_1"
+            ],
+            "duration_s": 3600,
+            "after": [
+              "protein"
+            ],
+            "params": {
+              "duration_source": "30-60 min (upper value)"
+            }
+          },
+          {
+            "id": "read",
+            "name": "TR-FRET read",
+            "capability": "fluorescence_read",
+            "candidate_instances": [
+              "reader_1"
+            ],
+            "duration_s": 300,
+            "after": [
+              "incubate"
+            ],
+            "params": {
+              "duration_source": "2-5 min per plate (estimate)"
+            }
+          },
+          {
+            "id": "unload",
+            "name": "Return plate",
+            "capability": "plate_storage",
+            "candidate_instances": [
+              "hotel_1"
+            ],
+            "duration_s": 0,
+            "after": [
+              "read"
+            ],
+            "params": {
+              "duration_source": "docs/pipelines.md (rough planning estimate)"
+            }
+          }
+        ]
+      },
+      "units": 2,
+      "weight": 5,
+      "deadline_h": 8,
+      "_note": "Re-check (LC-MS) and dose-response re-test of 2 plates of hits a partner needs within 8 h; competes with the library for the LC-MS."
+    }
+  ]
+}
