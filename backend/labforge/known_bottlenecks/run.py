@@ -3,6 +3,7 @@
     cd backend && python -m labforge.known_bottlenecks.run
 """
 import json
+import os
 
 from labforge.catalog import store
 from labforge.known_bottlenecks.cases import CATALOG, all_cases
@@ -12,8 +13,16 @@ _LOCAL = {c["id"]: c for c in CATALOG}
 
 
 def _use_local_catalog():
-    """Point the simulator at this module's catalog without touching Strand B's cache."""
-    store.load_catalog = lambda: _LOCAL
+    """Point the simulator at this module's catalog without touching Strand B's cache.
+
+    The simulator may import `load_catalog` by name, so patch it there too, and keep replicates in
+    this process: worker processes or Modal would not see the patch.
+    """
+    get = lambda: _LOCAL
+    store.load_catalog = get
+    if hasattr(sim_mod, "load_catalog"):
+        sim_mod.load_catalog = get
+    os.environ["LABFORGE_SIM_BACKEND"] = "serial"
 
 
 def check(case: dict, hours: float = 96, replicates: int = 20) -> dict:
