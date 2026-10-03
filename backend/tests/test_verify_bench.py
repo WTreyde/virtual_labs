@@ -143,3 +143,44 @@ def test_calibration_table():
 def test_worked_example_layout_still_validates_after_rederive():
     spec, wf = load_example("lab_spec"), load_example("workflow")
     assert errors(rederive(spec, wf, load_example("layout")), "layout") == []
+
+
+# A dry shipper that states its ~12-day hold time as a cold_storage duration. Self-contained, so the test
+# does not depend on how the real catalog records hold times.
+TEST_SHIPPER = {"id": "test_dry_shipper", "vendor": "test", "model": "dry shipper", "category": "storage",
+                "capabilities": ["cold_storage"],
+                "footprint": {"width_m": 0.5, "depth_m": 0.5, "height_m": 0.7, "clearance_m": 0.2, "mount": "floor"},
+                "access_points": [{"id": "lid", "position": {"x": 0, "y": -0.25, "z": 0.7}}],
+                "process": {"capacity": 1, "durations_s": {"cold_storage": 1036800}}, "data_confidence": "estimated"}
+
+
+def test_storage_hold_time_is_not_restored_onto_a_loading_step(monkeypatch):
+    # Loading pucks into the shipper takes 2 minutes; its catalog duration is how long it keeps them cold.
+    from labforge.catalog import store
+    from labforge.verify.tamper import restore_protected
+    cat = {**store.load_catalog(), TEST_SHIPPER["id"]: TEST_SHIPPER}
+    for module in ("labforge.catalog.store", "labforge.verify.tamper", "labforge.verify.verifier",
+                   "labforge.layout.placer", "labforge.sim.simulate"):  # every module that imports it by name
+        monkeypatch.setattr(f"{module}.load_catalog", lambda: cat)
+    shipper = TEST_SHIPPER["id"]
+    wf = {"id": "ship_wf", "lab_spec_id": "ship", "labware": "puck",
+          "equipment": [{"instance_id": "lh_1", "catalog_id": "opentrons_flex"}, {"instance_id": "shipper_1", "catalog_id": shipper}],
+          "steps": [{"id": "prep", "name": "prep", "capability": "liquid_handling", "candidate_instances": ["lh_1"], "duration_s": 1800},
+                    {"id": "load_shipper", "name": "load", "capability": "cold_storage", "candidate_instances": ["shipper_1"],
+                     "duration_s": 120, "after": ["prep"], "mode": "manual"},
+                    {"id": "ship", "name": "ship", "capability": "external_service", "candidate_instances": [],
+                     "duration_s": 2880, "after": ["load_shipper"], "mode": "external"}]}
+    honest, restored = restore_protected(wf)
+    assert restored == [] and honest["steps"][1]["duration_s"] == 120
+    assert not [f for f in find_tampering(wf) if "load_shipper" in f]
+
+    spec = {"id": "ship", "name": "s", "domain": "biology", "description": "s",
+            "throughput_target": {"value": 40, "unit": "plates_per_day"}, "room": {"width_m": 6, "depth_m": 4},
+            "operators": [{"role": "tech", "count": 1, "shift_hours": 24}]}
+    c = claim("rate", "throughput.p50", ">=", 30, 0.8, "At least 30 pucks/day")
+    out = verify_claims([c], wf, None, None, spec=spec)[0]
+    assert out["status"] == "supported", out  # not collapsed to ~0 by a 12-day "processing" time
+
+    # A real processing step that undercuts its catalog time is still restored.
+    wf["steps"][0]["duration_s"] = 60
+    assert restore_protected(wf)[1] and restore_protected(wf)[1][0].startswith("prep")

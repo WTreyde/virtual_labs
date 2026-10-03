@@ -28,6 +28,19 @@ def fingerprint(catalog_ids: list[str] | None = None) -> str:
     return hashlib.sha256(json.dumps(payload, sort_keys=True, default=str).encode()).hexdigest()
 
 
+# Catalog durations for these are how long labware can be held (a dry shipper keeps pucks cold for
+# ~12 days), not how long the unit is busy per labware, so they never set a floor on a step.
+HOLD_CAPABILITIES = {"plate_storage", "compound_storage", "cold_storage", "external_service", "in_silico"}
+
+
+def is_hold_time(step: dict, item: dict | None) -> bool:
+    """True when the catalog duration is a holding time, not processing: storage capabilities, or a
+    person loading/unloading storage equipment (the step's own handling time is what counts)."""
+    if step["capability"] in HOLD_CAPABILITIES:
+        return True
+    return (item or {}).get("category") == "storage" and step.get("mode") in ("manual", "semi_automated")
+
+
 def catalog_floor(item: dict | None, capability: str) -> tuple[float, float] | None:
     """(typical, lowest credible) duration the catalog gives for a capability, or None."""
     stated = ((item or {}).get("process") or {}).get("durations_s", {}).get(capability)
@@ -46,7 +59,8 @@ def restore_protected(workflow: dict) -> tuple[dict, list[str]]:
     restored = []
     for s in wf.get("steps", []):
         for inst in s.get("candidate_instances", []):
-            ref = catalog_floor(catalog.get(equipment.get(inst, "")), s["capability"])
+            item = catalog.get(equipment.get(inst, ""))
+            ref = None if is_hold_time(s, item) else catalog_floor(item, s["capability"])
             if ref and s["duration_s"] < ref[1] - 1e-6:
                 restored.append(f"{s['id']}: {s['duration_s']:g} s -> {ref[0]:g} s (catalog)")
                 s["duration_s"] = ref[0]
@@ -69,7 +83,8 @@ def find_tampering(workflow: dict, answer: dict | None = None, recomputed_sim: d
 
     for s in workflow.get("steps", []):
         for inst in s.get("candidate_instances", []):
-            ref = catalog_floor(catalog.get(equipment.get(inst, "")), s["capability"])
+            item = catalog.get(equipment.get(inst, ""))
+            ref = None if is_hold_time(s, item) else catalog_floor(item, s["capability"])
             if not ref:
                 continue
             stated, floor = ref
