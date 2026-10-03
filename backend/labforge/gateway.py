@@ -1,13 +1,16 @@
 """Integrator: the one HTTP API the game client talks to. Owner: the integrator.
 
 Run: uvicorn labforge.gateway:app --reload --port 8000
+`make demo` also serves the built game (frontend/dist) from this app, so everything is on one URL.
 """
 import json
+import os
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from labforge.agent.planner import run_turn
@@ -129,3 +132,9 @@ class PortfolioRequest(BaseModel):
 @app.post("/prioritise")
 def prioritise_projects(req: PortfolioRequest):
     return prioritise(req.projects, req.lab_id)
+
+
+# Keep this last: the built game client is served at / for `make demo`, behind every API route above.
+STATIC_DIR = Path(os.getenv("LABFORGE_STATIC_DIR", str(Path(__file__).resolve().parents[2] / "frontend" / "dist")))
+if STATIC_DIR.is_dir():
+    app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="game")
