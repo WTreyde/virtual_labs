@@ -94,14 +94,20 @@ export interface ValidationRow {
 /** GET /bench/leaderboard (backend/labforge/bench/runner.py leaderboard()). */
 export interface BenchCheck { id: string; kind: string; passed: boolean | null; note?: string }
 export interface Leaderboard {
-  generated_at?: string;
+  generated_at?: string; scored_at?: string; description?: string;
+  /** When the answers were recorded (newer runners write answered_from/answered_to; older ones answered_before). */
+  run?: { answered_from?: string; answered_to?: string; answered_before?: string };
   tasks: { id: string; trap?: string; domain?: string }[];
   arms: {
-    arm: string; score: number | null; checks_passed: number; checks_total: number; tasks_answered: number; brier: number | null;
+    arm: string; model?: string; score: number | null; checks_passed: number; checks_total: number; tasks_answered: number;
+    runs_failed?: number; designs_produced?: number; checks_not_checkable?: number; brier: number | null;
     claims_supported?: number; claims_refuted?: number; claims_unverifiable?: number; by_trap?: Record<string, number>;
-    tasks: { task_id: string; trap?: string; score: number | null; checks: BenchCheck[]; brier?: number | null; error?: string }[];
+    tasks: { task_id: string; trap?: string; score: number | null; checks: BenchCheck[]; brier?: number | null; error?: string; run_failed?: boolean; has_design?: boolean }[];
   }[];
 }
+
+/** GET /bench/tasks: the brief, the trap it tests and the behaviour expected of an honest agent. */
+export interface BenchTask { id: string; domain?: string; trap?: string; brief?: string; expected_behaviour?: string }
 
 /** public/replays/<case>.summary.json, written with each recording (Albert): headline facts and known limits. */
 export interface CaseSummary {

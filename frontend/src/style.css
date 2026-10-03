@@ -141,7 +141,7 @@ body.page-view #modal .close { display: none; }
 .card.own { background: #f2f0e6; }
 
 /* full-page views sit below the nav */
-body.page-view #app { display: block; overflow-y: auto; }
+body.page-view #app { display: block; }
 
 /* Panel text: the pixel font has no built-in leading, so "normal" line-height makes lines touch. */
 #panel { line-height: 1.6; }
@@ -173,3 +173,38 @@ body.page-view #app { display: block; overflow-y: auto; }
 #agent-banner { position: absolute; top: 56px; left: 50%; transform: translateX(-50%); z-index: 16; max-width: min(720px, calc(100% - 340px));
   padding: 10px 14px; background: #fde4df; color: #7a1d12; border: 3px solid #a3271a; border-radius: 8px; font: 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; box-shadow: 0 4px 0 #0005; }
 #modal .lead { font-size: 16px; margin: 4px 0; }
+
+/* Bench table: readable chips, legend, sticky header. */
+#modal .lead-text { font-size: 14px; line-height: 1.55; margin: 4px 0 8px; color: #1d2330; }
+#modal .model { font-size: 11px; color: #52514e; margin-left: 4px; }
+#modal .bench-wrap { max-height: 70vh; overflow: auto; border: 1px solid #e4e3dd; border-radius: 6px; }
+body.page-view #modal .bench-wrap { max-height: none; overflow: visible; }
+#modal table.bench { border-collapse: separate; border-spacing: 0; width: 100%; }
+#modal table.bench thead th { position: sticky; top: 0; z-index: 2; background: #f1efe6; padding: 8px; font-size: 13px; border-bottom: 2px solid #d9d6cc; }
+/* In page view the window scrolls. No ancestor of the table may be a scroll container, or the sticky header binds to
+   it instead of the viewport; the nav stays pinned and the table header sticks just below it. */
+body.page-view, body.page-view #app, body.page-view #modal { overflow: visible; }
+body.page-view #topnav { position: sticky; top: 0; z-index: 50; }
+body.page-view #modal table.bench thead th { top: 46px; }
+#modal table.bench td { padding: 8px; vertical-align: top; border-bottom: 1px solid #e4e3dd; font-size: 13px; }
+#modal table.bench td.task { width: 38%; }
+#modal .task-id { font-weight: 600; } #modal .task-line { margin-top: 3px; line-height: 1.45; }
+#modal .trap { font-weight: 400; font-size: 11px; padding: 1px 6px; border-radius: 10px; background: #efeee9; color: #52514e; margin-left: 4px; }
+#modal .trap.is-trap { background: #fff1d6; color: #7a5200; }
+#modal .score { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+#modal .chips { display: flex; flex-wrap: wrap; gap: 4px; }
+#modal .chip { font-size: 12px; padding: 2px 7px; border-radius: 10px; line-height: 1.5; margin: 0; }
+#modal .inputfail { margin-top: 4px; color: #7a5200; font-size: 12px; }
+#modal td.notrun { color: #8a8880; }
+#modal .bench-legend { margin: 8px 0; }
+#modal .bench-legend .chip { font-size: 11px; }
+
+/* Verifier verdicts, next to the BOM. */
+#verdicts { padding: 8px 10px; border: 3px solid #2b2f36; border-radius: 6px; background: #fbfbf5; }
+#verdicts .v-sum { font: 600 12px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; margin: 2px 0 6px; }
+#verdicts .v-sum.warn { color: #a3271a; } #verdicts .v-sum.ok { color: #1f6b3a; }
+#verdicts .verdict { display: grid; grid-template-columns: auto auto 1fr; gap: 6px; align-items: baseline; padding: 4px 0; border-top: 1px solid #e4e3dd;
+  font: 12px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+#verdicts .v-status { font: 8px "Press Start 2P", monospace; text-transform: uppercase; padding: 3px 5px; border-radius: 3px; color: #fff; background: #8a8880; }
+#verdicts .refuted .v-status { background: #a3271a; } #verdicts .supported .v-status { background: #1f6b3a; }
+#verdicts .v-label { font-weight: 700; }

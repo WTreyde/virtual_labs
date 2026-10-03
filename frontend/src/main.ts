@@ -1,10 +1,11 @@
 import "@fontsource/press-start-2p";
 import Phaser from "phaser";
-import { chatStream, exampleDesign, health, HttpError, LIVE_CHAT_MESSAGE, leaderboard, liveCatalog, optimise, prioritise, setOffline, validation } from "./api";
+import { benchTasks, chatStream, exampleDesign, health, HttpError, LIVE_CHAT_MESSAGE, leaderboard, liveCatalog, optimise, prioritise, setOffline, validation } from "./api";
 import demoQueue from "../../backend/labforge/catalog/data/demo_prioritise_queue.json";
 import cachedDemoSchedule from "./fixtures/demo_schedule.json";
 import { galleryDesign } from "./fixtures/gallery";
 import { fixCard } from "./capacity";
+import { verdictsBox } from "./verdicts";
 import { renderLanding, summaryBox } from "./landing";
 import { LabScene } from "./LabScene";
 import { renderPanel } from "./panel";
@@ -83,6 +84,7 @@ async function go(r: Route) {
   badge.querySelector("button")?.remove();
   $("#checked").classList.add("hidden");
   $("#fix").classList.add("hidden");
+  $("#verdicts").classList.add("hidden");
   $("#skill-btn").classList.add("hidden");
   $("#agent-banner").classList.add("hidden");
   log.textContent = "";
@@ -170,6 +172,8 @@ async function startReplay(name: string) {
           if (t.verified_p50 != null)
             lines.push(`Careful: my planning simulation says ${Math.round(t.p50)}, but an independent check of the same design gives ${Math.round(t.verified_p50)} ${t.unit.replace(/_/g, " ")}. The limits are listed on the right.`);
         }
+        const verdicts = verdictsBox(run.output.claims, summary);
+        if (verdicts) { $("#verdicts").innerHTML = verdicts; $("#verdicts").classList.remove("hidden"); }
         const fix = fixCard(d, summary);
         if (fix) { $("#fix").innerHTML = fix; $("#fix").classList.remove("hidden"); }
         dialogue.say(lines);
@@ -316,7 +320,12 @@ async function openValidation() {
 }
 async function openBench() {
   showLoading("LabDesignBench", "Loading the leaderboard…");
-  try { showLeaderboard(await leaderboard()); } catch { showError("LabDesignBench", "Needs the backend (make backend)."); }
+  try {
+    const [board, tasks] = await Promise.all([leaderboard(), benchTasks()]);
+    showLeaderboard(board, tasks);
+  } catch (e) {
+    showError("LabDesignBench", e instanceof HttpError ? `The backend returned an error (${e.status}).` : "Needs the backend (make backend).");
+  }
 }
 
 go(route);
