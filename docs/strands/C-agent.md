@@ -13,3 +13,7 @@ Already working: `planner.run_turn()` runs a Claude tool-use loop (`claude-opus-
 6. Report: Claude-written executive summary, BOM, throughput band, risks, unknowns, assumptions.
 7. Stream agent text to the UI (SSE) once the gateway route exists.
 8. The "vanilla" bench arm: same model, no tools, asked for design + claims as JSON. This is what we compare against.
+
+## Added after judge feedback (see docs/validation.md)
+9. `validation/runner.py::design_from_brief`: run the planner on each validation case's brief (the brief never contains the cost) and return its workflow, so validation tests the whole platform. Coordinate with Max, who owns that file.
+10. When the user asks about an instrument, the agent can call `/optimise` and explain the vendor takeaway (elasticity, headroom, next bottleneck) in plain words.

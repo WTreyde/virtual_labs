@@ -11,3 +11,6 @@ Already working: ring placement around one arm with operator fallback; overlap/o
 4. Sensitivity analysis: which uncertain durations move throughput most; fill `SimResult.sensitivity`.
 5. Run Monte Carlo replicates and bench tasks in parallel on Modal.
 6. Verifier: tamper detection (hash simulator inputs and catalog values the agent is not allowed to change), more metrics, per-task checks in `bench/runner.py` (`admits_infeasible`, `claim_matches_sim`, `inputs_untampered`, `calibration`, ...). Output a leaderboard JSON for Roshan.
+
+## Added after judge feedback (see docs/validation.md)
+7. Vendor what-ifs in `sim/whatif.py` (baseline works: cycle-time and capacity sweeps with elasticity and next bottleneck). Add `transfer_time` and `uptime` sweeps, run sweep points in parallel on Modal, and make the elasticity estimate robust to Monte Carlo noise.

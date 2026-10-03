@@ -20,9 +20,9 @@
 | Path | Strand | Owner |
 |---|---|---|
 | `frontend/` | A: game client and report UI | Roshan |
-| `backend/labforge/catalog/`, `backend/labforge/bench/tasks/` | B: catalog, safety rules, benchmark tasks | Max |
+| `backend/labforge/catalog/`, `backend/labforge/bench/tasks/`, `backend/labforge/validation/` | B: catalog, safety rules, benchmark tasks, validation cases | Max |
 | `backend/labforge/agent/` | C: planner agent, Amass, report | Albert |
-| `backend/labforge/layout/`, `sim/`, `verify/`, `bench/runner.py` | D: layout, simulation, verifier, bench scoring | Maxim |
+| `backend/labforge/layout/`, `sim/` (incl. `whatif.py`), `verify/`, `bench/runner.py` | D: layout, simulation, vendor what-ifs, verifier, bench scoring | Maxim |
 | `schemas/`, `examples/`, `backend/labforge/gateway.py`, `contracts.py`, CI | Integrator | team lead |
 
 ## Freeze

@@ -153,7 +153,7 @@ class Buffer:
 
 class Model:
     def __init__(self, spec: dict, workflow: dict, layout: dict, t0: float, t1: float, rng: random.Random,
-                 pins: dict[str, str] | None = None, record: bool = False):
+                 pins: dict[str, str] | None = None, record: bool = False, capacity_overrides: dict[str, int] | None = None):
         self.env, self.rng, self.t0, self.t1, self.record = simpy.Environment(), rng, t0, t1, record
         self.steps = topo_order(workflow["steps"])
         self.by_id = {s["id"]: s for s in self.steps}
@@ -175,6 +175,7 @@ class Model:
             stated = ((item or {}).get("process") or {}).get("capacity")
             batches = [s.get("batch_size", 1) for s in self.steps if inst in s["candidate_instances"]]
             caps[inst] = stated or max(batches + [1])
+        caps.update({i: int(c) for i, c in (capacity_overrides or {}).items() if i in caps})  # what-if: more slots
         self.caps = caps
         self.slots = {s["id"]: max(1, min([s.get("batch_size", 1)] + [caps[c] for c in s["candidate_instances"]]))
                       for s in self.steps}
@@ -511,25 +512,27 @@ def warmup_hours(spec: dict, workflow: dict) -> float:
     return float(max(1, math.ceil(hours)))
 
 
-def run_replicate(spec: dict, workflow: dict, layout: dict, hours: float, seed: int,
-                  pins: dict[str, str] | None = None, record: bool = False) -> dict:
+def run_replicate(spec: dict, workflow: dict, layout: dict, hours: float, seed: int, pins: dict[str, str] | None = None,
+                  record: bool = False, capacity_overrides: dict[str, int] | None = None) -> dict:
     """One Monte Carlo replicate; JSON in, JSON out so it can run remotely (Modal)."""
     warm = warmup_hours(spec, workflow)
-    model = Model(spec, workflow, layout, warm * 3600, (warm + hours) * 3600, random.Random(seed), pins, record)
+    model = Model(spec, workflow, layout, warm * 3600, (warm + hours) * 3600, random.Random(seed), pins, record,
+                  capacity_overrides)
     out = model.run_until_end()
     out["per_day"] = out["units"] / out["window_h"] * spec["throughput_target"].get("operating_hours_per_day", 24)
     return out
 
 
 def simulate(spec: dict, workflow: dict, layout: dict, hours: float = 72, replicates: int = 20, seed: int = 0,
-             sensitivity: bool = True, backend: str | None = None) -> dict:
+             sensitivity: bool = True, backend: str | None = None, capacity_overrides: dict[str, int] | None = None) -> dict:
     """Monte Carlo over duration uncertainty. `hours` is the minimum measurement window after warm-up.
 
     `backend` picks where replicates run: "serial", "process" (local cores) or "modal"; default from
-    LABFORGE_SIM_BACKEND, else serial. Sensitivity re-runs the top uncertain inputs pinned low and high."""
+    LABFORGE_SIM_BACKEND, else serial. Sensitivity re-runs the top uncertain inputs pinned low and high.
+    `capacity_overrides` ({instance: slots}) is for what-if sweeps."""
     rng = random.Random(seed)
     seeds = [rng.randrange(2**31) for _ in range(replicates)]
-    base = dict(spec=spec, workflow=workflow, layout=layout, hours=hours)
+    base = dict(spec=spec, workflow=workflow, layout=layout, hours=hours, capacity_overrides=capacity_overrides)
     runs = map_replicates([dict(base, seed=s, record=(k == 0)) for k, s in enumerate(seeds)], backend)
     result = summarise(spec, workflow, layout, hours, runs)
     if sensitivity:

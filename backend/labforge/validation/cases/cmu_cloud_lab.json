@@ -1,0 +1,18 @@
+{
+  "id": "cmu_cloud_lab",
+  "name": "Carnegie Mellon University Cloud Lab (with Emerald Cloud Lab)",
+  "domain": "mixed",
+  "sources": ["https://www.cmu.edu/news/stories/archives/2021/august/first-academic-cloud-lab.html"],
+  "brief": "A remotely operated university lab with more than 100 types of instruments for life sciences and chemistry, able to run more than 100 complex experiments at once.",
+  "reported": {
+    "cost": {
+      "value_usd": 40000000,
+      "original": "$40 million project",
+      "year": 2021,
+      "includes": ["instruments", "robots", "analytics", "software", "integration_labour", "construction"],
+      "excludes_note": "Project cost; split between building works and equipment not published."
+    }
+  },
+  "verified": false,
+  "notes": "Order-of-magnitude scale check only, because construction is bundled in. TODO(Max): look for an equipment-only figure."
+}
