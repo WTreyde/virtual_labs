@@ -39,6 +39,8 @@ def validate_design(spec: dict, workflow: dict) -> None:
         for parent in step.get("after", []):
             if parent not in steps:
                 raise ValueError(f"{step['id']}: unknown dependency {parent}")
+        if step['capability'] == 'crystal_harvesting' and step.get('mode') != 'manual':
+            raise ValueError('Crystal harvesting needs mode=manual: an operator performs the entire harvesting run, including with the Shifter. Setup-only semi_automated would undercount human work.')
         candidates = step["candidate_instances"]
         if len(candidates) != len(set(candidates)):
             raise ValueError(f"{step['id']}: candidate instance IDs must be unique")

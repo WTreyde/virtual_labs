@@ -25,11 +25,11 @@ PIPELINE_STAGES = {
 
 SCENARIOS = {
     'chemistry': {
-        'brief': 'Design an equipment and room-planning model for the full chemistry demo in docs/pipelines.md: 8 boronic acids x 12 aryl-bromide amines x 8 acids = 768 products, with Suzuki then amide reaction stages, stock preparation, workup/filtration, purification, evaporation, LC-MS QC of every product, compound storage and fluorescence screening against a supplied purified protein target. This is a bill of materials, abstract workflow graph and simulation request only; do not provide reaction recipes, chemical quantities or experimental execution instructions. Use only catalog equipment. Room 10 m x 8 m, USD 2000000 equipment budget, target 768 compounds/day, 24-hour instruments and one trained operator on an 8-hour shift. Use 96-well reaction blocks and appropriate assay plates, a ventilated/inert synthesis area and separated flammable-solvent storage. I permit provisional timing/yield assumptions with honest ranges. Declare flow units, plate arithmetic and final-sink units_per_labware; keep both reaction stages, QC and screening in the graph. Search catalog and evidence, call layout_and_simulate, verify throughput/budget/layout claims and create_report. Stop after the first validated design, repairing proposal validation errors if necessary; disclose refutations and limitations rather than revising equipment in this run. If essential equipment is absent, name the catalog gaps instead of inventing items or calling a partial lab complete.',
+        'brief': 'Plan the equipment, room layout and resource schedule for an abstract two-stage chemistry library benchmark. Stage 1 has 8 x 12 = 96 products in one 96-well reaction block; stage 2 expands each across 8 variants, making 768 products in eight 96-well blocks. Keep two separate reaction stages. Include explicit powder_dosing stock preparation and liquid_handling dissolution as separate equipment-demand steps, workup/filtration, purification, evaporation, LC-MS QC of every product, compound storage, assay preparation and fluorescence screening against a supplied purified protein target. The deliverable is a bill of materials and abstract equipment-demand graph, not a synthesis protocol: omit chemical identities, reagent amounts and execution instructions. Use only catalog equipment. Room 10 m x 8 m, USD 2000000 equipment budget, target 768 compounds/day, 24-hour instruments and one trained operator on an 8-hour shift. Use 96-well reaction blocks and appropriate assay plates, ventilated/inert synthesis areas and separated flammable storage. I permit provisional timing/yield assumptions with honest ranges. Declare flow units, plate arithmetic and final-sink units_per_labware. Search catalog and evidence, call layout_and_simulate, verify throughput/budget/layout claims and create_report. Stop after the first validated design, repairing proposal validation errors if necessary; disclose refutations and limitations rather than revising equipment in this run. If essential equipment is absent, name the catalog gaps instead of inventing items or calling a partial lab complete.',
         'required': ['liquid_handling', 'powder_dosing', 'reaction', 'heating_stirring', 'filtration', 'solid_phase_extraction', 'evaporation', 'lcms', 'compound_storage', 'inert_atmosphere', 'ventilated_enclosure', 'fluorescence_read', 'manual_bench'],
     },
     'xchem': {
-        'brief': 'Design the full XChem-style fragment-screening demo: express a soluble E. coli target protein, harvest cells, lyse/clarify, purify, QC/concentrate, set crystallisation drops, grow and image crystals, select drops, soak fragments, manually harvest crystals, cryo-cool/load pucks and ship to an external synchrotron for diffraction followed by in-silico hit analysis. No in-house X-ray instrument. Target 300 crystals/day in a steady-state 10 m x 8 m room, USD 2000000 equipment budget, instruments operating 24 h/day with two skilled operators on 8 h shifts. BSL1, high-g centrifuges and cryogens require separated work areas and ventilation/O2 monitoring. Use appropriate flasks, columns, crystallisation plates and pucks. State protein-yield and crystal-success assumptions explicitly; I permit provisional estimates with wide uncertainty. Preserve manual harvesting, crystal growth and the external shipping/beamline queue. Search catalog and evidence, then simulate, verify throughput/budget/layout claims and report. If essential equipment is absent, list it and stop; do not invent catalog entries or call a partial workflow end to end.',
+        'brief': 'Design the full XChem-style fragment-screening demo: express a soluble E. coli target protein, harvest cells, lyse/clarify, purify, QC/concentrate, set crystallisation drops, grow and image crystals, select drops, soak fragments, manually harvest crystals, cryo-cool/load pucks (manual handling on a bench or LN2 dewar with an operator, not cold_storage; keep the dry shipper as a storage/transit container and its residence time in the external shipping queue) and ship to an external synchrotron for diffraction followed by in-silico hit analysis. No in-house X-ray instrument. Target 300 crystals/day in a steady-state 10 m x 8 m room, USD 2000000 equipment budget, instruments operating 24 h/day with two skilled operators on 8 h shifts. BSL1, high-g centrifuges and cryogens require separated work areas and ventilation/O2 monitoring. Use appropriate flasks, columns, crystallisation plates and pucks. State protein-yield and crystal-success assumptions explicitly; I permit provisional estimates with wide uncertainty. Preserve manual harvesting, crystal growth and the external shipping/beamline queue. Search catalog and evidence, then simulate, verify throughput/budget/layout claims and report. If essential equipment is absent, list it and stop; do not invent catalog entries or call a partial workflow end to end. Model harvesting as mode manual with an operator throughout, using the reviewed Wright et al. Acta D 2021 comparison (DOI 10.1107/S2059798320014114): distinguish unassisted baseline 8 crystals/hour from Shifter mean 103/hour and apply the correct rate to the selected equipment. Retrieve that evidence via search_evidence. Separate growth residence from camera inspection; keep catalog camera capacity and per-inspection duration, and state a realistic inspection schedule as an estimate. Report whether harvesting or imaging actually binds; do not alter numbers, parallelism or equipment to force a harvesting story. Stop after the first checked full design/report, repairing structural validation errors but not tuning toward a scripted bottleneck.',
         'required': ['cell_culture', 'shaking', 'centrifugation', 'cell_lysis', 'protein_purification', 'protein_qc', 'concentration_measurement', 'crystallization_setup', 'crystal_imaging', 'crystal_soaking', 'crystal_harvesting', 'cryo_cooling', 'cold_storage', 'manual_bench'],
     },
 }
@@ -40,6 +40,23 @@ def catalog_gaps():
     available = {cap for item in items.values() for cap in item['capabilities']}
     return {name: {'missing_capabilities': sorted(set(case['required']) - available),
                    'catalog_ids': sorted(items)} for name, case in SCENARIOS.items()}
+
+
+# Independent seeds/replicate counts can differ; a >20% P50 gap is a demo failure,
+# not something to hide by substituting the verifier's number into the planning result.
+THROUGHPUT_AGREEMENT_TOLERANCE = 0.20
+
+
+def throughput_comparison(output):
+    planned = output.get('sim_result', {}).get('throughput', {}).get('p50')
+    values = {c['verified_value'] for c in output.get('claims', [])
+              if c.get('metric') == 'throughput.p50' and c.get('status') in ('supported', 'refuted')
+              and 'verified_value' in c and 'recomputed by the verifier' in c.get('verifier_note', '')}
+    verified = next(iter(values)) if len(values) == 1 else None
+    difference = abs(planned - verified) / max(abs(planned), abs(verified), 1e-9) if planned is not None and verified is not None else None
+    return {'planned_p50': planned, 'verified_p50': verified,
+            'relative_difference': difference, 'tolerance': THROUGHPUT_AGREEMENT_TOLERANCE,
+            'agrees': difference is not None and difference <= THROUGHPUT_AGREEMENT_TOLERANCE}
 
 
 def check_scenario(name, output, coverage):
@@ -68,6 +85,15 @@ def check_scenario(name, output, coverage):
         checks['external_diffraction'] = any(s['mode'] == 'external' and (s['capability'] == 'xray_diffraction' or (s['capability'] == 'external_service' and any(word in s['name'].lower() for word in ('diffraction', 'synchrotron', 'beamline')))) for s in steps if s.get('mode'))
         checks['no_inhouse_xray'] = not any('xray_diffraction' in load_catalog()[e['catalog_id']]['capabilities'] for e in workflow.get('equipment', []))
         checks['manual_harvesting'] = any(s['capability'] == 'crystal_harvesting' and s.get('mode') in ('manual', 'semi_automated') for s in steps)
+        loading = [s for s in steps if 'load' in (s['id'] + ' ' + s['name']).lower()
+                   and any(word in (s['id'] + ' ' + s['name']).lower() for word in ('puck', 'shipper'))]
+        roles = {o['role'] for o in output.get('lab_spec', {}).get('operators', []) if o['count'] > 0}
+        checks['puck_loading_is_handling'] = bool(loading) and all(
+            s['capability'] in ('manual_bench', 'cryo_cooling') and
+            s.get('mode') in ('manual', 'semi_automated') and s.get('operator_role') in roles for s in loading)
+        checks['independent_throughput_agreement'] = throughput_comparison(output)['agrees']
+        harvesting = [s for s in steps if s['capability'] == 'crystal_harvesting']
+        checks['full_operator_harvesting'] = bool(harvesting) and all(s.get('mode') == 'manual' and s.get('operator_role') in roles for s in harvesting)
     return {'passed': all(checks.values()), 'checks': checks, 'missing_stages': missing_stages, **coverage}
 
 
@@ -109,7 +135,6 @@ def main():
             output = {'error': safe_error(exc)}
             summary[name] = {'passed': False, 'error': safe_error(exc), **gaps[name]}
         output.pop('history', None)
-        output.get('sim_result', {}).pop('timeline', None)
         (args.out / f'{name}.json').write_text(redacted_json({'brief': case['brief'], 'model': os.getenv('ANTHROPIC_MODEL') or MODEL, 'output': output, 'events': events, 'gate': summary[name]}))
     (args.out / 'summary.json').write_text(redacted_json(summary))
     print(json.dumps(summary, indent=2), flush=True)

@@ -54,7 +54,7 @@ def run_turn(history: list[dict], max_steps: int = 12, on_event=None, stream_tex
         emit({"type": "model_call", "step": step_index + 1, "model": os.environ.get("ANTHROPIC_MODEL", MODEL)})
         request = dict(
             model=os.environ.get("ANTHROPIC_MODEL", MODEL),
-            max_tokens=16000,
+            max_tokens=24000,
             system=system_prompt(),
             tools=[definition for definition, _ in available_tools.values()],
             messages=messages,

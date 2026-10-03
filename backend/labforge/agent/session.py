@@ -37,7 +37,7 @@ class ToolSession:
         from labforge.agent.projects import PROJECT_TOOL
         self.tools['plan_projects'] = (PROJECT_TOOL, self.plan_projects)
         self.tools.update({
-            'search_evidence': ({'name': 'search_evidence', 'description': 'Retrieve cached Amass literature candidates. A paper title is not evidence of a numerical duration or yield. Missing access is returned explicitly.',
+            'search_evidence': ({'name': 'search_evidence', 'description': 'Retrieve cached Amass literature candidates and separately labelled reviewed public references. A paper title is not evidence of a numerical duration or yield. Missing access is returned explicitly.',
                 'input_schema': {'type': 'object', 'properties': {'query': {'type': 'string'}, 'limit': {'type': 'integer', 'minimum': 1, 'maximum': 10}}, 'required': ['query'], 'additionalProperties': False}}, self.search_evidence),
             'verify_claims': ({'name': 'verify_claims', 'description': 'Check structured claims against the last successful backend simulation and catalog. Accepts claims only, never simulator outputs. Refuted claims must be retracted. Checks model-based consistency, not real-world correctness.',
                 'input_schema': {'type': 'object', 'properties': {'claims': {'type': 'array', 'minItems': 1, 'maxItems': 20, 'items': {'type': 'object', 'properties': {'id': {'type': 'string'}, 'statement': {'type': 'string'}, 'metric': {'type': 'string'}, 'comparator': {'type': 'string', 'enum': ['>=', '<=', '==']}, 'predicted_value': {'type': 'number'}, 'confidence': {'type': 'number', 'minimum': 0, 'maximum': 1}}, 'required': ['id', 'statement', 'metric', 'comparator', 'predicted_value', 'confidence'], 'additionalProperties': False}}}, 'required': ['claims'], 'additionalProperties': False}}, self.verify),
@@ -55,8 +55,10 @@ class ToolSession:
 
     def search_evidence(self, query, limit=5):
         result = retrieve_literature(query, limit)
+        from labforge.agent.reviewed_evidence import search_reviewed
+        result['reviewed_items'] = search_reviewed(query)
         self.evidence.append({'query': query, **result})
-        for item in result['items']:
+        for item in result['items'] + result['reviewed_items']:
             self.known_sources.add(item['evidence']['source'])
         return result
 

@@ -1,9 +1,12 @@
 """Schema-guided planning context, read from the shared contracts."""
 import json
 from functools import lru_cache
-from labforge.contracts import SCHEMA_DIR, REPO_ROOT, load_example
+from labforge.contracts import SCHEMA_DIR, load_example
 
 SYSTEM = """You design lab configurations and report model-based feasibility.
+Produce equipment/resource scheduling graphs, not experimental protocols. Keep step params
+to flow units, labware, output counts, residence/queue times and estimate rationale.
+Do not add reaction recipes, reagent amounts, chemical structures or execution instructions.
 Before designing, ask concise follow-ups for missing throughput (value and unit),
 room dimensions, budget, operating hours and relevant hazards. Do not silently invent
 requirements. If budget is unknown, the user may explicitly permit a provisional design.
@@ -15,9 +18,32 @@ Use snake_case IDs, metres and seconds. Each equipment instance has its own uniq
 candidate_instances refer to those IDs, after refers to step IDs, and lab_spec_id matches
 LabSpec.id. Include transporters. Describe duration units explicitly: per sample, plate,
 or batch. Preserve external queues and manual steps rather than optimising them away.
+Crystal harvesting requires an operator for its entire duration, even with a Shifter:
+use mode manual, not setup-only semi_automated. Retrieve the Wright mounting-rate comparison
+with search_evidence; distinguish unassisted manual work from Shifter-assisted human work.
+Convert its rate using the actual number of harvested crystals per run, with explicit
+assumptions. Do not change source-based inputs merely to make a desired bottleneck appear.
+Crystal growth residence and imaging are different resources. The Rock Imager catalog has
+one camera (process.capacity=1) and 1000 storage slots; these are not interchangeable.
+Each inspection is minutes per plate, not days of growth. State the inspection schedule,
+keep growth in a supported incubation/storage resource, and disclose if the integrated
+imager hotel's residence capacity cannot be represented by the installed contracts.
+Never silently increase camera parallelism, omit growth, or inflate imaging time.
+Reviewed public references in search_evidence are provider web, not Amass records; preserve
+Amass unconfigured/unavailable status separately. Cite only the returned source content.
 External services and in-silico steps use mode external/in_silico and empty candidate_instances;
 they do not require a local catalog instrument. Synchrotron diffraction stays external and
 must retain shipping/queue assumptions; never add an in-house X-ray to the XChem scenario.
+Distinguish handling time from storage residence. For XChem, loading filled pucks into a
+charged dry shipper is a manual handling step: use manual_bench on a handling bench or
+cryo_cooling on an LN2 dewar, with a matching operator_role and explicit duration estimate.
+Keep the dry shipper in the equipment/BOM as a storage/transit container and reference its
+instance in the external shipping step params. Retain its residence/transit time in the
+shipping queue. Use operator-attended handling for the puck-loading step. A container's
+process.hold_time_s describes cold retention, not per-puck handling or mandatory residence;
+never use that hold time as the step duration. Interpret catalog fields by their provenance.
+Respect catalog duration floors for actual instrument processes; do not choose a different
+capability merely to avoid verification. Explain physical flow and resource assumptions.
 Declare the physical flow unit at every stage in params (e.g. a reaction block, assay plate,
 crystal or puck). A duration is per one run of batch_size input labware units. fan_out is
 output labware per input labware, not automatically the number of wells. At the counting
@@ -80,10 +106,32 @@ Do not use it for batch_size or fan_out other than 1, or claim measured/calibrat
 """
 
 
+# Keep protocol narratives out of the resource planner's context. docs/pipelines.md remains
+# the human reference; these abstract stages preserve its equipment and flow requirements.
+PLANNING_PIPELINES = """
+Chemistry: powder_dosing stock preparation then liquid_handling; reaction stage 1; workup/filtration; reaction stage 2;
+purification; evaporation; LC-MS QC; reformat/compound storage; assay preparation;
+incubation; fluorescence readout; analysis. Retain both reaction stages and explicit
+8 x 12 x 8 = 768-product plate arithmetic. These labels define equipment demand only.
+Reaction blocks are 96-well; each product must receive QC and a screening readout.
+LC-MS durations are per sample, so multiply by samples per plate when modelling a plate.
+Synthesis/evaporation require ventilation, inert-atmosphere capability where requested,
+and separated flammable-solvent storage. Include operator replenishment and transport.
+
+XChem: expression; cell harvest; lysis/clarification; purification; protein QC/concentration;
+drop setup; crystal growth/imaging; drop selection; fragment soaking; manual harvesting;
+cryo-cooling/puck loading; external shipping/diffraction; analysis. Keep growth residence
+and external shipping/queue time. Harvesting remains manual or semi-automated with operators.
+Track expression lots -> crystallisation plates -> harvested crystals -> 16-pin pucks.
+Protein yield and crystal success are explicit uncertain assumptions, not measured facts.
+Keep cryogen ventilation/O2-monitoring, expression zones and vibration-free equipment needs.
+"""
+
+
 @lru_cache
 def system_prompt() -> str:
     schemas = {name: json.loads((SCHEMA_DIR / f"{name}.schema.json").read_text())
                for name in ("common", "lab_spec", "workflow")}
     example = {name: load_example(name) for name in ("lab_spec", "workflow")}
-    pipelines = (REPO_ROOT / "docs" / "pipelines.md").read_text()
-    return SYSTEM + "\nShared JSON schemas:\n" + json.dumps(schemas) + "\nWorked structural example:\n" + json.dumps(example) + "\nPipeline templates (estimates, not verified evidence):\n" + pipelines
+    pipelines = PLANNING_PIPELINES
+    return SYSTEM + "\nShared JSON schemas:\n" + json.dumps(schemas) + "\nWorked structural example:\n" + json.dumps(example) + "\nEquipment-demand templates (estimates, not verified evidence):\n" + pipelines

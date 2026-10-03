@@ -38,3 +38,20 @@ def test_backend_contract_stops_further_model_calls_and_keeps_proposal(monkeypat
     assert out['failed_proposal'] == proposal
     assert 'workflow' not in out and 'sim_result' not in out
     assert 'integrator' in out['messages'][0]['content']
+
+
+def test_empty_provider_refusal_stops_without_retry_or_crash(monkeypatch):
+    from labforge.agent.planner import run_turn
+    calls = []
+    def create(**kwargs):
+        calls.append(kwargs)
+        return SimpleNamespace(content=[], stop_reason='refusal')
+    sdk = SimpleNamespace(Anthropic=lambda **kw: SimpleNamespace(messages=SimpleNamespace(create=create)))
+    monkeypatch.setitem(sys.modules, 'anthropic', sdk)
+    monkeypatch.setattr('labforge.agent.planner.load_env', lambda: None)
+    monkeypatch.setenv('ANTHROPIC_API_KEY', 'test-only')
+    out = run_turn([{'role':'user', 'content':'Plan a lab'}])
+    assert len(calls) == 1
+    assert out['completed'] is False and out['stop_reason'] == 'refusal'
+    assert 'API declined' in out['messages'][0]['content']
+    assert 'workflow' not in out
