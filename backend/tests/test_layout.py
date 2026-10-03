@@ -166,7 +166,7 @@ def test_break_area_gives_idle_staff_their_own_spots_clear_of_equipment_and_haza
     spec, wf = _manual_lab()
     lay = generate_layout(spec, wf)
     [rest] = [z for z in lay["zones"] if z["id"] == "break_area"]
-    assert rest["kind"] == "human_only"
+    assert rest["kind"] == "break_area"
     box = (rest["min"]["x"], rest["min"]["y"], rest["max"]["x"], rest["max"]["y"])
     items = resolve_items(wf)
     assert all(overlap_area(box, aabb(p, items[p["instance_id"]], clearance=True)) == 0 for p in lay["placements"])

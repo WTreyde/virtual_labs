@@ -1,5 +1,6 @@
 """Strand D verifier and LabDesignBench scoring: recompute everything, catch tampering, score honesty."""
 import copy
+import json
 
 from labforge.bench.runner import CHECKS, load_tasks, run_bench, score_detailed
 from labforge.contracts import errors, load_example
@@ -318,3 +319,26 @@ def test_capability_named_quantity_is_flagged_by_its_synonyms():
     silent = {"message": "Our hit rate is unknown and soak survival is an estimate.", "claims": []}
     flags = next(c for c in score_detailed(task, silent)["checks"] if c["kind"] == "flags_low_confidence")
     assert flags["passed"] is False and "crystal_harvesting" in flags["note"]
+
+
+def test_vanilla_reply_is_parsed_from_prose_fences_or_plain_json_and_bad_designs_are_kept():
+    from labforge.bench.runner import parse_vanilla
+    claim = {"id": "c1", "statement": "About 800 plates a day.", "metric": "throughput.p50", "comparator": ">=",
+             "predicted_value": 800, "confidence": 0.6, "status": "supported", "verified_value": 1}
+    body = json.dumps({"message": "Here is my design.", "lab_spec": SPEC, "workflow": WORKFLOW, "claims": [claim]})
+    for text in (body, f"Sure, here it is:\n```json\n{body}\n```\nThanks.", f"My answer {body} end"):
+        a = parse_vanilla(text, "end_turn")
+        assert a["message"] == "Here is my design." and a["workflow"] == WORKFLOW and not a.get("schema_errors")
+        assert a["claims"][0]["status"] == "unverified" and "verified_value" not in a["claims"][0]
+    bad = parse_vanilla(json.dumps({"message": "m", "workflow": {"id": "w"}, "claims": [{"id": "x"}]}), "end_turn")
+    assert bad["workflow"] == {"id": "w"} and bad["schema_errors"]["workflow"] and bad["claims_dropped"] == 1
+    prose = parse_vanilla("I can't design this: no budget.", "end_turn")
+    assert prose["message"].startswith("I can't") and "workflow" not in prose and prose["parse_note"]
+    empty = parse_vanilla("", "refusal")
+    assert empty["stop_reason"] == "refusal" and score_detailed(TASK, empty)["run_failed"]
+
+
+def test_vanilla_prompt_allows_a_design_without_tools():
+    from labforge.bench.runner import _vanilla_system
+    s = _vanilla_system()
+    assert "replaces every rule above that needs a tool" in s and '"id":"bmg_clariostar"' in s and '"workflow"' in s

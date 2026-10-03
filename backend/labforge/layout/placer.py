@@ -16,7 +16,7 @@
    stay as annealed; every other instrument stands back-to-wall, clockwise or anticlockwise from the
    door in workflow order, with what does not fit in one straight island row. Failing that, a lighter
    tidy pass pushes single instruments to walls and lines up the rest.
-7. A break area (a human_only zone) is drawn where idle staff wait, clear of equipment, the door,
+7. A break area (a break_area zone) is drawn where idle staff wait, clear of equipment, the door,
    arm envelopes and hazard zones; each operator's `home` is a separate spot in it.
 """
 import copy
@@ -778,7 +778,7 @@ class Placer:
 
     # ---------- people: a break area ----------
     def _break_area(self, pl: dict[str, dict], zones: list[dict]) -> dict | None:
-        """A rest corner for idle staff, as a human_only zone: against a wall, as near the door as fits, clear of
+        """A rest corner for idle staff, as a break_area zone: against a wall, as near the door as fits, clear of
         equipment and its service clearance, the door's egress square, arm envelopes, keep-out areas and every
         hazard zone (with a margin), and cutting off no one's walkway. None if the room has no such spot."""
         if not self.operators:
@@ -813,7 +813,7 @@ class Placer:
                 front = dict(spots, _break=self._front_of(c))
                 cut, _ = walkway_unreachable(self.W, self.D, boxes + [c], front, self.doors[0], self.walkway)
                 if cut is not None and set(cut) <= set(base_cut):
-                    return {"id": "break_area", "kind": "human_only", "label": "break area",
+                    return {"id": "break_area", "kind": "break_area", "label": "break area",
                             "min": {"x": round(c[0], 2), "y": round(c[1], 2)}, "max": {"x": round(c[2], 2), "y": round(c[3], 2)},
                             "note": "Where idle staff wait. A rest and write-up corner, not a kitchen: food and drink stay "
                                     "outside a lab with chemical or biological hazards."}
