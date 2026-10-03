@@ -139,6 +139,27 @@
           "type": "number",
           "minimum": 0,
           "description": "Optional, for storage and transit containers: how long contents can be held (e.g. a dry shipper's cold-hold time). Not a processing time; never use it as a step duration."
+        },
+        "temperature_c": {
+          "type": "object",
+          "description": "Optional. Operating temperature range of the unit in degrees C, e.g. a cooled plate hotel.",
+          "properties": {
+            "min": {
+              "type": "number"
+            },
+            "max": {
+              "type": "number"
+            },
+            "variant": {
+              "type": "string",
+              "description": "Model variant the range applies to, if it differs by variant."
+            }
+          }
+        },
+        "access_time_s": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Optional. Mean time for the unit to present or retrieve one labware item (e.g. a hotel's plate access). Informational; not a step duration."
         }
       }
     },
