@@ -45,7 +45,8 @@ class Dialogue {
   }
 
   /** Queue agent text, split into pages that fit the box. Replaces anything unread. */
-  say(lines: string[]) {
+  say(lines: string[], speaker = "LABFORGE") {
+    this.el.querySelector(".speaker")!.textContent = speaker;
     this.pages = lines.flatMap(paginate);
     this.next();
   }
@@ -89,6 +90,7 @@ export const dialogue = new Dialogue();
 
 /** What the agent says when a design appears: headline, uncertainty, bottlenecks and what it doesn't trust. */
 export function introLines(d: Design): string[] {
+  if (!d.workflow.equipment.length) return [];
   const t = d.sim_result.throughput, items = d.workflow.equipment.map((e) => d.catalog[e.catalog_id]).filter(Boolean);
   const total = items.reduce((s, i) => s + (i.price_usd_estimate ?? 0), 0);
   const lines = [`Here's your lab: ${items.length} pieces of equipment, about ${money(total)} in total.`];
@@ -178,6 +180,6 @@ export function setupClock(d: Design) {
 
 export function onTick(e: { t: number; end: number; done: number; moving: number }) {
   bar.querySelector("#clock-t")!.textContent = `T+${hms(e.t)}`;
-  bar.querySelector("#clock-done")!.textContent = `${e.done} plates done · ${e.moving} moving`;
+  bar.querySelector("#clock-done")!.textContent = `${e.done} finished · ${e.moving} in transit`;
   if (!scrubbing) scrub.value = String(Math.round((1000 * e.t) / Math.max(1, e.end)));
 }
