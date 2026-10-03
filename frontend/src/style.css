@@ -1,7 +1,7 @@
 :root { --bg: #1d2b2f; --panel: #f4efe1; --ink: #222; --accent: #e0503c; --ok: #3a9d5d; }
 * { box-sizing: border-box; }
 body { margin: 0; display: flex; height: 100vh; font-family: "Press Start 2P", ui-monospace, monospace; font-size: 11px; background: var(--bg); }
-#game { flex: 1; }
+#game { flex: 1; position: relative; overflow: hidden; }
 #panel { width: 340px; background: var(--panel); color: var(--ink); border-left: 6px solid #333; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
 h1 { font-size: 16px; margin: 0; }
 .band { position: relative; height: 14px; background: #ddd; border: 2px solid #333; }
@@ -12,3 +12,34 @@ table { width: 100%; border-collapse: collapse; } td { padding: 2px 4px; border-
 #log { max-height: 200px; overflow-y: auto; white-space: pre-wrap; }
 #chat-form { display: flex; gap: 4px; } #chat-input { flex: 1; font: inherit; }
 button { font: inherit; border: 3px solid #333; background: #fff; cursor: pointer; padding: 4px 8px; }
+
+/* Pokémon-style frames: white box, double dark border with a light inner rule. */
+.frame { position: absolute; z-index: 10; background: #fbfbf5; color: #222; border: 4px solid #2b2f36; border-radius: 10px;
+  box-shadow: inset 0 0 0 3px #fbfbf5, inset 0 0 0 5px #6b8fb3, 0 6px 0 #0006; line-height: 1.7; }
+.hidden { display: none !important; }
+
+#dialogue { left: 24px; right: 24px; bottom: 20px; min-height: 96px; padding: 20px 26px 16px; font-size: 12px; cursor: pointer; user-select: none; }
+#dialogue .speaker { position: absolute; top: -16px; left: 18px; background: #2b2f36; color: #fbfbf5; padding: 5px 10px; border-radius: 6px; font-size: 9px; }
+#dialogue .caret { position: absolute; right: 18px; bottom: 10px; color: #e0503c; visibility: hidden; animation: blink 0.8s steps(1) infinite; }
+#dialogue.done .caret { visibility: visible; }
+@keyframes blink { 50% { opacity: 0; } }
+
+#statcard { top: 16px; left: 16px; width: 360px; padding: 16px 18px; font-size: 9px; }
+#statcard .close { position: absolute; top: 8px; right: 8px; border: none; background: none; padding: 2px 4px; font-size: 10px; }
+#statcard .head { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 3px dotted #c8ccd2; }
+#statcard .sprite { image-rendering: pixelated; max-width: 96px; max-height: 96px; width: auto; height: auto; zoom: 2; }
+#statcard .name { font-size: 11px; line-height: 1.5; }
+#statcard .id { color: #667; margin-top: 4px; }
+#statcard .row { display: flex; justify-content: space-between; gap: 8px; align-items: center; padding: 3px 0; }
+#statcard .row > span:first-child { text-transform: uppercase; color: #445; white-space: nowrap; }
+#statcard .row > span:last-child { text-align: right; }
+#statcard .sub { color: #667; text-align: right; margin-top: -2px; }
+#statcard .range { color: #889; }
+#statcard .warn { margin-top: 8px; padding: 6px 8px; background: #fde4df; border: 2px solid #e0503c; border-radius: 4px; }
+#statcard .why { margin-top: 8px; color: #556; font-style: italic; }
+.hp { flex: 1; height: 10px; border: 2px solid #2b2f36; border-radius: 6px; background: #e8e8e0; overflow: hidden; margin: 0 6px; }
+.hp-fill { display: block; height: 100%; } .hp-green { background: #3ec46d; } .hp-yellow { background: #f2c94c; } .hp-red { background: #e0503c; }
+
+.badge { display: inline-block; padding: 2px 4px; border-radius: 3px; font-size: 7px; color: #fff; vertical-align: middle; }
+.badge-datasheet { background: var(--ok); } .badge-literature { background: #2d6cdf; }
+.badge-estimated { background: #c08a00; } .badge-placeholder, .badge-unknown { background: var(--accent); }
