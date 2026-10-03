@@ -16,7 +16,8 @@ const errors = [];
 let apiCalls = 0;
 page.on("pageerror", (e) => errors.push(`page error: ${e.message}`));
 page.on("console", (m) => { if (m.type() === "error") errors.push(`console: ${m.text()}`); });
-page.on("requestfailed", (r) => errors.push(`request failed (${r.failure()?.errorText}): ${r.url()}`));
+// net::ERR_ABORTED is the browser cancelling in-flight requests when the checker navigates to the next run.
+page.on("requestfailed", (r) => { if (r.failure()?.errorText !== "net::ERR_ABORTED") errors.push(`request failed (${r.failure()?.errorText}): ${r.url()}`); });
 page.on("response", (r) => { if (r.status() >= 400 && !r.url().endsWith("/favicon.ico")) errors.push(`HTTP ${r.status()}: ${r.url()}`); });
 // Backend routes, whether the API is another origin (make frontend) or the same one (make demo).
 const API_PATH = /^\/(chat|catalog|layout|simulate|verify|report|optimise|prioritise|validation|bench|example|health)\b/;

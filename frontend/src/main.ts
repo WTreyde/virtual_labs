@@ -83,6 +83,7 @@ async function go(r: Route) {
   badge.querySelector("button")?.remove();
   $("#checked").classList.add("hidden");
   $("#fix").classList.add("hidden");
+  $("#skill-btn").classList.add("hidden");
   log.textContent = "";
   history = [];
   chatting = false;
@@ -172,6 +173,11 @@ async function startReplay(name: string) {
   }
   if (!live()) return;
   skipBtn.remove();
+  if (await skillAvailable(name) && live()) {
+    const btn = $<HTMLButtonElement>("#skill-btn");
+    btn.classList.remove("hidden");
+    btn.onclick = () => downloadSkill(name);
+  }
   // Playback is over: the what-if may now ask the backend (it falls back to the case's cached sweep offline).
   setOffline(false);
 }
@@ -244,6 +250,32 @@ function updateWhatIfButton() {
   const id = b.instances![0], eq = design.workflow.equipment.find((e) => e.instance_id === id);
   btn.textContent = `What if ${(eq && design.catalog[eq.catalog_id]?.model) ?? id} were better?`;
   btn.onclick = () => openWhatIf(id);
+}
+
+// ---- agent skill download ---------------------------------------------------------------------
+
+// Each case ships the agent skill generated from its digital twin (public/skills/<case>/, copied from
+// backend/labforge/orchestrator/samples by scripts/copy_skills.py), so the download works offline.
+const SKILL_FILES = ["SKILL.md", "tools.json"];
+const skillUrl = (name: string, file: string) => `${(import.meta as any).env?.BASE_URL ?? "/"}skills/${encodeURIComponent(name)}/${file}`;
+
+async function skillAvailable(name: string) {
+  try {
+    const res = await fetch(skillUrl(name, "SKILL.md"), { method: "HEAD" });
+    return res.ok && !(res.headers.get("content-type") ?? "").includes("text/html"); // dev servers answer misses with index.html
+  } catch { return false; }
+}
+
+async function downloadSkill(name: string) {
+  for (const file of SKILL_FILES) {
+    const res = await fetch(skillUrl(name, file));
+    if (!res.ok) continue;
+    const url = URL.createObjectURL(await res.blob());
+    const a = Object.assign(document.createElement("a"), { href: url, download: file });
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    await new Promise((r) => setTimeout(r, 300)); // browsers drop back-to-back downloads
+  }
 }
 
 // ---- full-page views ----------------------------------------------------------------------------
