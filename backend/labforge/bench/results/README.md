@@ -9,6 +9,16 @@ That reproduces `leaderboard.json` exactly, apart from `scored_at`. Each answer 
 - `generated_at` is when the last answer came in: 2026-10-03 17:30 UTC. The run took 17:13–17:30 UTC (`run.answered_from` / `answered_to`).
 - `scored_at` is when the file was written.
 
+## Re-run (one command)
+Fresh answers for both arms on all tasks, cached so they re-score without API calls:
+
+    cd backend && python -m labforge.bench.runner --arms platform vanilla \
+        --answers labforge/bench/results/answers_$(date +%Y%m%d) --out labforge/bench/results/leaderboard.json
+
+- `--tasks <id> …` runs a subset; `--workers N` sets parallelism (default 4).
+- Smoke test on 4 Oct, 00:50 BST, current main: `--tasks enzyme_infeasible` ran both arms end to end in 80 s. Both produced designs (vanilla on protocol 2, 5 claims) and scored 2/2 and 1/1.
+- **Re-scoring the committed answers on current main no longer reproduces the table below** (platform 0.63, not 0.739). Catalog updates since the run changed clearance values (2 layouts now fail clearance) and durations (3 calibration flips). Imager storage slots also changed 3 XChem designs that grow plates in the imager. That's why the run needs repeating.
+
 ## Headline
 | Arm | Score (checkable checks passed) | Designs produced | Claims (supported / refuted) | Brier |
 |---|---|---|---|---|

@@ -220,3 +220,22 @@ def test_downtime_for_unknown_instance_is_an_error():
     w = wf([step("load", ["src_1"], 0)], SOURCE)
     with pytest.raises(ValueError, match="not in workflow.equipment"):
         simulate(spec(), w, layout(), hours=24, replicates=1, downtime={"ghost_1": {"availability": 0.9}})
+
+
+def test_imager_grows_plates_in_its_storage_slots_but_images_one_at_a_time():
+    # Rock Imager 1000: one camera (process.capacity 1, 180 s per plate) and 970 storage slots. Growth (incubation)
+    # is residence the catalog does not time, so it uses the slots; imaging stays one plate at a time.
+    w = wf([step("load", ["src_1"], 0), step("grow", ["imager_1"], 86400, ["load"], capability="incubation"),
+            step("image", ["imager_1"], 180, ["grow"], capability="crystal_imaging")],
+           {**SOURCE, "imager_1": "formulatrix_rock_imager_1000"})
+    out = run(spec(), w, layout(), hours=72)
+    assert out["throughput"]["p50"] == pytest.approx(86400 / 180, rel=0.1)  # the camera is the limit, not the slots
+    util = {u["instance_id"]: u["busy_fraction"] for u in out["utilisation"]}
+    assert util["imager_1"] > 0.9 and 0 < util["imager_1__storage"] < 0.9  # camera saturated, slots not full
+
+
+def test_timed_storage_operations_keep_the_process_capacity():
+    # The compound store times compound_storage (120 s, its picker): that is an operation, not residence.
+    w = wf([step("load", ["src_1"], 0), step("store", ["store_1"], 120, ["load"], capability="compound_storage")],
+           {**SOURCE, "store_1": "compound_store"})
+    assert run(spec(), w, layout())["throughput"]["p50"] == pytest.approx(86400 / 120, rel=0.05)
