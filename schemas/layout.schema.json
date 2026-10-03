@@ -176,7 +176,8 @@
               "robot_only",
               "human_only",
               "collaborative",
-              "walkway"
+              "walkway",
+              "break_area"
             ]
           },
           "min": {
