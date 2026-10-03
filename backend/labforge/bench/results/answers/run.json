@@ -1,5 +1,0 @@
-{
- "models": {"platform": "claude-opus-5-5", "vanilla": "claude-opus-5-5"},
- "answered_before": "2026-10-03T16:17:09+00:00",
- "note": "The exact run time wasn't recorded. The answers were produced on 3 Oct 2026 before they were first scored, which is the answered_before time. Both arms read ANTHROPIC_MODEL, set to claude-opus-5-5 in .env for this run. New runs stamp answered_at and model on each answer."
-}

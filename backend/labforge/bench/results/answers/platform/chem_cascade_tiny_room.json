@@ -1,21 +1,21 @@
 {
  "task_id": "chem_cascade_tiny_room",
  "arm": "platform",
- "message": "# Library cascade in a 3 \u00d7 2.5 m room: it doesn't fit\n\nThe full cascade won't fit in 7.5 m\u00b2. The best layout I could model had **22 layout violations**, and an independent check confirmed that count. With the throughput target I had to assume, the predicted median was **90 compounds/day**, under half that target. These are model predictions, not measurements, and this isn't a safety review.\n\n## Assumptions I made because nothing was specified\n- **Throughput target:** 192 compounds/day, which is two 96-product reaction blocks a day. A 768-product run (8 \u00d7 12 \u00d7 8) is 8 blocks.\n- **Hours and staff:** instruments run 24 h/day, with one chemist on an 8 h shift.\n- **Budget:** none given, so cost wasn't checked against a budget.\n- **Hazards:** flammable solvents and toxic reagents, because the catalog lists them for the synthesis platform, evaporator and LC-MS. No inert atmosphere.\n- **Room:** door at the middle of one short wall, 3 m ceiling, no areas that must stay clear.\n- **Left out because you didn't list them:** workup/filtration between the two reaction stages, purification, compound storage and incubation before the readout.\n- **One manual step kept:** an operator reformats each reaction block into a source plate the Echo can use. None of your listed instruments can do this, so it's modelled as 15 minutes of bench work per block (a placeholder).\n\n## Equipment (smallest suitable catalog models; estimated prices)\n| Station | Model | Est. USD |\n|---|---|---|\n| Powder dosing | Mettler Quantos QB5 | 72,900 |\n| Synthesis (both stages) | Chemspeed ISYNTH | 500,000 (placeholder) |\n| Fume hood (the catalog says the ISYNTH needs one) | Labconco XStream 6 ft | 16,560 |\n| Evaporator | Genevac EZ-2 4.0 | 52,500 |\n| LC-MS | Agilent 1290 + LC/MSD iQ | 214,184 |\n| Reformat bench | Fisher work bench | 5,530 |\n| Acoustic dispenser | Echo 650 Plus | 374,093 |\n| Reagent dispenser | Multidrop Combi | 24,191 |\n| Plate reader | CLARIOstar Plus | 44,450 |\n| Robot arm | UR5e | 39,083 |\n| **Subtotal** | | **\u2248 $1.34M**, not including installation, ducting, service or consumables |\n\n## Why it can't be done in this room\n- **Space:** the instruments' footprints alone come to **5.74 m\u00b2 of the 7.5 m\u00b2**, before service clearances and a walkway. The ISYNTH needs about 0.8 m of clearance, and the fume hood is 1.83 m wide.\n- **Layout violations (22):**\n  - The ISYNTH, fume hood and LC-MS extend outside the room.\n  - There are 7 overlaps between instruments.\n  - The ISYNTH and LC-MS can't be placed in a ventilated or fume-hood zone, as the catalog requires.\n  - The plate reader blocks the door, and there's no 1 m walkway to the ISYNTH, Quantos or Multidrop.\n  - The arm isn't rated to work alongside people, yet someone would hand reaction blocks into its reach at the ISYNTH.\n\n## Throughput (model result, not measured)\n- **Result:** median 90 compounds/day, with a range of 61\u201396 (10th\u201390th percentile). The chance of reaching 192 is 0.\n- **Bottleneck:** the ISYNTH is busy 74% of the time. Both reaction stages run on it, using the catalog's placeholder of 4 h per stage, and its reaction time is the result's most sensitive input. Every other instrument is busy less than 20% of the time.\n- **Arm usage:** in this model the arm moved nothing. The layout tool sent every transfer through the chemist, so this isn't yet an automated cell.\n\n## Why I didn't try a revised design\nThe fix for the throughput gap would be a second synthesis platform. That adds at least another 1.2 m\u00b2 of floor, which would only make the space problem worse. Nothing in the catalog is smaller than the ISYNTH for synthesis. So no design using catalog equipment can fit this whole cascade into 7.5 m\u00b2.\n\n## What could work (not yet modelled)\nSplit the cascade across two rooms:\n- **A ventilated chemistry room:** fume hood, ISYNTH (or two of them), Quantos, evaporator and probably the LC-MS.\n- **Your 3 \u00d7 2.5 m room:** Echo, Multidrop, plate reader, reformat bench and the arm. That's about 2.3 m\u00b2 of footprint, which looks workable with clearances, but I haven't run it through the layout tool.\n\nTo run that two-room design and check it properly, I'd need a real throughput target, a budget, and the size and ventilation of a second room.",
+ "message": "## It doesn't fit: the full cascade can't go into a 3 \u00d7 2.5 m room\n\nI placed and simulated all eight requested instruments, plus the fume hood and filtration station they need. The layout has **18 problems**, and an independent check confirmed that count. So I can't call this design workable. I didn't attempt a revision. Every supported change either adds floor space, such as a second synthesis platform, or removes equipment you asked for.\n\n### Assumptions I had to make (none came from you)\n- **Throughput target:** 192 compounds/day, which is two 96-well reaction blocks per day. At that rate, one library of 8 \u00d7 12 \u00d7 8 = 768 products takes 4 days. This is a placeholder figure.\n- **Hours and staff:** the system runs 24 h a day, with one chemist on an 8 h shift.\n- **Budget:** unknown, so this is a provisional design with no budget check.\n- **Hazards:** flammable solvents and toxic reagents are present, and no inert atmosphere is needed. In the catalog, only the 2.35 m-wide Chemspeed SWING XL provides an inert atmosphere, and it would make the room problem worse.\n- **Room:** 3 m ceiling, a door at the middle of the 2.5 m wall, and no keep-out zones.\n- **Duration figures:** nearly all are catalog estimates or my own estimates, not measured values. I didn't search the literature for evidence on any of them.\n\n### Equipment chosen: the smallest suitable catalog option at each stage\n| Stage | Instrument | Footprint (m) |\n|---|---|---|\n| Powder dosing | Mettler Quantos QB5 | 0.33 \u00d7 0.40 |\n| Synthesis, both reaction stages | Chemspeed ISYNTH | 1.3 \u00d7 0.9 (a placeholder size) |\n| Required ventilation for the ISYNTH | Labconco 6 ft fume hood | 1.83 \u00d7 0.96 |\n| Workup | Biotage PRESSURE+ 96 (manual) | 0.27 \u00d7 0.31 |\n| Evaporator | Genevac EZ-2 | 0.61 \u00d7 0.65 |\n| LC-MS | Agilent 1290 with MSD iQ | 0.80 \u00d7 0.55 |\n| Acoustic dispenser | Echo 650 (needs a vibration-free spot) | 0.54 \u00d7 0.75 |\n| Reagent dispenser | Multidrop Combi | 0.36 \u00d7 0.22 |\n| Plate reader | PHERAstar FSX | 0.45 \u00d7 0.51 |\n| Robot arm and output | UR5e, plate hotel | \u2014 |\n\n### Why it fails\n- **Floor space:** the equipment alone takes 4.81 m\u00b2 of the room's 7.5 m\u00b2. That's before service clearances, the hood's operator space and a 1 m walkway. The hood plus the ISYNTH account for about 2.9 m\u00b2 of it.\n- **The 18 problems found:**\n  - The hood and the filtration station stick out of the room.\n  - 10 pairs of instruments overlap. Most involve the hood or the ISYNTH; the Echo and plate reader also overlap.\n  - The filtration station isn't in a ventilated area, even though it handles flammable solvents.\n  - The door is blocked, and there's no 1 m walkway to the LC-MS.\n  - People would hand plates into the arm's reach at the reagent dispenser, LC-MS, filtration station and powder doser. The catalog doesn't rate the arm for working alongside people, so it would need a light curtain or a pass-through hotel.\n- **Throughput:** the simulation gives a middle estimate of **92 compounds/day**, with a likely range of 62\u201398. That's below the assumed 192, and no simulation run reached the target. The ISYNTH is the constraint: it runs both 4 h reaction stages and is busy 66% of the time, and blocks wait about 22 h on average to get onto it. Only the reaction times noticeably affect throughput. In the model, the chemist carried every plate and the arm did no transfers.\n\n### Parts of the cascade that aren't modelled\n- **Purification:** not on your list.\n- **Plate reformatting for the Echo:** the Echo needs 384- or 1536-well source plates, which takes a liquid handler that isn't on your list.\n- **Assay incubation.**\n- **Compound storage:** the smallest store in the catalog is 4.31 \u00d7 2.38 m.\n- **Separate flammable-solvent storage:** there's no catalog item for it.\n\n### Cost\nThe catalog estimate is about **$1.41M**. The ISYNTH price ($500k) is a placeholder, and the total excludes installation, service and building work. It hasn't been checked against a budget because there isn't one.\n\n### Options that could work\n1. **Split the cascade across two rooms.** A ventilated chemistry room would hold the powder doser, ISYNTH, hood, filtration station and evaporator. The 3 \u00d7 2.5 m room would then take the analysis and screening equipment: LC-MS, Echo, reagent dispenser, plate reader and arm. That second set still needs its own layout run before anyone relies on it.\n2. **Use a larger room.** I'd need its real dimensions and door position.\n3. **Add a second synthesis platform** if throughput matters. This only helps once there's room for it.\n\nAll results here are model predictions, not measured lab performance, and not a safety certification. If you send the real target, hours, budget, hazards and room details, I'll rerun the design.",
  "lab_spec": {
   "id": "lib_cascade_small_room",
-  "name": "Two-stage library cascade in 3 x 2.5 m room (provisional)",
+  "name": "Compact library synthesis-to-screen cascade (provisional)",
   "domain": "chemistry",
-  "description": "Fit the full library cascade (powder dosing, synthesis platform, evaporator, LC-MS, acoustic dispenser, reagent dispenser, plate reader and a robot arm) into a 3 x 2.5 m room. User supplied no target, hours, budget or hazards; all such values below are agent assumptions for a provisional design.",
+  "description": "User brief: fit the full library cascade (powder dosing, synthesis platform, evaporator, LC-MS, acoustic dispenser, reagent dispenser, plate reader, robot arm) into a 3 x 2.5 m room. No further information was available. Throughput, hours, budget, hazards, door and ceiling are agent assumptions.",
   "throughput_target": {
    "value": 192,
    "unit": "compounds_per_day",
    "operating_hours_per_day": 24
   },
   "room": {
-   "width_m": 3,
+   "width_m": 3.0,
    "depth_m": 2.5,
-   "height_m": 3,
+   "height_m": 3.0,
    "doors": [
     {
      "x": 0,
@@ -24,29 +24,32 @@
    ]
   },
   "labware": [
+   "vial_rack",
    "reaction_block_96",
-   "sbs_384",
+   "filter_plate_96",
    "sbs_96",
-   "vial_rack"
+   "sbs_384"
   ],
   "required_capabilities": [
    "powder_dosing",
-   "reaction",
    "liquid_dosing",
+   "reaction",
+   "filtration",
    "evaporation",
    "lcms",
-   "manual_bench",
    "acoustic_dispensing",
    "reagent_dispensing",
    "fluorescence_read",
    "plate_transport_arm",
+   "plate_storage",
    "ventilated_enclosure"
   ],
   "constraints": {
    "hazards": [
     "flammable_solvents",
     "toxic_reagents"
-   ]
+   ],
+   "max_human_interventions_per_day": 4
   },
   "operators": [
    {
@@ -55,17 +58,17 @@
     "shift_hours": 8,
     "skills": [
      "manual_bench",
+     "filtration",
      "powder_dosing"
     ]
    }
   ],
   "notes": [
-   "ASSUMED target: 192 compounds/day = 2 x 96-product reaction blocks/day; a 768-product campaign (8 x 12 x 8) = 8 reaction blocks.",
-   "ASSUMED 24 h unattended instrument operation, 1 chemist on an 8 h shift.",
-   "ASSUMED no budget given: provisional design, cost check not verified.",
-   "ASSUMED hazards flammable_solvents and toxic_reagents (catalog lists them for synthesis/evaporation/LC-MS); no inert atmosphere assumed.",
-   "ASSUMED door at x=0, y=1.25 and 3 m ceiling; no keep-out zones known.",
-   "OUT OF SCOPE (not listed by user): inter-stage workup/filtration, purification, compound storage, pre-read incubation. A manual reformat step from reaction block to Echo source plate is retained because no listed instrument can do it."
+   "ASSUMPTION: target is 192 compounds/day = 2 x 96-well reaction blocks/day, so one 8x12x8 = 768-product library every 4 days. This is a placeholder, not a user requirement.",
+   "ASSUMPTION: budget unknown; provisional design with no budget limit.",
+   "ASSUMPTION: flammable solvents and toxic reagents present; inert atmosphere not required (if required, only the 2.35 m wide SWING XL in the catalog provides it).",
+   "ASSUMPTION: door centred on the 2.5 m wall at x=0; ceiling 3 m; no keep-out zones.",
+   "Out of scope or not representable: purification (not in user's list), 96-to-384 Echo source reformat (needs a liquid handler not in user's list), assay incubation, compound storage (smallest catalog store is 4.31 x 2.38 m), separated flammable-solvent storage cabinet (no catalog item)."
   ],
   "scenario": "chem_library_screen"
  },
@@ -75,118 +78,99 @@
   "labware": "reaction_block_96",
   "equipment": [
    {
+    "instance_id": "hood_1",
+    "catalog_id": "labconco_fume_hood",
+    "rationale": "ISYNTH catalog safety requires a fume_hood/ventilated zone; flammable solvents assumed."
+   },
+   {
     "instance_id": "quantos_1",
     "catalog_id": "mettler_quantos",
-    "rationale": "Smallest catalog powder doser (0.33 x 0.40 m)."
+    "rationale": "Smallest powder doser in catalog (0.33 x 0.40 m)."
    },
    {
     "instance_id": "isynth_1",
     "catalog_id": "chemspeed_isynth",
-    "rationale": "Smallest catalog synthesis platform (1.3 x 0.9 m vs 2.35 m SWING XL); runs both reaction stages on 96-position blocks."
+    "rationale": "Smallest synthesis platform in catalog (1.3 x 0.9 m, placeholder footprint); runs both reaction stages."
    },
    {
-    "instance_id": "hood_1",
-    "catalog_id": "labconco_fume_hood",
-    "rationale": "Catalog lists fume_hood/ventilated zone as a requirement for ISYNTH and ventilation for evaporator/LC-MS/Quantos."
+    "instance_id": "pressure_1",
+    "catalog_id": "biotage_pressure_plus_96",
+    "rationale": "Workup filtration between stages; manual positive-pressure manifold."
    },
    {
-    "instance_id": "evap_1",
+    "instance_id": "ez2_1",
     "catalog_id": "genevac_ez2",
-    "rationale": "Smallest catalog evaporator (0.61 x 0.65 m), 4 plate positions."
+    "rationale": "Bench evaporator, smaller than HT-6."
    },
    {
     "instance_id": "lcms_1",
     "catalog_id": "agilent_1290_lcmsd_iq",
-    "rationale": "Shallower LC-MS (0.55 m) and shorter catalog per-plate run (14400 s/96 samples) than the Waters option."
-   },
-   {
-    "instance_id": "bench_1",
-    "catalog_id": "lab_bench",
-    "rationale": "Operator bench for manual reformat of reaction block into Echo-qualified 384 source plate (no listed instrument provides this)."
+    "rationale": "Shallower (0.55 m) LC-MS in catalog."
    },
    {
     "instance_id": "echo_1",
     "catalog_id": "beckman_echo_650",
-    "rationale": "Acoustic dispenser; accepts sbs_384 source and sbs_96 destination."
+    "rationale": "Acoustic transfer to assay plates."
    },
    {
-    "instance_id": "multidrop_1",
+    "instance_id": "combi_1",
     "catalog_id": "thermo_multidrop_combi",
-    "rationale": "Very small reagent dispenser (0.36 x 0.22 m)."
+    "rationale": "Smallest reagent dispenser."
    },
    {
     "instance_id": "reader_1",
-    "catalog_id": "bmg_clariostar",
-    "rationale": "Fluorescence reader; smallest/cheapest catalog option."
+    "catalog_id": "bmg_pherastar_fsx",
+    "rationale": "Fluorescence readout."
    },
    {
     "instance_id": "arm_1",
     "catalog_id": "ur5e",
-    "rationale": "0.85 m reach and 5 kg payload for reaction blocks and plates (PF400 payload 0.5 kg)."
+    "rationale": "Requested robot arm; 0.85 m reach, longer than PF400."
+   },
+   {
+    "instance_id": "hotel_1",
+    "catalog_id": "generic_plate_hotel",
+    "rationale": "Output stack for read plates (counting sink)."
    }
   ],
   "steps": [
    {
     "id": "dose_stocks",
-    "name": "Powder dosing of building-block stock vials",
+    "name": "Powder dosing of building-block stocks",
     "capability": "powder_dosing",
     "candidate_instances": [
      "quantos_1"
     ],
-    "duration_s": 1200,
-    "mode": "semi_automated",
-    "operator_role": "chemist",
+    "duration_s": 3600,
     "after": [],
+    "mode": "automated",
     "params": {
-     "flow_unit": "reaction block (96 products) worth of stock vials",
-     "vials_per_block": 4,
-     "duration_basis": "Catalog estimate 300 s per vial x assumed 4 vials per block (28 building-block stocks for 8+12+8 over 8 blocks, rounded up). Per reaction block."
+     "flow_unit": "vial_rack of stock vials for one reaction block",
+     "units_per_run": 12,
+     "duration_basis": "Catalog 300 s per vial x 12 stock vials per block (agent assumption on stock count)"
     },
     "duration_uncertainty": {
-     "value": 1200,
-     "low": 480,
-     "high": 3600,
+     "value": 3600,
+     "low": 1440,
+     "high": 10800,
      "confidence": "estimated",
      "source": "agent_estimate"
     }
    },
    {
-    "id": "stage1_reaction",
-    "name": "Reaction stage 1",
-    "capability": "reaction",
-    "candidate_instances": [
-     "isynth_1"
-    ],
-    "duration_s": 14400,
-    "after": [
-     "dose_stocks"
-    ],
-    "params": {
-     "flow_unit": "reaction_block_96",
-     "duration_basis": "Catalog ISYNTH reaction 14400 s per block run (placeholder 4 h)."
-    },
-    "duration_uncertainty": {
-     "value": 14400,
-     "low": 3600,
-     "high": 86400,
-     "confidence": "estimated",
-     "source": "agent_estimate"
-    }
-   },
-   {
-    "id": "stage2_dosing",
-    "name": "Stage-2 building-block liquid dosing",
+    "id": "dose_liquids",
+    "name": "Liquid dosing into reaction block",
     "capability": "liquid_dosing",
     "candidate_instances": [
      "isynth_1"
     ],
     "duration_s": 900,
     "after": [
-     "stage1_reaction"
+     "dose_stocks"
     ],
     "params": {
      "flow_unit": "reaction_block_96",
-     "duration_basis": "Catalog ISYNTH liquid_dosing 900 s per block array."
+     "duration_basis": "catalog placeholder per reactor array"
     },
     "duration_uncertainty": {
      "value": 900,
@@ -197,7 +181,55 @@
     }
    },
    {
-    "id": "stage2_reaction",
+    "id": "react_1",
+    "name": "Reaction stage 1",
+    "capability": "reaction",
+    "candidate_instances": [
+     "isynth_1"
+    ],
+    "duration_s": 14400,
+    "after": [
+     "dose_liquids"
+    ],
+    "params": {
+     "flow_unit": "reaction_block_96",
+     "duration_basis": "catalog 4 h placeholder per block"
+    },
+    "duration_uncertainty": {
+     "value": 14400,
+     "low": 3600,
+     "high": 86400,
+     "confidence": "estimated",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "workup",
+    "name": "Workup filtration",
+    "capability": "filtration",
+    "candidate_instances": [
+     "pressure_1"
+    ],
+    "duration_s": 420,
+    "after": [
+     "react_1"
+    ],
+    "mode": "manual",
+    "operator_role": "chemist",
+    "params": {
+     "flow_unit": "filter_plate_96 (one per block)",
+     "duration_basis": "catalog 300 s run + 120 s setup per plate"
+    },
+    "duration_uncertainty": {
+     "value": 420,
+     "low": 180,
+     "high": 1500,
+     "confidence": "estimated",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "react_2",
     "name": "Reaction stage 2",
     "capability": "reaction",
     "candidate_instances": [
@@ -205,11 +237,11 @@
     ],
     "duration_s": 14400,
     "after": [
-     "stage2_dosing"
+     "workup"
     ],
     "params": {
      "flow_unit": "reaction_block_96",
-     "duration_basis": "Catalog ISYNTH reaction 14400 s per block run."
+     "duration_basis": "catalog 4 h placeholder per block"
     },
     "duration_uncertainty": {
      "value": 14400,
@@ -224,15 +256,15 @@
     "name": "Solvent evaporation",
     "capability": "evaporation",
     "candidate_instances": [
-     "evap_1"
+     "ez2_1"
     ],
     "duration_s": 5400,
     "after": [
-     "stage2_reaction"
+     "react_2"
     ],
     "params": {
-     "flow_unit": "reaction_block_96",
-     "duration_basis": "Catalog EZ-2 5400 s per run; capacity 4 positions."
+     "flow_unit": "one 96-well plate per block",
+     "duration_basis": "catalog per run estimate"
     },
     "duration_uncertainty": {
      "value": 5400,
@@ -254,41 +286,15 @@
      "evaporate"
     ],
     "params": {
-     "flow_unit": "reaction_block_96",
-     "samples_per_block": 96,
-     "duration_basis": "Catalog 150 s per sample x 96 samples = 14400 s per block."
+     "flow_unit": "sbs_96 plate",
+     "units_per_run": 96,
+     "duration_basis": "catalog 150 s per sample x 96 samples"
     },
     "duration_uncertainty": {
      "value": 14400,
      "low": 9600,
      "high": 28800,
      "confidence": "estimated",
-     "source": "agent_estimate"
-    }
-   },
-   {
-    "id": "reformat_manual",
-    "name": "Manual reformat to Echo 384 source plate",
-    "capability": "manual_bench",
-    "candidate_instances": [
-     "bench_1"
-    ],
-    "duration_s": 900,
-    "mode": "manual",
-    "operator_role": "chemist",
-    "after": [
-     "lcms_qc"
-    ],
-    "params": {
-     "flow_unit": "reaction_block_96 in -> one sbs_384 Echo source plate out",
-     "fan_out_basis": "1 source plate per block (96 of 384 wells used)",
-     "duration_basis": "Catalog bench placeholder 900 s per plate handling step; operator-attended."
-    },
-    "duration_uncertainty": {
-     "value": 900,
-     "low": 300,
-     "high": 3600,
-     "confidence": "placeholder",
      "source": "agent_estimate"
     }
    },
@@ -301,11 +307,12 @@
     ],
     "duration_s": 180,
     "after": [
-     "reformat_manual"
+     "lcms_qc"
     ],
     "params": {
-     "flow_unit": "sbs_384 source in -> one sbs_96 assay plate (96 compounds) out",
-     "duration_basis": "Catalog Echo 650 180 s per destination plate."
+     "flow_unit": "assay plate",
+     "duration_basis": "catalog per destination plate",
+     "gap": "Echo source must be 384/1536 format; 96->384 reformat not modelled (no liquid handler in brief)"
     },
     "duration_uncertainty": {
      "value": 180,
@@ -317,18 +324,18 @@
    },
    {
     "id": "reagent_add",
-    "name": "Assay reagent dispensing",
+    "name": "Assay reagent dispense",
     "capability": "reagent_dispensing",
     "candidate_instances": [
-     "multidrop_1"
+     "combi_1"
     ],
     "duration_s": 70,
     "after": [
      "acoustic_transfer"
     ],
     "params": {
-     "flow_unit": "sbs_96 assay plate",
-     "duration_basis": "Catalog 10 s dispense + 60 s setup per plate (setup placeholder)."
+     "flow_unit": "assay plate",
+     "duration_basis": "catalog 10 s dispense + 60 s setup"
     },
     "duration_uncertainty": {
      "value": 70,
@@ -339,50 +346,43 @@
     }
    },
    {
-    "id": "fluor_read",
+    "id": "read",
     "name": "Fluorescence readout",
     "capability": "fluorescence_read",
     "candidate_instances": [
      "reader_1"
     ],
-    "duration_s": 180,
+    "duration_s": 30,
     "after": [
      "reagent_add"
     ],
     "params": {
-     "flow_unit": "sbs_96 assay plate",
-     "duration_basis": "Catalog CLARIOstar 180 s per plate."
+     "flow_unit": "assay plate",
+     "note": "assay incubation not modelled"
     },
     "duration_uncertainty": {
-     "value": 180,
-     "low": 90,
-     "high": 360,
+     "value": 30,
+     "low": 14,
+     "high": 90,
      "confidence": "estimated",
      "source": "agent_estimate"
     }
    },
    {
-    "id": "hit_analysis",
-    "name": "Data/hit analysis",
-    "capability": "in_silico",
-    "candidate_instances": [],
-    "duration_s": 300,
-    "mode": "in_silico",
+    "id": "store_out",
+    "name": "Finished plate to output hotel",
+    "capability": "plate_storage",
+    "candidate_instances": [
+     "hotel_1"
+    ],
+    "duration_s": 0,
     "after": [
-     "fluor_read"
+     "read"
     ],
     "params": {
-     "flow_unit": "sbs_96 assay plate",
+     "flow_unit": "assay plate",
      "count_throughput": true,
-     "units_per_labware": 96,
-     "duration_basis": "Placeholder 300 s per plate of data processing."
-    },
-    "duration_uncertainty": {
-     "value": 300,
-     "low": 60,
-     "high": 1800,
-     "confidence": "placeholder",
-     "source": "agent_estimate"
+     "units_per_labware": 96
     }
    }
   ]
@@ -391,16 +391,25 @@
   "id": "lib_cascade_wf_v1_layout",
   "workflow_id": "lib_cascade_wf_v1",
   "room": {
-   "width_m": 3,
+   "width_m": 3.0,
    "depth_m": 2.5,
-   "height_m": 3
+   "height_m": 3.0
   },
   "placements": [
    {
+    "instance_id": "hood_1",
+    "position": {
+     "x": 2.384,
+     "y": 0.635,
+     "z": 0.0
+    },
+    "rotation_deg": 270.0
+   },
+   {
     "instance_id": "quantos_1",
     "position": {
-     "x": 2.541,
-     "y": 1.882,
+     "x": 0.552,
+     "y": 0.214,
      "z": 0.9
     },
     "rotation_deg": 270.0
@@ -408,83 +417,83 @@
    {
     "instance_id": "isynth_1",
     "position": {
+     "x": 1.973,
+     "y": 1.062,
+     "z": 0.0
+    },
+    "rotation_deg": 270.0
+   },
+   {
+    "instance_id": "pressure_1",
+    "position": {
      "x": 0.1,
-     "y": 2.4,
-     "z": 0.0
-    },
-    "rotation_deg": 0.0
-   },
-   {
-    "instance_id": "hood_1",
-    "position": {
-     "x": 2.6,
-     "y": 2.388,
-     "z": 0.0
-    },
-    "rotation_deg": 0.0
-   },
-   {
-    "instance_id": "evap_1",
-    "position": {
-     "x": 1.576,
-     "y": 0.692,
+     "y": 0.779,
      "z": 0.9
     },
-    "rotation_deg": 180.0
+    "rotation_deg": 90.0
+   },
+   {
+    "instance_id": "ez2_1",
+    "position": {
+     "x": 0.416,
+     "y": 2.172,
+     "z": 0.9
+    },
+    "rotation_deg": 0.0
    },
    {
     "instance_id": "lcms_1",
     "position": {
-     "x": 0.265,
-     "y": 0.1,
+     "x": 1.523,
+     "y": 0.336,
      "z": 0.9
     },
-    "rotation_deg": 180.0
-   },
-   {
-    "instance_id": "bench_1",
-    "position": {
-     "x": 2.023,
-     "y": 1.17,
-     "z": 0.0
-    },
-    "rotation_deg": 270.0
+    "rotation_deg": 0.0
    },
    {
     "instance_id": "echo_1",
     "position": {
-     "x": 2.592,
-     "y": 0.953,
+     "x": 1.791,
+     "y": 1.584,
      "z": 0.9
     },
-    "rotation_deg": 270.0
+    "rotation_deg": 0.0
    },
    {
-    "instance_id": "multidrop_1",
+    "instance_id": "combi_1",
     "position": {
-     "x": 0.221,
-     "y": 0.211,
+     "x": 0.498,
+     "y": 0.788,
      "z": 0.9
     },
-    "rotation_deg": 180.0
+    "rotation_deg": 0.0
    },
    {
     "instance_id": "reader_1",
     "position": {
-     "x": 0.557,
-     "y": 0.896,
+     "x": 1.798,
+     "y": 1.322,
      "z": 0.9
     },
-    "rotation_deg": 180.0
+    "rotation_deg": 0.0
    },
    {
     "instance_id": "arm_1",
     "position": {
      "x": 0.1,
-     "y": 2.296,
+     "y": 0.1,
      "z": 0.9
     },
     "rotation_deg": 0.0
+   },
+   {
+    "instance_id": "hotel_1",
+    "position": {
+     "x": 2.57,
+     "y": 0.986,
+     "z": 0.9
+    },
+    "rotation_deg": 270.0
    }
   ],
   "operators": [
@@ -502,254 +511,362 @@
     "from_instance": "quantos_1",
     "to_instance": "isynth_1",
     "transporter_instance": "chemist_1",
-    "distance_m": 4.62,
+    "distance_m": 1.75,
     "path": [
      {
-      "x": 2.541,
-      "y": 1.882,
+      "x": 0.552,
+      "y": 0.214,
       "z": 1.1
      },
      {
-      "x": 2.541,
-      "y": 1.882,
+      "x": 1.191,
+      "y": 0.375,
       "z": 1.0
      },
      {
-      "x": 0.1,
-      "y": 3.591,
+      "x": 1.123,
+      "y": 1.062,
       "z": 1.0
      },
      {
-      "x": 0.1,
-      "y": 1.95,
+      "x": 1.523,
+      "y": 1.062,
       "z": 0.9
      }
     ],
-    "est_time_s": 19.6
+    "est_time_s": 16.7
    },
    {
     "from_instance": "isynth_1",
-    "to_instance": "evap_1",
+    "to_instance": "pressure_1",
     "transporter_instance": "chemist_1",
-    "distance_m": 5.35,
+    "distance_m": 2.15,
     "path": [
      {
-      "x": 0.1,
-      "y": 1.95,
+      "x": 1.523,
+      "y": 1.062,
       "z": 0.9
      },
      {
+      "x": 1.123,
+      "y": 1.062,
+      "z": 1.0
+     },
+     {
+      "x": 1.05,
+      "y": 1.05,
+      "z": 1.0
+     },
+     {
+      "x": 0.95,
+      "y": 1.15,
+      "z": 1.0
+     },
+     {
+      "x": 0.75,
+      "y": 1.15,
+      "z": 1.0
+     },
+     {
+      "x": 0.55,
+      "y": 1.35,
+      "z": 1.0
+     },
+     {
       "x": 0.1,
-      "y": 3.591,
+      "y": 1.383,
       "z": 1.0
      },
      {
-      "x": 0.25,
-      "y": 1.65,
+      "x": 0.1,
+      "y": 0.779,
+      "z": 1.05
+     }
+    ],
+    "est_time_s": 17.2
+   },
+   {
+    "from_instance": "pressure_1",
+    "to_instance": "isynth_1",
+    "transporter_instance": "chemist_1",
+    "distance_m": 2.15,
+    "path": [
+     {
+      "x": 0.1,
+      "y": 0.779,
+      "z": 1.05
+     },
+     {
+      "x": 0.1,
+      "y": 1.383,
       "z": 1.0
      },
      {
-      "x": 0.35,
-      "y": 1.65,
+      "x": 0.55,
+      "y": 1.35,
       "z": 1.0
      },
      {
       "x": 0.65,
-      "y": 1.35,
-      "z": 1.0
-     },
-     {
-      "x": 1.05,
-      "y": 1.35,
-      "z": 1.0
-     },
-     {
-      "x": 1.576,
-      "y": 0.692,
-      "z": 1.0
-     },
-     {
-      "x": 1.576,
-      "y": 0.692,
-      "z": 1.46
-     }
-    ],
-    "est_time_s": 20.4
-   },
-   {
-    "from_instance": "evap_1",
-    "to_instance": "lcms_1",
-    "transporter_instance": "chemist_1",
-    "distance_m": 1.41,
-    "path": [
-     {
-      "x": 1.576,
-      "y": 0.692,
-      "z": 1.46
-     },
-     {
-      "x": 1.576,
-      "y": 0.692,
-      "z": 1.0
-     },
-     {
-      "x": 1.05,
-      "y": 0.35,
-      "z": 1.0
-     },
-     {
-      "x": 0.748,
-      "y": 0.583,
-      "z": 1.0
-     },
-     {
-      "x": 0.465,
-      "y": 0.3,
-      "z": 1.35
-     }
-    ],
-    "est_time_s": 16.4
-   },
-   {
-    "from_instance": "lcms_1",
-    "to_instance": "bench_1",
-    "transporter_instance": "chemist_1",
-    "distance_m": 1.8,
-    "path": [
-     {
-      "x": 0.465,
-      "y": 0.3,
-      "z": 1.35
-     },
-     {
-      "x": 0.748,
-      "y": 0.583,
-      "z": 1.0
-     },
-     {
-      "x": 2.023,
-      "y": 1.17,
-      "z": 1.0
-     },
-     {
-      "x": 2.023,
-      "y": 1.17,
-      "z": 0.9
-     }
-    ],
-    "est_time_s": 16.8
-   },
-   {
-    "from_instance": "bench_1",
-    "to_instance": "echo_1",
-    "transporter_instance": "chemist_1",
-    "distance_m": 0.7,
-    "path": [
-     {
-      "x": 2.023,
-      "y": 1.17,
-      "z": 0.9
-     },
-     {
-      "x": 2.023,
-      "y": 1.17,
-      "z": 1.0
-     },
-     {
-      "x": 1.822,
-      "y": 0.953,
-      "z": 1.0
-     },
-     {
-      "x": 2.222,
-      "y": 0.953,
-      "z": 1.3
-     }
-    ],
-    "est_time_s": 15.7
-   },
-   {
-    "from_instance": "echo_1",
-    "to_instance": "multidrop_1",
-    "transporter_instance": "chemist_1",
-    "distance_m": 3.21,
-    "path": [
-     {
-      "x": 2.222,
-      "y": 0.953,
-      "z": 1.3
-     },
-     {
-      "x": 1.822,
-      "y": 0.953,
-      "z": 1.0
-     },
-     {
-      "x": 1.15,
       "y": 1.25,
       "z": 1.0
      },
      {
+      "x": 0.75,
+      "y": 1.25,
+      "z": 1.0
+     },
+     {
+      "x": 0.85,
+      "y": 1.15,
+      "z": 1.0
+     },
+     {
+      "x": 0.95,
+      "y": 1.15,
+      "z": 1.0
+     },
+     {
       "x": 1.05,
-      "y": 1.35,
+      "y": 1.05,
       "z": 1.0
      },
      {
-      "x": 0.15,
-      "y": 1.35,
+      "x": 1.123,
+      "y": 1.062,
       "z": 1.0
      },
      {
-      "x": 0.221,
-      "y": 0.721,
-      "z": 1.0
-     },
-     {
-      "x": 0.221,
-      "y": 0.321,
-      "z": 0.95
+      "x": 1.523,
+      "y": 1.062,
+      "z": 0.9
      }
     ],
-    "est_time_s": 18.2
+    "est_time_s": 17.2
    },
    {
-    "from_instance": "multidrop_1",
-    "to_instance": "reader_1",
+    "from_instance": "isynth_1",
+    "to_instance": "ez2_1",
     "transporter_instance": "chemist_1",
-    "distance_m": 2.81,
+    "distance_m": 1.9,
     "path": [
      {
-      "x": 0.221,
-      "y": 0.321,
+      "x": 1.523,
+      "y": 1.062,
+      "z": 0.9
+     },
+     {
+      "x": 1.123,
+      "y": 1.062,
+      "z": 1.0
+     },
+     {
+      "x": 1.15,
+      "y": 1.65,
+      "z": 1.0
+     },
+     {
+      "x": 0.95,
+      "y": 1.85,
+      "z": 1.0
+     },
+     {
+      "x": 0.416,
+      "y": 2.172,
+      "z": 1.0
+     },
+     {
+      "x": 0.416,
+      "y": 2.172,
+      "z": 1.46
+     }
+    ],
+    "est_time_s": 16.9
+   },
+   {
+    "from_instance": "ez2_1",
+    "to_instance": "lcms_1",
+    "transporter_instance": "chemist_1",
+    "distance_m": 3.74,
+    "path": [
+     {
+      "x": 0.416,
+      "y": 2.172,
+      "z": 1.46
+     },
+     {
+      "x": 0.416,
+      "y": 2.172,
+      "z": 1.0
+     },
+     {
+      "x": 0.95,
+      "y": 1.85,
+      "z": 1.0
+     },
+     {
+      "x": 1.25,
+      "y": 1.55,
+      "z": 1.0
+     },
+     {
+      "x": 2.396,
+      "y": 0.481,
+      "z": 1.0
+     },
+     {
+      "x": 1.323,
+      "y": 0.136,
+      "z": 1.35
+     }
+    ],
+    "est_time_s": 18.7
+   },
+   {
+    "from_instance": "lcms_1",
+    "to_instance": "echo_1",
+    "transporter_instance": "chemist_1",
+    "distance_m": 2.22,
+    "path": [
+     {
+      "x": 1.323,
+      "y": 0.136,
+      "z": 1.35
+     },
+     {
+      "x": 2.396,
+      "y": 0.481,
+      "z": 1.0
+     },
+     {
+      "x": 1.791,
+      "y": 0.814,
+      "z": 1.0
+     },
+     {
+      "x": 1.791,
+      "y": 1.214,
+      "z": 1.3
+     }
+    ],
+    "est_time_s": 17.2
+   },
+   {
+    "from_instance": "echo_1",
+    "to_instance": "combi_1",
+    "transporter_instance": "chemist_1",
+    "distance_m": 2.3,
+    "path": [
+     {
+      "x": 1.791,
+      "y": 1.214,
+      "z": 1.3
+     },
+     {
+      "x": 1.791,
+      "y": 0.814,
+      "z": 1.0
+     },
+     {
+      "x": 1.15,
+      "y": 0.95,
+      "z": 1.0
+     },
+     {
+      "x": 1.15,
+      "y": 1.05,
+      "z": 1.0
+     },
+     {
+      "x": 0.803,
+      "y": 1.315,
+      "z": 1.0
+     },
+     {
+      "x": 0.498,
+      "y": 0.678,
+      "z": 0.95
+     }
+    ],
+    "est_time_s": 17.3
+   },
+   {
+    "from_instance": "combi_1",
+    "to_instance": "reader_1",
+    "transporter_instance": "chemist_1",
+    "distance_m": 2.34,
+    "path": [
+     {
+      "x": 0.498,
+      "y": 0.678,
       "z": 0.95
      },
      {
-      "x": 0.221,
-      "y": 0.721,
+      "x": 0.803,
+      "y": 1.315,
       "z": 1.0
      },
      {
-      "x": 0.15,
-      "y": 1.35,
+      "x": 0.95,
+      "y": 1.25,
       "z": 1.0
      },
      {
-      "x": 1.05,
-      "y": 1.35,
+      "x": 0.95,
+      "y": 1.15,
       "z": 1.0
      },
      {
-      "x": 1.207,
-      "y": 0.896,
+      "x": 1.798,
+      "y": 0.667,
       "z": 1.0
      },
      {
-      "x": 0.807,
-      "y": 0.896,
+      "x": 1.798,
+      "y": 1.067,
       "z": 1.0
      }
     ],
-    "est_time_s": 17.8
+    "est_time_s": 17.3
+   },
+   {
+    "from_instance": "reader_1",
+    "to_instance": "hotel_1",
+    "transporter_instance": "chemist_1",
+    "distance_m": 4.62,
+    "path": [
+     {
+      "x": 1.798,
+      "y": 1.067,
+      "z": 1.0
+     },
+     {
+      "x": 1.798,
+      "y": 0.667,
+      "z": 1.0
+     },
+     {
+      "x": 1.25,
+      "y": 2.25,
+      "z": 1.0
+     },
+     {
+      "x": 2.35,
+      "y": 2.25,
+      "z": 1.0
+     },
+     {
+      "x": 2.012,
+      "y": 1.265,
+      "z": 1.0
+     },
+     {
+      "x": 2.37,
+      "y": 1.086,
+      "z": 1.0
+     }
+    ],
+    "est_time_s": 19.6
    }
   ],
   "zones": [
@@ -757,111 +874,56 @@
     "id": "fume_hood_1",
     "kind": "fume_hood",
     "min": {
-     "x": 2.041,
-     "y": 1.417
-    },
-    "max": {
-     "x": 3,
-     "y": 2.347
-    }
-   },
-   {
-    "id": "fume_hood_2",
-    "kind": "fume_hood",
-    "min": {
-     "x": 0.0,
-     "y": 1.65
-    },
-    "max": {
-     "x": 1.05,
-     "y": 2.5
-    }
-   },
-   {
-    "id": "fume_hood_3",
-    "kind": "fume_hood",
-    "min": {
-     "x": 0.97,
-     "y": 0.068
-    },
-    "max": {
-     "x": 2.183,
-     "y": 1.316
-    }
-   },
-   {
-    "id": "fume_hood_4",
-    "kind": "fume_hood",
-    "min": {
      "x": 0.0,
      "y": 0.0
     },
     "max": {
-     "x": 0.965,
-     "y": 0.675
+     "x": 2.723,
+     "y": 2.5
     }
    },
    {
     "id": "ventilated_1",
     "kind": "ventilated",
     "min": {
-     "x": 2.041,
-     "y": 1.417
+     "x": 0.0,
+     "y": 0.0
     },
     "max": {
-     "x": 3,
-     "y": 2.347
+     "x": 2.223,
+     "y": 1.215
     }
    },
    {
     "id": "ventilated_2",
     "kind": "ventilated",
     "min": {
-     "x": 0.97,
-     "y": 0.068
-    },
-    "max": {
-     "x": 2.183,
-     "y": 1.316
-    }
-   },
-   {
-    "id": "ventilated_3",
-    "kind": "ventilated",
-    "min": {
      "x": 0.0,
-     "y": 0.0
+     "y": 1.548
     },
     "max": {
-     "x": 0.965,
-     "y": 0.675
+     "x": 1.022,
+     "y": 2.5
     }
    },
    {
     "id": "vibration_free_1",
     "kind": "vibration_free",
     "min": {
-     "x": 1.919,
-     "y": 0.384
+     "x": 1.222,
+     "y": 0.911
     },
     "max": {
-     "x": 3,
-     "y": 1.522
+     "x": 2.36,
+     "y": 2.257
     }
    }
   ],
   "score": {
-   "total_weighted_distance_m": 19.9,
-   "floor_area_used_m2": 5.74
+   "total_weighted_distance_m": 23.17,
+   "floor_area_used_m2": 4.81
   },
   "violations": [
-   {
-    "kind": "out_of_room",
-    "instances": [
-     "isynth_1"
-    ],
-    "message": "isynth_1 sticks out of the room."
-   },
    {
     "kind": "out_of_room",
     "instances": [
@@ -872,199 +934,186 @@
    {
     "kind": "out_of_room",
     "instances": [
-     "lcms_1"
+     "pressure_1"
     ],
-    "message": "lcms_1 sticks out of the room."
-   },
-   {
-    "kind": "overlap",
-    "instances": [
-     "quantos_1",
-     "hood_1"
-    ],
-    "message": "quantos_1 and hood_1 overlap."
-   },
-   {
-    "kind": "overlap",
-    "instances": [
-     "quantos_1",
-     "bench_1"
-    ],
-    "message": "quantos_1 and bench_1 overlap."
-   },
-   {
-    "kind": "overlap",
-    "instances": [
-     "isynth_1",
-     "arm_1"
-    ],
-    "message": "isynth_1 and arm_1 overlap."
+    "message": "pressure_1 sticks out of the room."
    },
    {
     "kind": "overlap",
     "instances": [
      "hood_1",
-     "bench_1"
+     "isynth_1"
     ],
-    "message": "hood_1 and bench_1 overlap."
+    "message": "hood_1 and isynth_1 overlap."
    },
    {
     "kind": "overlap",
     "instances": [
-     "evap_1",
-     "bench_1"
+     "hood_1",
+     "lcms_1"
     ],
-    "message": "evap_1 and bench_1 overlap."
+    "message": "hood_1 and lcms_1 overlap."
    },
    {
     "kind": "overlap",
     "instances": [
-     "lcms_1",
-     "multidrop_1"
+     "hood_1",
+     "echo_1"
     ],
-    "message": "lcms_1 and multidrop_1 overlap."
+    "message": "hood_1 and echo_1 overlap."
+   },
+   {
+    "kind": "overlap",
+    "instances": [
+     "hood_1",
+     "reader_1"
+    ],
+    "message": "hood_1 and reader_1 overlap."
+   },
+   {
+    "kind": "overlap",
+    "instances": [
+     "hood_1",
+     "hotel_1"
+    ],
+    "message": "hood_1 and hotel_1 overlap."
+   },
+   {
+    "kind": "overlap",
+    "instances": [
+     "isynth_1",
+     "lcms_1"
+    ],
+    "message": "isynth_1 and lcms_1 overlap."
+   },
+   {
+    "kind": "overlap",
+    "instances": [
+     "isynth_1",
+     "echo_1"
+    ],
+    "message": "isynth_1 and echo_1 overlap."
+   },
+   {
+    "kind": "overlap",
+    "instances": [
+     "isynth_1",
+     "reader_1"
+    ],
+    "message": "isynth_1 and reader_1 overlap."
+   },
+   {
+    "kind": "overlap",
+    "instances": [
+     "isynth_1",
+     "hotel_1"
+    ],
+    "message": "isynth_1 and hotel_1 overlap."
    },
    {
     "kind": "clearance",
     "instances": [
-     "lcms_1",
-     "reader_1"
+     "pressure_1",
+     "combi_1"
     ],
-    "message": "lcms_1 and reader_1 are closer than their service clearance."
+    "message": "pressure_1 and combi_1 are closer than their service clearance."
    },
    {
     "kind": "overlap",
     "instances": [
-     "bench_1",
-     "echo_1"
-    ],
-    "message": "bench_1 and echo_1 overlap."
-   },
-   {
-    "kind": "zone_mismatch",
-    "instances": [
-     "isynth_1"
-    ],
-    "message": "isynth_1 must sit in a fume hood or ventilated zone (catalog: chemspeed_isynth requires fume_hood/ventilated)."
-   },
-   {
-    "kind": "zone_mismatch",
-    "instances": [
-     "isynth_1"
-    ],
-    "message": "isynth_1 must sit in a fume hood or ventilated zone (catalog: chemspeed_isynth has flammable solvents)."
-   },
-   {
-    "kind": "zone_mismatch",
-    "instances": [
-     "isynth_1"
-    ],
-    "message": "isynth_1 must sit in a fume hood zone (catalog: chemspeed_isynth has toxic reagents)."
-   },
-   {
-    "kind": "zone_mismatch",
-    "instances": [
-     "lcms_1"
-    ],
-    "message": "lcms_1 must sit in a ventilated zone (catalog: agilent_1290_lcmsd_iq requires ventilated)."
-   },
-   {
-    "kind": "zone_mismatch",
-    "instances": [
-     "lcms_1"
-    ],
-    "message": "lcms_1 must sit in a fume hood or ventilated zone (catalog: agilent_1290_lcmsd_iq has flammable solvents)."
-   },
-   {
-    "kind": "zone_mismatch",
-    "instances": [
-     "lcms_1"
-    ],
-    "message": "lcms_1 must sit in a fume hood zone (catalog: agilent_1290_lcmsd_iq has toxic reagents)."
-   },
-   {
-    "kind": "egress_blocked",
-    "instances": [
+     "echo_1",
      "reader_1"
     ],
-    "message": "reader_1 block the door at (0, 1.25)."
+    "message": "echo_1 and reader_1 overlap."
+   },
+   {
+    "kind": "zone_mismatch",
+    "instances": [
+     "pressure_1"
+    ],
+    "message": "pressure_1 must sit in a ventilated zone (catalog: biotage_pressure_plus_96 requires ventilated)."
+   },
+   {
+    "kind": "zone_mismatch",
+    "instances": [
+     "pressure_1"
+    ],
+    "message": "pressure_1 must sit in a fume hood or ventilated zone (catalog: biotage_pressure_plus_96 has flammable solvents)."
    },
    {
     "kind": "egress_blocked",
     "instances": [
-     "isynth_1"
+     "pressure_1",
+     "ez2_1",
+     "combi_1"
     ],
-    "message": "No 1.0 m walkway from the door to where someone works at isynth_1."
+    "message": "pressure_1, ez2_1, combi_1 block the door at (0, 1.25)."
    },
    {
     "kind": "egress_blocked",
     "instances": [
-     "multidrop_1"
+     "lcms_1"
     ],
-    "message": "No 1.0 m walkway from the door to where someone works at multidrop_1."
-   },
-   {
-    "kind": "egress_blocked",
-    "instances": [
-     "quantos_1"
-    ],
-    "message": "No 1.0 m walkway from the door to where someone works at quantos_1."
+    "message": "No 1.0 m walkway from the door to where someone works at lcms_1."
    },
    {
     "kind": "safety",
     "instances": [
      "arm_1",
-     "isynth_1"
+     "combi_1",
+     "lcms_1",
+     "pressure_1",
+     "quantos_1"
     ],
-    "message": "People hand labware into arm_1's reach at isynth_1, and arm_1 has no collaborative rating in the catalog; add a light curtain or a pass-through hotel at the cell edge."
+    "message": "People hand labware into arm_1's reach at combi_1, lcms_1, pressure_1, quantos_1, and arm_1 has no collaborative rating in the catalog; add a light curtain or a pass-through hotel at the cell edge."
    }
   ]
  },
  "sim_result": {
   "id": "lib_cascade_wf_v1_layout_sim",
   "layout_id": "lib_cascade_wf_v1_layout",
-  "simulated_hours": 1198.0,
+  "simulated_hours": 1199.0,
   "replicates": 10,
   "throughput": {
-   "value": 90.0,
+   "value": 92.0,
    "unit": "compounds_per_day",
    "target": 192,
    "meets_target": false,
-   "p10": 61.4,
-   "p50": 90.0,
-   "p90": 96.0,
+   "p10": 62.4,
+   "p50": 92.0,
+   "p90": 97.6,
    "prob_meets_target": 0.0
   },
-  "cycle_time_s": 968102.9,
+  "cycle_time_s": 974347.5,
   "utilisation": [
-   {
-    "instance_id": "quantos_1",
-    "busy_fraction": 0.018,
-    "mean_queue_wait_s": 213.4
-   },
-   {
-    "instance_id": "isynth_1",
-    "busy_fraction": 0.737,
-    "mean_queue_wait_s": 139495.1
-   },
    {
     "instance_id": "hood_1",
     "busy_fraction": 0.0,
     "mean_queue_wait_s": 0.0
    },
    {
-    "instance_id": "evap_1",
-    "busy_fraction": 0.018,
+    "instance_id": "quantos_1",
+    "busy_fraction": 0.042,
+    "mean_queue_wait_s": 695.1
+   },
+   {
+    "instance_id": "isynth_1",
+    "busy_fraction": 0.662,
+    "mean_queue_wait_s": 80945.6
+   },
+   {
+    "instance_id": "pressure_1",
+    "busy_fraction": 0.008,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "ez2_1",
+    "busy_fraction": 0.017,
     "mean_queue_wait_s": 0.0
    },
    {
     "instance_id": "lcms_1",
-    "busy_fraction": 0.171,
-    "mean_queue_wait_s": 0.0
-   },
-   {
-    "instance_id": "bench_1",
-    "busy_fraction": 0.008,
+    "busy_fraction": 0.178,
     "mean_queue_wait_s": 0.0
    },
    {
@@ -1073,13 +1122,13 @@
     "mean_queue_wait_s": 0.0
    },
    {
-    "instance_id": "multidrop_1",
+    "instance_id": "combi_1",
     "busy_fraction": 0.002,
     "mean_queue_wait_s": 0.0
    },
    {
     "instance_id": "reader_1",
-    "busy_fraction": 0.002,
+    "busy_fraction": 0.001,
     "mean_queue_wait_s": 0.0
    },
    {
@@ -1088,84 +1137,3360 @@
     "mean_queue_wait_s": 0.0
    },
    {
+    "instance_id": "hotel_1",
+    "busy_fraction": 0.0,
+    "mean_queue_wait_s": 0.0
+   },
+   {
     "instance_id": "chemist_1",
-    "busy_fraction": 0.059,
+    "busy_fraction": 0.029,
     "mean_queue_wait_s": 0.0
    }
   ],
-  "bottlenecks": [
-   {
-    "kind": "instrument_capacity",
-    "instances": [
-     "isynth_1"
-    ],
-    "severity": "medium",
-    "message": "isynth_1 is busy 74% of the time.",
-    "suggestion": "Add a parallel unit or move slow steps elsewhere."
-   },
-   {
-    "kind": "long_transfer",
-    "instances": [
-     "isynth_1",
-     "evap_1"
-    ],
-    "severity": "medium",
-    "message": "Labware travels 5.35 m from isynth_1 to evap_1."
-   }
-  ],
+  "bottlenecks": [],
   "sensitivity": [
    {
-    "parameter": "stage2_reaction.duration_s",
-    "effect": -83.0
+    "parameter": "react_2.duration_s",
+    "effect": -73.0
    },
    {
-    "parameter": "stage1_reaction.duration_s",
-    "effect": -78.0
+    "parameter": "react_1.duration_s",
+    "effect": -48.0
+   },
+   {
+    "parameter": "dose_liquids.duration_s",
+    "effect": -2.0
    },
    {
     "parameter": "lcms_qc.duration_s",
-    "effect": -4.0
-   },
-   {
-    "parameter": "stage2_dosing.duration_s",
-    "effect": 0.0
-   },
-   {
-    "parameter": "reformat_manual.duration_s",
     "effect": 0.0
    },
    {
     "parameter": "dose_stocks.duration_s",
     "effect": 0.0
+   },
+   {
+    "parameter": "workup.duration_s",
+    "effect": 0.0
+   }
+  ],
+  "timeline": [
+   {
+    "t_s": 0,
+    "labware_id": "plate_00001",
+    "event": "step_start",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 3325.1,
+    "labware_id": "plate_00001",
+    "event": "step_end",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 3325.1,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 3325.1,
+    "labware_id": "plate_00001",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 3342.2,
+    "labware_id": "plate_00001",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 3342.2,
+    "labware_id": "plate_00001",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 5028.5,
+    "labware_id": "plate_00001",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 5028.5,
+    "labware_id": "plate_00001",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 6850.0,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 6850.0,
+    "labware_id": "plate_00003",
+    "event": "step_start",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 10253.3,
+    "labware_id": "plate_00003",
+    "event": "step_end",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 10253.3,
+    "labware_id": "plate_00004",
+    "event": "step_start",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 13646.4,
+    "labware_id": "plate_00004",
+    "event": "step_end",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 13646.4,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 17232.1,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 17232.1,
+    "labware_id": "plate_00006",
+    "event": "step_start",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 20811.0,
+    "labware_id": "plate_00006",
+    "event": "step_end",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 20811.0,
+    "labware_id": "plate_00007",
+    "event": "step_start",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 24328.5,
+    "labware_id": "plate_00007",
+    "event": "step_end",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 24328.5,
+    "labware_id": "plate_00008",
+    "event": "step_start",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 27749.1,
+    "labware_id": "plate_00008",
+    "event": "step_end",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 37770.2,
+    "labware_id": "plate_00001",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 37770.2,
+    "labware_id": "plate_00009",
+    "event": "step_start",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 41402.6,
+    "labware_id": "plate_00009",
+    "event": "step_end",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 86400.0,
+    "labware_id": "plate_00001",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 86419.0,
+    "labware_id": "plate_00001",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 86419.0,
+    "labware_id": "plate_00002",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 86436.2,
+    "labware_id": "plate_00002",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 86436.2,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 86436.2,
+    "labware_id": "plate_00001",
+    "event": "step_start",
+    "instance_id": "pressure_1",
+    "step_id": "workup"
+   },
+   {
+    "t_s": 87947.3,
+    "labware_id": "plate_00001",
+    "event": "step_end",
+    "instance_id": "pressure_1",
+    "step_id": "workup"
+   },
+   {
+    "t_s": 88235.0,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 88235.0,
+    "labware_id": "plate_00003",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 88235.0,
+    "labware_id": "plate_00010",
+    "event": "step_start",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 88252.8,
+    "labware_id": "plate_00003",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 88252.8,
+    "labware_id": "plate_00003",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 90069.5,
+    "labware_id": "plate_00003",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 90069.5,
+    "labware_id": "plate_00001",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 90087.4,
+    "labware_id": "plate_00001",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 90087.4,
+    "labware_id": "plate_00001",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "react_2"
+   },
+   {
+    "t_s": 91607.2,
+    "labware_id": "plate_00010",
+    "event": "step_end",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 119058.2,
+    "labware_id": "plate_00001",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "react_2"
+   },
+   {
+    "t_s": 119058.2,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 152907.1,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 152907.1,
+    "labware_id": "plate_00011",
+    "event": "step_start",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 156542.7,
+    "labware_id": "plate_00011",
+    "event": "step_end",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 172800.0,
+    "labware_id": "plate_00004",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 172818.6,
+    "labware_id": "plate_00004",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 172818.6,
+    "labware_id": "plate_00004",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 172818.6,
+    "labware_id": "plate_00001",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 172836.9,
+    "labware_id": "plate_00001",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 172836.9,
+    "labware_id": "plate_00001",
+    "event": "step_start",
+    "instance_id": "ez2_1",
+    "step_id": "evaporate"
+   },
+   {
+    "t_s": 172836.9,
+    "labware_id": "plate_00002",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 172856.3,
+    "labware_id": "plate_00002",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 172856.3,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "pressure_1",
+    "step_id": "workup"
+   },
+   {
+    "t_s": 174314.7,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "pressure_1",
+    "step_id": "workup"
+   },
+   {
+    "t_s": 174486.8,
+    "labware_id": "plate_00004",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 174486.8,
+    "labware_id": "plate_00003",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 177157.8,
+    "labware_id": "plate_00001",
+    "event": "step_end",
+    "instance_id": "ez2_1",
+    "step_id": "evaporate"
+   },
+   {
+    "t_s": 177157.8,
+    "labware_id": "plate_00001",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 177177.0,
+    "labware_id": "plate_00001",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 177177.0,
+    "labware_id": "plate_00001",
+    "event": "step_start",
+    "instance_id": "lcms_1",
+    "step_id": "lcms_qc"
+   },
+   {
+    "t_s": 193069.0,
+    "labware_id": "plate_00001",
+    "event": "step_end",
+    "instance_id": "lcms_1",
+    "step_id": "lcms_qc"
+   },
+   {
+    "t_s": 193069.0,
+    "labware_id": "plate_00001",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 193087.2,
+    "labware_id": "plate_00001",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 193087.2,
+    "labware_id": "plate_00001",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "acoustic_transfer"
+   },
+   {
+    "t_s": 193496.3,
+    "labware_id": "plate_00001",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "acoustic_transfer"
+   },
+   {
+    "t_s": 193496.3,
+    "labware_id": "plate_00001",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 193515.4,
+    "labware_id": "plate_00001",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 193515.4,
+    "labware_id": "plate_00001",
+    "event": "step_start",
+    "instance_id": "combi_1",
+    "step_id": "reagent_add"
+   },
+   {
+    "t_s": 193728.9,
+    "labware_id": "plate_00001",
+    "event": "step_end",
+    "instance_id": "combi_1",
+    "step_id": "reagent_add"
+   },
+   {
+    "t_s": 193728.9,
+    "labware_id": "plate_00001",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 193748.2,
+    "labware_id": "plate_00001",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 193748.2,
+    "labware_id": "plate_00001",
+    "event": "step_start",
+    "instance_id": "reader_1",
+    "step_id": "read"
+   },
+   {
+    "t_s": 193790.8,
+    "labware_id": "plate_00001",
+    "event": "step_end",
+    "instance_id": "reader_1",
+    "step_id": "read"
+   },
+   {
+    "t_s": 193790.8,
+    "labware_id": "plate_00001",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 193812.9,
+    "labware_id": "plate_00001",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 193812.9,
+    "labware_id": "plate_00001",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "store_out"
+   },
+   {
+    "t_s": 193813.9,
+    "labware_id": "plate_00001",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "store_out"
+   },
+   {
+    "t_s": 208173.7,
+    "labware_id": "plate_00003",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 208173.7,
+    "labware_id": "plate_00012",
+    "event": "step_start",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 211744.2,
+    "labware_id": "plate_00012",
+    "event": "step_end",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 259200.0,
+    "labware_id": "plate_00003",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 259219.2,
+    "labware_id": "plate_00003",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 259219.2,
+    "labware_id": "plate_00005",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 259236.7,
+    "labware_id": "plate_00005",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 259236.7,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 259236.7,
+    "labware_id": "plate_00003",
+    "event": "step_start",
+    "instance_id": "pressure_1",
+    "step_id": "workup"
+   },
+   {
+    "t_s": 260736.7,
+    "labware_id": "plate_00003",
+    "event": "step_end",
+    "instance_id": "pressure_1",
+    "step_id": "workup"
+   },
+   {
+    "t_s": 261045.4,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 261045.4,
+    "labware_id": "plate_00002",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 261063.1,
+    "labware_id": "plate_00002",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 261063.1,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "react_2"
+   },
+   {
+    "t_s": 292406.1,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "react_2"
+   },
+   {
+    "t_s": 292406.1,
+    "labware_id": "plate_00004",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 324538.3,
+    "labware_id": "plate_00004",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 324538.3,
+    "labware_id": "plate_00013",
+    "event": "step_start",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 328143.4,
+    "labware_id": "plate_00013",
+    "event": "step_end",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 345600.0,
+    "labware_id": "plate_00006",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 345618.3,
+    "labware_id": "plate_00006",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 345618.3,
+    "labware_id": "plate_00006",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 345618.3,
+    "labware_id": "plate_00002",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 345635.5,
+    "labware_id": "plate_00002",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 345635.5,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "ez2_1",
+    "step_id": "evaporate"
+   },
+   {
+    "t_s": 345635.5,
+    "labware_id": "plate_00004",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 345654.5,
+    "labware_id": "plate_00004",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 345654.5,
+    "labware_id": "plate_00004",
+    "event": "step_start",
+    "instance_id": "pressure_1",
+    "step_id": "workup"
+   },
+   {
+    "t_s": 347044.6,
+    "labware_id": "plate_00004",
+    "event": "step_end",
+    "instance_id": "pressure_1",
+    "step_id": "workup"
+   },
+   {
+    "t_s": 347323.8,
+    "labware_id": "plate_00006",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 347323.8,
+    "labware_id": "plate_00003",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 347342.0,
+    "labware_id": "plate_00003",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 347342.0,
+    "labware_id": "plate_00003",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "react_2"
+   },
+   {
+    "t_s": 349858.5,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "ez2_1",
+    "step_id": "evaporate"
+   },
+   {
+    "t_s": 349858.5,
+    "labware_id": "plate_00002",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 349877.8,
+    "labware_id": "plate_00002",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 349877.8,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "lcms_1",
+    "step_id": "lcms_qc"
+   },
+   {
+    "t_s": 366109.2,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "lcms_1",
+    "step_id": "lcms_qc"
+   },
+   {
+    "t_s": 366109.2,
+    "labware_id": "plate_00002",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 366127.2,
+    "labware_id": "plate_00002",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 366127.2,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "acoustic_transfer"
+   },
+   {
+    "t_s": 366504.3,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "acoustic_transfer"
+   },
+   {
+    "t_s": 366504.3,
+    "labware_id": "plate_00002",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 366522.0,
+    "labware_id": "plate_00002",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 366522.0,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "combi_1",
+    "step_id": "reagent_add"
+   },
+   {
+    "t_s": 366739.3,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "combi_1",
+    "step_id": "reagent_add"
+   },
+   {
+    "t_s": 366739.3,
+    "labware_id": "plate_00002",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 366757.7,
+    "labware_id": "plate_00002",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 366757.7,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "reader_1",
+    "step_id": "read"
+   },
+   {
+    "t_s": 366799.7,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "reader_1",
+    "step_id": "read"
+   },
+   {
+    "t_s": 366799.7,
+    "labware_id": "plate_00002",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 366821.2,
+    "labware_id": "plate_00002",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 366821.2,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "store_out"
+   },
+   {
+    "t_s": 366822.2,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "store_out"
+   },
+   {
+    "t_s": 377557.1,
+    "labware_id": "plate_00003",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "react_2"
+   },
+   {
+    "t_s": 377557.1,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 410605.3,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 410605.3,
+    "labware_id": "plate_00014",
+    "event": "step_start",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 414195.7,
+    "labware_id": "plate_00014",
+    "event": "step_end",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 432000.0,
+    "labware_id": "plate_00007",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 432017.3,
+    "labware_id": "plate_00007",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 432017.3,
+    "labware_id": "plate_00007",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 432017.3,
+    "labware_id": "plate_00003",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 432035.7,
+    "labware_id": "plate_00003",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 432035.7,
+    "labware_id": "plate_00003",
+    "event": "step_start",
+    "instance_id": "ez2_1",
+    "step_id": "evaporate"
+   },
+   {
+    "t_s": 432035.7,
+    "labware_id": "plate_00005",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 432054.5,
+    "labware_id": "plate_00005",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 432054.5,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "pressure_1",
+    "step_id": "workup"
+   },
+   {
+    "t_s": 433495.7,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "pressure_1",
+    "step_id": "workup"
+   },
+   {
+    "t_s": 433732.3,
+    "labware_id": "plate_00007",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 433732.3,
+    "labware_id": "plate_00004",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 433750.0,
+    "labware_id": "plate_00004",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 433750.0,
+    "labware_id": "plate_00004",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "react_2"
+   },
+   {
+    "t_s": 436667.7,
+    "labware_id": "plate_00003",
+    "event": "step_end",
+    "instance_id": "ez2_1",
+    "step_id": "evaporate"
+   },
+   {
+    "t_s": 436667.7,
+    "labware_id": "plate_00003",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 436687.3,
+    "labware_id": "plate_00003",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 436687.3,
+    "labware_id": "plate_00003",
+    "event": "step_start",
+    "instance_id": "lcms_1",
+    "step_id": "lcms_qc"
+   },
+   {
+    "t_s": 452557.0,
+    "labware_id": "plate_00003",
+    "event": "step_end",
+    "instance_id": "lcms_1",
+    "step_id": "lcms_qc"
+   },
+   {
+    "t_s": 452557.0,
+    "labware_id": "plate_00003",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 452575.3,
+    "labware_id": "plate_00003",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 452575.3,
+    "labware_id": "plate_00003",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "acoustic_transfer"
+   },
+   {
+    "t_s": 452967.5,
+    "labware_id": "plate_00003",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "acoustic_transfer"
+   },
+   {
+    "t_s": 452967.5,
+    "labware_id": "plate_00003",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 452985.2,
+    "labware_id": "plate_00003",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 452985.2,
+    "labware_id": "plate_00003",
+    "event": "step_start",
+    "instance_id": "combi_1",
+    "step_id": "reagent_add"
+   },
+   {
+    "t_s": 453206.1,
+    "labware_id": "plate_00003",
+    "event": "step_end",
+    "instance_id": "combi_1",
+    "step_id": "reagent_add"
+   },
+   {
+    "t_s": 453206.1,
+    "labware_id": "plate_00003",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 453224.9,
+    "labware_id": "plate_00003",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 453224.9,
+    "labware_id": "plate_00003",
+    "event": "step_start",
+    "instance_id": "reader_1",
+    "step_id": "read"
+   },
+   {
+    "t_s": 453266.7,
+    "labware_id": "plate_00003",
+    "event": "step_end",
+    "instance_id": "reader_1",
+    "step_id": "read"
+   },
+   {
+    "t_s": 453266.7,
+    "labware_id": "plate_00003",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 453286.8,
+    "labware_id": "plate_00003",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 453286.8,
+    "labware_id": "plate_00003",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "store_out"
+   },
+   {
+    "t_s": 453287.8,
+    "labware_id": "plate_00003",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "store_out"
+   },
+   {
+    "t_s": 463982.3,
+    "labware_id": "plate_00004",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "react_2"
+   },
+   {
+    "t_s": 463982.3,
+    "labware_id": "plate_00006",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 497201.3,
+    "labware_id": "plate_00006",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 497201.3,
+    "labware_id": "plate_00015",
+    "event": "step_start",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 500539.8,
+    "labware_id": "plate_00015",
+    "event": "step_end",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 518400.0,
+    "labware_id": "plate_00008",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 518417.4,
+    "labware_id": "plate_00008",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 518417.4,
+    "labware_id": "plate_00008",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 518417.4,
+    "labware_id": "plate_00004",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 518435.6,
+    "labware_id": "plate_00004",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 518435.6,
+    "labware_id": "plate_00004",
+    "event": "step_start",
+    "instance_id": "ez2_1",
+    "step_id": "evaporate"
+   },
+   {
+    "t_s": 518435.6,
+    "labware_id": "plate_00006",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 518453.3,
+    "labware_id": "plate_00006",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 518453.3,
+    "labware_id": "plate_00006",
+    "event": "step_start",
+    "instance_id": "pressure_1",
+    "step_id": "workup"
+   },
+   {
+    "t_s": 519940.4,
+    "labware_id": "plate_00006",
+    "event": "step_end",
+    "instance_id": "pressure_1",
+    "step_id": "workup"
+   },
+   {
+    "t_s": 520231.0,
+    "labware_id": "plate_00008",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 520231.0,
+    "labware_id": "plate_00005",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 520249.9,
+    "labware_id": "plate_00005",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 520249.9,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "react_2"
+   },
+   {
+    "t_s": 522789.1,
+    "labware_id": "plate_00004",
+    "event": "step_end",
+    "instance_id": "ez2_1",
+    "step_id": "evaporate"
+   },
+   {
+    "t_s": 522789.1,
+    "labware_id": "plate_00004",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 522809.3,
+    "labware_id": "plate_00004",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 522809.3,
+    "labware_id": "plate_00004",
+    "event": "step_start",
+    "instance_id": "lcms_1",
+    "step_id": "lcms_qc"
+   },
+   {
+    "t_s": 539231.4,
+    "labware_id": "plate_00004",
+    "event": "step_end",
+    "instance_id": "lcms_1",
+    "step_id": "lcms_qc"
+   },
+   {
+    "t_s": 539231.4,
+    "labware_id": "plate_00004",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 539249.6,
+    "labware_id": "plate_00004",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 539249.6,
+    "labware_id": "plate_00004",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "acoustic_transfer"
+   },
+   {
+    "t_s": 539630.0,
+    "labware_id": "plate_00004",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "acoustic_transfer"
+   },
+   {
+    "t_s": 539630.0,
+    "labware_id": "plate_00004",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 539648.5,
+    "labware_id": "plate_00004",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 539648.5,
+    "labware_id": "plate_00004",
+    "event": "step_start",
+    "instance_id": "combi_1",
+    "step_id": "reagent_add"
+   },
+   {
+    "t_s": 539858.7,
+    "labware_id": "plate_00004",
+    "event": "step_end",
+    "instance_id": "combi_1",
+    "step_id": "reagent_add"
+   },
+   {
+    "t_s": 539858.7,
+    "labware_id": "plate_00004",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 539877.8,
+    "labware_id": "plate_00004",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 539877.8,
+    "labware_id": "plate_00004",
+    "event": "step_start",
+    "instance_id": "reader_1",
+    "step_id": "read"
+   },
+   {
+    "t_s": 539919.5,
+    "labware_id": "plate_00004",
+    "event": "step_end",
+    "instance_id": "reader_1",
+    "step_id": "read"
+   },
+   {
+    "t_s": 539919.5,
+    "labware_id": "plate_00004",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 539939.9,
+    "labware_id": "plate_00004",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 539939.9,
+    "labware_id": "plate_00004",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "store_out"
+   },
+   {
+    "t_s": 539940.9,
+    "labware_id": "plate_00004",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "store_out"
+   },
+   {
+    "t_s": 550033.1,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "react_2"
+   },
+   {
+    "t_s": 550033.1,
+    "labware_id": "plate_00007",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 583697.1,
+    "labware_id": "plate_00007",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 583697.1,
+    "labware_id": "plate_00016",
+    "event": "step_start",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 587071.7,
+    "labware_id": "plate_00016",
+    "event": "step_end",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 604800.0,
+    "labware_id": "plate_00009",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 604818.6,
+    "labware_id": "plate_00009",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 604818.6,
+    "labware_id": "plate_00009",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 604818.6,
+    "labware_id": "plate_00005",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 604837.4,
+    "labware_id": "plate_00005",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 604837.4,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "ez2_1",
+    "step_id": "evaporate"
+   },
+   {
+    "t_s": 604837.4,
+    "labware_id": "plate_00007",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 604856.3,
+    "labware_id": "plate_00007",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 604856.3,
+    "labware_id": "plate_00007",
+    "event": "step_start",
+    "instance_id": "pressure_1",
+    "step_id": "workup"
+   },
+   {
+    "t_s": 606293.6,
+    "labware_id": "plate_00007",
+    "event": "step_end",
+    "instance_id": "pressure_1",
+    "step_id": "workup"
+   },
+   {
+    "t_s": 606509.1,
+    "labware_id": "plate_00009",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 606509.1,
+    "labware_id": "plate_00006",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 606528.3,
+    "labware_id": "plate_00006",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 606528.3,
+    "labware_id": "plate_00006",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "react_2"
+   },
+   {
+    "t_s": 609345.4,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "ez2_1",
+    "step_id": "evaporate"
+   },
+   {
+    "t_s": 609345.4,
+    "labware_id": "plate_00005",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 609365.3,
+    "labware_id": "plate_00005",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 609365.3,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "lcms_1",
+    "step_id": "lcms_qc"
+   },
+   {
+    "t_s": 625069.8,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "lcms_1",
+    "step_id": "lcms_qc"
+   },
+   {
+    "t_s": 625069.8,
+    "labware_id": "plate_00005",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 625087.8,
+    "labware_id": "plate_00005",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 625087.8,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "acoustic_transfer"
+   },
+   {
+    "t_s": 625480.3,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "acoustic_transfer"
+   },
+   {
+    "t_s": 625480.3,
+    "labware_id": "plate_00005",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 625498.1,
+    "labware_id": "plate_00005",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 625498.1,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "combi_1",
+    "step_id": "reagent_add"
+   },
+   {
+    "t_s": 625713.5,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "combi_1",
+    "step_id": "reagent_add"
+   },
+   {
+    "t_s": 625713.5,
+    "labware_id": "plate_00005",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 625732.7,
+    "labware_id": "plate_00005",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 625732.7,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "reader_1",
+    "step_id": "read"
+   },
+   {
+    "t_s": 625776.3,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "reader_1",
+    "step_id": "read"
+   },
+   {
+    "t_s": 625776.3,
+    "labware_id": "plate_00005",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 625797.5,
+    "labware_id": "plate_00005",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 625797.5,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "store_out"
+   },
+   {
+    "t_s": 625798.5,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "store_out"
+   },
+   {
+    "t_s": 635352.3,
+    "labware_id": "plate_00006",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "react_2"
+   },
+   {
+    "t_s": 635352.3,
+    "labware_id": "plate_00008",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 667283.5,
+    "labware_id": "plate_00008",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 667283.5,
+    "labware_id": "plate_00017",
+    "event": "step_start",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 670693.9,
+    "labware_id": "plate_00017",
+    "event": "step_end",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 691200.0,
+    "labware_id": "plate_00010",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 691217.2,
+    "labware_id": "plate_00010",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 691217.2,
+    "labware_id": "plate_00010",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 691217.2,
+    "labware_id": "plate_00006",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 691234.5,
+    "labware_id": "plate_00006",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 691234.5,
+    "labware_id": "plate_00006",
+    "event": "step_start",
+    "instance_id": "ez2_1",
+    "step_id": "evaporate"
+   },
+   {
+    "t_s": 691234.5,
+    "labware_id": "plate_00008",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 691252.5,
+    "labware_id": "plate_00008",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 691252.5,
+    "labware_id": "plate_00008",
+    "event": "step_start",
+    "instance_id": "pressure_1",
+    "step_id": "workup"
+   },
+   {
+    "t_s": 692748.6,
+    "labware_id": "plate_00008",
+    "event": "step_end",
+    "instance_id": "pressure_1",
+    "step_id": "workup"
+   },
+   {
+    "t_s": 692956.3,
+    "labware_id": "plate_00010",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 692956.3,
+    "labware_id": "plate_00007",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 692974.0,
+    "labware_id": "plate_00007",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 692974.0,
+    "labware_id": "plate_00007",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "react_2"
+   },
+   {
+    "t_s": 695537.0,
+    "labware_id": "plate_00006",
+    "event": "step_end",
+    "instance_id": "ez2_1",
+    "step_id": "evaporate"
+   },
+   {
+    "t_s": 695537.0,
+    "labware_id": "plate_00006",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 695557.4,
+    "labware_id": "plate_00006",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 695557.4,
+    "labware_id": "plate_00006",
+    "event": "step_start",
+    "instance_id": "lcms_1",
+    "step_id": "lcms_qc"
+   },
+   {
+    "t_s": 712614.6,
+    "labware_id": "plate_00006",
+    "event": "step_end",
+    "instance_id": "lcms_1",
+    "step_id": "lcms_qc"
+   },
+   {
+    "t_s": 712614.6,
+    "labware_id": "plate_00006",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 712632.2,
+    "labware_id": "plate_00006",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 712632.2,
+    "labware_id": "plate_00006",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "acoustic_transfer"
+   },
+   {
+    "t_s": 713013.5,
+    "labware_id": "plate_00006",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "acoustic_transfer"
+   },
+   {
+    "t_s": 713013.5,
+    "labware_id": "plate_00006",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 713031.9,
+    "labware_id": "plate_00006",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 713031.9,
+    "labware_id": "plate_00006",
+    "event": "step_start",
+    "instance_id": "combi_1",
+    "step_id": "reagent_add"
+   },
+   {
+    "t_s": 713244.1,
+    "labware_id": "plate_00006",
+    "event": "step_end",
+    "instance_id": "combi_1",
+    "step_id": "reagent_add"
+   },
+   {
+    "t_s": 713244.1,
+    "labware_id": "plate_00006",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 713262.9,
+    "labware_id": "plate_00006",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 713262.9,
+    "labware_id": "plate_00006",
+    "event": "step_start",
+    "instance_id": "reader_1",
+    "step_id": "read"
+   },
+   {
+    "t_s": 713305.8,
+    "labware_id": "plate_00006",
+    "event": "step_end",
+    "instance_id": "reader_1",
+    "step_id": "read"
+   },
+   {
+    "t_s": 713305.8,
+    "labware_id": "plate_00006",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 713326.6,
+    "labware_id": "plate_00006",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 713326.6,
+    "labware_id": "plate_00006",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "store_out"
+   },
+   {
+    "t_s": 713327.6,
+    "labware_id": "plate_00006",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "store_out"
+   },
+   {
+    "t_s": 721788.1,
+    "labware_id": "plate_00007",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "react_2"
+   },
+   {
+    "t_s": 721788.1,
+    "labware_id": "plate_00009",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 755152.7,
+    "labware_id": "plate_00009",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 755152.7,
+    "labware_id": "plate_00018",
+    "event": "step_start",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 758476.6,
+    "labware_id": "plate_00018",
+    "event": "step_end",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 777600.0,
+    "labware_id": "plate_00011",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 777617.9,
+    "labware_id": "plate_00011",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 777617.9,
+    "labware_id": "plate_00011",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 777617.9,
+    "labware_id": "plate_00007",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 777635.5,
+    "labware_id": "plate_00007",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 777635.5,
+    "labware_id": "plate_00007",
+    "event": "step_start",
+    "instance_id": "ez2_1",
+    "step_id": "evaporate"
+   },
+   {
+    "t_s": 777635.5,
+    "labware_id": "plate_00009",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 777654.4,
+    "labware_id": "plate_00009",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 777654.4,
+    "labware_id": "plate_00009",
+    "event": "step_start",
+    "instance_id": "pressure_1",
+    "step_id": "workup"
+   },
+   {
+    "t_s": 779054.7,
+    "labware_id": "plate_00009",
+    "event": "step_end",
+    "instance_id": "pressure_1",
+    "step_id": "workup"
+   },
+   {
+    "t_s": 779411.0,
+    "labware_id": "plate_00011",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 779411.0,
+    "labware_id": "plate_00008",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 779429.1,
+    "labware_id": "plate_00008",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 779429.1,
+    "labware_id": "plate_00008",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "react_2"
+   },
+   {
+    "t_s": 782100.1,
+    "labware_id": "plate_00007",
+    "event": "step_end",
+    "instance_id": "ez2_1",
+    "step_id": "evaporate"
+   },
+   {
+    "t_s": 782100.1,
+    "labware_id": "plate_00007",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 782120.8,
+    "labware_id": "plate_00007",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 782120.8,
+    "labware_id": "plate_00007",
+    "event": "step_start",
+    "instance_id": "lcms_1",
+    "step_id": "lcms_qc"
+   },
+   {
+    "t_s": 798224.2,
+    "labware_id": "plate_00007",
+    "event": "step_end",
+    "instance_id": "lcms_1",
+    "step_id": "lcms_qc"
+   },
+   {
+    "t_s": 798224.2,
+    "labware_id": "plate_00007",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 798243.3,
+    "labware_id": "plate_00007",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 798243.3,
+    "labware_id": "plate_00007",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "acoustic_transfer"
+   },
+   {
+    "t_s": 798636.3,
+    "labware_id": "plate_00007",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "acoustic_transfer"
+   },
+   {
+    "t_s": 798636.3,
+    "labware_id": "plate_00007",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 798655.4,
+    "labware_id": "plate_00007",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 798655.4,
+    "labware_id": "plate_00007",
+    "event": "step_start",
+    "instance_id": "combi_1",
+    "step_id": "reagent_add"
+   },
+   {
+    "t_s": 798878.0,
+    "labware_id": "plate_00007",
+    "event": "step_end",
+    "instance_id": "combi_1",
+    "step_id": "reagent_add"
+   },
+   {
+    "t_s": 798878.0,
+    "labware_id": "plate_00007",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 798897.0,
+    "labware_id": "plate_00007",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 798897.0,
+    "labware_id": "plate_00007",
+    "event": "step_start",
+    "instance_id": "reader_1",
+    "step_id": "read"
+   },
+   {
+    "t_s": 798941.8,
+    "labware_id": "plate_00007",
+    "event": "step_end",
+    "instance_id": "reader_1",
+    "step_id": "read"
+   },
+   {
+    "t_s": 798941.8,
+    "labware_id": "plate_00007",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 798962.2,
+    "labware_id": "plate_00007",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 798962.2,
+    "labware_id": "plate_00007",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "store_out"
+   },
+   {
+    "t_s": 798963.2,
+    "labware_id": "plate_00007",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "store_out"
+   },
+   {
+    "t_s": 809230.2,
+    "labware_id": "plate_00008",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "react_2"
+   },
+   {
+    "t_s": 809230.2,
+    "labware_id": "plate_00010",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 840239.4,
+    "labware_id": "plate_00010",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 840239.4,
+    "labware_id": "plate_00019",
+    "event": "step_start",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 843736.1,
+    "labware_id": "plate_00019",
+    "event": "step_end",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 864000.0,
+    "labware_id": "plate_00012",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 864018.8,
+    "labware_id": "plate_00012",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 864018.8,
+    "labware_id": "plate_00012",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 864018.8,
+    "labware_id": "plate_00008",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 864036.2,
+    "labware_id": "plate_00008",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 864036.2,
+    "labware_id": "plate_00008",
+    "event": "step_start",
+    "instance_id": "ez2_1",
+    "step_id": "evaporate"
+   },
+   {
+    "t_s": 864036.2,
+    "labware_id": "plate_00010",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 864054.2,
+    "labware_id": "plate_00010",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 864054.2,
+    "labware_id": "plate_00010",
+    "event": "step_start",
+    "instance_id": "pressure_1",
+    "step_id": "workup"
+   },
+   {
+    "t_s": 865466.6,
+    "labware_id": "plate_00010",
+    "event": "step_end",
+    "instance_id": "pressure_1",
+    "step_id": "workup"
+   },
+   {
+    "t_s": 865795.9,
+    "labware_id": "plate_00012",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 865795.9,
+    "labware_id": "plate_00009",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 865814.9,
+    "labware_id": "plate_00009",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 865814.9,
+    "labware_id": "plate_00009",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "react_2"
+   },
+   {
+    "t_s": 868588.2,
+    "labware_id": "plate_00008",
+    "event": "step_end",
+    "instance_id": "ez2_1",
+    "step_id": "evaporate"
+   },
+   {
+    "t_s": 868588.2,
+    "labware_id": "plate_00008",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 868607.8,
+    "labware_id": "plate_00008",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 868607.8,
+    "labware_id": "plate_00008",
+    "event": "step_start",
+    "instance_id": "lcms_1",
+    "step_id": "lcms_qc"
+   },
+   {
+    "t_s": 884782.7,
+    "labware_id": "plate_00008",
+    "event": "step_end",
+    "instance_id": "lcms_1",
+    "step_id": "lcms_qc"
+   },
+   {
+    "t_s": 884782.7,
+    "labware_id": "plate_00008",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 884802.1,
+    "labware_id": "plate_00008",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 884802.1,
+    "labware_id": "plate_00008",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "acoustic_transfer"
+   },
+   {
+    "t_s": 885208.9,
+    "labware_id": "plate_00008",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "acoustic_transfer"
+   },
+   {
+    "t_s": 885208.9,
+    "labware_id": "plate_00008",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 885227.9,
+    "labware_id": "plate_00008",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 885227.9,
+    "labware_id": "plate_00008",
+    "event": "step_start",
+    "instance_id": "combi_1",
+    "step_id": "reagent_add"
+   },
+   {
+    "t_s": 885437.6,
+    "labware_id": "plate_00008",
+    "event": "step_end",
+    "instance_id": "combi_1",
+    "step_id": "reagent_add"
+   },
+   {
+    "t_s": 885437.6,
+    "labware_id": "plate_00008",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 885456.3,
+    "labware_id": "plate_00008",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 885456.3,
+    "labware_id": "plate_00008",
+    "event": "step_start",
+    "instance_id": "reader_1",
+    "step_id": "read"
+   },
+   {
+    "t_s": 885499.6,
+    "labware_id": "plate_00008",
+    "event": "step_end",
+    "instance_id": "reader_1",
+    "step_id": "read"
+   },
+   {
+    "t_s": 885499.6,
+    "labware_id": "plate_00008",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 885520.2,
+    "labware_id": "plate_00008",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 885520.2,
+    "labware_id": "plate_00008",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "store_out"
+   },
+   {
+    "t_s": 885521.2,
+    "labware_id": "plate_00008",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "store_out"
+   },
+   {
+    "t_s": 897298.7,
+    "labware_id": "plate_00009",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "react_2"
+   },
+   {
+    "t_s": 897298.7,
+    "labware_id": "plate_00011",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 930972.4,
+    "labware_id": "plate_00011",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 930972.4,
+    "labware_id": "plate_00020",
+    "event": "step_start",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 934569.7,
+    "labware_id": "plate_00020",
+    "event": "step_end",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 950400.0,
+    "labware_id": "plate_00013",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 950418.5,
+    "labware_id": "plate_00013",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 950418.5,
+    "labware_id": "plate_00013",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 950418.5,
+    "labware_id": "plate_00009",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 950436.3,
+    "labware_id": "plate_00009",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 950436.3,
+    "labware_id": "plate_00009",
+    "event": "step_start",
+    "instance_id": "ez2_1",
+    "step_id": "evaporate"
+   },
+   {
+    "t_s": 950436.3,
+    "labware_id": "plate_00011",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 950455.6,
+    "labware_id": "plate_00011",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 950455.6,
+    "labware_id": "plate_00011",
+    "event": "step_start",
+    "instance_id": "pressure_1",
+    "step_id": "workup"
+   },
+   {
+    "t_s": 951852.1,
+    "labware_id": "plate_00011",
+    "event": "step_end",
+    "instance_id": "pressure_1",
+    "step_id": "workup"
+   },
+   {
+    "t_s": 952152.0,
+    "labware_id": "plate_00013",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 952152.0,
+    "labware_id": "plate_00010",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 952170.8,
+    "labware_id": "plate_00010",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 952170.8,
+    "labware_id": "plate_00010",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "react_2"
+   },
+   {
+    "t_s": 954884.9,
+    "labware_id": "plate_00009",
+    "event": "step_end",
+    "instance_id": "ez2_1",
+    "step_id": "evaporate"
+   },
+   {
+    "t_s": 954884.9,
+    "labware_id": "plate_00009",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 954905.3,
+    "labware_id": "plate_00009",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 954905.3,
+    "labware_id": "plate_00009",
+    "event": "step_start",
+    "instance_id": "lcms_1",
+    "step_id": "lcms_qc"
+   },
+   {
+    "t_s": 972164.2,
+    "labware_id": "plate_00009",
+    "event": "step_end",
+    "instance_id": "lcms_1",
+    "step_id": "lcms_qc"
+   },
+   {
+    "t_s": 972164.2,
+    "labware_id": "plate_00009",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 972183.5,
+    "labware_id": "plate_00009",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 972183.5,
+    "labware_id": "plate_00009",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "acoustic_transfer"
+   },
+   {
+    "t_s": 972583.4,
+    "labware_id": "plate_00009",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "acoustic_transfer"
+   },
+   {
+    "t_s": 972583.4,
+    "labware_id": "plate_00009",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 972602.3,
+    "labware_id": "plate_00009",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 972602.3,
+    "labware_id": "plate_00009",
+    "event": "step_start",
+    "instance_id": "combi_1",
+    "step_id": "reagent_add"
+   },
+   {
+    "t_s": 972815.1,
+    "labware_id": "plate_00009",
+    "event": "step_end",
+    "instance_id": "combi_1",
+    "step_id": "reagent_add"
+   },
+   {
+    "t_s": 972815.1,
+    "labware_id": "plate_00009",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 972833.9,
+    "labware_id": "plate_00009",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 972833.9,
+    "labware_id": "plate_00009",
+    "event": "step_start",
+    "instance_id": "reader_1",
+    "step_id": "read"
+   },
+   {
+    "t_s": 972878.9,
+    "labware_id": "plate_00009",
+    "event": "step_end",
+    "instance_id": "reader_1",
+    "step_id": "read"
+   },
+   {
+    "t_s": 972878.9,
+    "labware_id": "plate_00009",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 972899.8,
+    "labware_id": "plate_00009",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 972899.8,
+    "labware_id": "plate_00009",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "store_out"
+   },
+   {
+    "t_s": 972900.8,
+    "labware_id": "plate_00009",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "store_out"
+   },
+   {
+    "t_s": 981732.8,
+    "labware_id": "plate_00010",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "react_2"
+   },
+   {
+    "t_s": 981732.8,
+    "labware_id": "plate_00012",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 1012566.0,
+    "labware_id": "plate_00012",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 1012566.0,
+    "labware_id": "plate_00021",
+    "event": "step_start",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 1016139.9,
+    "labware_id": "plate_00021",
+    "event": "step_end",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 1036800.0,
+    "labware_id": "plate_00014",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1036818.6,
+    "labware_id": "plate_00014",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1036818.6,
+    "labware_id": "plate_00014",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 1036818.6,
+    "labware_id": "plate_00010",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1036835.8,
+    "labware_id": "plate_00010",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1036835.8,
+    "labware_id": "plate_00010",
+    "event": "step_start",
+    "instance_id": "ez2_1",
+    "step_id": "evaporate"
+   },
+   {
+    "t_s": 1036835.8,
+    "labware_id": "plate_00012",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1036854.3,
+    "labware_id": "plate_00012",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1036854.3,
+    "labware_id": "plate_00012",
+    "event": "step_start",
+    "instance_id": "pressure_1",
+    "step_id": "workup"
+   },
+   {
+    "t_s": 1038310.8,
+    "labware_id": "plate_00012",
+    "event": "step_end",
+    "instance_id": "pressure_1",
+    "step_id": "workup"
+   },
+   {
+    "t_s": 1038621.9,
+    "labware_id": "plate_00014",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 1038621.9,
+    "labware_id": "plate_00011",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1038640.3,
+    "labware_id": "plate_00011",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1038640.3,
+    "labware_id": "plate_00011",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "react_2"
+   },
+   {
+    "t_s": 1041238.3,
+    "labware_id": "plate_00010",
+    "event": "step_end",
+    "instance_id": "ez2_1",
+    "step_id": "evaporate"
+   },
+   {
+    "t_s": 1041238.3,
+    "labware_id": "plate_00010",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1041258.7,
+    "labware_id": "plate_00010",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1041258.7,
+    "labware_id": "plate_00010",
+    "event": "step_start",
+    "instance_id": "lcms_1",
+    "step_id": "lcms_qc"
+   },
+   {
+    "t_s": 1057548.8,
+    "labware_id": "plate_00010",
+    "event": "step_end",
+    "instance_id": "lcms_1",
+    "step_id": "lcms_qc"
+   },
+   {
+    "t_s": 1057548.8,
+    "labware_id": "plate_00010",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1057566.5,
+    "labware_id": "plate_00010",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1057566.5,
+    "labware_id": "plate_00010",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "acoustic_transfer"
+   },
+   {
+    "t_s": 1057955.0,
+    "labware_id": "plate_00010",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "acoustic_transfer"
+   },
+   {
+    "t_s": 1057955.0,
+    "labware_id": "plate_00010",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1057973.0,
+    "labware_id": "plate_00010",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1057973.0,
+    "labware_id": "plate_00010",
+    "event": "step_start",
+    "instance_id": "combi_1",
+    "step_id": "reagent_add"
+   },
+   {
+    "t_s": 1058187.1,
+    "labware_id": "plate_00010",
+    "event": "step_end",
+    "instance_id": "combi_1",
+    "step_id": "reagent_add"
+   },
+   {
+    "t_s": 1058187.1,
+    "labware_id": "plate_00010",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1058204.9,
+    "labware_id": "plate_00010",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1058204.9,
+    "labware_id": "plate_00010",
+    "event": "step_start",
+    "instance_id": "reader_1",
+    "step_id": "read"
+   },
+   {
+    "t_s": 1058248.0,
+    "labware_id": "plate_00010",
+    "event": "step_end",
+    "instance_id": "reader_1",
+    "step_id": "read"
+   },
+   {
+    "t_s": 1058248.0,
+    "labware_id": "plate_00010",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1058268.3,
+    "labware_id": "plate_00010",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1058268.3,
+    "labware_id": "plate_00010",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "store_out"
+   },
+   {
+    "t_s": 1058269.3,
+    "labware_id": "plate_00010",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "store_out"
+   },
+   {
+    "t_s": 1069129.6,
+    "labware_id": "plate_00011",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "react_2"
+   },
+   {
+    "t_s": 1069129.6,
+    "labware_id": "plate_00013",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 1100620.8,
+    "labware_id": "plate_00013",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 1100620.8,
+    "labware_id": "plate_00022",
+    "event": "step_start",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 1104257.0,
+    "labware_id": "plate_00022",
+    "event": "step_end",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 1123200.0,
+    "labware_id": "plate_00015",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1123218.6,
+    "labware_id": "plate_00015",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1123218.6,
+    "labware_id": "plate_00015",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 1123218.6,
+    "labware_id": "plate_00011",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1123237.0,
+    "labware_id": "plate_00011",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1123237.0,
+    "labware_id": "plate_00011",
+    "event": "step_start",
+    "instance_id": "ez2_1",
+    "step_id": "evaporate"
+   },
+   {
+    "t_s": 1123237.0,
+    "labware_id": "plate_00013",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1123254.7,
+    "labware_id": "plate_00013",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1123254.7,
+    "labware_id": "plate_00013",
+    "event": "step_start",
+    "instance_id": "pressure_1",
+    "step_id": "workup"
+   },
+   {
+    "t_s": 1124692.5,
+    "labware_id": "plate_00013",
+    "event": "step_end",
+    "instance_id": "pressure_1",
+    "step_id": "workup"
+   },
+   {
+    "t_s": 1124993.1,
+    "labware_id": "plate_00015",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "dose_liquids"
+   },
+   {
+    "t_s": 1124993.1,
+    "labware_id": "plate_00012",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1125011.8,
+    "labware_id": "plate_00012",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1125011.8,
+    "labware_id": "plate_00012",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "react_2"
+   },
+   {
+    "t_s": 1127511.6,
+    "labware_id": "plate_00011",
+    "event": "step_end",
+    "instance_id": "ez2_1",
+    "step_id": "evaporate"
+   },
+   {
+    "t_s": 1127511.6,
+    "labware_id": "plate_00011",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1127532.1,
+    "labware_id": "plate_00011",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1127532.1,
+    "labware_id": "plate_00011",
+    "event": "step_start",
+    "instance_id": "lcms_1",
+    "step_id": "lcms_qc"
+   },
+   {
+    "t_s": 1144738.0,
+    "labware_id": "plate_00011",
+    "event": "step_end",
+    "instance_id": "lcms_1",
+    "step_id": "lcms_qc"
+   },
+   {
+    "t_s": 1144738.0,
+    "labware_id": "plate_00011",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1144756.1,
+    "labware_id": "plate_00011",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1144756.1,
+    "labware_id": "plate_00011",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "acoustic_transfer"
+   },
+   {
+    "t_s": 1145150.9,
+    "labware_id": "plate_00011",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "acoustic_transfer"
+   },
+   {
+    "t_s": 1145150.9,
+    "labware_id": "plate_00011",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1145168.8,
+    "labware_id": "plate_00011",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1145168.8,
+    "labware_id": "plate_00011",
+    "event": "step_start",
+    "instance_id": "combi_1",
+    "step_id": "reagent_add"
+   },
+   {
+    "t_s": 1145388.1,
+    "labware_id": "plate_00011",
+    "event": "step_end",
+    "instance_id": "combi_1",
+    "step_id": "reagent_add"
+   },
+   {
+    "t_s": 1145388.1,
+    "labware_id": "plate_00011",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1145407.1,
+    "labware_id": "plate_00011",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1145407.1,
+    "labware_id": "plate_00011",
+    "event": "step_start",
+    "instance_id": "reader_1",
+    "step_id": "read"
+   },
+   {
+    "t_s": 1145450.8,
+    "labware_id": "plate_00011",
+    "event": "step_end",
+    "instance_id": "reader_1",
+    "step_id": "read"
+   },
+   {
+    "t_s": 1145450.8,
+    "labware_id": "plate_00011",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1145471.7,
+    "labware_id": "plate_00011",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1145471.7,
+    "labware_id": "plate_00011",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "store_out"
+   },
+   {
+    "t_s": 1145472.7,
+    "labware_id": "plate_00011",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "store_out"
+   },
+   {
+    "t_s": 1154645.9,
+    "labware_id": "plate_00012",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "react_2"
+   },
+   {
+    "t_s": 1154645.9,
+    "labware_id": "plate_00014",
+    "event": "step_start",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 1185897.2,
+    "labware_id": "plate_00014",
+    "event": "step_end",
+    "instance_id": "isynth_1",
+    "step_id": "react_1"
+   },
+   {
+    "t_s": 1185897.2,
+    "labware_id": "plate_00023",
+    "event": "step_start",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 1189468.5,
+    "labware_id": "plate_00023",
+    "event": "step_end",
+    "instance_id": "quantos_1",
+    "step_id": "dose_stocks"
+   },
+   {
+    "t_s": 1209600.0,
+    "labware_id": "plate_00016",
+    "event": "transfer_start",
+    "instance_id": "chemist_1"
+   },
+   {
+    "t_s": 1209618.8,
+    "labware_id": "plate_00016",
+    "event": "transfer_end",
+    "instance_id": "chemist_1"
    }
   ]
  },
  "claims": [
   {
-   "id": "c_throughput",
-   "statement": "Provisional design P50 throughput meets the assumed 192 compounds/day target",
+   "id": "c_tp",
+   "statement": "Simulated P50 throughput meets the assumed 192 compounds/day target",
    "metric": "throughput.p50",
    "comparator": ">=",
    "predicted_value": 192,
    "confidence": 0.05,
    "status": "refuted",
-   "verified_value": 90.0,
-   "verifier_note": "throughput.p50 = 90, recomputed by the verifier."
+   "verified_value": 92.0,
+   "verifier_note": "throughput.p50 = 92, recomputed by the verifier."
   },
   {
    "id": "c_layout",
-   "statement": "Layout in the 3 x 2.5 m room has zero violations",
+   "statement": "Layout has zero violations in the 3 x 2.5 m room",
    "metric": "layout.violations",
    "comparator": "==",
    "predicted_value": 0,
    "confidence": 0.02,
    "status": "refuted",
-   "verified_value": 22.0,
-   "verifier_note": "layout.violations = 22, recomputed by the verifier."
+   "verified_value": 18.0,
+   "verifier_note": "layout.violations = 18, recomputed by the verifier."
   }
  ],
  "follow_up_used": true,
- "first_reply": "Before I build the layout I need a few details. I don't want to guess at requirements, because they decide how many of each instrument you need and whether everything can fit.\n\n**What I still need:**\n\n1. **Throughput target:** a number and a unit, such as reaction blocks per day, compounds per day or plates per day. For a two-stage library, it would also help to know whether you're aiming for 768 products per campaign (8 \u00d7 12 \u00d7 8) or a different number.\n2. **Operating hours:** hours per day the system runs, and how many operators are available per shift. Manual restocking and handling steps will be modelled as operator work.\n3. **Budget (USD):** if you don't have one yet, you can tell me to do a **provisional design without a budget**, and I'll mark the cost check as not verified.\n4. **Hazards and containment:**\n   - Will the room contain flammable solvents or toxic reagents?\n   - Does synthesis or powder dosing need an inert atmosphere, such as a glovebox or nitrogen?\n   - Are there existing fume hoods or a ventilated enclosure, and a separate cabinet for flammable-solvent storage?\n5. **Room details:** where the door is, the ceiling height, and any areas that must stay clear (service access, existing benches, utility drops).\n6. **Scope check:** your list doesn't include the steps between reactions (workup/filtration), purification, compound storage/reformatting or incubation before the readout. Should I include them, or are they handled outside this room or not needed?\n\n**Early warning about the room:** 3 \u00d7 2.5 m is 7.5 m\u00b2. An evaporator, LC-MS, synthesis platform, powder doser, acoustic dispenser, reagent dispenser, plate reader and robot arm will probably need more space than that once you allow for service clearances, the arm's reach and ventilated enclosures. When I run the layout, any overlaps or clearance problems will show up as layout violations. I'll report them as such rather than calling the design feasible, and I'll suggest options like moving some instruments to a neighbouring room or sharing equipment.\n\nOnce you send these details, I'll search the catalog, build the workflow and run the layout and throughput simulation.",
+ "first_reply": "Before I lay this out I need a few details I don't want to guess:\n\n1. **Throughput target:** How many, and in what unit? For example plates/day, reactions/day or compounds/day. The template assumes a 96-well reaction block, two reaction stages and 8 \u00d7 12 \u00d7 8 = 768 products per library. Is that your library size, and how many libraries per day or week?\n2. **Operating hours:** Run time per day (e.g. 8 h attended or 24 h unattended), and how many operators per shift.\n3. **Budget:** A total in USD. If you don't have one yet, you can tell me to make a provisional design with no budget limit, and I'll mark it that way.\n4. **Hazards and safety:**\n   - Flammable solvents?\n   - Toxic reagents?\n   - Do you need an inert atmosphere for dosing or synthesis?\n   - Is there existing ventilation (fume hood or extraction) in the room?\n   - Where can flammable-solvent storage go? It must be separate from the rest.\n5. **Room details:**\n   - Ceiling height.\n   - Where the door is.\n   - Any keep-out zones, such as an existing hood, a sink or service columns.\n6. **Scope:** Should the cascade include reformatting into compound storage and the assay incubation step? Or is it just dosing \u2192 synthesis \u2192 workup \u2192 evaporation \u2192 LC-MS \u2192 acoustic transfer \u2192 reagent dispense \u2192 read?\n\n**About the room size:** 3 \u00d7 2.5 m is only 7.5 m\u00b2. Eight instruments, an arm's reach envelope, access clearance and ventilated enclosures may not fit. Once you answer, I'll check real footprints in the catalog, run the layout and throughput simulation, and report any layout problems. If it doesn't fit, I'll tell you plainly rather than force it.",
  "completed": true,
- "stop_reason": "end_turn"
+ "stop_reason": "end_turn",
+ "answered_at": "2026-10-03T17:13:32+00:00",
+ "model": "claude-opus-5-5"
 }

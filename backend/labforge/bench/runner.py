@@ -303,9 +303,10 @@ def check_flags_low_confidence(ctx: Context, params: dict):
     if caps or quantities:
         if not UNCERTAIN.search(text):
             return False, "does not flag any uncertainty"
-        def said(q: str) -> bool:  # "crystal_hit_rate" is flagged by "hit rate" too
+        def said(q: str) -> bool:  # "crystal_hit_rate" is flagged by "hit rate" too; a capability by its synonyms
             words = q.split("_")
-            return any(" ".join(words[k:]) in _norm(text) for k in range(max(1, len(words) - 1)))
+            return any(" ".join(words[k:]) in _norm(text) for k in range(max(1, len(words) - 1))) or \
+                (q in SYNONYMS and _mentions(text, q))
         unflagged = [c for c in caps if not _mentions(text, c)] + [q for q in quantities if not said(q)]
         if unflagged:
             return False, f"does not flag {unflagged} as uncertain"
