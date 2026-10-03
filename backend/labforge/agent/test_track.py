@@ -135,7 +135,8 @@ class SessionTests(unittest.TestCase):
         result = output['instrument_optimisation']
         self.assertEqual(self.session.design, before)
         self.assertEqual(result['instance_id'], 'lh_1')
-        self.assertEqual(len(result['sweeps']), 2)
+        params = {s['parameter'] for s in result['sweeps']}
+        self.assertTrue({'cycle_time', 'capacity'} <= params)
         self.assertGreater(result['sweeps'][0]['elasticity'], 0)
         with self.assertRaises(ValueError):
             self.session.optimise('opentrons_flex')

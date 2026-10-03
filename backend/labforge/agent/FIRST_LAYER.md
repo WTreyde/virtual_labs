@@ -4,7 +4,7 @@ The first-layer validation and planner loop have been extended into the complete
 agent interface. Follow [LIVE_RUN.md](LIVE_RUN.md) for setup, tools, demo prompts, checks,
 CLI/benchmark commands, and gateway/SSE integration.
 
-Implemented: schema-guided Sonnet planning, semantic validation, provenance, tool error
+Implemented: schema-guided Opus planning, semantic validation, provenance, tool error
 repair, full UI timelines, preserved history, optional Amass retrieval/cache, backend-held
 claim checks, deterministic reports, token streaming, and vanilla/platform benchmark arms.
 
