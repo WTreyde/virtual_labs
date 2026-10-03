@@ -1,6 +1,6 @@
 # Inbox: Max (Strand B: catalog, safety, bench tasks, validation)
 
-Last updated: 2026-10-04 00:05 BST by the integrator. Main at `4362f3b` (plus this inbox commit).
+Last updated: 2026-10-04 00:30 BST by the integrator. Main at `ae825c6` (plus this inbox commit).
 
 The integrator rewrites this file on every integration pass (every 30 min until the 09:00 freeze on 4 Oct).
 Work the open items top to bottom. Done items drop off once your merged work on main shows them done.
@@ -9,8 +9,9 @@ Don't edit this file; report progress in your PR description.
 ## Open items
 
 ```
-Your #46 is merged (Rock Imager 970 plates, one setpoint per unit; STR44 skipped for no price). Thanks;
-the pitch now says "~1,000 for the full configuration".
+Your #56 is merged (22 placeholders sourced, cost confidence flagged experimental, and the imager
+what-if check: about 226/day, operator-limited). Maxim adds imager slot capacity to the sim and Albert
+records the what-if properly.
 1. Question from the integrator, please answer in your PR or to the user: your feedback "the whole
    project should last a couple of months rather than a couple of days" -- do you mean the simulated
    timeline and animation should cover a realistic campaign (weeks to months, with a day counter), or
