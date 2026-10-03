@@ -1243,7 +1243,7 @@
       "width_m": 0.538,
       "depth_m": 0.746,
       "height_m": 0.915,
-      "clearance_m": 0.3,
+      "clearance_m": 0.305,
       "mount": "bench"
     },
     "access_points": [
@@ -1316,12 +1316,13 @@
         "source": "https://www.beckman.com/liquid-handlers/echo-acoustic/echo-650-plus-series"
       },
       "footprint.clearance_m": {
-        "value": 0.3,
-        "confidence": "placeholder",
-        "source": "agent_estimate",
-        "low": 0.15,
-        "high": 0.6,
-        "note": "Plate drawer clearance at front; not vendor stated."
+        "value": 0.305,
+        "low": 0.025,
+        "high": 0.305,
+        "confidence": "datasheet",
+        "source": "Labcyte Echo 525 Technical Specifications v2.0 (Dec 2015), https://labplan.ie/content/uploads/2020/03/Echo525-Technical-Specifications.pdf ; Echo 650 spec sheet SPC-65XT, https://dipylonmedical.com/wp-content/uploads/2021/12/Labcyte-Echo-650.pdf",
+        "note": "Vendor 'Working envelope: Additional 25.4 cm (10 in) on top, 2.5 cm (1 in) on sides, 15.24 cm (6 in) at front, 30.5 cm (12 in) at back'. Largest horizontal clearance (rear) used: 0.305 m.",
+        "year": 2026
       },
       "access_points.source_plate_drawer.position": {
         "value": 0.4,
@@ -1393,7 +1394,7 @@
       "width_m": 0.539,
       "depth_m": 0.683,
       "height_m": 0.925,
-      "clearance_m": 0.3,
+      "clearance_m": 0.305,
       "mount": "bench"
     },
     "access_points": [
@@ -1477,11 +1478,13 @@
         "source": "agent_estimate: ligand transfer into 96 crystallization drops (~1-5 s per drop) plus plate load"
       },
       "footprint.clearance_m": {
-        "value": 0.3,
-        "low": 0.2,
-        "high": 0.5,
-        "confidence": "placeholder",
-        "source": "agent_estimate"
+        "value": 0.305,
+        "low": 0.025,
+        "high": 0.305,
+        "confidence": "datasheet",
+        "source": "Labcyte Echo 525 Technical Specifications v2.0 (Dec 2015), https://labplan.ie/content/uploads/2020/03/Echo525-Technical-Specifications.pdf ; Echo 650 spec sheet SPC-65XT, https://dipylonmedical.com/wp-content/uploads/2021/12/Labcyte-Echo-650.pdf",
+        "note": "Vendor 'Working envelope: Additional 25.4 cm (10 in) on top, 2.5 cm (1 in) on sides, 15.24 cm (6 in) at front, 30.5 cm (12 in) at back'. Largest horizontal clearance (rear) used: 0.305 m.",
+        "year": 2026
       },
       "lead_time_weeks": {
         "value": 8,
@@ -1956,7 +1959,7 @@
         "powder_dosing": 300
       }
     },
-    "power_w": 50,
+    "power_w": 27,
     "lead_time_weeks": 8,
     "integration": [
       "RS-232",
@@ -2028,12 +2031,13 @@
         "high": 900
       },
       "power_w": {
-        "value": 50,
-        "confidence": "placeholder",
-        "source": "agent_estimate",
-        "low": 20,
-        "high": 100,
-        "note": "Not found in sources"
+        "value": 27,
+        "low": 27,
+        "high": 80,
+        "confidence": "datasheet",
+        "source": "Mettler Toledo Quantos Dosing System Operating Instructions 11781172K, sec. 9.1 General Data, https://www.mt.com/dam/product_organizations/laboratory_weighing/quantos/documentation/en/OI_Quantos_11781172K_EN_May2013.pdf",
+        "note": "Manual: 'Balance: Power supply to the balance: 12 VDC, 2.25 A max. 27 W'; AC adapter primary 100-240 V, 0.8 A (about 80 VA at 100 V, high bound).",
+        "year": 2026
       },
       "lead_time_weeks": {
         "value": 8,
@@ -2200,9 +2204,10 @@
         "value": 0,
         "low": 0,
         "high": 0,
-        "confidence": "placeholder",
-        "source": "agent_estimate",
-        "note": "Environment, not a timed step"
+        "confidence": "estimated",
+        "source": "https://www.chemspeed.com/configurable-solutions/",
+        "note": "Derived: inert atmosphere is an enclosure state (catalog safety.provides_zone = inert) maintained during the run, not a separate timed step, so its own duration is 0 s; time is carried by reaction/dosing steps.",
+        "year": 2026
       },
       "price_usd_estimate": {
         "value": 594301,
@@ -2910,20 +2915,22 @@
         "note": "5350 VA stated, taken as W; 32 A supply"
       },
       "process.durations_s.evaporation": {
-        "value": 5400,
-        "low": 1800,
-        "high": 14400,
-        "confidence": "placeholder",
-        "source": "agent_estimate",
-        "note": "Run time depends on solvent (DCM minutes, DMSO/water hours); 1.5 h placeholder"
+        "value": 9000,
+        "low": 5400,
+        "high": 16200,
+        "confidence": "literature",
+        "source": "https://scientificproducts.com/wp-content/uploads/sites/58/2023/07/High-Boiling-Point-Solvents_SP-Genevac.pdf",
+        "note": "Genevac 'High Boiling Point Solvents' guide, simulation of microtitre plates at 0.75 mL/well on an HT-4: solvent gone after 2.5 h (9000 s) with default program; under 90 min (5400 s) with reprogrammed hot stage / heat transfer plates; two plates per swing 4.5 h (16200 s) default. Per run (not per plate); high-boiling solvent (DMSO-class) worst case, DCM-type solvents are much faster.",
+        "year": 2026
       },
       "process.capacity": {
-        "value": 6,
-        "low": 3,
-        "high": 12,
-        "confidence": "placeholder",
-        "source": "agent_estimate",
-        "note": "Model name HT-6 suggests 6 plate/rotor positions; not verified in brochure (PDF unreadable)"
+        "value": 12,
+        "low": 6,
+        "high": 24,
+        "confidence": "datasheet",
+        "source": "https://kovalent.se/images/Produktdokument/Genevac/10-1629-HT-Series-3-Brochure.pdf ; https://scientificproducts.com/products/genevac-ht-series-3i-vacuum-evaporator/",
+        "note": "Brochure: 'new six place rotor'; 'FastStack microplate holders will accommodate two deep well or four shallow well plates per rotor position'. 6 positions x 2 deep-well plates = 12 (24 if shallow-well, per SP page 'HT-6 can accommodate up to 24 shallow-well microplates'). Deep-well basis because catalog labware is deep_well_96.",
+        "year": 2026
       },
       "lead_time_weeks": {
         "value": 10,
@@ -2944,9 +2951,9 @@
     },
     "scraped_at": "2026-10-03T13:29:57Z",
     "process": {
-      "capacity": 6,
+      "capacity": 12,
       "durations_s": {
-        "evaporation": 5400
+        "evaporation": 9000
       }
     },
     "power_w": 5350,
@@ -3124,7 +3131,7 @@
       "width_m": 0.8,
       "depth_m": 0.55,
       "height_m": 0.75,
-      "clearance_m": 0.4,
+      "clearance_m": 0.3,
       "mount": "bench"
     },
     "access_points": [
@@ -3189,11 +3196,13 @@
         "source": "https://www.gmi-inc.com/product/agilent-1290-infinity-ii/ ; module heights 140-200 mm each (pump 180, detector 140), ~4 stacked modules"
       },
       "footprint.clearance_m": {
-        "value": 0.4,
-        "low": 0.3,
-        "high": 0.8,
-        "confidence": "placeholder",
-        "source": "agent_estimate"
+        "value": 0.3,
+        "low": 0.08,
+        "high": 0.3,
+        "confidence": "literature",
+        "source": "Agilent InfinityLab LC/MSD Series Site Preparation Guide / LC/MSD iQ Site Preparation Checklist (G6301-90004), agilent.com (page itself returned 403; wording taken from search extract)",
+        "note": "Site prep text: 'at least 30 cm (1 ft.) to the left, right and rear of the instrument must be added to provide adequate clearance'. Individual 1290 Infinity modules need only 2.5 cm sides / 8 cm rear (low bound).",
+        "year": 2026
       },
       "access_points.sampler_tray.position": {
         "value": 0.45,
@@ -3227,10 +3236,12 @@
       },
       "power_w": {
         "value": 1200,
-        "low": 800,
-        "high": 1800,
-        "confidence": "placeholder",
-        "source": "agent_estimate ; pump 110-180 W per module (datasheet), plus sampler, thermostat, detector, MSD with pump not found"
+        "low": 500,
+        "high": 1200,
+        "confidence": "literature",
+        "source": "Agilent InfinityLab LC/MSD iQ Site Preparation Checklist (G6301-90004), agilent.com (403 to direct fetch; values from search extract)",
+        "note": "Max power 500 VA (MSD iQ with MS40+ SmartPump, 100-240 VAC); 1200 VA at 15 A with the optional transformer. VA used as W upper bound; full LC stack on top adds module draw, hence 1200 retained.",
+        "year": 2026
       },
       "lead_time_weeks": {
         "value": 12,
@@ -3789,10 +3800,11 @@
       "durations_s": {
         "incubation": 3600,
         "plate_storage": 12
-      }
+      },
+      "access_time_s": 12
     },
     "storage_slots": 42,
-    "power_w": 500,
+    "power_w": 700,
     "lead_time_weeks": 12,
     "integration": [
       "Vendor automation interface (RS-232/Ethernet, not confirmed on product page)"
@@ -3873,11 +3885,13 @@
         "note": "stated access time 12 s"
       },
       "power_w": {
-        "value": 500,
-        "low": 200,
-        "high": 1000,
-        "confidence": "placeholder",
-        "source": "agent_estimate ; only 100-230 V stated"
+        "value": 700,
+        "low": 700,
+        "high": 900,
+        "confidence": "datasheet",
+        "source": "Thermo Scientific Cytomat Technical Specifications and Options (table), https://med.stanford.edu/content/dam/sm/htbc/documents/eq/Cytomat.pdf",
+        "note": "Rated power 230 V/120 V: Cytomat 2 C = 0.7 kW; Cytomat 2 C15 = 0.9 kW (high bound). Value for the Cytomat 2 C base model.",
+        "year": 2026
       },
       "lead_time_weeks": {
         "value": 12,
@@ -3894,6 +3908,15 @@
         "source": "https://www.usaspending.gov/award/CONT_AWD_75N92020P00205_7529_-NONE-_-NONE-",
         "note": "NIH award 75N92020P00205 (Aug 2020): Cytomat 2C automated incubator, $44,787. Range is agent judgement of configuration spread.",
         "year": 2020
+      },
+      "process.access_time_s": {
+        "value": 12,
+        "low": 6,
+        "high": 20,
+        "confidence": "datasheet",
+        "source": "https://documents.thermofisher.com/TFS-Assets/CMD/brochures/br-90468-cytomat-2-c-lin-br90468-en.pdf",
+        "note": "Brochure: 'mean access time of 12 seconds' (below 12 s) for storing/retrieving a plate at the transfer station. Replaces incubation hold time (protocol-dependent) with plate access/transfer time per request; low/high bracket is an estimate.",
+        "year": 2026
       }
     },
     "safety": {
@@ -4524,9 +4547,9 @@
       "manual_bench"
     ],
     "footprint": {
-      "width_m": 1.5,
-      "depth_m": 0.75,
-      "height_m": 0.9,
+      "width_m": 1.829,
+      "depth_m": 0.762,
+      "height_m": 0.838,
       "clearance_m": 0.9,
       "mount": "floor"
     },
@@ -4569,25 +4592,31 @@
     "data_confidence": "placeholder",
     "provenance": {
       "footprint.width_m": {
-        "value": 1.5,
-        "low": 1.2,
-        "high": 2.4,
-        "confidence": "placeholder",
-        "source": "agent_estimate ; Fisher page blocked, typical bench"
+        "value": 1.829,
+        "low": 1.829,
+        "high": 1.829,
+        "confidence": "datasheet",
+        "source": "https://www.fishersci.com/shop/products/adjustable-height-basic-work-bench-leveling-glides-3/06000654",
+        "note": "Fisherbrand Adjustable Height Basic Work Bench with Leveling Glides, 30 x 72 x 30-36 in. (Fisher Scientific product title, cat. 06-000-654): 72 in long = 1.829 m.",
+        "year": 2026
       },
       "footprint.depth_m": {
-        "value": 0.75,
-        "low": 0.6,
-        "high": 0.9,
-        "confidence": "placeholder",
-        "source": "agent_estimate"
+        "value": 0.762,
+        "low": 0.762,
+        "high": 0.762,
+        "confidence": "datasheet",
+        "source": "https://www.fishersci.com/shop/products/adjustable-height-basic-work-bench-leveling-glides-3/06000654",
+        "note": "Fisherbrand Adjustable Height Basic Work Bench with Leveling Glides, 30 x 72 x 30-36 in. (Fisher Scientific product title, cat. 06-000-654): 30 in deep = 0.762 m.",
+        "year": 2026
       },
       "footprint.height_m": {
-        "value": 0.9,
-        "low": 0.7,
-        "high": 1.0,
-        "confidence": "placeholder",
-        "source": "agent_estimate ; adjustable height"
+        "value": 0.838,
+        "low": 0.762,
+        "high": 0.914,
+        "confidence": "datasheet",
+        "source": "https://www.fishersci.com/shop/products/adjustable-height-basic-work-bench-leveling-glides-3/06000654",
+        "note": "Fisherbrand Adjustable Height Basic Work Bench with Leveling Glides, 30 x 72 x 30-36 in. (Fisher Scientific product title, cat. 06-000-654): adjustable 30-36 in = 0.762-0.914 m; midpoint 33 in = 0.838 m used.",
+        "year": 2026
       },
       "footprint.clearance_m": {
         "value": 0.9,
@@ -4825,12 +4854,13 @@
         "source": "agent_estimate: typical overnight culture"
       },
       "power_w": {
-        "value": 1500,
-        "low": 500,
-        "high": 2500,
-        "confidence": "placeholder",
-        "source": "agent_estimate",
-        "note": "Voltage stated (115/230 V) but wattage not found; 3.5 kWh/day figure from vendor page is the average"
+        "value": 880,
+        "low": 540,
+        "high": 1760,
+        "confidence": "datasheet",
+        "source": "Infors HT Multitron Pro Operating Manual, sec. 3.3 Connection values, https://www.manualslib.com/manual/1336522/Infors-Ht-Multitron-Pro.html?page=26 (and page=27)",
+        "note": "Single unit, 230 V 50/60 Hz: power consumption max. 880 W (standby 6 W). Top-cooling variant table lists 540 W. High bound = two stacked units (2 x 880 W); catalog footprint may represent a larger configuration.",
+        "year": 2026
       },
       "lead_time_weeks": {
         "value": 10,
@@ -4858,7 +4888,7 @@
         "cell_culture": 43200
       }
     },
-    "power_w": 1500,
+    "power_w": 880,
     "lead_time_weeks": 10,
     "integration": [
       "Local touch controller",
@@ -5051,7 +5081,7 @@
         "centrifugation": 1800
       }
     },
-    "power_w": 3500,
+    "power_w": 5500,
     "lead_time_weeks": 10,
     "integration": [
       "Manual touchscreen (no automation interface confirmed)"
@@ -5119,11 +5149,13 @@
         "source": "agent_estimate ; typical 10-30 min spin plus accel/decel for high-speed rotor"
       },
       "power_w": {
-        "value": 3500,
-        "low": 2000,
-        "high": 5000,
-        "confidence": "placeholder",
-        "source": "agent_estimate ; 3-phase unit, rating not found"
+        "value": 5500,
+        "low": 3500,
+        "high": 5760,
+        "confidence": "estimated",
+        "source": "Beckman Coulter Avanti JXN-26 (B34183) specifications: 200-240 VAC, 50/60 Hz, 24 A, https://store.beckman.com/en/p/b34183",
+        "note": "Vendor lists only current rating (24 A at 200-240 V), no wattage. Derived apparent power 24 A x ~230 V = ~5.5 kVA (5.76 kVA at 240 V); this is the circuit rating, real running draw is lower, so low bound kept at the prior 3500 W.",
+        "year": 2026
       },
       "lead_time_weeks": {
         "value": 10,
@@ -5252,10 +5284,12 @@
       },
       "footprint.clearance_m": {
         "value": 0.3,
-        "low": 0.1,
-        "high": 0.5,
-        "confidence": "placeholder",
-        "source": "agent_estimate"
+        "low": 0.3,
+        "high": 0.3,
+        "confidence": "datasheet",
+        "source": "Eppendorf Centrifuge 5804/5804 R/5810/5810 R Operating manual 5820 900.040, https://www.nist.gov/system/files/documents/ncnr/Eppendorf_5810R_Centrifuge_Manual.pdf",
+        "note": "Manual: 'In accordance with recommendations in EN 61010-2-020, leave a safety clearance of 30 cm around the device during operation.'",
+        "year": 2026
       },
       "power_w": {
         "value": 1650,
@@ -5520,12 +5554,13 @@
         "note": "700 W max output; draw may be higher"
       },
       "process.durations_s.cell_lysis": {
-        "value": 300,
+        "value": 130,
         "low": 60,
-        "high": 900,
-        "confidence": "placeholder",
-        "source": "agent_estimate",
-        "note": "Typical bacterial lysis 1-5 min pulsed per tube; single tube at a time"
+        "high": 600,
+        "confidence": "literature",
+        "source": "https://wolfson.huji.ac.il/expression/procedures/cell_lysis/Sonication_of_bacterial_samples.html",
+        "note": "Weizmann/Wolfson bacterial sonication protocol (0.5-1 mL pellet in lysis buffer): 3 x 30 s pulsed sonication (5 s on / 5 s off) with 20 s on ice between rounds = 90 s + 2 x 20 s = 130 s per tube. Instrument in that protocol is not stated to be a Q700; Q700 supports 1 s-24 h pulse timers. Low/high are estimates (1-10 min).",
+        "year": 2026
       },
       "process.capacity": {
         "value": 1,
@@ -5556,7 +5591,7 @@
     "process": {
       "capacity": 1,
       "durations_s": {
-        "cell_lysis": 300
+        "cell_lysis": 130
       }
     },
     "power_w": 700,
@@ -6001,7 +6036,7 @@
         "concentration_measurement": 60
       }
     },
-    "power_w": 30,
+    "power_w": 18,
     "integration": [
       "USB",
       "Ethernet/WiFi (verify)",
@@ -6067,12 +6102,13 @@
         "high": 120
       },
       "power_w": {
-        "value": 30,
-        "confidence": "placeholder",
-        "source": "agent_estimate",
-        "low": 15,
-        "high": 60,
-        "note": "Not found"
+        "value": 18,
+        "low": 12,
+        "high": 18,
+        "confidence": "datasheet",
+        "source": "Thermo Scientific NanoDrop One specification sheet, https://documents.thermofisher.com/TFS-Assets/CAD/Specification-Sheets/NanoDrop-One-Specifications.pdf",
+        "note": "Spec sheet: 'Power Consumption Operating: 12-18 W, Standby: 5 W' (12 V DC supply). Max 18 W used.",
+        "year": 2026
       },
       "price_usd_estimate": {
         "value": 15167,
@@ -6807,9 +6843,9 @@
       "crystal_harvesting"
     ],
     "footprint": {
-      "width_m": 0.6,
-      "depth_m": 0.6,
-      "height_m": 0.6,
+      "width_m": 0.9,
+      "depth_m": 0.3,
+      "height_m": 0.06,
       "clearance_m": 0.3,
       "mount": "bench"
     },
@@ -6846,26 +6882,31 @@
     "data_confidence": "placeholder",
     "provenance": {
       "footprint.width_m": {
-        "value": 0.6,
-        "low": 0.4,
+        "value": 0.9,
+        "low": 0.9,
         "high": 0.9,
-        "confidence": "placeholder",
-        "source": "agent_estimate",
-        "note": "No dimensions published on vendor page"
+        "confidence": "literature",
+        "source": "https://europepmc.org/article/MED/33404526 ; Wright et al., Acta Cryst. D 77, 62-74 (2021), doi:10.1107/S2059798320014114",
+        "note": "Fig. 2: 'Shifter enclosure (~90 x 30 x 6 cm)'. Length (x) 0.90 m. Enclosure only, microscope not included; vendor page publishes no dimensions.",
+        "year": 2026
       },
       "footprint.depth_m": {
-        "value": 0.6,
-        "low": 0.4,
-        "high": 0.9,
-        "confidence": "placeholder",
-        "source": "agent_estimate"
+        "value": 0.3,
+        "low": 0.3,
+        "high": 0.4,
+        "confidence": "literature",
+        "source": "https://europepmc.org/article/MED/33404526 ; Wright et al., Acta Cryst. D 77, 62-74 (2021), doi:10.1107/S2059798320014114",
+        "note": "Fig. 2: 'Shifter enclosure (~90 x 30 x 6 cm)'. Depth 0.30 m (enclosure only).",
+        "year": 2026
       },
       "footprint.height_m": {
-        "value": 0.6,
-        "low": 0.4,
-        "high": 0.9,
-        "confidence": "placeholder",
-        "source": "agent_estimate"
+        "value": 0.06,
+        "low": 0.06,
+        "high": 0.5,
+        "confidence": "literature",
+        "source": "https://europepmc.org/article/MED/33404526 ; Wright et al., Acta Cryst. D 77, 62-74 (2021), doi:10.1107/S2059798320014114",
+        "note": "Fig. 2: 'Shifter enclosure (~90 x 30 x 6 cm)'. Enclosure thickness 0.06 m; the mounting microscope that sits over it is separate, so high bound allows for it.",
+        "year": 2026
       },
       "footprint.clearance_m": {
         "value": 0.3,
@@ -7694,11 +7735,13 @@
         "source": "https://www.dndkm.org/DOEKMDocuments/GetMedia/Technology/5392-KUKA_KMRiiwa_EN.pdf ; 3 km/h straight"
       },
       "transport.pick_place_s": {
-        "value": 15,
-        "low": 8,
-        "high": 60,
-        "confidence": "placeholder",
-        "source": "agent_estimate: navigate-dock-pick overhead per transfer for a mobile manipulator"
+        "value": 20,
+        "low": 13,
+        "high": 24,
+        "confidence": "literature",
+        "source": "https://arxiv.org/pdf/2309.00544",
+        "note": "Video 1 step timestamps of the KMR iiwa PXRD workflow (arXiv 2309.00544): collect rack from Chemspeed 0:00-0:24 (24 s), collect PXRD plate 4:19-4:32 (13 s), load plate into diffractometer 5:03-5:26 (23 s). Manipulator pick/place step only, excludes driving; video may be edited so treat as approximate.",
+        "year": 2026
       },
       "transport.payload_kg": {
         "value": 7,
@@ -7728,7 +7771,7 @@
       "kind": "mobile",
       "reach_m": 0.8,
       "speed_m_s": 0.83,
-      "pick_place_s": 15,
+      "pick_place_s": 20,
       "payload_kg": 7
     },
     "scraped_at": "2026-10-03T13:31:44+00:00",
