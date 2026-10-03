@@ -12,6 +12,8 @@ Digital twins of autonomous labs: describe a chemistry or biology lab in chat, a
 
 ## Quick start
 
+For the standalone Claude agent and local test UI, see [Agent setup](backend/labforge/agent/LIVE_RUN.md).
+
 ```bash
 make install    # backend (pip -e) + frontend (npm)
 make check      # schemas, tests, typecheck: keep green
