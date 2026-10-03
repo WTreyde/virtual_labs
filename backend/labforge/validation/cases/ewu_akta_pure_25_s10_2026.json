@@ -1,0 +1,47 @@
+{
+  "id": "ewu_akta_pure_25_s10_2026",
+  "name": "Eastern Washington University: AKTA pure 25 FPLC (NIH S10; 2026)",
+  "domain": "biology",
+  "sources": [
+    "https://api.reporter.nih.gov/v2/projects/search (project_num 1S10GM164840-01)"
+  ],
+  "build": "turnkey",
+  "brief": "A primarily undergraduate institution buys a fast protein liquid chromatography system for biomolecule purification, replacing gravity-flow purification, for research and teaching.",
+  "reported": {
+    "cost": {
+      "value_usd": 176423,
+      "original": "US$176,423 (NIH S10 award, FY2026)",
+      "year": 2026,
+      "includes": [
+        "instruments"
+      ],
+      "excludes_note": "NIH S10 award for one FPLC system; accessories, columns, software, install and any institutional match are not itemised in the abstract."
+    }
+  },
+  "verified": true,
+  "notes": "Out-of-sample: found after the cost model was frozen at commit 02d7678 and scored blind against it (results in docs/validation.md). Later model or catalog changes do not count as out-of-sample for this case. price_basis=configured, from the wording of a grant to buy a working FPLC \"system\" (accessories not itemised). Verified 3 Oct 2026 via NIH RePORTER API (1S10GM164840-01, award_amount 176423; https://reporter.nih.gov/project-details/11366771). Quote: \"This proposal requests funds for acquisition of an AKTA pure 25 fast protein liquid chromatography (FPLC) system for biomolecule purification at Eastern Washington University\". 1 of 1 items maps to cytiva_akta_pure_25 (exact; the 25 L/25 M variant is not stated). Caveat: S10 awards often include columns/software/service, so this is likely well above a bare unit.",
+  "workflow": {
+    "id": "ewu_akta_pure_25_s10_2026_wf",
+    "lab_spec_id": "ewu_akta_pure_25_s10_2026",
+    "equipment": [
+      {
+        "instance_id": "cytiva_akta_pure_25_1",
+        "catalog_id": "cytiva_akta_pure_25",
+        "rationale": "Named in the source.",
+        "match": "exact"
+      }
+    ],
+    "steps": [
+      {
+        "id": "use",
+        "name": "Placeholder step (cost comparison only)",
+        "capability": "manual_bench",
+        "candidate_instances": [],
+        "duration_s": 0
+      }
+    ]
+  },
+  "price_basis": "configured",
+  "condition": "new",
+  "split": "out_of_sample"
+}

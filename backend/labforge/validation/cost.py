@@ -52,6 +52,8 @@ def cost_category(item: dict) -> str | None:
         return None  # e.g. synchrotron beamtime is priced per shift, not bought
     if item["category"] == "furniture":
         return "construction"  # fume hoods, cold rooms, benches are facility fit-out
+    if (item.get("transport") or {}).get("kind") == "human":
+        return "staff"  # operators are people, not capex; staff cost is not modelled
     if item["category"] == "transporter":
         return "robots"
     if ANALYTICS & set(item["capabilities"]):

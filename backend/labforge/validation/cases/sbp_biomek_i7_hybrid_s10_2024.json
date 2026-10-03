@@ -1,0 +1,47 @@
+{
+  "id": "sbp_biomek_i7_hybrid_s10_2024",
+  "name": "Sanford Burnham Prebys Functional Genomics Core: Beckman Coulter Biomek i7 Hybrid (NIH S10; 2024)",
+  "domain": "biology",
+  "sources": [
+    "https://api.reporter.nih.gov/v2/projects/search (project_num 1S10OD036254-01)"
+  ],
+  "build": "turnkey",
+  "brief": "A functional genomics core replaces two ageing liquid handlers with one fully automated workstation having eight independent pipettes plus interchangeable 96- and 384-channel heads, to build arrayed CRISPR libraries and run cell-based screening pipelines.",
+  "reported": {
+    "cost": {
+      "value_usd": 594187,
+      "original": "US$594,187 (NIH S10 award, FY2024)",
+      "year": 2024,
+      "includes": [
+        "instruments"
+      ],
+      "excludes_note": "NIH S10 award for one workstation; any institutional match, service contract or integrated peripherals are not stated."
+    }
+  },
+  "verified": true,
+  "notes": "Out-of-sample: found after the cost model was frozen at commit 02d7678 and scored blind against it (results in docs/validation.md). Later model or catalog changes do not count as out-of-sample for this case. price_basis=configured, from the wording of a grant to buy a complete working \"fully automated system\" (set before looking at catalog prices). Verified 3 Oct 2026 via NIH RePORTER API (1S10OD036254-01, award_amount 594187; https://reporter.nih.gov/project-details/10852179). Quote: \"the SBP Functional Genomics Core Facility seeks funding to acquire the Beckman Coulter Biomek i7 Hybrid automated workstation. This fully automated system, with 8 independent pipettes and interchangeable 96 and 384-multichannel liquid handling platforms...\". 1 of 1 items maps to beckman_biomek_i7 (exact; catalog adds enclosure). Caveat: the S10 award may differ from the invoice.",
+  "workflow": {
+    "id": "sbp_biomek_i7_hybrid_s10_2024_wf",
+    "lab_spec_id": "sbp_biomek_i7_hybrid_s10_2024",
+    "equipment": [
+      {
+        "instance_id": "beckman_biomek_i7_1",
+        "catalog_id": "beckman_biomek_i7",
+        "rationale": "Named in the source.",
+        "match": "exact"
+      }
+    ],
+    "steps": [
+      {
+        "id": "use",
+        "name": "Placeholder step (cost comparison only)",
+        "capability": "manual_bench",
+        "candidate_instances": [],
+        "duration_s": 0
+      }
+    ]
+  },
+  "price_basis": "configured",
+  "condition": "new",
+  "split": "out_of_sample"
+}
