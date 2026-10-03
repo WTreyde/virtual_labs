@@ -130,4 +130,4 @@ def run_turn(history: list[dict], max_steps: int = 12, on_event=None, stream_tex
     if session.claim_history:
         produced['claim_history'] = session.claim_history
     return {"messages": [{"role": "assistant", "content": text.strip()}],
-            "history": messages, "completed": completed, **produced}
+            "history": messages, "completed": completed, "stop_reason": stop_reason, **produced}

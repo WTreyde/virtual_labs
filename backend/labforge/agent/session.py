@@ -1,6 +1,7 @@
 """Per-turn tools. Verifier inputs are held here, never supplied in the claim call."""
 import copy
 import math
+import inspect
 
 from labforge.agent.amass import retrieve_literature
 from labforge.agent.report import render_report
@@ -123,7 +124,10 @@ class ToolSession:
                     c.update(status='unverifiable', verifier_note='Unknown equipment price or unsupported metric; cannot verify.')
                 checked.append(c)
         else:
-            checked = verify_claims(ordinary, d['workflow'], d['layout'], d['sim_result'])
+            # Strand D's verifier accepts spec for independent layout/simulation recomputation.
+            # Keep compatibility while its PR is pending on the main gateway.
+            kwargs = {'spec': d['lab_spec']} if 'spec' in inspect.signature(verify_claims).parameters else {}
+            checked = verify_claims(ordinary, d['workflow'], d['layout'], d['sim_result'], **kwargs)
         checked = [validate(c, 'claim') for c in checked]
         self.claim_history.append({'workflow_id': d['workflow']['id'], 'claims': copy.deepcopy(checked)})
         # A second batch (e.g. BOM/layout) must not erase a throughput refutation.

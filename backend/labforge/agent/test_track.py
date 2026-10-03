@@ -29,6 +29,14 @@ class SessionTests(unittest.TestCase):
         self.result = {'layout': load_example('layout'), 'sim_result': load_example('sim_result')}
         self.simulate = Mock(side_effect=lambda **kw: copy.deepcopy(self.result))
         self.tools = {**TOOLS, 'layout_and_simulate': (TOOLS['layout_and_simulate'][0], self.simulate)}
+        # These tests exercise claims over a deliberately mocked simulation. Keep the
+        # verifier on those supplied results; independent recomputation is tested separately.
+        from labforge.agent.session import verify_claims as original_verify
+        def fixture_verify(claims, workflow, layout, sim):
+            return original_verify(claims, workflow, layout, sim)
+        patcher = patch('labforge.agent.session.verify_claims', fixture_verify)
+        patcher.start()
+        self.addCleanup(patcher.stop)
         self.session = ToolSession(self.tools, [])
 
     def design(self):
@@ -106,6 +114,25 @@ class SessionTests(unittest.TestCase):
         for expected in ('Executive summary', 'refuted', 'Assumptions', 'not measured throughput', 'agent_estimate'):
             self.assertIn(expected, text)
 
+    def test_new_verifier_receives_backend_spec_for_independent_recompute(self):
+        self.design()
+        seen = {}
+        def independent(claims, workflow, layout, sim, spec=None):
+            seen['spec'] = spec
+            return [{**c, 'status': 'refuted', 'verified_value': 12,
+                     'verifier_note': 'recomputed by the verifier'} for c in claims]
+        with patch('labforge.agent.session.verify_claims', independent):
+            result = self.session.verify([claim()])
+        self.assertEqual(seen['spec'], self.spec)
+        self.assertEqual(result['claims'][0]['verified_value'], 12)
+
+    def test_legacy_verifier_keeps_four_argument_contract(self):
+        self.design()
+        def legacy(claims, workflow, layout, sim):
+            return [{**c, 'status': 'refuted', 'verified_value': 20} for c in claims]
+        with patch('labforge.agent.session.verify_claims', legacy):
+            self.assertEqual(self.session.verify([claim()])['claims'][0]['verified_value'], 20)
+
     def test_real_simulator_and_verifier_loop(self):
         session = ToolSession(TOOLS, [])
         session.simulate(self.spec, self.workflow)
@@ -140,6 +167,18 @@ class SessionTests(unittest.TestCase):
         self.assertGreater(result['sweeps'][0]['elasticity'], 0)
         with self.assertRaises(ValueError):
             self.session.optimise('opentrons_flex')
+
+
+class VerifierIntegrationTests(unittest.TestCase):
+    def test_real_engine_checks_are_independent_when_spec_api_is_available(self):
+        import inspect
+        from labforge.agent.session import verify_claims
+        session = ToolSession(TOOLS, [])
+        session.simulate(load_example('lab_spec'), load_example('workflow'))
+        checked = session.verify([claim(500)])['claims']
+        self.assertEqual(checked[0]['status'], 'refuted')
+        if 'spec' in inspect.signature(verify_claims).parameters:
+            self.assertIn('recomputed by the verifier', checked[0]['verifier_note'])
 
 
 class EvidenceTests(unittest.TestCase):

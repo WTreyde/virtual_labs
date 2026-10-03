@@ -18,6 +18,15 @@ or batch. Preserve external queues and manual steps rather than optimising them 
 External services and in-silico steps use mode external/in_silico and empty candidate_instances;
 they do not require a local catalog instrument. Synchrotron diffraction stays external and
 must retain shipping/queue assumptions; never add an in-house X-ray to the XChem scenario.
+Declare the physical flow unit at every stage in params (e.g. a reaction block, assay plate,
+crystal or puck). A duration is per one run of batch_size input labware units. fan_out is
+output labware per input labware, not automatically the number of wells. At the counting
+sink set params.count_throughput=true and params.units_per_labware to the number of target
+units per output labware (e.g. 96 compounds per plate or 1 crystal per crystal token).
+Do not relabel plate counts as compounds/crystals. For external turnaround retain
+params.queue_time_s separately from processing duration; operator_role must match the
+LabSpec operators for manual and semi-automated steps. Do not treat the crystal imager
+capacity or protein yield as measured evidence when they are placeholders.
 Numbers from sources must retain retrieved evidence. Never invent citations. Unsupported
 numbers are estimates or placeholders, with explicit assumptions and uncertainty ranges;
 uncertainty ranges are modelling assumptions, not empirically calibrated confidence.
