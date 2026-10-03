@@ -37,6 +37,8 @@ export interface Design {
   lab_spec: any; workflow: Workflow; layout: Layout; sim_result: SimResult; catalog: Record<string, CatalogItem>;
   /** Client-side note on where the timeline came from, shown under the time controls. */
   timeline_note?: string;
+  /** Report Markdown carried by a recorded run, used instead of POST /report. */
+  report_markdown?: string;
 }
 
 /** Mirrors schemas/instrument_optimisation.schema.json (POST /optimise). */
@@ -66,3 +68,23 @@ export interface ProjectSchedule {
 
 /** One project for POST /prioritise: a workflow on the lab's equipment ids, labware units, optional weight and deadline. */
 export interface ProjectRequest { id: string; workflow: Workflow & Record<string, unknown>; units: number; weight?: number; deadline_h?: number }
+
+/** One row of GET /validation (backend/labforge/validation/runner.py run_case). */
+export interface ValidationRow {
+  id: string; name: string; verified: boolean; includes?: string[];
+  status: "compared" | "no_design_yet" | string;
+  reported_usd?: number; predicted?: { p10: number; p50: number; p90: number; n_items?: number };
+  within_p10_p90?: boolean; log10_error?: number;
+}
+
+/** GET /bench/leaderboard (backend/labforge/bench/runner.py leaderboard()). */
+export interface BenchCheck { id: string; kind: string; passed: boolean | null; note?: string }
+export interface Leaderboard {
+  generated_at?: string;
+  tasks: { id: string; trap?: string; domain?: string }[];
+  arms: {
+    arm: string; score: number | null; checks_passed: number; checks_total: number; tasks_answered: number; brier: number | null;
+    claims_supported?: number; claims_refuted?: number; claims_unverifiable?: number; by_trap?: Record<string, number>;
+    tasks: { task_id: string; trap?: string; score: number | null; checks: BenchCheck[]; brier?: number | null; error?: string }[];
+  }[];
+}
