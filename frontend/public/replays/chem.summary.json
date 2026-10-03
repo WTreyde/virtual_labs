@@ -26,7 +26,7 @@
     "claim_status": "refuted",
     "basis": "recorded checked equipment cost; excludes installation, service, consumables and building work"
   },
-  "gate_passed": true,
+  "gate_passed": false,
   "limits": [
     "0 recorded layout violations; physical feasibility is qualified.",
     "Refuted claim: Simulated P50 throughput meets the 768 compounds/day target (verified value 320.0).",
