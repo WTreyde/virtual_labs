@@ -22,4 +22,4 @@ include = ["labforge*"]
 labforge = ["**/*.json"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "labforge/agent"]

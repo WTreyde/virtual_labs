@@ -2,7 +2,7 @@
 
 **Owns:** `backend/labforge/agent/`. **Produces:** `LabSpec`, `Workflow`, `Claim`s, the report. **Calls:** catalog search, layout, simulate, verify.
 
-Already working: `planner.run_turn()` runs a Claude tool-use loop (`claude-opus-5-5`, server-side refusal fallback enabled) with `search_catalog` and `layout_and_simulate`; it returns the worked example when `ANTHROPIC_API_KEY` is unset.
+Already implemented: `planner.run_turn()` runs a Claude Sonnet tool-use loop (`claude-sonnet-5-5`) with `search_catalog` and `layout_and_simulate`, validates proposals and returns errors to the model for repair. It returns the worked example when `ANTHROPIC_API_KEY` is unset. The standalone workbench exposes tool events and preserves conversation history. See [setup and demo instructions](../../backend/labforge/agent/LIVE_RUN.md).
 
 ## Tasks, in order
 1. System prompt and few-shot templates for both pipelines in `docs/pipelines.md`, so the agent emits valid `LabSpec`/`Workflow` JSON (validate with `labforge.contracts.validate`, return errors to Claude as tool errors).
