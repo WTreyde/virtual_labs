@@ -142,3 +142,12 @@ body.page-view #modal .close { display: none; }
 
 /* full-page views sit below the nav */
 body.page-view #app { display: block; overflow-y: auto; }
+
+/* Panel text: the pixel font has no built-in leading, so "normal" line-height makes lines touch. */
+#panel { line-height: 1.6; }
+#panel section > b:first-child { display: block; margin-bottom: 4px; }
+/* Agent log: its own framed, scrolling box that takes the panel's spare height. */
+#chat { flex: 1 1 auto; min-height: 160px; display: flex; flex-direction: column; gap: 6px; }
+#log { flex: 1 1 auto; min-height: 120px; max-height: none; overflow-y: auto; font-size: 8px; line-height: 1.8;
+  padding: 8px 10px; background: #fbfbf5; border: 3px solid #2b2f36; border-radius: 6px; overflow-wrap: anywhere; }
+#log:empty { display: none; }

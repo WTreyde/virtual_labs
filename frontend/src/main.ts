@@ -60,6 +60,12 @@ function show(d: Design) {
   updateWhatIfButton();
 }
 
+/** One log entry per line, scrolled to the newest. */
+function appendLog(line: string) {
+  log.textContent += (log.textContent ? "\n\n" : "") + line;
+  log.scrollTop = log.scrollHeight;
+}
+
 const setChatEnabled = (on: boolean) => {
   for (const el of document.querySelectorAll<HTMLInputElement | HTMLButtonElement>("#chat-input, #chat-form button")) el.disabled = !on;
 };
@@ -129,7 +135,7 @@ async function startReplay(name: string) {
     if (run.output.lab_spec) show(emptyDesign(run.output.lab_spec));
     await playReplay(run, {
       say: (lines, speaker) => live() && dialogue.say(lines, speaker),
-      log: (line) => { if (live()) { log.textContent += `\n${line}`; log.scrollTop = log.scrollHeight; } },
+      log: (line) => { if (live()) appendLog(line); },
       showDesign: (d) => { if (live()) { show({ ...d, whatif_cache: whatif }); dialogue.say(introLines(d)); } },
       showAnswer: (title, html) => live() && showHtml(title, html),
     }, skip);
@@ -150,19 +156,19 @@ $<HTMLFormElement>("#chat-form").addEventListener("submit", async (e) => {
   chatting = true;
   const input = $<HTMLInputElement>("#chat-input"), started = route;
   history.push({ role: "user", content: input.value });
-  log.textContent += `\nYou: ${input.value}`;
+  appendLog(`You: ${input.value}`);
   input.value = "";
   try {
     const out = await chat(history, design);
     if (route !== started) return;
     history = out.history;
-    log.textContent += `\nAgent: ${out.reply}`;
+    appendLog(`Agent: ${out.reply}`);
     show(out.design);
     hideStatCard();
     dialogue.say([out.reply]);
   } catch (error) {
     history.pop(); // the failed request was not committed to the conversation
-    log.textContent += `\n${error instanceof Error ? error.message : "Chat failed"}`;
+    appendLog(error instanceof Error ? error.message : "Chat failed");
   } finally {
     chatting = false;
   }
