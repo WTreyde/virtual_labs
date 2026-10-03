@@ -1,0 +1,88 @@
+{
+  "model": "claude-opus-5-5",
+  "comparisons": [
+    {
+      "variant": "baseline",
+      "stop_reason": "refusal",
+      "system_sha256": "7be707b6b9a4e27577534067c154542d6562d12f8f53a5828767dc8f90f4252a",
+      "note": "Reconstructed prior tool context; original tool call IDs and assistant introductory text were not retained. Current main catalog results used.",
+      "next_tools": [],
+      "input_tokens": 77467,
+      "output_tokens": 4056,
+      "acceptance_run": false
+    },
+    {
+      "variant": "planning_scope",
+      "stop_reason": "tool_use",
+      "system_sha256": "fbfb053e0aef6553544f8aa47c5ab585dbd8b0f0dfbc12d94fe6791fa3dc2976",
+      "note": "Reconstructed prior tool context; original tool call IDs and assistant introductory text were not retained. Current main catalog results used.",
+      "next_tools": [
+        "search_catalog",
+        "search_catalog",
+        "search_catalog",
+        "search_catalog",
+        "search_catalog"
+      ],
+      "input_tokens": 74378,
+      "output_tokens": 452,
+      "acceptance_run": false
+    },
+    {
+      "variant": "abstract_equipment",
+      "stop_reason": "tool_use",
+      "system_sha256": "07c06956e44ed20fd4e2774714a083f7a7100d52d0807ca99b4605202467e0db",
+      "tool_context_sha256": "a0e408808dc9a8efe1146cf930e1917e7bfa35b20354e6b98ad3f3349a96e5ce",
+      "note": "Reconstructed tool-use context from failed scoped-prompt run; tool IDs/assistant introductory text not retained. Both variants use identical system/tools/results. Only the user brief differs.",
+      "next_tools": [
+        "layout_and_simulate"
+      ],
+      "input_tokens": 75381,
+      "output_tokens": 14588,
+      "acceptance_run": false
+    },
+    {
+      "variant": "named_reactions",
+      "stop_reason": "tool_use",
+      "system_sha256": "07c06956e44ed20fd4e2774714a083f7a7100d52d0807ca99b4605202467e0db",
+      "tool_context_sha256": "a0e408808dc9a8efe1146cf930e1917e7bfa35b20354e6b98ad3f3349a96e5ce",
+      "note": "Reconstructed tool-use context from failed scoped-prompt run; tool IDs/assistant introductory text not retained. Both variants use identical system/tools/results. Only the user brief differs.",
+      "next_tools": [
+        "layout_and_simulate"
+      ],
+      "input_tokens": 75362,
+      "output_tokens": 11923,
+      "acceptance_run": false
+    }
+  ],
+  "conclusion": "Refusal occurs during workflow generation after catalog/evidence returns. Narrowing system templates alone did not eliminate refusal in a full named-reaction run; an abstract equipment-demand brief produced a checked design/report. In a subsequent paired brief comparison both wordings proposed workflows. No deterministic word or individual tool-result trigger is established; provider refusal rationale is not exposed. Diagnostic proposals were not executed and do not count as passing gates.",
+  "full_run_observations": [
+    {
+      "prompt": "original protocol templates",
+      "brief": "named reactions/building blocks",
+      "stop_reason": "refusal",
+      "workflow_emitted": false
+    },
+    {
+      "prompt": "equipment-demand templates",
+      "brief": "named reactions/building blocks",
+      "stop_reason": "refusal",
+      "workflow_emitted": false
+    },
+    {
+      "prompt": "equipment-demand templates",
+      "brief": "abstract two-stage equipment demand, implicit stock preparation",
+      "stop_reason": "end_turn",
+      "workflow_emitted": true,
+      "gate_passed": false,
+      "missing_stage": "powder dosing stock preparation"
+    },
+    {
+      "prompt": "equipment-demand templates",
+      "brief": "abstract two-stage equipment demand, explicit powder dosing",
+      "stop_reason": "end_turn",
+      "workflow_emitted": true,
+      "gate_passed": true,
+      "record": "chemistry.json"
+    }
+  ]
+}

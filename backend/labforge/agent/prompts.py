@@ -95,7 +95,7 @@ Do not use it for batch_size or fan_out other than 1, or claim measured/calibrat
 # Keep protocol narratives out of the resource planner's context. docs/pipelines.md remains
 # the human reference; these abstract stages preserve its equipment and flow requirements.
 PLANNING_PIPELINES = """
-Chemistry: stock preparation; reaction stage 1; workup/filtration; reaction stage 2;
+Chemistry: powder_dosing stock preparation then liquid_handling; reaction stage 1; workup/filtration; reaction stage 2;
 purification; evaporation; LC-MS QC; reformat/compound storage; assay preparation;
 incubation; fluorescence readout; analysis. Retain both reaction stages and explicit
 8 x 12 x 8 = 768-product plate arithmetic. These labels define equipment demand only.

@@ -281,3 +281,19 @@ The demo runner supports `--scenario chemistry` or `--scenario xchem`, writes ev
 arrive, and records the API stop reason. Gate success means complete orchestration and
 checked model claims, not that the target, budget or physical layout are feasible. Inspect
 refuted claims and layout violations separately. Missing evidence remains an explicit estimate.
+
+## Repaired demo replay (3 Oct)
+
+`demo/scenarios_20261003_repaired/` contains successful live chemistry and XChem orchestration
+gates, checked reports and animation timelines. Chemistry’s brief is an abstract equipment-demand
+request, with both reaction stages and powder dosing explicit; the system uses planning templates
+rather than detailed protocol narratives. Refusals remain terminal, clear incomplete results.
+Controlled comparisons do not establish a deterministic word-level refusal trigger.
+
+Puck loading is operator-attended handling (`manual_bench` or `cryo_cooling`), while the dry
+shipper remains a storage/transit container with external shipping/queue assumptions. XChem’s
+gate rejects storage-as-loading and independent P50 gaps above 20%. The recorded planning
+P50 362.7 and independent 376 crystals/day differ by 3.5%, with no catalog duration restoration.
+Both recordings retain refuted feasibility claims and layout issues; passing gates means
+complete orchestration, not a procurement-ready design. See the recordings’ README for Roshan’s
+replay-copy command, metrics, diagnostic limits and owning-strand follow-ups.
