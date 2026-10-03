@@ -23,6 +23,9 @@ export interface RecordedRun {
   catalog?: Record<string, CatalogItem>;
 }
 
+/** One agent event, as recorded in a run's `events` or streamed live by POST /chat/stream. */
+export type AgentEvent = { type: string; name?: string; input?: Record<string, unknown>; step?: number; text?: string; error?: string; message?: string; output?: any };
+
 export interface ReplayHooks {
   say: (lines: string[], speaker?: string) => void;
   log: (line: string) => void;
@@ -89,7 +92,7 @@ export function emptyDesign(lab_spec?: any): Design {
 const humanise = (s: unknown) => String(s).replace(/_/g, " ");
 
 /** One line per recorded event, in the agent's voice. */
-function describe(e: NonNullable<RecordedRun["events"]>[number]): string | undefined {
+export function describe(e: AgentEvent): string | undefined {
   const i = e.input ?? {};
   switch (e.type) {
     case "model_call": return `Thinking (step ${e.step ?? "?"})…`;

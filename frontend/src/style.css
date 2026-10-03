@@ -169,3 +169,6 @@ body.page-view #app { display: block; overflow-y: auto; }
 #fix .fix-show { margin-top: 8px; width: 100%; font-size: 8px; }
 .card.own.disabled { background: #e7e5dc; } .card.own.disabled .card-kicker { color: #a3271a; }
 #report-row { display: flex; gap: 6px; } #report-row button { flex: 1; } #skill-btn { font-size: 9px; }
+
+#agent-banner { position: absolute; top: 56px; left: 50%; transform: translateX(-50%); z-index: 16; max-width: min(720px, calc(100% - 340px));
+  padding: 10px 14px; background: #fde4df; color: #7a1d12; border: 3px solid #a3271a; border-radius: 8px; font: 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; box-shadow: 0 4px 0 #0005; }

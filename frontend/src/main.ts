@@ -1,6 +1,6 @@
 import "@fontsource/press-start-2p";
 import Phaser from "phaser";
-import { chat, exampleDesign, LIVE_CHAT_MESSAGE, leaderboard, liveCatalog, liveChat, optimise, prioritise, setOffline, validation } from "./api";
+import { chatStream, exampleDesign, health, LIVE_CHAT_MESSAGE, leaderboard, liveCatalog, optimise, prioritise, setOffline, validation } from "./api";
 import demoQueue from "../../backend/labforge/catalog/data/demo_prioritise_queue.json";
 import cachedDemoSchedule from "./fixtures/demo_schedule.json";
 import { galleryDesign } from "./fixtures/gallery";
@@ -9,7 +9,7 @@ import { renderLanding, summaryBox } from "./landing";
 import { LabScene } from "./LabScene";
 import { renderPanel } from "./panel";
 import { openReport } from "./report";
-import { emptyDesign, loadReplay, loadSummary, loadWhatIfCache, playReplay } from "./replay";
+import { describe, emptyDesign, loadReplay, loadSummary, loadWhatIfCache, playReplay } from "./replay";
 import { migrateLegacyLinks, parseRoute, routeKey, type Route } from "./router";
 import { clock } from "./timeline";
 import type { ChatMessage, Design, ProjectRequest, ProjectSchedule } from "./types";
@@ -84,6 +84,7 @@ async function go(r: Route) {
   $("#checked").classList.add("hidden");
   $("#fix").classList.add("hidden");
   $("#skill-btn").classList.add("hidden");
+  $("#agent-banner").classList.add("hidden");
   log.textContent = "";
   history = [];
   chatting = false;
@@ -106,12 +107,19 @@ async function go(r: Route) {
       // With the backend up, use its catalog so BOM prices match /report; offline, keep examples/catalog.json.
       liveCatalog(d).then((catalog) => { if (route === r) show({ ...design, catalog }); }).catch(() => {});
       // Public demo (live_chat: false) or no backend: say so instead of offering a chat box that errors.
-      liveChat().then((state) => {
-        if (route !== r || state === "on") return;
-        setChatEnabled(false);
-        $<HTMLInputElement>("#chat-input").placeholder = state === "off" ? "Live design is off in this demo" : "Backend not reachable";
-        appendLog(LIVE_CHAT_MESSAGE[state]);
-        dialogue.say([LIVE_CHAT_MESSAGE[state], ...introLines(d)]);
+      health().then(({ state, liveAgent, note }) => {
+        if (route !== r) return;
+        if (state !== "on") {
+          setChatEnabled(false);
+          $<HTMLInputElement>("#chat-input").placeholder = state === "off" ? "Live design is off in this demo" : "Backend not reachable";
+          appendLog(LIVE_CHAT_MESSAGE[state]);
+          dialogue.say([LIVE_CHAT_MESSAGE[state], ...introLines(d)]);
+        } else if (!liveAgent) {
+          // Chat still answers, but with the offline worked example: say so plainly instead of pretending.
+          const banner = $("#agent-banner");
+          banner.textContent = note ?? "Live agent off: the backend has no API key, so replies use the offline worked example.";
+          banner.classList.remove("hidden");
+        }
       });
       if (r.whatif) openWhatIf(r.whatif);
       return;
@@ -193,7 +201,20 @@ $<HTMLFormElement>("#chat-form").addEventListener("submit", async (e) => {
   appendLog(`You: ${input.value}`);
   input.value = "";
   try {
-    const out = await chat(history, design);
+    // Stream the agent's steps into the log and dialogue box as they happen.
+    let writing = false;
+    const out = await chatStream(history, design, (ev) => {
+      if (route !== started) return;
+      if (ev.type === "text_delta") {
+        if (!writing) { writing = true; dialogue.say(["Writing the answer…"]); }
+        return;
+      }
+      const line = describe(ev);
+      if (!line) return;
+      appendLog(`Agent: ${line}`);
+      dialogue.say([line]);
+      writing = false;
+    });
     if (route !== started) return;
     history = out.history;
     appendLog(`Agent: ${out.reply}`);
