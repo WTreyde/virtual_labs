@@ -3,22 +3,23 @@
   "name": "RoboChem (original platform, Noël group, Science 2024)",
   "domain": "chemistry",
   "sources": [
-    "https://doi.org/10.1038/s44160-026-01053-0",
     "https://doi.org/10.1126/science.adj1817",
-    "https://phys.org/news/2026-04-robotic-chemistry-built-deployed-lab.html"
+    "https://www.nature.com/articles/s44160-026-01053-0",
+    "https://hims.uva.nl/content/news/2026/04/robochem-flex-democratisation-of-the-autonomous-synthesis-robot.html",
+    "https://phys.org/news/2024-01-autonomous-synthesis-robot-ai-chemical.html"
   ],
-  "brief": "A closed-loop flow photochemistry optimisation platform with a robotic sampler, pumps, a photoreactor and an inline benchtop NMR, used to optimise and scale up photocatalytic reactions.",
+  "brief": "A closed-loop flow photochemistry optimisation platform: a robotic needle sampler picks reagents and mixes them in sub-millilitre slugs, syringe pumps push them through tubing to a high-power LED photoreactor, and an inline benchtop NMR spectrometer measures yield and selectivity. A machine-learning optimiser chooses the next experiments; the platform runs around the clock and is used to optimise and scale up photocatalytic reactions.",
   "reported": {
     "cost": {
       "value_usd": 50000,
-      "original": "approximately US$50,000 for essential components alone, not including the benchtop NMR spectrometer (stated retrospectively in Pilon et al. 2026)",
+      "original": "approximately US$50,000 for essential components alone, not including the benchtop NMR spectrometer (Pilon et al. 2026); \"over 50.000 dollar, not even including the very expensive NMR equipment\" (Noel, UvA press release 2026)",
+      "year": 2024,
       "includes": [
         "robots"
       ],
-      "excludes_note": "Excludes the benchtop NMR (the most expensive component); 'essential components alone'; labour and integration not stated.",
-      "year": 2024
+      "excludes_note": "Excludes the benchtop NMR (the most expensive component). 'Essential components alone'; labour, integration and software development not stated. 'Over' / 'approximately' so a lower bound; no upper bound given."
     }
   },
-  "verified": false,
-  "notes": "The ~US$50,000 figure is confirmed in the 2026 Nat. Synth. paper (\"cost approximately US$50,000 for essential components alone, not including ... a benchtop NMR\"), but the platform paper (Slattery et al., Science 2024) has not been read, so the case stays unverified. The earlier GBP 36,900 conversion could not be confirmed and was removed. Not like-for-like with RoboChem-Flex: that build also drops inline analytics."
+  "verified": true,
+  "notes": "Verified 3 Oct 2026. Primary statement is by the platform's own authors in Pilon et al., Nat. Synth. 2026 (doi 10.1038/s44160-026-01053-0), read via nature.com HTML: \"The first 'RoboChem' platform developed by our group cost approximately US$50,000 for essential components alone, not including the most expensive component, a benchtop nuclear magnetic resonance (NMR) spectrometer\". Same figure in UvA press release (hims.uva.nl, Apr 2026), quoting Noel: \"the system cost us over 50.000 dollar, not even including the very expensive NMR equipment\". CAVEAT: the original Science 2024 paper (403 paywall) and its SI could not be opened, so the figure is NOT confirmed in the platform paper itself and the hardware list comes from the UvA press release (phys.org 25 Jan 2024), not the SI. Not like-for-like with RoboChem-Flex (that drops inline analytics). Earlier GBP 36,900 conversion remains unconfirmed and is not used."
 }

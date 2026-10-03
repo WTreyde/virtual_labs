@@ -1,0 +1,51 @@
+{
+  "id": "dna_bot_opentrons_2020",
+  "name": "DNA-BOT: low-cost automated DNA assembly on an Opentrons OT-2 (Imperial/Freemont, 2020)",
+  "domain": "biology",
+  "sources": [
+    "https://doi.org/10.1093/synbio/ysaa010",
+    "https://pmc.ncbi.nlm.nih.gov/articles/PMC7476404/"
+  ],
+  "brief": "An automated DNA assembly platform for synthetic biology: one benchtop open-source liquid-handling robot with magnetic-bead and temperature modules, plus an external thermocycler, assembles up to 96 genetic constructs per run, purifies them and transforms bacteria by heat shock, ready for colony picking.",
+  "reported": {
+    "cost": {
+      "value_usd": 8000,
+      "original": "around $8k for the OT-2 including all required modules and pipettes (2020)",
+      "year": 2020,
+      "includes": [
+        "instruments",
+        "robots"
+      ],
+      "excludes_note": "OT-2 with modules and pipettes only. The thermocycler, incubators, plates and consumables are excluded (consumables quoted separately at $1.50-$5.50 per construct)."
+    },
+    "throughput": {
+      "value": 96,
+      "confidence": "literature"
+    },
+    "throughput_unit": "constructs per run"
+  },
+  "verified": true,
+  "notes": "Single-instrument price check: the reported figure is one OT-2 with pipettes/modules, so this tests the catalog price band, not whole-lab design. includes covers 'instruments' because the catalog files liquid handlers there. Verified 3 Oct 2026 via Europe PMC full text of Storch et al., ACS Synth. Biol./Synth. Biol. 2020: \"At the time of writing, the OT-2 including all required modules and pipettes costs around $8k.\" Also \"consumables cost per construct was as low as $1.50 or $5.50\". Automated run: 1578 pipetting steps, 38 magnetic bead purifications, 96 heat-shock transformations. Throughput value is runs of up to 96 constructs (per run, not per day). Cost is a robot price, not a lab build.",
+  "workflow": {
+    "id": "dna_bot_opentrons_2020_wf",
+    "lab_spec_id": "dna_bot_opentrons_2020",
+    "equipment": [
+      {
+        "instance_id": "lh_1",
+        "catalog_id": "opentrons_ot2",
+        "rationale": "The single OT-2 the paper prices."
+      }
+    ],
+    "steps": [
+      {
+        "id": "run",
+        "name": "Automated protocol on the OT-2",
+        "capability": "liquid_handling",
+        "candidate_instances": [
+          "lh_1"
+        ],
+        "duration_s": 3600
+      }
+    ]
+  }
+}
