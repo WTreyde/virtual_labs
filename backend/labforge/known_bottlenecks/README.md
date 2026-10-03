@@ -8,10 +8,13 @@ Run `cd backend && python -m labforge.known_bottlenecks.run` (local catalog, no 
 | Liverpool mobile robotic chemist ([Burger et al., Nature 2020](https://www.nature.com/articles/s41586-020-2442-2)) | GC analysis ("The slowest step in the workflow is the GC analysis") | GC, 94% busy (photolysis next at 46%) | 5.8 vs 5.4 batches/day (+8%) |
 | XChem harvesting, manual ~8 crystals/h ([Wright et al., Acta D 2021](https://pmc.ncbi.nlm.nih.gov/articles/PMC7787106/)) | crystal harvesting | harvest bench, 93% busy | 58 vs 64 crystals per 8 h (−9%) |
 | XChem harvesting with Shifter ~103 crystals/h (same paper) | crystal harvesting | harvest bench, 98% busy | 730 vs 824 crystals per 8 h (−11%) |
+| OT-2 pendant-drop surface tension module ([npj Comput Mater 2025](https://www.nature.com/articles/s41524-025-01842-9), open [data and code](https://doi.org/10.5281/zenodo.17232763)) | surfactant equilibration, not the robot ("These equilibration times place limitations on the throughput rate of the platform") | OT-2 100% busy (one instrument); most sensitive input: explore-phase equilibration time | P10–P50–P90 8.9–11.0–17.5 vs 6–16 surfactants/day (paper's 90 min to 4 h each); ranges overlap |
 
 Figures are from the simulator on `main` at 8ed4eae. On Maxim's rewrite (PR #1) all three still match, with errors of +15%, −9% and −9%.
 
 What-if on Burger: halving GC time roughly doubles throughput (5.5 → 11.5 batches/day) and GC stays the limit; a second GC gives 11, a third 14, where photolysis starts to bind.
+
+What-if on the OT-2 case (same seeds): halving the equilibration waits gives 11.0 → 16.0 surfactants/day (+45%); a robot twice as fast at dilution and drop handling gives 14.2 (+29%). The size of the second number rests entirely on our placeholder handling times, so the defensible claim is only the ranking: waiting for interfaces to equilibrate limits this platform more than robot speed.
 
 ## Honest caveats
 - In these serial, one-unit-per-station lines the bottleneck is the longest step, so identity is close to guaranteed. They show the plumbing is right, not that the simulator finds non-obvious bottlenecks.
@@ -26,6 +29,8 @@ What-if on Burger: halving GC time roughly doubles throughput (5.5 → 11.5 batc
   | charging 32%, 8 h cycle | 5.8–6.0–6.0 | no |
   | charging 32%, 12 h cycle (~3.8 h charges) | 5.0–5.9–6.0 | yes |
   | random outages, MTBF 2.1 h / MTTR 1 h (32% down) | 5.2–5.6–6.0 | yes |
+
+- OT-2 case: the paper reports a time per surfactant (90 min to 4 h, Table 1, which we could not read row by row), not a daily output, so "observed" is that range run back to back. Dilution time, per-drop handling time, the 6 min typical wait and 3 exploit points are placeholders; whether Table 1's times include the triplicate is unclear. With one instrument, "busiest unit" is trivially the OT-2, so this case checks the bottleneck at step level instead: the input whose uncertainty moves throughput most must be an equilibration step.
 
 ## Missing for a stronger test
 - A sourced charging pattern for the Liverpool robot (the downtime model exists; the input does not). Operator shifts are modelled but unused in these cases.
