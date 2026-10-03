@@ -1,11 +1,15 @@
 // Hand-written mirrors of /schemas, covering only the fields the client reads.
 // TODO(Roshan): generate from the JSON schemas (e.g. json-schema-to-typescript) once they settle.
 export type Vec3 = { x: number; y: number; z: number };
+export type Confidence = "datasheet" | "literature" | "estimated" | "placeholder";
+export interface UncertainNumber { value: number; low?: number; high?: number; confidence?: Confidence; source?: string }
 export interface CatalogItem {
   id: string; vendor: string; model: string; category: string; capabilities: string[];
   footprint: { width_m: number; depth_m: number; height_m: number; mount?: string };
   price_usd_estimate?: number; data_confidence?: string; visual?: { color?: string };
-  transport?: { kind?: "arm" | "rail" | "mobile" | "human" };
+  transport?: { kind?: "arm" | "rail" | "mobile" | "human"; speed_m_s?: number; reach_m?: number; pick_place_s?: number };
+  process?: { capacity?: number; durations_s?: Record<string, number>; setup_s?: number };
+  integration?: string[]; lead_time_weeks?: number; provenance?: Record<string, UncertainNumber>;
 }
 export interface Workflow { id: string; equipment: { instance_id: string; catalog_id: string; rationale?: string }[] }
 export interface Layout {
@@ -18,7 +22,7 @@ export interface Layout {
 }
 export interface SimResult {
   throughput: { value: number; unit: string; target?: number; p10?: number; p50?: number; p90?: number; prob_meets_target?: number };
-  utilisation: { instance_id: string; busy_fraction: number }[];
+  utilisation: { instance_id: string; busy_fraction: number; mean_queue_wait_s?: number }[];
   bottlenecks: { kind: string; severity: string; message: string; instances?: string[]; suggestion?: string }[];
 }
 export interface Design { lab_spec: any; workflow: Workflow; layout: Layout; sim_result: SimResult; catalog: Record<string, CatalogItem> }

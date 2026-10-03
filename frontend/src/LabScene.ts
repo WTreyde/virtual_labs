@@ -7,10 +7,12 @@ import type { Design } from "./types";
  * Strand A: the isometric lab. Owner: Roshan.
  * Draws the room, zones and instruments as procedural pixel-art sprites sized from catalog footprints,
  * transfer paths with moving plates, operators and bottleneck speech bubbles.
- * TODO(Roshan): animate from SimResult.timeline, stat card on click, Pokemon-style UI frame.
+ * Clicks emit a `select` game event that main.ts turns into the stat card.
+ * TODO(Roshan): animate from SimResult.timeline.
  */
 export class LabScene extends Phaser.Scene {
   private design!: Design;
+  private sprites: Record<string, Phaser.GameObjects.Image> = {};
   private movers: { plate: Phaser.GameObjects.Image; pts: { x: number; y: number }[]; t: number; speed: number }[] = [];
 
   constructor() { super("lab"); }
@@ -18,17 +20,22 @@ export class LabScene extends Phaser.Scene {
   init(data: { design: Design }) {
     this.design = data.design;
     this.movers = [];
+    this.sprites = {};
   }
 
   create() {
     const { layout } = this.design;
-    fitRoom(layout.room.width_m, layout.room.depth_m, this.scale.width, this.scale.height);
+    // Keep the room clear of the dialogue box along the bottom.
+    fitRoom(layout.room.width_m, layout.room.depth_m, this.scale.width, this.scale.height - 120);
     for (const k of this.textures.getTextureKeys()) if (k.startsWith("lf:")) this.textures.remove(k);
     this.drawRoom();
     this.drawEquipment();
     this.drawTransfers();
     this.drawOperators();
     this.drawBottlenecks();
+    const pre = new URLSearchParams(location.search).get("select"); // e.g. ?select=lh_1, for screenshots
+    if (pre && this.sprites[pre]) this.select(pre, this.sprites[pre]);
+    this.input.on("pointerdown", (_: unknown, hits: unknown[]) => { if (!hits.length) this.game.events.emit("select", null); });
     this.scale.once("resize", () => this.scene.restart({ design: this.design }));
   }
 
@@ -39,6 +46,12 @@ export class LabScene extends Phaser.Scene {
       const a = m.pts[i], b = m.pts[Math.min(i + 1, m.pts.length - 1)];
       m.plate.setPosition(a.x + (b.x - a.x) * f, a.y + (b.y - a.y) * f);
     }
+  }
+
+  /** Tell the HTML overlay which instance was clicked, with its sprite for the stat card. */
+  private select(id: string, img: Phaser.GameObjects.Image) {
+    const src = this.textures.get(img.texture.key).getSourceImage() as HTMLCanvasElement;
+    this.game.events.emit("select", { id, sprite: src.toDataURL() });
   }
 
   /** Place a baked texture so its local origin lands on floor point (x, y). Depth sorts by x + y. */
@@ -70,10 +83,12 @@ export class LabScene extends Phaser.Scene {
       const colour = item.visual?.color ? parseInt(item.visual.color.replace("#", ""), 16) : undefined;
       const vox = model(spriteKind(item), w, d, h, p.position.z * Z_SQUASH, colour);
       const img = this.place(bakeVoxels(this, `lf:${p.instance_id}`, vox, p.rotation_deg, { w, d }), p.position.x, p.position.y);
+      this.sprites[p.instance_id] = img;
       const lbl = this.label(img, item.model).setVisible(false);
       img.setInteractive({ pixelPerfect: true, useHandCursor: true })
         .on("pointerover", () => { lbl.setVisible(true); img.setTint(0xfff3c4); })
-        .on("pointerout", () => { lbl.setVisible(false); img.clearTint(); });
+        .on("pointerout", () => { lbl.setVisible(false); img.clearTint(); })
+        .on("pointerdown", () => this.select(p.instance_id, img));
     }
   }
 
@@ -95,7 +110,9 @@ export class LabScene extends Phaser.Scene {
     for (const op of this.design.layout.operators ?? []) {
       const img = this.place(bakeVoxels(this, `lf:op:${op.id}`, model("operator", 0.4, 0.25, 1.7, 0), 0, { w: 0.4, d: 0.25 }), op.home.x, op.home.y);
       this.tweens.add({ targets: img, y: img.y - PIX, yoyo: true, repeat: -1, duration: 500 + Math.random() * 300, ease: "Stepped" });
+      this.sprites[op.id] = img;
       this.label(img, op.role).setAlpha(0.85);
+      img.setInteractive({ pixelPerfect: true, useHandCursor: true }).on("pointerdown", () => this.select(op.id, img));
     }
   }
 
@@ -108,10 +125,16 @@ export class LabScene extends Phaser.Scene {
       const aura = this.add.ellipse(f.x, f.y, TILE * 1.6, TILE * 0.8, 0xe0503c, 0.35).setDepth(pos.x + pos.y - 0.01);
       this.tweens.add({ targets: aura, alpha: 0.08, yoyo: true, repeat: -1, duration: 700 });
       const s = iso(pos.x, pos.y, 1.4);
-      this.add.text(s.x, s.y, b.message, {
-        fontFamily: '"Press Start 2P", monospace', fontSize: "8px", lineSpacing: 4, color: "#111", backgroundColor: "#ffffff",
-        padding: { x: 6, y: 6 }, wordWrap: { width: 200 },
-      }).setOrigin(0.5, 1).setDepth(1000);
+      const txt = this.add.text(s.x, s.y - 14, b.message, {
+        fontFamily: '"Press Start 2P", monospace', fontSize: "8px", lineSpacing: 5, color: "#222", wordWrap: { width: 210 },
+      }).setOrigin(0.5, 1).setDepth(1001);
+      // Speech bubble in the same frame style as the HTML dialogue box, tail pointing at the instrument.
+      const r = txt.getBounds(), pad = 9, g = this.add.graphics().setDepth(1000);
+      g.fillStyle(0x2b2f36).fillRoundedRect(r.x - pad - 3, r.y - pad - 3, r.width + 2 * pad + 6, r.height + 2 * pad + 6, 8);
+      g.fillTriangle(s.x - 10, r.bottom + pad, s.x + 10, r.bottom + pad, s.x, r.bottom + pad + 14);
+      g.fillStyle(0xfbfbf5).fillRoundedRect(r.x - pad, r.y - pad, r.width + 2 * pad, r.height + 2 * pad, 6);
+      g.fillTriangle(s.x - 6, r.bottom + pad - 1, s.x + 6, r.bottom + pad - 1, s.x, r.bottom + pad + 9);
+      this.tweens.add({ targets: [txt, g], y: "-=3", yoyo: true, repeat: -1, duration: 600, ease: "Stepped" });
     }
   }
 }

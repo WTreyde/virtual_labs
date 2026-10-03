@@ -5,6 +5,7 @@ import { galleryDesign } from "./fixtures/gallery";
 import { LabScene } from "./LabScene";
 import { renderPanel } from "./panel";
 import type { Design } from "./types";
+import { dialogue, hideStatCard, introLines, showStatCard } from "./ui";
 
 // `?demo=gallery` shows every sprite kind; the default is the worked example from examples/.
 let design: Design = new URLSearchParams(location.search).get("demo") === "gallery" ? galleryDesign : exampleDesign();
@@ -21,6 +22,8 @@ const game = new Phaser.Game({
 // Wait for the pixel font so Phaser text doesn't bake in the fallback face.
 document.fonts.load('8px "Press Start 2P"').finally(() => game.scene.add("lab", LabScene, true, { design }));
 renderPanel(design);
+dialogue.say(introLines(design));
+game.events.on("select", (sel: { id: string; sprite?: string } | null) => (sel ? showStatCard(design, sel.id, sel.sprite) : hideStatCard()));
 
 function show(d: Design) {
   design = d;
@@ -40,6 +43,8 @@ document.querySelector<HTMLFormElement>("#chat-form")!.addEventListener("submit"
     history.push({ role: "assistant", content: out.reply });
     log.textContent += `\nAgent: ${out.reply}`;
     show(out.design);
+    hideStatCard();
+    dialogue.say([out.reply]);
   } catch {
     log.textContent += "\n(backend not reachable: start it with `make backend`)";
   }
