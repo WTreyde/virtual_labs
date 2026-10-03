@@ -156,3 +156,23 @@ def test_window_extends_until_enough_labware_finishes():
     out = run(spec("compounds_per_day", 768), w, layout(), hours=24)
     assert out["simulated_hours"] >= 20 * 8
     assert out["throughput"]["p50"] == pytest.approx(3 * 384, rel=0.05)
+
+
+def test_sensitivity_ranks_the_bottleneck_first_and_skips_idle_steps():
+    from labforge.contracts import load_example
+    from labforge.layout.placer import generate_layout
+    s, w = load_example("lab_spec"), load_example("workflow")
+    out = simulate(s, w, generate_layout(s, w), hours=48, replicates=6)
+    assert errors(out, "sim_result") == []
+    top = out["sensitivity"][0]
+    assert top["parameter"] == "dispense.duration_s" and top["effect"] < -5  # slower liquid handling, fewer plates
+    assert "seal.duration_s" not in {e["parameter"] for e in out["sensitivity"]}  # sealer idles: not worth measuring
+
+
+def test_parallel_backends_match_serial():
+    w = wf([step("load", ["src_1"], 0), step("work", ["lh_1"], 3600, ["load"], exact=False)], {**SOURCE, "lh_1": "opentrons_flex"})
+    serial = simulate(spec(), w, layout(), hours=24, replicates=30, backend="serial")
+    pooled = simulate(spec(), w, layout(), hours=24, replicates=30, backend="process")
+    remote = simulate(spec(), w, layout(), hours=24, replicates=30, backend="modal")  # no token in CI: falls back locally
+    assert serial["throughput"] == pooled["throughput"] == remote["throughput"]
+    assert serial["sensitivity"] == pooled["sensitivity"]

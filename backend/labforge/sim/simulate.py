@@ -24,7 +24,8 @@ Uncertainty: each Monte Carlo replicate draws one "true" mean duration per step 
 capability, else a band set by the confidence level. Throughput is the steady-state rate,
 measured after a warm-up that covers the pipeline's fill time.
 
-TODO(Maxim): sensitivity analysis, run replicates in parallel on Modal.
+Sensitivity: the busiest wide-range inputs are pinned low and high (same seeds); see sensitivity_analysis.
+Parallel runs: sim/parallel.py (local processes or Modal).
 """
 import math
 import random
@@ -36,6 +37,7 @@ import simpy
 
 from labforge.catalog.store import load_catalog
 from labforge.contracts import validate
+from labforge.sim.parallel import map_replicates
 
 # Range multipliers (low, high) around a stated duration when no explicit range is given.
 BANDS = {"datasheet": (0.95, 1.10), "literature": (0.85, 1.25), "estimated": (0.8, 1.4), "placeholder": (0.5, 2.0)}
@@ -49,6 +51,9 @@ TIMELINE_LIMIT = 500
 MIN_SINK_LABWARE = 20  # extend the measurement window until this many units finish...
 MAX_WINDOW_H = 60 * 24  # ...but never beyond 60 days
 UNBOUNDED = 10_000
+SENSITIVITY_TOP = 6  # inputs swung per sensitivity analysis
+SENSITIVITY_REPS = 6  # replicates per swing end
+SENSITIVITY_MIN_SCORE = 0.03  # skip inputs that are narrow or sit on idle resources
 
 
 def topo_order(steps: list[dict]) -> list[dict]:
@@ -516,12 +521,69 @@ def run_replicate(spec: dict, workflow: dict, layout: dict, hours: float, seed: 
     return out
 
 
-def simulate(spec: dict, workflow: dict, layout: dict, hours: float = 72, replicates: int = 20, seed: int = 0) -> dict:
-    """Monte Carlo over duration uncertainty. `hours` is the minimum measurement window after warm-up."""
+def simulate(spec: dict, workflow: dict, layout: dict, hours: float = 72, replicates: int = 20, seed: int = 0,
+             sensitivity: bool = True, backend: str | None = None) -> dict:
+    """Monte Carlo over duration uncertainty. `hours` is the minimum measurement window after warm-up.
+
+    `backend` picks where replicates run: "serial", "process" (local cores) or "modal"; default from
+    LABFORGE_SIM_BACKEND, else serial. Sensitivity re-runs the top uncertain inputs pinned low and high."""
     rng = random.Random(seed)
     seeds = [rng.randrange(2**31) for _ in range(replicates)]
-    runs = [run_replicate(spec, workflow, layout, hours, s, record=(k == 0)) for k, s in enumerate(seeds)]
-    return summarise(spec, workflow, layout, hours, runs)
+    base = dict(spec=spec, workflow=workflow, layout=layout, hours=hours)
+    runs = map_replicates([dict(base, seed=s, record=(k == 0)) for k, s in enumerate(seeds)], backend)
+    result = summarise(spec, workflow, layout, hours, runs)
+    if sensitivity:
+        result["sensitivity"] = sensitivity_analysis(base, seeds, runs, backend)
+    return result
+
+
+def sensitivity_candidates(workflow: dict, layout: dict, util: dict[str, float]) -> list[tuple[str, str, float]]:
+    """(parameter, pin key, screening score) for inputs that could move throughput: wide ranges on busy resources."""
+    catalog = load_catalog()
+    items = {e["instance_id"]: catalog.get(e["catalog_id"]) for e in workflow["equipment"]}
+    ops_util = [u for i, u in util.items() if i in {o["id"] for o in layout.get("operators", [])}]
+    out = []
+    for s in workflow["steps"]:
+        mode = step_mode(s)
+        item = items.get(s["candidate_instances"][0]) if s["candidate_instances"] else None
+        low, mid, high = duration_range(s, item)
+        if mid <= 0 or high - low <= 0.02 * mid:
+            continue
+        if s["candidate_instances"]:
+            busy = max(util.get(c, 0.0) for c in s["candidate_instances"])
+            if mode in ("manual", "semi_automated"):
+                busy = max([busy] + ops_util)
+        elif mode == "manual":
+            busy = max(ops_util, default=0.0)
+        elif mode == "external" and (s.get("params") or {}).get("max_concurrent"):
+            busy = 1.0
+        else:
+            continue  # pure delays (in silico, unlimited external) add latency, not a throughput limit
+        out.append((f"{s['id']}.duration_s", s["id"], busy * (high - low) / mid))
+        q = _uncertain((s.get("params") or {}).get("queue_time_s"))
+        if mode == "external" and (s.get("params") or {}).get("max_concurrent") and q[2] > q[0]:
+            out.append((f"{s['id']}.queue_time_s", f"{s['id']}.queue", (q[2] - q[0]) / max(q[1] + mid, 1)))
+    operators = {o["id"] for o in layout.get("operators", [])}
+    if any(t["transporter_instance"] in operators for t in layout.get("transfers", [])):
+        busy = max(ops_util, default=0.0)
+        out.append(("operator_walking_time", "operator_walking", busy * (HUMAN_WALK_BAND[1] - HUMAN_WALK_BAND[0])))
+    return sorted((c for c in out if c[2] >= SENSITIVITY_MIN_SCORE), key=lambda c: -c[2])[:SENSITIVITY_TOP]
+
+
+def sensitivity_analysis(base: dict, seeds: list[int], runs: list[dict], backend: str | None) -> list[dict]:
+    """One-at-a-time swings with common random numbers: p50 with the input at its high end minus at its low end."""
+    util = {i: statistics.mean(r["util"][i] for r in runs) for i in runs[0]["util"]}
+    cands = sensitivity_candidates(base["workflow"], base["layout"], util)
+    seeds = seeds[:SENSITIVITY_REPS]
+    jobs = [dict(base, seed=s, pins={pin: end}) for _, pin, _ in cands for end in ("low", "high") for s in seeds]
+    results = map_replicates(jobs, backend)
+    out, n = [], len(seeds)
+    for k, (param, _, _) in enumerate(cands):
+        lo = results[2 * k * n:(2 * k + 1) * n]
+        hi = results[(2 * k + 1) * n:(2 * k + 2) * n]
+        effect = statistics.median(r["per_day"] for r in hi) - statistics.median(r["per_day"] for r in lo)
+        out.append({"parameter": param, "effect": round(effect, 1)})
+    return sorted(out, key=lambda e: -abs(e["effect"]))
 
 
 def summarise(spec: dict, workflow: dict, layout: dict, hours: float, runs: list[dict]) -> dict:
