@@ -43,3 +43,10 @@ button { font: inherit; border: 3px solid #333; background: #fff; cursor: pointe
 .badge { display: inline-block; padding: 2px 4px; border-radius: 3px; font-size: 7px; color: #fff; vertical-align: middle; }
 .badge-datasheet { background: var(--ok); } .badge-literature { background: #2d6cdf; }
 .badge-estimated { background: #c08a00; } .badge-placeholder, .badge-unknown { background: var(--accent); }
+
+#clockbar { top: 16px; right: 16px; width: 300px; padding: 12px 14px 10px; font-size: 9px; }
+#clockbar .controls { display: flex; align-items: center; gap: 8px; }
+#clockbar button, #clockbar select { font: inherit; font-size: 9px; border: 3px solid #2b2f36; border-radius: 4px; background: #fff; padding: 4px 6px; }
+#clock-t { margin-left: auto; font-size: 11px; }
+#scrub { width: 100%; margin: 10px 0 6px; accent-color: #e0503c; }
+#clockbar .stats { display: flex; justify-content: space-between; color: #556; font-size: 8px; }

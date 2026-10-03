@@ -3,12 +3,15 @@ import Phaser from "phaser";
 import { chat, exampleDesign, report } from "./api";
 import { galleryDesign } from "./fixtures/gallery";
 import { LabScene } from "./LabScene";
+import { clock } from "./timeline";
 import { renderPanel } from "./panel";
 import type { Design } from "./types";
-import { dialogue, hideStatCard, introLines, showStatCard } from "./ui";
+import { dialogue, hideStatCard, introLines, onTick, setupClock, showStatCard } from "./ui";
 
 // `?demo=gallery` shows every sprite kind; the default is the worked example from examples/.
-let design: Design = new URLSearchParams(location.search).get("demo") === "gallery" ? galleryDesign : exampleDesign();
+const params = new URLSearchParams(location.search);
+clock.t = +(params.get("t") ?? 0) || 0; // ?t=<sim seconds> starts mid-run, handy for screenshots
+let design: Design = params.get("demo") === "gallery" ? galleryDesign : exampleDesign();
 const history: { role: string; content: string }[] = [];
 
 const game = new Phaser.Game({
@@ -23,6 +26,8 @@ const game = new Phaser.Game({
 document.fonts.load('8px "Press Start 2P"').finally(() => game.scene.add("lab", LabScene, true, { design }));
 renderPanel(design);
 dialogue.say(introLines(design));
+game.events.on("tick", onTick);
+game.events.on("ready-clock", () => setupClock(design));
 game.events.on("select", (sel: { id: string; sprite?: string } | null) => (sel ? showStatCard(design, sel.id, sel.sprite) : hideStatCard()));
 
 function show(d: Design) {
