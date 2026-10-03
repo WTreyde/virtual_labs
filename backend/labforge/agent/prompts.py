@@ -18,6 +18,13 @@ Use snake_case IDs, metres and seconds. Each equipment instance has its own uniq
 candidate_instances refer to those IDs, after refers to step IDs, and lab_spec_id matches
 LabSpec.id. Include transporters. Describe duration units explicitly: per sample, plate,
 or batch. Preserve external queues and manual steps rather than optimising them away.
+Catalog process.duration_basis is keyed by capability. durations_s is per labware by
+default; when the basis is crystal, sample or well, multiply the per-unit duration
+and uncertainty bounds by the explicit units handled in one workflow run. Declare
+params.units_per_run and the physical batch basis. The Shifter crystal_harvesting
+is 35 seconds per crystal, never 35 seconds per plate: 32 crystals require about
+1120 seconds (35 x 32), with an operator throughout. Distinguish attempted mounts
+from successful crystals and disclose yield; do not count failed mounts as output.
 Crystal harvesting requires an operator for its entire duration, even with a Shifter:
 use mode manual, not setup-only semi_automated. Retrieve the Wright mounting-rate comparison
 with search_evidence; distinguish unassisted manual work from Shifter-assisted human work.

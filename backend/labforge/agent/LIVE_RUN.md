@@ -297,3 +297,27 @@ P50 362.7 and independent 376 crystals/day differ by 3.5%, with no catalog durat
 Both recordings retain refuted feasibility claims and layout issues; passing gates means
 complete orchestration, not a procurement-ready design. See the recordings’ README for Roshan’s
 replay-copy command, metrics, diagnostic limits and owning-strand follow-ups.
+
+## Per-unit catalog times and landing summaries
+
+Catalog `process.duration_basis` is a capability-to-unit map. The Shifter now gives
+`durations_s.crystal_harvesting = 35` and `duration_basis.crystal_harvesting = "crystal"`.
+Workflow durations still describe one processing run: declare numeric
+`params.units_per_run` (mount attempts), multiply per-crystal time and uncertainty
+bounds by the count, and distinguish attempts from successful output. For 32 attempts,
+the mean is 1120 seconds, not 35 seconds per plate. Planner validation requires an
+explicit count and rejects durations below the scaled catalog floor. The independent
+verifier owns checking that the count also agrees with downstream output/fan-out.
+
+The landing assets `frontend/public/replays/{chem,fbdd}.summary.json` report the exact
+recorded planning P10/P50/P90, independent P50, busiest instrument, checked BOM versus
+budget and refuted claims. They do not recompute an old replay against a new catalog.
+After copying a new replay, regenerate both summaries with:
+
+```bash
+PYTHONPATH=backend .venv/bin/python -m labforge.agent.replay_summary frontend/public/replays
+```
+
+Fresh XChem recording is blocked until verifier PR #26 merges. Until then the published
+FBDD summary explicitly retains the historical 312 versus 112 disagreement. Hotel
+what-if PR #23 remains a separate follow-up; do not replace the baseline with a remedy.
