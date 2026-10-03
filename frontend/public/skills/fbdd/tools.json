@@ -1,0 +1,2471 @@
+{
+  "lab_id": "xchem_demo",
+  "lab_name": "XChem-style fragment screening demo",
+  "workflow_id": "xchem_demo_wf_v1",
+  "layout_id": "xchem_demo_wf_v1_layout",
+  "sim_result_id": "xchem_demo_wf_v1_layout_sim",
+  "generated_by": "labforge.orchestrator",
+  "source": "replay:fbdd",
+  "alignment_note": "Each devices[] entry is a device sheet: capabilities used, limits with confidence, safety and control interface. Tool definitions follow the MCP tool shape (name, description, input_schema) with a device limits/safety block. Aligned with device-description standards such as Anthropic's Model Hardware Standard; not an implementation of it (spec not public).",
+  "devices": [
+    {
+      "instance_id": "shaker_1",
+      "catalog_id": "infors_multitron_pro",
+      "vendor": "Infors HT",
+      "model": "Multitron Pro",
+      "capabilities_used": [
+        "cell_culture"
+      ],
+      "control": {
+        "status": "vendor_software_only",
+        "interfaces": [
+          "Local touch controller",
+          "Infors IRIS software (vendor)"
+        ]
+      },
+      "data_confidence": "estimated",
+      "location": {
+        "position": {
+          "x": 6.106,
+          "y": 1.836,
+          "z": 0.0
+        },
+        "zones": [
+          "vibration_free"
+        ]
+      },
+      "limits": {
+        "capacity": 12,
+        "capacity_confidence": "estimated",
+        "accepted_labware": [
+          "deep_well_24",
+          "deep_well_96",
+          "sbs_96",
+          "shake_flask"
+        ],
+        "durations": {
+          "cell_culture": {
+            "value_s": 43200,
+            "low_s": 14400,
+            "high_s": 172800,
+            "confidence": "estimated",
+            "per": "labware"
+          }
+        }
+      },
+      "safety": {
+        "hazards": [
+          "moving_parts",
+          "heavy"
+        ],
+        "requires_zone": [
+          "vibration_free"
+        ],
+        "collaborative": null,
+        "needs_light_curtain": null
+      },
+      "measure_on_first_run": [],
+      "tools": [
+        {
+          "name": "shaker_1__cell_culture",
+          "description": "Run cell culture on shaker_1 (Multitron Pro) for one unit of labware. Workflow steps: expression. Reject the call if the device is at capacity (12) or the labware type is not accepted.",
+          "input_schema": {
+            "type": "object",
+            "required": [
+              "step_id",
+              "labware_id"
+            ],
+            "properties": {
+              "step_id": {
+                "type": "string",
+                "enum": [
+                  "expression"
+                ]
+              },
+              "labware_id": {
+                "type": "string",
+                "description": "Barcode of the plate, tube rack, puck or flask."
+              },
+              "params": {
+                "type": "object",
+                "description": "Protocol parameters from the workflow step; do not invent new ones."
+              }
+            }
+          }
+        },
+        {
+          "name": "shaker_1__status",
+          "description": "Read shaker_1's state: idle/busy/error, occupied slots, current labware, last error.",
+          "input_schema": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      ]
+    },
+    {
+      "instance_id": "centrifuge_hs_1",
+      "catalog_id": "beckman_avanti_jxn26",
+      "vendor": "Beckman Coulter",
+      "model": "Avanti JXN-26",
+      "capabilities_used": [
+        "centrifugation"
+      ],
+      "control": {
+        "status": "vendor_software_only",
+        "interfaces": [
+          "Manual touchscreen (no automation interface confirmed)"
+        ]
+      },
+      "data_confidence": "estimated",
+      "location": {
+        "position": {
+          "x": 6.43,
+          "y": 3.632,
+          "z": 0.0
+        },
+        "zones": [
+          "vibration_free"
+        ]
+      },
+      "limits": {
+        "capacity": 1,
+        "capacity_confidence": "datasheet",
+        "accepted_labware": [
+          "bottle",
+          "other",
+          "tube_rack"
+        ],
+        "durations": {
+          "centrifugation": {
+            "value_s": 1800,
+            "low_s": 600,
+            "high_s": 3600,
+            "confidence": "estimated",
+            "per": "labware"
+          }
+        }
+      },
+      "safety": {
+        "hazards": [
+          "heavy",
+          "high_g",
+          "moving_parts"
+        ],
+        "requires_zone": [
+          "vibration_free"
+        ],
+        "collaborative": false,
+        "needs_light_curtain": false
+      },
+      "measure_on_first_run": [],
+      "tools": [
+        {
+          "name": "centrifuge_hs_1__centrifugation",
+          "description": "Run centrifugation on centrifuge_hs_1 (Avanti JXN-26) for one unit of labware. Workflow steps: cell_harvest, clarification. Reject the call if the device is at capacity (1) or the labware type is not accepted.",
+          "input_schema": {
+            "type": "object",
+            "required": [
+              "step_id",
+              "labware_id"
+            ],
+            "properties": {
+              "step_id": {
+                "type": "string",
+                "enum": [
+                  "cell_harvest",
+                  "clarification"
+                ]
+              },
+              "labware_id": {
+                "type": "string",
+                "description": "Barcode of the plate, tube rack, puck or flask."
+              },
+              "params": {
+                "type": "object",
+                "description": "Protocol parameters from the workflow step; do not invent new ones."
+              }
+            }
+          }
+        },
+        {
+          "name": "centrifuge_hs_1__status",
+          "description": "Read centrifuge_hs_1's state: idle/busy/error, occupied slots, current labware, last error.",
+          "input_schema": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      ]
+    },
+    {
+      "instance_id": "sonicator_1",
+      "catalog_id": "qsonica_q700",
+      "vendor": "Qsonica",
+      "model": "Q700 Sonicator",
+      "capabilities_used": [
+        "cell_lysis"
+      ],
+      "control": {
+        "status": "vendor_software_only",
+        "interfaces": [
+          "Touchscreen local control"
+        ]
+      },
+      "data_confidence": "estimated",
+      "location": {
+        "position": {
+          "x": 8.171,
+          "y": 3.928,
+          "z": 0.9
+        },
+        "zones": []
+      },
+      "limits": {
+        "capacity": 1,
+        "capacity_confidence": "datasheet",
+        "accepted_labware": [
+          "bottle",
+          "other",
+          "tube_rack"
+        ],
+        "durations": {
+          "cell_lysis": {
+            "value_s": 300,
+            "low_s": 60,
+            "high_s": 900,
+            "confidence": "placeholder",
+            "per": "labware"
+          }
+        }
+      },
+      "safety": {
+        "hazards": [
+          "high_voltage"
+        ],
+        "requires_zone": [],
+        "collaborative": null,
+        "needs_light_curtain": null
+      },
+      "measure_on_first_run": [
+        {
+          "field": "process.durations_s.cell_lysis",
+          "value": 300,
+          "low": 60,
+          "high": 900,
+          "note": "Typical bacterial lysis 1-5 min pulsed per tube; single tube at a time"
+        }
+      ],
+      "tools": [
+        {
+          "name": "sonicator_1__cell_lysis",
+          "description": "Run cell lysis on sonicator_1 (Q700 Sonicator) for one unit of labware. Workflow steps: lysis. Reject the call if the device is at capacity (1) or the labware type is not accepted.",
+          "input_schema": {
+            "type": "object",
+            "required": [
+              "step_id",
+              "labware_id"
+            ],
+            "properties": {
+              "step_id": {
+                "type": "string",
+                "enum": [
+                  "lysis"
+                ]
+              },
+              "labware_id": {
+                "type": "string",
+                "description": "Barcode of the plate, tube rack, puck or flask."
+              },
+              "params": {
+                "type": "object",
+                "description": "Protocol parameters from the workflow step; do not invent new ones."
+              }
+            }
+          }
+        },
+        {
+          "name": "sonicator_1__status",
+          "description": "Read sonicator_1's state: idle/busy/error, occupied slots, current labware, last error.",
+          "input_schema": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      ]
+    },
+    {
+      "instance_id": "akta_1",
+      "catalog_id": "cytiva_akta_pure_25",
+      "vendor": "Cytiva",
+      "model": "\u00c4KTA pure 25",
+      "capabilities_used": [
+        "protein_purification"
+      ],
+      "control": {
+        "status": "open_standard",
+        "interfaces": [
+          "UNICORN",
+          "OPC-UA via UNICORN (unverified)"
+        ]
+      },
+      "data_confidence": "estimated",
+      "location": {
+        "position": {
+          "x": 7.06,
+          "y": 4.745,
+          "z": 0.9
+        },
+        "zones": [
+          "ventilated"
+        ]
+      },
+      "limits": {
+        "capacity": 1,
+        "capacity_confidence": "estimated",
+        "accepted_labware": [
+          "bottle",
+          "column",
+          "tube_rack"
+        ],
+        "durations": {
+          "protein_purification": {
+            "value_s": 3600,
+            "low_s": 1200,
+            "high_s": 14400,
+            "confidence": "estimated",
+            "per": "labware"
+          }
+        }
+      },
+      "safety": {
+        "hazards": [
+          "flammable_solvents"
+        ],
+        "requires_zone": [
+          "ventilated"
+        ],
+        "collaborative": null,
+        "needs_light_curtain": null
+      },
+      "measure_on_first_run": [],
+      "tools": [
+        {
+          "name": "akta_1__protein_purification",
+          "description": "Run protein purification on akta_1 (\u00c4KTA pure 25) for one unit of labware. Workflow steps: affinity_purification, sec_purification. Reject the call if the device is at capacity (1) or the labware type is not accepted.",
+          "input_schema": {
+            "type": "object",
+            "required": [
+              "step_id",
+              "labware_id"
+            ],
+            "properties": {
+              "step_id": {
+                "type": "string",
+                "enum": [
+                  "affinity_purification",
+                  "sec_purification"
+                ]
+              },
+              "labware_id": {
+                "type": "string",
+                "description": "Barcode of the plate, tube rack, puck or flask."
+              },
+              "params": {
+                "type": "object",
+                "description": "Protocol parameters from the workflow step; do not invent new ones."
+              }
+            }
+          }
+        },
+        {
+          "name": "akta_1__status",
+          "description": "Read akta_1's state: idle/busy/error, occupied slots, current labware, last error.",
+          "input_schema": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      ]
+    },
+    {
+      "instance_id": "gel_1",
+      "catalog_id": "biorad_mini_protean_tetra",
+      "vendor": "Bio-Rad",
+      "model": "Mini-PROTEAN Tetra Cell with PowerPac Basic",
+      "capabilities_used": [
+        "protein_qc"
+      ],
+      "control": {
+        "status": "vendor_software_only",
+        "interfaces": [
+          "manual (no control interface)"
+        ]
+      },
+      "data_confidence": "estimated",
+      "location": {
+        "position": {
+          "x": 7.56,
+          "y": 3.829,
+          "z": 0.9
+        },
+        "zones": [
+          "vibration_free"
+        ]
+      },
+      "limits": {
+        "capacity": 4,
+        "capacity_confidence": "datasheet",
+        "accepted_labware": [
+          "other"
+        ],
+        "durations": {
+          "protein_qc": {
+            "value_s": 2400,
+            "low_s": 2100,
+            "high_s": 2700,
+            "confidence": "datasheet",
+            "per": "labware"
+          }
+        }
+      },
+      "safety": {
+        "hazards": [
+          "high_voltage",
+          "toxic_reagents"
+        ],
+        "requires_zone": [],
+        "collaborative": null,
+        "needs_light_curtain": null
+      },
+      "measure_on_first_run": [],
+      "tools": [
+        {
+          "name": "gel_1__protein_qc",
+          "description": "Run protein qc on gel_1 (Mini-PROTEAN Tetra Cell with PowerPac Basic) for one unit of labware. Workflow steps: protein_qc. Reject the call if the device is at capacity (4) or the labware type is not accepted.",
+          "input_schema": {
+            "type": "object",
+            "required": [
+              "step_id",
+              "labware_id"
+            ],
+            "properties": {
+              "step_id": {
+                "type": "string",
+                "enum": [
+                  "protein_qc"
+                ]
+              },
+              "labware_id": {
+                "type": "string",
+                "description": "Barcode of the plate, tube rack, puck or flask."
+              },
+              "params": {
+                "type": "object",
+                "description": "Protocol parameters from the workflow step; do not invent new ones."
+              }
+            }
+          }
+        },
+        {
+          "name": "gel_1__status",
+          "description": "Read gel_1's state: idle/busy/error, occupied slots, current labware, last error.",
+          "input_schema": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      ]
+    },
+    {
+      "instance_id": "benchtop_centrifuge_1",
+      "catalog_id": "eppendorf_5810r",
+      "vendor": "Eppendorf",
+      "model": "Centrifuge 5810 R",
+      "capabilities_used": [
+        "centrifugation"
+      ],
+      "control": {
+        "status": "vendor_api",
+        "interfaces": [
+          "Manual front panel (no lab-automation API found)"
+        ]
+      },
+      "data_confidence": "estimated",
+      "location": {
+        "position": {
+          "x": 7.401,
+          "y": 2.492,
+          "z": 0.0
+        },
+        "zones": [
+          "vibration_free"
+        ]
+      },
+      "limits": {
+        "capacity": 16,
+        "capacity_confidence": "datasheet",
+        "accepted_labware": [
+          "bottle",
+          "deep_well_96",
+          "sbs_96",
+          "tube_rack"
+        ],
+        "durations": {
+          "centrifugation": {
+            "value_s": 600,
+            "low_s": 180,
+            "high_s": 1800,
+            "confidence": "estimated",
+            "per": "labware"
+          }
+        }
+      },
+      "safety": {
+        "hazards": [
+          "heavy",
+          "high_g",
+          "moving_parts"
+        ],
+        "requires_zone": [
+          "vibration_free"
+        ],
+        "collaborative": null,
+        "needs_light_curtain": null
+      },
+      "measure_on_first_run": [],
+      "tools": [
+        {
+          "name": "benchtop_centrifuge_1__centrifugation",
+          "description": "Run centrifugation on benchtop_centrifuge_1 (Centrifuge 5810 R) for one unit of labware. Workflow steps: concentrate. Reject the call if the device is at capacity (16) or the labware type is not accepted.",
+          "input_schema": {
+            "type": "object",
+            "required": [
+              "step_id",
+              "labware_id"
+            ],
+            "properties": {
+              "step_id": {
+                "type": "string",
+                "enum": [
+                  "concentrate"
+                ]
+              },
+              "labware_id": {
+                "type": "string",
+                "description": "Barcode of the plate, tube rack, puck or flask."
+              },
+              "params": {
+                "type": "object",
+                "description": "Protocol parameters from the workflow step; do not invent new ones."
+              }
+            }
+          }
+        },
+        {
+          "name": "benchtop_centrifuge_1__status",
+          "description": "Read benchtop_centrifuge_1's state: idle/busy/error, occupied slots, current labware, last error.",
+          "input_schema": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      ]
+    },
+    {
+      "instance_id": "nanodrop_1",
+      "catalog_id": "thermo_nanodrop_one",
+      "vendor": "Thermo Fisher Scientific",
+      "model": "NanoDrop Ultra (successor to NanoDrop One)",
+      "capabilities_used": [
+        "concentration_measurement"
+      ],
+      "control": {
+        "status": "vendor_software_only",
+        "interfaces": [
+          "USB",
+          "Ethernet/WiFi (verify)",
+          "Manual pipette loading"
+        ]
+      },
+      "data_confidence": "datasheet",
+      "location": {
+        "position": {
+          "x": 7.227,
+          "y": 1.696,
+          "z": 0.9
+        },
+        "zones": [
+          "vibration_free"
+        ]
+      },
+      "limits": {
+        "capacity": 1,
+        "capacity_confidence": "datasheet",
+        "accepted_labware": [
+          "other"
+        ],
+        "durations": {
+          "concentration_measurement": {
+            "value_s": 60,
+            "low_s": 20,
+            "high_s": 120,
+            "confidence": "estimated",
+            "per": "labware"
+          }
+        }
+      },
+      "safety": {
+        "hazards": [],
+        "requires_zone": [],
+        "collaborative": null,
+        "needs_light_curtain": null
+      },
+      "measure_on_first_run": [],
+      "tools": [
+        {
+          "name": "nanodrop_1__concentration_measurement",
+          "description": "Run concentration measurement on nanodrop_1 (NanoDrop Ultra (successor to NanoDrop One)) for one unit of labware. Workflow steps: concentration_check. Reject the call if the device is at capacity (1) or the labware type is not accepted.",
+          "input_schema": {
+            "type": "object",
+            "required": [
+              "step_id",
+              "labware_id"
+            ],
+            "properties": {
+              "step_id": {
+                "type": "string",
+                "enum": [
+                  "concentration_check"
+                ]
+              },
+              "labware_id": {
+                "type": "string",
+                "description": "Barcode of the plate, tube rack, puck or flask."
+              },
+              "params": {
+                "type": "object",
+                "description": "Protocol parameters from the workflow step; do not invent new ones."
+              }
+            }
+          }
+        },
+        {
+          "name": "nanodrop_1__status",
+          "description": "Read nanodrop_1's state: idle/busy/error, occupied slots, current labware, last error.",
+          "input_schema": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      ]
+    },
+    {
+      "instance_id": "mosquito_1",
+      "catalog_id": "sptlabtech_mosquito_xtal3",
+      "vendor": "SPT Labtech",
+      "model": "mosquito Xtal3",
+      "capabilities_used": [
+        "crystallization_setup"
+      ],
+      "control": {
+        "status": "unconfirmed",
+        "interfaces": [
+          "Vendor control software (interfaces not confirmed)"
+        ]
+      },
+      "data_confidence": "estimated",
+      "location": {
+        "position": {
+          "x": 4.888,
+          "y": 2.49,
+          "z": 0.9
+        },
+        "zones": [
+          "vibration_free"
+        ]
+      },
+      "limits": {
+        "capacity": 3,
+        "capacity_confidence": "datasheet",
+        "accepted_labware": [
+          "crystallization_plate_96",
+          "sbs_384",
+          "sbs_96"
+        ],
+        "durations": {
+          "crystallization_setup": {
+            "value_s": 120,
+            "low_s": 60,
+            "high_s": 300,
+            "confidence": "datasheet",
+            "per": "labware"
+          }
+        }
+      },
+      "safety": {
+        "hazards": [
+          "moving_parts"
+        ],
+        "requires_zone": [
+          "vibration_free"
+        ],
+        "collaborative": false,
+        "needs_light_curtain": false
+      },
+      "measure_on_first_run": [],
+      "tools": [
+        {
+          "name": "mosquito_1__crystallization_setup",
+          "description": "Run crystallization setup on mosquito_1 (mosquito Xtal3) for one unit of labware. Workflow steps: drop_setup. Reject the call if the device is at capacity (3) or the labware type is not accepted.",
+          "input_schema": {
+            "type": "object",
+            "required": [
+              "step_id",
+              "labware_id"
+            ],
+            "properties": {
+              "step_id": {
+                "type": "string",
+                "enum": [
+                  "drop_setup"
+                ]
+              },
+              "labware_id": {
+                "type": "string",
+                "description": "Barcode of the plate, tube rack, puck or flask."
+              },
+              "params": {
+                "type": "object",
+                "description": "Protocol parameters from the workflow step; do not invent new ones."
+              }
+            }
+          }
+        },
+        {
+          "name": "mosquito_1__status",
+          "description": "Read mosquito_1's state: idle/busy/error, occupied slots, current labware, last error.",
+          "input_schema": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      ]
+    },
+    {
+      "instance_id": "incubator_1",
+      "catalog_id": "liconic_stx44",
+      "vendor": "LiCONiC",
+      "model": "STX44",
+      "capabilities_used": [
+        "incubation"
+      ],
+      "control": {
+        "status": "open_standard",
+        "interfaces": [
+          "SiLA2"
+        ]
+      },
+      "data_confidence": "estimated",
+      "location": {
+        "position": {
+          "x": 2.67,
+          "y": 3.905,
+          "z": 0.9
+        },
+        "zones": []
+      },
+      "limits": {
+        "capacity": 44,
+        "capacity_confidence": "estimated",
+        "storage_slots": 44,
+        "accepted_labware": [
+          "deep_well_96",
+          "sbs_384",
+          "sbs_96"
+        ],
+        "durations": {
+          "incubation": {
+            "value_s": 3600,
+            "low_s": null,
+            "high_s": null,
+            "confidence": "estimated",
+            "per": "labware"
+          }
+        }
+      },
+      "safety": {
+        "hazards": [],
+        "requires_zone": [],
+        "collaborative": null,
+        "needs_light_curtain": null
+      },
+      "measure_on_first_run": [],
+      "tools": [
+        {
+          "name": "incubator_1__incubation",
+          "description": "Run incubation on incubator_1 (STX44) for one unit of labware. Workflow steps: grow_1, grow_2, soak_residence. Reject the call if the device is at capacity (44) or the labware type is not accepted.",
+          "input_schema": {
+            "type": "object",
+            "required": [
+              "step_id",
+              "labware_id"
+            ],
+            "properties": {
+              "step_id": {
+                "type": "string",
+                "enum": [
+                  "grow_1",
+                  "grow_2",
+                  "soak_residence"
+                ]
+              },
+              "labware_id": {
+                "type": "string",
+                "description": "Barcode of the plate, tube rack, puck or flask."
+              },
+              "params": {
+                "type": "object",
+                "description": "Protocol parameters from the workflow step; do not invent new ones."
+              }
+            }
+          }
+        },
+        {
+          "name": "incubator_1__status",
+          "description": "Read incubator_1's state: idle/busy/error, occupied slots, current labware, last error.",
+          "input_schema": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      ]
+    },
+    {
+      "instance_id": "imager_1",
+      "catalog_id": "formulatrix_rock_imager_1000",
+      "vendor": "Formulatrix",
+      "model": "Rock Imager 1000",
+      "capabilities_used": [
+        "crystal_imaging"
+      ],
+      "control": {
+        "status": "vendor_software_only",
+        "interfaces": [
+          "Rock Maker software",
+          "Robot-accessible plate hand-off (verify)"
+        ]
+      },
+      "data_confidence": "datasheet",
+      "location": {
+        "position": {
+          "x": 2.445,
+          "y": 2.487,
+          "z": 0.0
+        },
+        "zones": [
+          "cold_room"
+        ]
+      },
+      "limits": {
+        "capacity": 1,
+        "capacity_confidence": "estimated",
+        "storage_slots": 1000,
+        "accepted_labware": [
+          "crystallization_plate_96",
+          "sbs_96"
+        ],
+        "durations": {
+          "crystal_imaging": {
+            "value_s": 180,
+            "low_s": null,
+            "high_s": null,
+            "confidence": "datasheet",
+            "per": "labware"
+          }
+        }
+      },
+      "safety": {
+        "hazards": [
+          "heavy",
+          "laser"
+        ],
+        "requires_zone": [
+          "cold_room",
+          "vibration_free"
+        ],
+        "collaborative": null,
+        "needs_light_curtain": null
+      },
+      "measure_on_first_run": [],
+      "tools": [
+        {
+          "name": "imager_1__crystal_imaging",
+          "description": "Run crystal imaging on imager_1 (Rock Imager 1000) for one unit of labware. Workflow steps: image_t0, image_d1, image_d3. Reject the call if the device is at capacity (1) or the labware type is not accepted.",
+          "input_schema": {
+            "type": "object",
+            "required": [
+              "step_id",
+              "labware_id"
+            ],
+            "properties": {
+              "step_id": {
+                "type": "string",
+                "enum": [
+                  "image_t0",
+                  "image_d1",
+                  "image_d3"
+                ]
+              },
+              "labware_id": {
+                "type": "string",
+                "description": "Barcode of the plate, tube rack, puck or flask."
+              },
+              "params": {
+                "type": "object",
+                "description": "Protocol parameters from the workflow step; do not invent new ones."
+              }
+            }
+          }
+        },
+        {
+          "name": "imager_1__status",
+          "description": "Read imager_1's state: idle/busy/error, occupied slots, current labware, last error.",
+          "input_schema": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      ]
+    },
+    {
+      "instance_id": "cold_room_1",
+      "catalog_id": "walk_in_cold_room",
+      "vendor": "Norlake",
+      "model": "Kold Locker walk-in cooler (8 ft x 8 ft)",
+      "capabilities_used": [],
+      "control": {
+        "status": "none_listed",
+        "interfaces": []
+      },
+      "data_confidence": "estimated",
+      "location": {
+        "position": {
+          "x": 4.948,
+          "y": 6.732,
+          "z": 0.0
+        },
+        "zones": []
+      },
+      "limits": {
+        "capacity": 1,
+        "capacity_confidence": "estimated",
+        "storage_slots": 300,
+        "accepted_labware": [
+          "bottle",
+          "deep_well_96",
+          "reservoir",
+          "sbs_384",
+          "sbs_96",
+          "shake_flask",
+          "tube_rack"
+        ]
+      },
+      "safety": {
+        "hazards": [],
+        "requires_zone": [
+          "cold_room"
+        ],
+        "collaborative": null,
+        "needs_light_curtain": null
+      },
+      "measure_on_first_run": [
+        {
+          "field": "storage_slots",
+          "value": 300,
+          "low": 100,
+          "high": 800,
+          "note": "agent_estimate: plates/tote boxes on wire shelving in 8x8 ft room"
+        }
+      ],
+      "tools": [
+        {
+          "name": "cold_room_1__status",
+          "description": "Read cold_room_1's state: idle/busy/error, occupied slots, current labware, last error.",
+          "input_schema": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      ]
+    },
+    {
+      "instance_id": "echo_1",
+      "catalog_id": "beckman_echo_525",
+      "vendor": "Beckman Coulter",
+      "model": "Echo 525",
+      "capabilities_used": [
+        "crystal_soaking"
+      ],
+      "control": {
+        "status": "vendor_software_only",
+        "interfaces": [
+          "Echo Liquid Handler software (vendor)",
+          "Echo Plate Reformat / Cherry Pick software"
+        ]
+      },
+      "data_confidence": "estimated",
+      "location": {
+        "position": {
+          "x": 4.647,
+          "y": 3.417,
+          "z": 0.9
+        },
+        "zones": [
+          "vibration_free"
+        ]
+      },
+      "limits": {
+        "capacity": 1,
+        "capacity_confidence": "estimated",
+        "accepted_labware": [
+          "crystallization_plate_96",
+          "sbs_1536",
+          "sbs_384"
+        ],
+        "durations": {
+          "crystal_soaking": {
+            "value_s": 900,
+            "low_s": 300,
+            "high_s": 2400,
+            "confidence": "estimated",
+            "per": "labware"
+          }
+        }
+      },
+      "safety": {
+        "hazards": [
+          "moving_parts"
+        ],
+        "requires_zone": [
+          "vibration_free"
+        ],
+        "collaborative": null,
+        "needs_light_curtain": null
+      },
+      "measure_on_first_run": [],
+      "tools": [
+        {
+          "name": "echo_1__crystal_soaking",
+          "description": "Run crystal soaking on echo_1 (Echo 525) for one unit of labware. Workflow steps: soak_dispense. Reject the call if the device is at capacity (1) or the labware type is not accepted.",
+          "input_schema": {
+            "type": "object",
+            "required": [
+              "step_id",
+              "labware_id"
+            ],
+            "properties": {
+              "step_id": {
+                "type": "string",
+                "enum": [
+                  "soak_dispense"
+                ]
+              },
+              "labware_id": {
+                "type": "string",
+                "description": "Barcode of the plate, tube rack, puck or flask."
+              },
+              "params": {
+                "type": "object",
+                "description": "Protocol parameters from the workflow step; do not invent new ones."
+              }
+            }
+          }
+        },
+        {
+          "name": "echo_1__status",
+          "description": "Read echo_1's state: idle/busy/error, occupied slots, current labware, last error.",
+          "input_schema": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      ]
+    },
+    {
+      "instance_id": "shifter_1",
+      "catalog_id": "olt_crystal_shifter",
+      "vendor": "Oxford Lab Technologies",
+      "model": "Crystal Shifter",
+      "capabilities_used": [
+        "crystal_harvesting"
+      ],
+      "control": {
+        "status": "vendor_software_only",
+        "interfaces": [
+          "Vendor software with ISPyB / RockImager / Echo integration (per vendor page)"
+        ]
+      },
+      "data_confidence": "placeholder",
+      "location": {
+        "position": {
+          "x": 2.587,
+          "y": 5.738,
+          "z": 0.9
+        },
+        "zones": [
+          "cryogen"
+        ]
+      },
+      "limits": {
+        "capacity": 1,
+        "capacity_confidence": "placeholder",
+        "accepted_labware": [
+          "crystallization_plate_96",
+          "puck"
+        ],
+        "durations": {
+          "crystal_harvesting": {
+            "value_s": 35,
+            "low_s": 15,
+            "high_s": 36,
+            "confidence": "literature",
+            "per": "crystal"
+          }
+        }
+      },
+      "safety": {
+        "hazards": [
+          "cryogens",
+          "moving_parts"
+        ],
+        "requires_zone": [
+          "cryogen"
+        ],
+        "collaborative": null,
+        "needs_light_curtain": null
+      },
+      "measure_on_first_run": [
+        {
+          "field": "process.capacity",
+          "value": 1,
+          "low": 1,
+          "high": 1,
+          "note": "agent_estimate"
+        }
+      ],
+      "tools": [
+        {
+          "name": "shifter_1__crystal_harvesting",
+          "description": "Run crystal harvesting on shifter_1 (Crystal Shifter) for one unit of labware. Workflow steps: harvest. Reject the call if the device is at capacity (1) or the labware type is not accepted.",
+          "input_schema": {
+            "type": "object",
+            "required": [
+              "step_id",
+              "labware_id"
+            ],
+            "properties": {
+              "step_id": {
+                "type": "string",
+                "enum": [
+                  "harvest"
+                ]
+              },
+              "labware_id": {
+                "type": "string",
+                "description": "Barcode of the plate, tube rack, puck or flask."
+              },
+              "params": {
+                "type": "object",
+                "description": "Protocol parameters from the workflow step; do not invent new ones."
+              }
+            }
+          }
+        },
+        {
+          "name": "shifter_1__status",
+          "description": "Read shifter_1's state: idle/busy/error, occupied slots, current labware, last error.",
+          "input_schema": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      ]
+    },
+    {
+      "instance_id": "vib_table_1",
+      "catalog_id": "tmc_vibration_table",
+      "vendor": "TMC (AMETEK)",
+      "model": "CleanBench 63 Series",
+      "capabilities_used": [],
+      "control": {
+        "status": "none_listed",
+        "interfaces": []
+      },
+      "data_confidence": "datasheet",
+      "location": {
+        "position": {
+          "x": 1.157,
+          "y": 0.823,
+          "z": 0.0
+        },
+        "zones": []
+      },
+      "limits": {
+        "capacity": 1,
+        "capacity_confidence": "datasheet",
+        "accepted_labware": [
+          "other",
+          "sbs_96",
+          "tube_rack"
+        ]
+      },
+      "safety": {
+        "hazards": [
+          "heavy"
+        ],
+        "requires_zone": [
+          "vibration_free"
+        ],
+        "collaborative": null,
+        "needs_light_curtain": null
+      },
+      "measure_on_first_run": [],
+      "tools": [
+        {
+          "name": "vib_table_1__status",
+          "description": "Read vib_table_1's state: idle/busy/error, occupied slots, current labware, last error.",
+          "input_schema": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      ]
+    },
+    {
+      "instance_id": "ln2_dewar_1",
+      "catalog_id": "ln2_storage_dewar",
+      "vendor": "MiTeGen (IC Biomedical)",
+      "model": "ICB35-10 (formerly TW35-10) LN2 freezer",
+      "capabilities_used": [
+        "cryo_cooling"
+      ],
+      "control": {
+        "status": "none_listed",
+        "interfaces": []
+      },
+      "data_confidence": "estimated",
+      "location": {
+        "position": {
+          "x": 1.739,
+          "y": 5.469,
+          "z": 0.0
+        },
+        "zones": [
+          "cryogen"
+        ]
+      },
+      "limits": {
+        "capacity": 1,
+        "capacity_confidence": "estimated",
+        "storage_slots": 10,
+        "accepted_labware": [
+          "puck",
+          "tube_rack"
+        ],
+        "durations": {
+          "cryo_cooling": {
+            "value_s": 120,
+            "low_s": 30,
+            "high_s": 600,
+            "confidence": "placeholder",
+            "per": "labware"
+          }
+        }
+      },
+      "safety": {
+        "hazards": [
+          "cryogens"
+        ],
+        "requires_zone": [
+          "cryogen",
+          "ventilated"
+        ],
+        "collaborative": null,
+        "needs_light_curtain": null
+      },
+      "measure_on_first_run": [
+        {
+          "field": "process.durations_s.cryo_cooling",
+          "value": 120,
+          "low": 30,
+          "high": 600,
+          "note": "Per filled puck: moving one puck from the harvesting station's LN2 bath into a storage cane/dewar. Per-crystal plunge-cooling is already inside olt_crystal_shifter crystal_harvesting (35 s/crystal), so do not add it again here."
+        }
+      ],
+      "tools": [
+        {
+          "name": "ln2_dewar_1__cryo_cooling",
+          "description": "Run cryo cooling on ln2_dewar_1 (ICB35-10 (formerly TW35-10) LN2 freezer) for one unit of labware. Workflow steps: puck_to_shipper. Reject the call if the device is at capacity (1) or the labware type is not accepted.",
+          "input_schema": {
+            "type": "object",
+            "required": [
+              "step_id",
+              "labware_id"
+            ],
+            "properties": {
+              "step_id": {
+                "type": "string",
+                "enum": [
+                  "puck_to_shipper"
+                ]
+              },
+              "labware_id": {
+                "type": "string",
+                "description": "Barcode of the plate, tube rack, puck or flask."
+              },
+              "params": {
+                "type": "object",
+                "description": "Protocol parameters from the workflow step; do not invent new ones."
+              }
+            }
+          }
+        },
+        {
+          "name": "ln2_dewar_1__status",
+          "description": "Read ln2_dewar_1's state: idle/busy/error, occupied slots, current labware, last error.",
+          "input_schema": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      ]
+    },
+    {
+      "instance_id": "dry_shipper_1",
+      "catalog_id": "taylor_wharton_cx100",
+      "vendor": "Taylor-Wharton (IC Biomedical)",
+      "model": "CX100 Cryo Express Dry Shipper",
+      "capabilities_used": [],
+      "control": {
+        "status": "vendor_software_only",
+        "interfaces": [
+          "None (passive vessel)"
+        ]
+      },
+      "data_confidence": "estimated",
+      "location": {
+        "position": {
+          "x": 1.88,
+          "y": 6.117,
+          "z": 0.9
+        },
+        "zones": [
+          "cryogen"
+        ]
+      },
+      "limits": {
+        "capacity": 1,
+        "capacity_confidence": "placeholder",
+        "storage_slots": 3,
+        "accepted_labware": [
+          "other",
+          "puck"
+        ],
+        "hold_time_s": 1088640
+      },
+      "safety": {
+        "hazards": [
+          "cryogens"
+        ],
+        "requires_zone": [
+          "cryogen"
+        ],
+        "collaborative": false,
+        "needs_light_curtain": false
+      },
+      "measure_on_first_run": [
+        {
+          "field": "process.capacity",
+          "value": 1,
+          "low": 1,
+          "high": 1,
+          "note": "agent_estimate"
+        },
+        {
+          "field": "storage_slots",
+          "value": 3,
+          "low": 1,
+          "high": 7,
+          "note": "Pucks per shipment. The stock canister takes vials (85 x 1.2/2.0 mL); UniPucks need separate puck shipping canes, whose count per CX100 was not found."
+        }
+      ],
+      "tools": [
+        {
+          "name": "dry_shipper_1__status",
+          "description": "Read dry_shipper_1's state: idle/busy/error, occupied slots, current labware, last error.",
+          "input_schema": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      ]
+    },
+    {
+      "instance_id": "bench_1",
+      "catalog_id": "lab_bench",
+      "vendor": "Fisher Scientific",
+      "model": "Adjustable-height basic work bench (06-000-654)",
+      "capabilities_used": [
+        "manual_bench"
+      ],
+      "control": {
+        "status": "none_listed",
+        "interfaces": []
+      },
+      "data_confidence": "placeholder",
+      "location": {
+        "position": {
+          "x": 3.307,
+          "y": 0.745,
+          "z": 0.0
+        },
+        "zones": []
+      },
+      "limits": {
+        "capacity": 2,
+        "capacity_confidence": "placeholder",
+        "accepted_labware": [
+          "bottle",
+          "deep_well_96",
+          "other",
+          "petri_dish",
+          "reservoir",
+          "sbs_384",
+          "sbs_96",
+          "shake_flask",
+          "tip_rack",
+          "tube_rack",
+          "vial_rack"
+        ],
+        "durations": {
+          "manual_bench": {
+            "value_s": 900,
+            "low_s": 300,
+            "high_s": 3600,
+            "confidence": "placeholder",
+            "per": "labware"
+          }
+        }
+      },
+      "safety": {
+        "hazards": [],
+        "requires_zone": [],
+        "collaborative": null,
+        "needs_light_curtain": null
+      },
+      "measure_on_first_run": [
+        {
+          "field": "process.durations_s.manual_bench",
+          "value": 900,
+          "low": 300,
+          "high": 3600,
+          "note": "one manual handling step per plate"
+        }
+      ],
+      "tools": [
+        {
+          "name": "bench_1__manual_bench",
+          "description": "Run manual bench on bench_1 (Adjustable-height basic work bench (06-000-654)) for one unit of labware. Workflow steps: drop_selection. Reject the call if the device is at capacity (2) or the labware type is not accepted.",
+          "input_schema": {
+            "type": "object",
+            "required": [
+              "step_id",
+              "labware_id"
+            ],
+            "properties": {
+              "step_id": {
+                "type": "string",
+                "enum": [
+                  "drop_selection"
+                ]
+              },
+              "labware_id": {
+                "type": "string",
+                "description": "Barcode of the plate, tube rack, puck or flask."
+              },
+              "params": {
+                "type": "object",
+                "description": "Protocol parameters from the workflow step; do not invent new ones."
+              }
+            }
+          }
+        },
+        {
+          "name": "bench_1__status",
+          "description": "Read bench_1's state: idle/busy/error, occupied slots, current labware, last error.",
+          "input_schema": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      ]
+    },
+    {
+      "instance_id": "arm_1",
+      "catalog_id": "ur5e",
+      "vendor": "Universal Robots",
+      "model": "UR5e",
+      "capabilities_used": [],
+      "control": {
+        "status": "vendor_software_only",
+        "interfaces": [
+          "URScript",
+          "ROS2"
+        ]
+      },
+      "data_confidence": "estimated",
+      "location": {
+        "position": {
+          "x": 7.23,
+          "y": 4.393,
+          "z": 0.9
+        },
+        "zones": [
+          "ventilated"
+        ]
+      },
+      "limits": {
+        "capacity": 1,
+        "capacity_confidence": "estimated",
+        "transport": {
+          "kind": "arm",
+          "reach_m": 0.85,
+          "speed_m_s": 0.5,
+          "payload_kg": 5,
+          "pick_place_s": 8
+        }
+      },
+      "safety": {
+        "hazards": [],
+        "requires_zone": [],
+        "collaborative": null,
+        "needs_light_curtain": null
+      },
+      "measure_on_first_run": [],
+      "tools": [
+        {
+          "name": "arm_1__transfer",
+          "description": "Move one labware unit with arm_1. Only these handoffs are reachable in the layout: akta_1->gel_1.",
+          "input_schema": {
+            "type": "object",
+            "required": [
+              "route",
+              "labware_id"
+            ],
+            "properties": {
+              "route": {
+                "type": "string",
+                "enum": [
+                  "akta_1->gel_1"
+                ]
+              },
+              "labware_id": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "name": "arm_1__status",
+          "description": "Read arm_1's state: idle/busy/error, occupied slots, current labware, last error.",
+          "input_schema": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      ]
+    }
+  ],
+  "operators": [
+    {
+      "id": "skilled_operator_1",
+      "role": "skilled_operator"
+    },
+    {
+      "id": "skilled_operator_2",
+      "role": "skilled_operator"
+    }
+  ],
+  "transfers": [
+    {
+      "from_instance": "shaker_1",
+      "to_instance": "centrifuge_hs_1",
+      "transporter_instance": "skilled_operator_1",
+      "distance_m": 1.87,
+      "est_time_s": 16.9
+    },
+    {
+      "from_instance": "centrifuge_hs_1",
+      "to_instance": "sonicator_1",
+      "transporter_instance": "skilled_operator_1",
+      "distance_m": 4.87,
+      "est_time_s": 19.9
+    },
+    {
+      "from_instance": "sonicator_1",
+      "to_instance": "centrifuge_hs_1",
+      "transporter_instance": "skilled_operator_1",
+      "distance_m": 4.87,
+      "est_time_s": 19.9
+    },
+    {
+      "from_instance": "centrifuge_hs_1",
+      "to_instance": "akta_1",
+      "transporter_instance": "skilled_operator_1",
+      "distance_m": 4.85,
+      "est_time_s": 19.9
+    },
+    {
+      "from_instance": "akta_1",
+      "to_instance": "gel_1",
+      "transporter_instance": "arm_1",
+      "distance_m": 0.79,
+      "est_time_s": 9.6
+    },
+    {
+      "from_instance": "gel_1",
+      "to_instance": "benchtop_centrifuge_1",
+      "transporter_instance": "skilled_operator_1",
+      "distance_m": 2.88,
+      "est_time_s": 17.9
+    },
+    {
+      "from_instance": "benchtop_centrifuge_1",
+      "to_instance": "nanodrop_1",
+      "transporter_instance": "skilled_operator_1",
+      "distance_m": 1.72,
+      "est_time_s": 16.7
+    },
+    {
+      "from_instance": "nanodrop_1",
+      "to_instance": "mosquito_1",
+      "transporter_instance": "skilled_operator_1",
+      "distance_m": 3.72,
+      "est_time_s": 18.7
+    },
+    {
+      "from_instance": "mosquito_1",
+      "to_instance": "imager_1",
+      "transporter_instance": "skilled_operator_1",
+      "distance_m": 2.19,
+      "est_time_s": 17.2
+    },
+    {
+      "from_instance": "imager_1",
+      "to_instance": "incubator_1",
+      "transporter_instance": "skilled_operator_1",
+      "distance_m": 2.22,
+      "est_time_s": 17.2
+    },
+    {
+      "from_instance": "incubator_1",
+      "to_instance": "imager_1",
+      "transporter_instance": "skilled_operator_1",
+      "distance_m": 2.22,
+      "est_time_s": 17.2
+    },
+    {
+      "from_instance": "imager_1",
+      "to_instance": "bench_1",
+      "transporter_instance": "skilled_operator_1",
+      "distance_m": 4.31,
+      "est_time_s": 19.3
+    },
+    {
+      "from_instance": "bench_1",
+      "to_instance": "echo_1",
+      "transporter_instance": "skilled_operator_1",
+      "distance_m": 6.13,
+      "est_time_s": 21.1
+    },
+    {
+      "from_instance": "echo_1",
+      "to_instance": "incubator_1",
+      "transporter_instance": "skilled_operator_1",
+      "distance_m": 2.11,
+      "est_time_s": 17.1
+    },
+    {
+      "from_instance": "incubator_1",
+      "to_instance": "shifter_1",
+      "transporter_instance": "skilled_operator_1",
+      "distance_m": 2.38,
+      "est_time_s": 17.4
+    },
+    {
+      "from_instance": "shifter_1",
+      "to_instance": "ln2_dewar_1",
+      "transporter_instance": "skilled_operator_1",
+      "distance_m": 2.49,
+      "est_time_s": 17.5
+    }
+  ],
+  "global_tools": [
+    {
+      "name": "request_human",
+      "description": "Page an operator. Use for manual steps, every escalation trigger in the skill file, and anything outside the manifest. Blocks the affected line until acknowledged.",
+      "input_schema": {
+        "type": "object",
+        "required": [
+          "role",
+          "reason",
+          "urgency"
+        ],
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "urgency": {
+            "type": "string",
+            "enum": [
+              "info",
+              "soon",
+              "now",
+              "stop_everything"
+            ]
+          },
+          "instances": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "record_measurement",
+      "description": "Log a measured value (step duration, capacity, hold time) so the digital twin can be re-run with real numbers. Always log first-run measurements of placeholder values.",
+      "input_schema": {
+        "type": "object",
+        "required": [
+          "parameter",
+          "value"
+        ],
+        "properties": {
+          "parameter": {
+            "type": "string",
+            "description": "e.g. 'harvest.duration_s' or 'growth_hotel_1.storage_slots'"
+          },
+          "value": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "labware_id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "pause_line",
+      "description": "Stop releasing new labware into the workflow from a given step onwards; work already inside instruments finishes.",
+      "input_schema": {
+        "type": "object",
+        "required": [
+          "from_step",
+          "reason"
+        ],
+        "properties": {
+          "from_step": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  ],
+  "run_order": {
+    "waves": [
+      [
+        "expression"
+      ],
+      [
+        "cell_harvest"
+      ],
+      [
+        "lysis"
+      ],
+      [
+        "clarification"
+      ],
+      [
+        "affinity_purification"
+      ],
+      [
+        "sec_purification"
+      ],
+      [
+        "protein_qc"
+      ],
+      [
+        "concentrate"
+      ],
+      [
+        "concentration_check"
+      ],
+      [
+        "drop_setup"
+      ],
+      [
+        "image_t0"
+      ],
+      [
+        "grow_1"
+      ],
+      [
+        "image_d1"
+      ],
+      [
+        "grow_2"
+      ],
+      [
+        "image_d3"
+      ],
+      [
+        "drop_selection"
+      ],
+      [
+        "soak_dispense"
+      ],
+      [
+        "soak_residence"
+      ],
+      [
+        "harvest"
+      ],
+      [
+        "puck_to_shipper"
+      ],
+      [
+        "ship_and_collect"
+      ],
+      [
+        "hit_analysis"
+      ]
+    ],
+    "steps": [
+      {
+        "step_id": "expression",
+        "name": "E. coli expression in shake flasks",
+        "mode": "automated",
+        "instances": [
+          "shaker_1"
+        ],
+        "after": [],
+        "operator_role": null,
+        "expected_s": 64800.0,
+        "low_s": 43200.0,
+        "high_s": 108000.0,
+        "confidence": "estimated",
+        "source": "agent_estimate",
+        "pause_after_s": 162000.0
+      },
+      {
+        "step_id": "cell_harvest",
+        "name": "Cell harvest spin",
+        "mode": "manual",
+        "instances": [
+          "centrifuge_hs_1"
+        ],
+        "after": [
+          "expression"
+        ],
+        "operator_role": "skilled_operator",
+        "expected_s": 1800.0,
+        "low_s": 600.0,
+        "high_s": 3600.0,
+        "confidence": "estimated",
+        "source": "agent_estimate",
+        "pause_after_s": 5400.0
+      },
+      {
+        "step_id": "lysis",
+        "name": "Cell lysis",
+        "mode": "manual",
+        "instances": [
+          "sonicator_1"
+        ],
+        "after": [
+          "cell_harvest"
+        ],
+        "operator_role": "skilled_operator",
+        "expected_s": 1200.0,
+        "low_s": 600.0,
+        "high_s": 2700.0,
+        "confidence": "estimated",
+        "source": "agent_estimate",
+        "pause_after_s": 4050.0
+      },
+      {
+        "step_id": "clarification",
+        "name": "Lysate clarification spin",
+        "mode": "manual",
+        "instances": [
+          "centrifuge_hs_1"
+        ],
+        "after": [
+          "lysis"
+        ],
+        "operator_role": "skilled_operator",
+        "expected_s": 1800.0,
+        "low_s": 600.0,
+        "high_s": 3600.0,
+        "confidence": "estimated",
+        "source": "agent_estimate",
+        "pause_after_s": 5400.0
+      },
+      {
+        "step_id": "affinity_purification",
+        "name": "Affinity chromatography",
+        "mode": "semi_automated",
+        "instances": [
+          "akta_1"
+        ],
+        "after": [
+          "clarification"
+        ],
+        "operator_role": "skilled_operator",
+        "expected_s": 3600.0,
+        "low_s": 1200.0,
+        "high_s": 14400.0,
+        "confidence": "estimated",
+        "source": "agent_estimate",
+        "pause_after_s": 21600.0
+      },
+      {
+        "step_id": "sec_purification",
+        "name": "Size-exclusion polishing",
+        "mode": "semi_automated",
+        "instances": [
+          "akta_1"
+        ],
+        "after": [
+          "affinity_purification"
+        ],
+        "operator_role": "skilled_operator",
+        "expected_s": 3600.0,
+        "low_s": 1800.0,
+        "high_s": 14400.0,
+        "confidence": "estimated",
+        "source": "agent_estimate",
+        "pause_after_s": 21600.0
+      },
+      {
+        "step_id": "protein_qc",
+        "name": "SDS-PAGE purity QC",
+        "mode": "manual",
+        "instances": [
+          "gel_1"
+        ],
+        "after": [
+          "sec_purification"
+        ],
+        "operator_role": "skilled_operator",
+        "expected_s": 2400.0,
+        "low_s": 2100.0,
+        "high_s": 2700.0,
+        "confidence": "datasheet",
+        "source": "https://www.bio-rad.com/webroot/web/pdf/lsr/literature/10007296D.pdf",
+        "pause_after_s": 4050.0
+      },
+      {
+        "step_id": "concentrate",
+        "name": "Concentrate protein (centrifugal concentrator)",
+        "mode": "manual",
+        "instances": [
+          "benchtop_centrifuge_1"
+        ],
+        "after": [
+          "protein_qc"
+        ],
+        "operator_role": "skilled_operator",
+        "expected_s": 1200.0,
+        "low_s": 600.0,
+        "high_s": 3600.0,
+        "confidence": "estimated",
+        "source": "agent_estimate",
+        "pause_after_s": 5400.0
+      },
+      {
+        "step_id": "concentration_check",
+        "name": "Concentration measurement",
+        "mode": "manual",
+        "instances": [
+          "nanodrop_1"
+        ],
+        "after": [
+          "concentrate"
+        ],
+        "operator_role": "skilled_operator",
+        "expected_s": 180.0,
+        "low_s": 60.0,
+        "high_s": 360.0,
+        "confidence": "estimated",
+        "source": "agent_estimate",
+        "pause_after_s": 540.0
+      },
+      {
+        "step_id": "drop_setup",
+        "name": "Crystallisation drop setup",
+        "mode": "semi_automated",
+        "instances": [
+          "mosquito_1"
+        ],
+        "after": [
+          "concentration_check"
+        ],
+        "operator_role": "skilled_operator",
+        "expected_s": 1440.0,
+        "low_s": 720.0,
+        "high_s": 3600.0,
+        "confidence": "estimated",
+        "source": "agent_estimate",
+        "pause_after_s": 5400.0
+      },
+      {
+        "step_id": "image_t0",
+        "name": "Inspection t0",
+        "mode": "automated",
+        "instances": [
+          "imager_1"
+        ],
+        "after": [
+          "drop_setup"
+        ],
+        "operator_role": null,
+        "expected_s": 180.0,
+        "low_s": 180.0,
+        "high_s": 240.0,
+        "confidence": "estimated",
+        "source": "agent_estimate",
+        "pause_after_s": 360.0
+      },
+      {
+        "step_id": "grow_1",
+        "name": "Crystal growth residence day 0-1",
+        "mode": "automated",
+        "instances": [
+          "incubator_1"
+        ],
+        "after": [
+          "image_t0"
+        ],
+        "operator_role": null,
+        "expected_s": 86400.0,
+        "low_s": 43200.0,
+        "high_s": 172800.0,
+        "confidence": "estimated",
+        "source": "agent_estimate",
+        "pause_after_s": 259200.0
+      },
+      {
+        "step_id": "image_d1",
+        "name": "Inspection day 1",
+        "mode": "automated",
+        "instances": [
+          "imager_1"
+        ],
+        "after": [
+          "grow_1"
+        ],
+        "operator_role": null,
+        "expected_s": 180.0,
+        "low_s": 180.0,
+        "high_s": 240.0,
+        "confidence": "estimated",
+        "source": "agent_estimate",
+        "pause_after_s": 360.0
+      },
+      {
+        "step_id": "grow_2",
+        "name": "Crystal growth residence day 1-3",
+        "mode": "automated",
+        "instances": [
+          "incubator_1"
+        ],
+        "after": [
+          "image_d1"
+        ],
+        "operator_role": null,
+        "expected_s": 172800.0,
+        "low_s": 86400.0,
+        "high_s": 1036800.0,
+        "confidence": "estimated",
+        "source": "agent_estimate",
+        "pause_after_s": 1555200.0
+      },
+      {
+        "step_id": "image_d3",
+        "name": "Inspection day 3",
+        "mode": "automated",
+        "instances": [
+          "imager_1"
+        ],
+        "after": [
+          "grow_2"
+        ],
+        "operator_role": null,
+        "expected_s": 180.0,
+        "low_s": 180.0,
+        "high_s": 240.0,
+        "confidence": "estimated",
+        "source": "agent_estimate",
+        "pause_after_s": 360.0
+      },
+      {
+        "step_id": "drop_selection",
+        "name": "Image review and drop selection",
+        "mode": "manual",
+        "instances": [
+          "bench_1"
+        ],
+        "after": [
+          "image_d3"
+        ],
+        "operator_role": "skilled_operator",
+        "expected_s": 600.0,
+        "low_s": 300.0,
+        "high_s": 1800.0,
+        "confidence": "estimated",
+        "source": "agent_estimate",
+        "pause_after_s": 2700.0
+      },
+      {
+        "step_id": "soak_dispense",
+        "name": "Acoustic fragment soaking",
+        "mode": "automated",
+        "instances": [
+          "echo_1"
+        ],
+        "after": [
+          "drop_selection"
+        ],
+        "operator_role": null,
+        "expected_s": 900.0,
+        "low_s": 300.0,
+        "high_s": 2400.0,
+        "confidence": "estimated",
+        "source": "agent_estimate",
+        "pause_after_s": 3600.0
+      },
+      {
+        "step_id": "soak_residence",
+        "name": "Soak residence",
+        "mode": "automated",
+        "instances": [
+          "incubator_1"
+        ],
+        "after": [
+          "soak_dispense"
+        ],
+        "operator_role": null,
+        "expected_s": 7200.0,
+        "low_s": 3600.0,
+        "high_s": 86400.0,
+        "confidence": "estimated",
+        "source": "agent_estimate",
+        "pause_after_s": 129600.0
+      },
+      {
+        "step_id": "harvest",
+        "name": "Shifter-assisted manual crystal harvesting",
+        "mode": "manual",
+        "instances": [
+          "shifter_1"
+        ],
+        "after": [
+          "soak_residence"
+        ],
+        "operator_role": "skilled_operator",
+        "expected_s": 1120.0,
+        "low_s": 480.0,
+        "high_s": 1152.0,
+        "confidence": "literature",
+        "source": "https://doi.org/10.1107/S2059798320014114",
+        "pause_after_s": 1728.0
+      },
+      {
+        "step_id": "puck_to_shipper",
+        "name": "Load filled puck into charged dry shipper",
+        "mode": "manual",
+        "instances": [
+          "ln2_dewar_1"
+        ],
+        "after": [
+          "harvest"
+        ],
+        "operator_role": "skilled_operator",
+        "expected_s": 300.0,
+        "low_s": 120.0,
+        "high_s": 900.0,
+        "confidence": "estimated",
+        "source": "agent_estimate",
+        "pause_after_s": 1350.0
+      },
+      {
+        "step_id": "ship_and_collect",
+        "name": "Ship to synchrotron, beamline queue and diffraction",
+        "mode": "external",
+        "instances": [],
+        "after": [
+          "puck_to_shipper"
+        ],
+        "operator_role": null,
+        "expected_s": 1920.0,
+        "low_s": 960.0,
+        "high_s": 4800.0,
+        "confidence": "estimated",
+        "source": "agent_estimate",
+        "pause_after_s": 7200.0
+      },
+      {
+        "step_id": "hit_analysis",
+        "name": "In-silico processing and hit analysis",
+        "mode": "in_silico",
+        "instances": [],
+        "after": [
+          "ship_and_collect"
+        ],
+        "operator_role": null,
+        "expected_s": 3600.0,
+        "low_s": 1800.0,
+        "high_s": 14400.0,
+        "confidence": "estimated",
+        "source": "agent_estimate",
+        "pause_after_s": 21600.0
+      }
+    ],
+    "bottleneck": {
+      "instance_id": "incubator_1",
+      "busy_fraction": 0.854,
+      "steps": [
+        "grow_1",
+        "grow_2",
+        "soak_residence"
+      ],
+      "parallel_units": [
+        "incubator_1"
+      ]
+    },
+    "dispatch_policy": "Pull-based release paced by the bottleneck (drum-buffer-rope): keep 1-2 units queued in front of incubator_1 (grow_1, grow_2, soak_residence) so it never idles, and release a new unit at the first step only when that buffer drops below 2. Among ready steps, serve the one feeding the bottleneck first, then oldest labware first.",
+    "dispatch_policy_basis": "Heuristic from the twin's utilisation; not an optimised schedule. Confirm in the simulator before relying on it.",
+    "wip_limits": [
+      {
+        "instance_id": "incubator_1",
+        "max_units": 44
+      },
+      {
+        "instance_id": "imager_1",
+        "max_units": 1000
+      },
+      {
+        "instance_id": "cold_room_1",
+        "max_units": 300
+      },
+      {
+        "instance_id": "ln2_dewar_1",
+        "max_units": 10
+      },
+      {
+        "instance_id": "dry_shipper_1",
+        "max_units": 3
+      }
+    ]
+  },
+  "preflight": {
+    "unresolved_layout_violations": [
+      {
+        "kind": "safety",
+        "instances": [
+          "arm_1",
+          "akta_1",
+          "centrifuge_hs_1",
+          "gel_1",
+          "sonicator_1"
+        ],
+        "message": "People hand labware into arm_1's reach at akta_1, centrifuge_hs_1, gel_1, sonicator_1, and arm_1 has no collaborative rating in the catalog; add a light curtain or a pass-through hotel at the cell edge."
+      }
+    ],
+    "measure_on_first_run": [
+      {
+        "instance_id": "sonicator_1",
+        "field": "process.durations_s.cell_lysis",
+        "value": 300,
+        "low": 60,
+        "high": 900,
+        "note": "Typical bacterial lysis 1-5 min pulsed per tube; single tube at a time"
+      },
+      {
+        "instance_id": "cold_room_1",
+        "field": "storage_slots",
+        "value": 300,
+        "low": 100,
+        "high": 800,
+        "note": "agent_estimate: plates/tote boxes on wire shelving in 8x8 ft room"
+      },
+      {
+        "instance_id": "shifter_1",
+        "field": "process.capacity",
+        "value": 1,
+        "low": 1,
+        "high": 1,
+        "note": "agent_estimate"
+      },
+      {
+        "instance_id": "ln2_dewar_1",
+        "field": "process.durations_s.cryo_cooling",
+        "value": 120,
+        "low": 30,
+        "high": 600,
+        "note": "Per filled puck: moving one puck from the harvesting station's LN2 bath into a storage cane/dewar. Per-crystal plunge-cooling is already inside olt_crystal_shifter crystal_harvesting (35 s/crystal), so do not add it again here."
+      },
+      {
+        "instance_id": "dry_shipper_1",
+        "field": "process.capacity",
+        "value": 1,
+        "low": 1,
+        "high": 1,
+        "note": "agent_estimate"
+      },
+      {
+        "instance_id": "dry_shipper_1",
+        "field": "storage_slots",
+        "value": 3,
+        "low": 1,
+        "high": 7,
+        "note": "Pucks per shipment. The stock canister takes vials (85 x 1.2/2.0 mL); UniPucks need separate puck shipping canes, whose count per CX100 was not found."
+      },
+      {
+        "instance_id": "bench_1",
+        "field": "process.durations_s.manual_bench",
+        "value": 900,
+        "low": 300,
+        "high": 3600,
+        "note": "one manual handling step per plate"
+      }
+    ]
+  },
+  "safety_rules": [
+    "Only call tools in the manifest, with step ids and routes from their enums. Never improvise a device action, parameter or route that is not listed.",
+    "Never load a device beyond its capacity or storage slots, and never load labware types it does not accept.",
+    "Never start a step before every step in its `after` list has finished for that labware unit.",
+    "Keep walkways of at least 1.0 m and egress of at least 1.2 m clear; mobile robots must not park in them.",
+    "flammable solvents: akta_1 must only run inside a fume_hood or ventilated zone with its extraction or monitoring confirmed on.",
+    "toxic reagents: gel_1 must only run inside a fume_hood zone with its extraction or monitoring confirmed on.",
+    "cryogens: dry_shipper_1, ln2_dewar_1, shifter_1 must only run inside a cryogen zone with its extraction or monitoring confirmed on.",
+    "Cryogens: no one handles liquid nitrogen alone; confirm the O2 monitor reads normal before any cryo step.",
+    "High-g centrifuge: only start a run when the rotor is balanced and the lid interlock reports closed."
+  ],
+  "escalation_rules": [
+    "Manual or semi-automated steps (cell_harvest, lysis, clarification, affinity_purification, sec_purification, protein_qc, concentrate, concentration_check, drop_setup, drop_selection, harvest, puck_to_shipper): call `request_human` with the step's operator role before the labware arrives. skilled_operator works 8 h shifts. Out of shift, hold the labware in storage rather than skipping the step.",
+    "External steps (ship_and_collect) leave the lab: a human books, packs and ships them. Never mark them done yourself.",
+    "A step still running at 1.5x its high bound (`pause_after_s` in the run order) is outside what the twin expects: check the device status, `pause_line` from that step, and `request_human` (urgency soon).",
+    "Any device error, safety interlock, labware mismatch or barcode you cannot read: stop that device, `request_human` (urgency now). Do not retry a failed physical action more than once.",
+    "dry_shipper_1 hold contents for about 12.6 d each: track when each was charged, alert a human at 75% of that, and ship or unload before it expires.",
+    "No confirmed programmable interface for echo_1, imager_1, mosquito_1, shaker_1: until a driver is verified, treat their tools as 'ask a human to do this and confirm', not as direct control.",
+    "The twin gives only a 10% chance of meeting the 300 crystals_per_day target. Tell the lab manager on day one instead of pushing devices past their limits to catch up.",
+    "Design claim refuted by the verifier: \"Median simulated throughput meets the 300 crystals/day target\" (verified throughput.p50 = 172.0). Never report the claimed value as expected performance; use the verified one.",
+    "Design claim refuted by the verifier: \"Layout has zero violations\" (verified layout.violations = 1.0). Never report the claimed value as expected performance; use the verified one."
+  ],
+  "expected_performance": {
+    "throughput": {
+      "value": 123.8,
+      "unit": "crystals_per_day",
+      "target": 300,
+      "meets_target": false,
+      "p10": 89.1,
+      "p50": 123.8,
+      "p90": 229.8,
+      "prob_meets_target": 0.1
+    },
+    "top_utilisation": [
+      {
+        "instance_id": "incubator_1",
+        "busy_fraction": 0.854,
+        "mean_queue_wait_s": 126.2
+      },
+      {
+        "instance_id": "skilled_operator_2",
+        "busy_fraction": 0.706,
+        "mean_queue_wait_s": 0.0
+      },
+      {
+        "instance_id": "skilled_operator_1",
+        "busy_fraction": 0.703,
+        "mean_queue_wait_s": 0.0
+      },
+      {
+        "instance_id": "akta_1",
+        "busy_fraction": 0.371,
+        "mean_queue_wait_s": 33087.4
+      },
+      {
+        "instance_id": "shaker_1",
+        "busy_fraction": 0.146,
+        "mean_queue_wait_s": 1112.9
+      }
+    ],
+    "bottlenecks": [
+      "incubator_1 is busy 85% of the time; it caps throughput near 145 crystals per day.",
+      "skilled_operator_2 is busy 71% of their shift.",
+      "skilled_operator_1 is busy 70% of their shift.",
+      "Labware travels 6.13 m from bench_1 to echo_1.",
+      "External step 'Ship to synchrotron, beamline queue and diffraction' takes about 241 h of the 610 h cycle; the layout cannot shorten it."
+    ],
+    "sensitivity": [
+      {
+        "parameter": "grow_2.duration_s",
+        "effect": -190.9
+      },
+      {
+        "parameter": "puck_to_shipper.duration_s",
+        "effect": -48.2
+      },
+      {
+        "parameter": "soak_residence.duration_s",
+        "effect": -20.6
+      },
+      {
+        "parameter": "affinity_purification.duration_s",
+        "effect": 20.6
+      },
+      {
+        "parameter": "sec_purification.duration_s",
+        "effect": 9.2
+      }
+    ],
+    "refuted_claims": [
+      {
+        "statement": "Median simulated throughput meets the 300 crystals/day target",
+        "metric": "throughput.p50",
+        "verified_value": 172.0,
+        "note": "throughput.p50 = 172, recomputed by the verifier."
+      },
+      {
+        "statement": "Layout has zero violations",
+        "metric": "layout.violations",
+        "verified_value": 1.0,
+        "note": "layout.violations = 1, recomputed by the verifier."
+      }
+    ]
+  }
+}

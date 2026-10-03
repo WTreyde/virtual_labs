@@ -117,7 +117,9 @@ export function showSchedule(s: ProjectSchedule, projects: ProjectRequest[], cac
   const bars = (s.gantt ?? []).filter((g) => g.end_s > g.start_s);
   const lanes = [...new Set(bars.map((g) => g.instance))];
   const endH = Math.max(rec.makespan_h, ...bars.map((g) => g.end_s / 3600));
-  const W = 700, L = 96, R = 14, T = 8, lane = 24, H = T + lanes.length * lane + 34;
+  const deadlines = projects.filter((p) => p.deadline_h != null);
+  // Deadline labels sit above the chart at the top of their line, clear of the x-axis title below.
+  const W = 700, L = 96, R = 14, T = deadlines.length ? 22 : 8, lane = 24, H = T + lanes.length * lane + 34;
   const X = (h: number) => L + (h / endH) * (W - L - R);
   const step = endH > 12 ? 2 : 1, hours = Array.from({ length: Math.floor(endH / step) + 1 }, (_, i) => i * step);
   const gantt = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Gantt chart of the recommended schedule by instrument">
@@ -128,8 +130,11 @@ export function showSchedule(s: ProjectSchedule, projects: ProjectRequest[], cac
       const t = `<b>${esc(g.project)}</b> #${g.unit} · ${esc(g.step)} on ${esc(g.instance)}<br>${num(g.start_s / 3600, 2)}–${num(g.end_s / 3600, 2)} h`;
       return `<rect data-tip="${esc(t)}" x="${x}" y="${y}" width="${w}" height="14" rx="2" fill="${colour[g.project] ?? C.before}"/>`;
     }).join("")}
-    ${projects.filter((p) => p.deadline_h != null).map((p) => `<line x1="${X(p.deadline_h!)}" x2="${X(p.deadline_h!)}" y1="${T - 4}" y2="${T + lanes.length * lane}" stroke="${C.ink}" stroke-width="1.5" stroke-dasharray="5 3"/>
-      <text x="${X(p.deadline_h!) + 4}" y="${T + lanes.length * lane + 28}" class="ref">${esc(p.id)} deadline ${p.deadline_h} h</text>`).join("")}
+    ${deadlines.map((p) => {
+      const x = X(p.deadline_h!), label = `${p.id} deadline ${p.deadline_h} h`, right = x + 4 + label.length * 5.6 <= W - R;
+      return `<line x1="${x}" x2="${x}" y1="${T - 18}" y2="${T + lanes.length * lane}" stroke="${C.ink}" stroke-width="1.5" stroke-dasharray="5 3"/>
+      <text x="${right ? x + 4 : x - 4}" y="${T - 9}" text-anchor="${right ? "start" : "end"}" class="ref">${esc(label)}</text>`;
+    }).join("")}
     <text x="${L}" y="${H - 4}" class="axis">hours from start, recommended order</text></svg>`;
   const legend = `<div class="legend">${given.map((id) => `<span><i style="background:${colour[id]}"></i>${esc(id)}</span>`).join("")}</div>`;
 
@@ -171,16 +176,27 @@ export function showSchedule(s: ProjectSchedule, projects: ProjectRequest[], cac
 const usd = (v: number) => (v >= 1e6 ? `$${+(v / 1e6).toFixed(1)}M` : v >= 1e3 ? `$${Math.round(v / 1e3)}k` : `$${Math.round(v)}`);
 const shortName = (n: string) => { const s = n.split(/[(:,]/)[0].trim(); return s.length > 26 ? `${s.slice(0, 24)}…` : s; };
 
-/** Log-log scatter: reported cost (x) against LabForge's P50 with a P10-P90 bar (y), y = x line, hollow = unverified. */
+const STATUS_TEXT: Record<string, string> = { no_design_yet: "No design yet", error: "Error", not_costable: "Not costable", compared: "Compared" };
+const confidenceText = (r: ValidationRow) => {
+  const c = r.predicted?.confidence?.within_25pct;
+  return c == null ? "" : `${Math.round(c * 100)}% chance within ±25%`;
+};
+
+/**
+ * Log-log scatter: reported cost (x) against LabForge's P50 with its P10-P90 band (y), y = x line, hollow = reported
+ * cost unverified. The band is the headline (it holds up in blind tests); the single-number confidence score is shown
+ * only as "experimental" because it does not yet beat a constant baseline (docs/validation.md). Cases without a
+ * comparison (no design yet, error, not costable) are listed with their reason, never plotted as $0.
+ */
 export function showValidation(rows: ValidationRow[]) {
   const pts = rows.filter((r) => r.status === "compared" && r.reported_usd && r.predicted);
   const rest = rows.filter((r) => !pts.includes(r));
   const inBand = pts.filter((r) => r.within_p10_p90).length;
-  let chart = `<p class="muted">No case has a LabForge design to compare yet.</p>`;
+  let chart = `<p class="muted">No case has a LabForge design to compare yet.</p>`, hiddenLabels = 0;
   if (pts.length) {
     const vals = pts.flatMap((r) => [r.reported_usd!, r.predicted!.p10, r.predicted!.p90]);
     const lo = Math.log10(Math.min(...vals) / 1.6), hi = Math.log10(Math.max(...vals) * 1.6);
-    const W = 640, H = 420, L = 64, R = 20, T = 16, B = 46;
+    const W = 680, H = 480, L = 64, R = 20, T = 16, B = 46;
     const X = (v: number) => L + ((Math.log10(v) - lo) / (hi - lo)) * (W - L - R);
     const Y = (v: number) => H - B - ((Math.log10(v) - lo) / (hi - lo)) * (H - T - B);
     const ticks: number[] = [];
@@ -190,13 +206,13 @@ export function showValidation(rows: ValidationRow[]) {
     const a = 10 ** lo, b = 10 ** hi;
     const diag = `<line x1="${X(a)}" y1="${Y(a)}" x2="${X(b)}" y2="${Y(b)}" stroke="${C.ink2}" stroke-dasharray="5 4"/>
       <text x="${X(b) - 4}" y="${Y(b) + 14}" text-anchor="end" class="ref">predicted = reported</text>`;
-    // Direct labels: each goes to the first of right/left/above/below that clears earlier labels and the markers.
+    // Direct labels: each takes the first free spot (beside the point, stepped up/down with a leader line, or
+    // above/below its band). With no free spot the label is left off rather than overprinted; hover still names it.
     type Box = { x0: number; y0: number; x1: number; y1: number };
     const hit = (a: Box, b: Box) => a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
     const taken: Box[] = pts.map((r) => ({ x0: X(r.reported_usd!) - 6, x1: X(r.reported_usd!) + 6, y0: Y(r.predicted!.p90), y1: Y(r.predicted!.p10) }));
     const marks = [...pts].sort((a, b) => a.reported_usd! - b.reported_usd!).map((r) => {
       const p = r.predicted!, x = X(r.reported_usd!), y = Y(p.p50), hollow = !r.verified, name = shortName(r.name), w = name.length * 5.9 + 6;
-      // Right or left of the point, then stepped up and down (with a leader line), then above/below the bar.
       const spots: { x: number; y: number; a: string; box: Box; lead?: boolean }[] = [];
       for (const dy of [0, -14, 14, -28, 28, -42, 42, -56, 56, -70, 70]) {
         const ly = y + dy;
@@ -206,35 +222,53 @@ export function showValidation(rows: ValidationRow[]) {
       spots.push({ x, y: Y(p.p90) - 8, a: "middle", box: { x0: x - w / 2, x1: x + w / 2, y0: Y(p.p90) - 19, y1: Y(p.p90) - 5 } });
       spots.push({ x, y: Y(p.p10) + 16, a: "middle", box: { x0: x - w / 2, x1: x + w / 2, y0: Y(p.p10) + 5, y1: Y(p.p10) + 19 } });
       const inside = (b: Box) => b.x0 >= L && b.x1 <= W - 2 && b.y0 >= T && b.y1 <= H - B;
-      const spot = spots.find((s) => inside(s.box) && !taken.some((t) => hit(t, s.box))) ?? spots[0];
-      const leader = spot.lead ? `<line x1="${x + (spot.a === "start" ? 6 : -6)}" y1="${y}" x2="${spot.a === "start" ? spot.box.x0 - 2 : spot.box.x1 + 2}" y2="${spot.y - 4}" stroke="${C.ink2}" stroke-width="1"/>` : "";
-      taken.push(spot.box);
-      const tip = `<b>${esc(r.name)}</b><br>Reported ${usd(r.reported_usd!)} · predicted ${usd(p.p50)} (P10–P90 ${usd(p.p10)}–${usd(p.p90)})<br>` +
-        `${r.within_p10_p90 ? "Inside" : "Outside"} the band · log10 error ${r.log10_error ?? "?"}${hollow ? "<br><i>Reported cost not verified</i>" : ""}`;
+      const spot = spots.find((s) => inside(s.box) && !taken.some((t) => hit(t, s.box)));
+      let label = "";
+      if (spot) {
+        taken.push(spot.box);
+        const leader = spot.lead ? `<line x1="${x + (spot.a === "start" ? 6 : -6)}" y1="${y}" x2="${spot.a === "start" ? spot.box.x0 - 2 : spot.box.x1 + 2}" y2="${spot.y - 4}" stroke="${C.ink2}" stroke-width="1"/>` : "";
+        label = `${leader}<text x="${spot.x}" y="${spot.y}" text-anchor="${spot.a}" class="lane">${esc(name)}</text>`;
+      } else hiddenLabels++;
+      const conf = confidenceText(r);
+      const tip = `<b>${esc(r.name)}</b><br>Reported ${usd(r.reported_usd!)} · predicted ${usd(p.p50)} (80% band ${usd(p.p10)}–${usd(p.p90)})<br>` +
+        `${r.within_p10_p90 ? "Inside" : "Outside"} the band${r.like_for_like === false ? " · not like-for-like" : ""}` +
+        (conf ? `<br>Confidence (experimental): ${conf}` : "") +
+        (r.unmodelled_categories?.length ? `<br>Not modelled: ${esc(r.unmodelled_categories.join(", "))}` : "") +
+        (r.design_provenance ? "<br><i>Designed by the agent, cost withheld</i>" : "") +
+        (hollow ? "<br><i>Reported cost not verified</i>" : "");
       return `<g data-tip="${esc(tip)}">
         <line x1="${x}" x2="${x}" y1="${Y(p.p10)}" y2="${Y(p.p90)}" stroke="${C.s1}" stroke-width="2"/>
         <line x1="${x - 5}" x2="${x + 5}" y1="${Y(p.p10)}" y2="${Y(p.p10)}" stroke="${C.s1}" stroke-width="2"/>
         <line x1="${x - 5}" x2="${x + 5}" y1="${Y(p.p90)}" y2="${Y(p.p90)}" stroke="${C.s1}" stroke-width="2"/>
         <circle cx="${x}" cy="${y}" r="14" fill="transparent"/>
         <circle cx="${x}" cy="${y}" r="5" fill="${hollow ? C.surface : C.s1}" stroke="${hollow ? C.s1 : C.surface}" stroke-width="2"/>
-        ${leader}<text x="${spot.x}" y="${spot.y}" text-anchor="${spot.a}" class="lane">${esc(name)}</text></g>`;
+        ${label}</g>`;
     }).join("");
     chart = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Predicted against reported lab cost, log scales">${grid}${diag}${marks}
       <text x="${(L + W - R) / 2}" y="${H - 8}" text-anchor="middle" class="axis">reported cost (USD, log scale)</text>
-      <text x="14" y="${(T + H - B) / 2}" text-anchor="middle" class="axis" transform="rotate(-90 14 ${(T + H - B) / 2})">LabForge predicted cost, P50 with P10–P90 (USD, log)</text></svg>
-      <div class="legend"><span><i style="background:${C.s1};border-radius:50%"></i>reported cost verified</span><span><i style="background:${C.surface};border:2px solid ${C.s1};border-radius:50%;width:7px;height:7px"></i>reported cost not verified</span></div>`;
+      <text x="14" y="${(T + H - B) / 2}" text-anchor="middle" class="axis" transform="rotate(-90 14 ${(T + H - B) / 2})">LabForge predicted cost, P50 with 80% band (USD, log)</text></svg>
+      <div class="legend"><span><i style="background:${C.s1};border-radius:50%"></i>reported cost verified</span><span><i style="background:${C.surface};border:2px solid ${C.s1};border-radius:50%;width:7px;height:7px"></i>reported cost not verified</span>
+        <span><i style="background:${C.s1};width:2px;height:12px;border-radius:0"></i>80% band (P10–P90)</span>${hiddenLabels ? `<span class="muted">${hiddenLabels} labels left off to avoid overlap; hover a point for its name</span>` : ""}</div>`;
   }
+  const byStatus = (st: string) => rest.filter((r) => r.status === st);
+  const restList = ["not_costable", "error", "no_design_yet"].filter((st) => byStatus(st).length).map((st) =>
+    `<p class="muted"><b>${STATUS_TEXT[st]} (${byStatus(st).length}):</b> ${byStatus(st).map((r) => `<span title="${esc(r.reason ?? "")}">${esc(shortName(r.name))}</span>`).join(" · ")}${
+      new Set(byStatus(st).map((r) => r.reason)).size === 1 && byStatus(st)[0].reason ? ` <i>(${esc(byStatus(st)[0].reason)})</i>` : ""}</p>`).join("");
   const table = `<details${pts.length ? "" : " open"}><summary>Table view: all ${rows.length} cases</summary><table>
-    <tr><th>Case</th><th>Reported</th><th>Predicted P10–P50–P90</th><th>In band</th><th>Source verified</th></tr>
-    ${rows.map((r) => `<tr><td>${esc(r.name)}</td><td>${r.reported_usd ? usd(r.reported_usd) : "–"}</td>
-      <td>${r.predicted ? `${usd(r.predicted.p10)} – ${usd(r.predicted.p50)} – ${usd(r.predicted.p90)}` : esc(r.status.replace(/_/g, " "))}</td>
-      <td>${r.within_p10_p90 == null ? "–" : r.within_p10_p90 ? "yes" : "no"}</td><td>${r.verified ? "yes" : "no"}</td></tr>`).join("")}
+    <tr><th>Case</th><th>Status</th><th>Reported</th><th>Predicted P10 – P50 – P90</th><th>In band</th><th>Confidence (experimental)</th><th>Source verified</th></tr>
+    ${rows.map((r) => `<tr><td>${esc(r.name)}</td>
+      <td>${esc(STATUS_TEXT[r.status] ?? r.status.replace(/_/g, " "))}${r.reason ? `<div class="muted">${esc(r.reason)}</div>` : ""}</td>
+      <td>${r.reported_usd ? usd(r.reported_usd) : "–"}</td>
+      <td>${r.status === "compared" && r.predicted ? `${usd(r.predicted.p10)} – ${usd(r.predicted.p50)} – ${usd(r.predicted.p90)}` : "–"}</td>
+      <td>${r.within_p10_p90 == null ? "–" : r.within_p10_p90 ? "yes" : "no"}</td><td>${esc(confidenceText(r) || "–")}</td><td>${r.verified ? "yes" : "no"}</td></tr>`).join("")}
     </table></details>`;
   openModal("Does LabForge price real labs right?", `
-    <p class="muted">Predicted equipment cost against the cost reported for published labs. <b>${pts.length} of ${rows.length}</b> cases have a LabForge design to compare;
-      <b>${inBand} of ${pts.length}</b> reported costs fall inside our P10–P90 band. Points on the dashed line would be exact.</p>
+    <p class="lead">Our 80% cost band (P10–P90) caught <b>${inBand} of ${pts.length}</b> published labs we could compare.
+      Points on the dashed line would be exact.</p>
+    <p class="muted">${pts.length} of ${rows.length} cases have a LabForge design to compare. The single-number confidence score is
+      <b>experimental</b>: it does not yet beat a constant baseline, so we show the band, not the score.</p>
     ${chart}
-    ${rest.length ? `<p class="muted">No prediction yet: ${rest.map((r) => esc(shortName(r.name))).join(" · ")}.</p>` : ""}
+    ${restList}
     ${table}`, true);
 }
 

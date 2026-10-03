@@ -1,6 +1,6 @@
 import "@fontsource/press-start-2p";
 import Phaser from "phaser";
-import { chat, exampleDesign, LIVE_CHAT_MESSAGE, leaderboard, liveCatalog, liveChat, optimise, prioritise, setOffline, validation } from "./api";
+import { chatStream, exampleDesign, health, HttpError, LIVE_CHAT_MESSAGE, leaderboard, liveCatalog, optimise, prioritise, setOffline, validation } from "./api";
 import demoQueue from "../../backend/labforge/catalog/data/demo_prioritise_queue.json";
 import cachedDemoSchedule from "./fixtures/demo_schedule.json";
 import { galleryDesign } from "./fixtures/gallery";
@@ -9,7 +9,7 @@ import { renderLanding, summaryBox } from "./landing";
 import { LabScene } from "./LabScene";
 import { renderPanel } from "./panel";
 import { openReport } from "./report";
-import { emptyDesign, loadReplay, loadSummary, loadWhatIfCache, playReplay } from "./replay";
+import { describe, emptyDesign, loadReplay, loadSummary, loadWhatIfCache, playReplay } from "./replay";
 import { migrateLegacyLinks, parseRoute, routeKey, type Route } from "./router";
 import { clock } from "./timeline";
 import type { ChatMessage, Design, ProjectRequest, ProjectSchedule } from "./types";
@@ -83,6 +83,8 @@ async function go(r: Route) {
   badge.querySelector("button")?.remove();
   $("#checked").classList.add("hidden");
   $("#fix").classList.add("hidden");
+  $("#skill-btn").classList.add("hidden");
+  $("#agent-banner").classList.add("hidden");
   log.textContent = "";
   history = [];
   chatting = false;
@@ -105,12 +107,19 @@ async function go(r: Route) {
       // With the backend up, use its catalog so BOM prices match /report; offline, keep examples/catalog.json.
       liveCatalog(d).then((catalog) => { if (route === r) show({ ...design, catalog }); }).catch(() => {});
       // Public demo (live_chat: false) or no backend: say so instead of offering a chat box that errors.
-      liveChat().then((state) => {
-        if (route !== r || state === "on") return;
-        setChatEnabled(false);
-        $<HTMLInputElement>("#chat-input").placeholder = state === "off" ? "Live design is off in this demo" : "Backend not reachable";
-        appendLog(LIVE_CHAT_MESSAGE[state]);
-        dialogue.say([LIVE_CHAT_MESSAGE[state], ...introLines(d)]);
+      health().then(({ state, liveAgent, note }) => {
+        if (route !== r) return;
+        if (state !== "on") {
+          setChatEnabled(false);
+          $<HTMLInputElement>("#chat-input").placeholder = state === "off" ? "Live design is off in this demo" : "Backend not reachable";
+          appendLog(LIVE_CHAT_MESSAGE[state]);
+          dialogue.say([LIVE_CHAT_MESSAGE[state], ...introLines(d)]);
+        } else if (!liveAgent) {
+          // Chat still answers, but with the offline worked example: say so plainly instead of pretending.
+          const banner = $("#agent-banner");
+          banner.textContent = note ?? "Live agent off: the backend has no API key, so replies use the offline worked example.";
+          banner.classList.remove("hidden");
+        }
       });
       if (r.whatif) openWhatIf(r.whatif);
       return;
@@ -172,6 +181,11 @@ async function startReplay(name: string) {
   }
   if (!live()) return;
   skipBtn.remove();
+  if (await skillAvailable(name) && live()) {
+    const btn = $<HTMLButtonElement>("#skill-btn");
+    btn.classList.remove("hidden");
+    btn.onclick = () => downloadSkill(name);
+  }
   // Playback is over: the what-if may now ask the backend (it falls back to the case's cached sweep offline).
   setOffline(false);
 }
@@ -187,7 +201,20 @@ $<HTMLFormElement>("#chat-form").addEventListener("submit", async (e) => {
   appendLog(`You: ${input.value}`);
   input.value = "";
   try {
-    const out = await chat(history, design);
+    // Stream the agent's steps into the log and dialogue box as they happen.
+    let writing = false;
+    const out = await chatStream(history, design, (ev) => {
+      if (route !== started) return;
+      if (ev.type === "text_delta") {
+        if (!writing) { writing = true; dialogue.say(["Writing the answer…"]); }
+        return;
+      }
+      const line = describe(ev);
+      if (!line) return;
+      appendLog(`Agent: ${line}`);
+      dialogue.say([line]);
+      writing = false;
+    });
     if (route !== started) return;
     history = out.history;
     appendLog(`Agent: ${out.reply}`);
@@ -246,6 +273,32 @@ function updateWhatIfButton() {
   btn.onclick = () => openWhatIf(id);
 }
 
+// ---- agent skill download ---------------------------------------------------------------------
+
+// Each case ships the agent skill generated from its digital twin (public/skills/<case>/, copied from
+// backend/labforge/orchestrator/samples by scripts/copy_skills.py), so the download works offline.
+const SKILL_FILES = ["SKILL.md", "tools.json"];
+const skillUrl = (name: string, file: string) => `${(import.meta as any).env?.BASE_URL ?? "/"}skills/${encodeURIComponent(name)}/${file}`;
+
+async function skillAvailable(name: string) {
+  try {
+    const res = await fetch(skillUrl(name, "SKILL.md"), { method: "HEAD" });
+    return res.ok && !(res.headers.get("content-type") ?? "").includes("text/html"); // dev servers answer misses with index.html
+  } catch { return false; }
+}
+
+async function downloadSkill(name: string) {
+  for (const file of SKILL_FILES) {
+    const res = await fetch(skillUrl(name, file));
+    if (!res.ok) continue;
+    const url = URL.createObjectURL(await res.blob());
+    const a = Object.assign(document.createElement("a"), { href: url, download: file });
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    await new Promise((r) => setTimeout(r, 300)); // browsers drop back-to-back downloads
+  }
+}
+
 // ---- full-page views ----------------------------------------------------------------------------
 
 async function openSchedule() {
@@ -257,7 +310,9 @@ async function openSchedule() {
 }
 async function openValidation() {
   showLoading("Does LabForge price real labs right?", "Comparing against published labs…");
-  try { showValidation(await validation()); } catch { showError("Does LabForge price real labs right?", "Needs the backend (make backend)."); }
+  try { showValidation(await validation()); } catch (e) {
+    showError("Does LabForge price real labs right?", e instanceof HttpError ? `The backend returned an error (${e.status}).` : "Needs the backend (make backend).");
+  }
 }
 async function openBench() {
   showLoading("LabDesignBench", "Loading the leaderboard…");
