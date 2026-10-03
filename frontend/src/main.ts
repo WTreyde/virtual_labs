@@ -1,9 +1,10 @@
 import "@fontsource/press-start-2p";
 import Phaser from "phaser";
-import { chat, exampleDesign, leaderboard, liveCatalog, optimise, prioritise, setOffline, validation } from "./api";
+import { chat, exampleDesign, LIVE_CHAT_MESSAGE, leaderboard, liveCatalog, liveChat, optimise, prioritise, setOffline, validation } from "./api";
 import demoQueue from "../../backend/labforge/catalog/data/demo_prioritise_queue.json";
 import cachedDemoSchedule from "./fixtures/demo_schedule.json";
 import { galleryDesign } from "./fixtures/gallery";
+import { fixCard } from "./capacity";
 import { renderLanding, summaryBox } from "./landing";
 import { LabScene } from "./LabScene";
 import { renderPanel } from "./panel";
@@ -81,11 +82,13 @@ async function go(r: Route) {
   badge.classList.add("hidden");
   badge.querySelector("button")?.remove();
   $("#checked").classList.add("hidden");
+  $("#fix").classList.add("hidden");
   log.textContent = "";
   history = [];
   chatting = false;
   setOffline(false);
   setChatEnabled(r.page === "design");
+  $<HTMLInputElement>("#chat-input").placeholder = "Describe your lab...";
   document.body.classList.toggle("page-view", ["bench", "validation", "schedule"].includes(r.page));
   document.body.classList.toggle("on-landing", r.page === "landing");
   landing.classList.toggle("hidden", r.page !== "landing");
@@ -101,6 +104,14 @@ async function go(r: Route) {
       dialogue.say(["Describe the lab you want in the box on the right. Meanwhile, here is the worked example.", ...introLines(d)]);
       // With the backend up, use its catalog so BOM prices match /report; offline, keep examples/catalog.json.
       liveCatalog(d).then((catalog) => { if (route === r) show({ ...design, catalog }); }).catch(() => {});
+      // Public demo (live_chat: false) or no backend: say so instead of offering a chat box that errors.
+      liveChat().then((state) => {
+        if (route !== r || state === "on") return;
+        setChatEnabled(false);
+        $<HTMLInputElement>("#chat-input").placeholder = state === "off" ? "Live design is off in this demo" : "Backend not reachable";
+        appendLog(LIVE_CHAT_MESSAGE[state]);
+        dialogue.say([LIVE_CHAT_MESSAGE[state], ...introLines(d)]);
+      });
       if (r.whatif) openWhatIf(r.whatif);
       return;
     }
@@ -150,6 +161,8 @@ async function startReplay(name: string) {
           if (t.verified_p50 != null)
             lines.push(`Careful: my planning simulation says ${Math.round(t.p50)}, but an independent check of the same design gives ${Math.round(t.verified_p50)} ${t.unit.replace(/_/g, " ")}. The limits are listed on the right.`);
         }
+        const fix = fixCard(d, summary);
+        if (fix) { $("#fix").innerHTML = fix; $("#fix").classList.remove("hidden"); }
         dialogue.say(lines);
       },
       showAnswer: (title, html) => live() && showHtml(title, html),
@@ -209,6 +222,11 @@ async function openWhatIf(id: string) {
     showError(title, "Needs the backend (make backend); there is no cached sweep for this instrument.");
   }
 }
+// "Show the <instrument>" on the fix card opens that instrument's stat card, as clicking it in the scene would.
+$("#fix").addEventListener("click", (e) => {
+  const id = (e.target as HTMLElement).closest<HTMLElement>(".fix-show")?.dataset.id;
+  if (id) game.events.emit("select-id", id);
+});
 $("#statcard").addEventListener("click", (e) => {
   const id = (e.target as HTMLElement).closest<HTMLElement>(".whatif")?.dataset.id;
   if (id) openWhatIf(id);

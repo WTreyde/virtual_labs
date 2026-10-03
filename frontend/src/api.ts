@@ -92,3 +92,20 @@ export async function leaderboard(): Promise<Leaderboard | null> {
   if (!res.ok) throw new Error(`/bench/leaderboard: HTTP ${res.status}`);
   return res.json();
 }
+
+/**
+ * Is live design (POST /chat) available? "off" when the gateway says live_chat: false (the public replay-only
+ * demo), "unreachable" when there is no backend, "on" otherwise. Asked once per page load.
+ */
+let liveChatState: Promise<"on" | "off" | "unreachable"> | undefined;
+export function liveChat(): Promise<"on" | "off" | "unreachable"> {
+  liveChatState ??= apiFetch("/health", { signal: AbortSignal.timeout(3000) })
+    .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
+    .then((h: { live_chat?: boolean }) => (h.live_chat === false ? "off" : "on") as "on" | "off")
+    .catch(() => "unreachable" as const);
+  return liveChatState;
+}
+export const LIVE_CHAT_MESSAGE = {
+  off: "Live design is off in this public demo. Watch the two recorded cases instead.",
+  unreachable: "Live design needs the backend (make backend or make demo), which isn't reachable right now.",
+};

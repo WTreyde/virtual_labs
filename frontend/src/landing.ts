@@ -1,3 +1,4 @@
+import { LIVE_CHAT_MESSAGE, liveChat } from "./api";
 import { loadReplay, loadSummary, type RecordedRun } from "./replay";
 import type { CaseSummary } from "./types";
 
@@ -88,6 +89,16 @@ export async function renderLanding(el: HTMLElement) {
           <div class="card-go">Start designing ▸</div></a>
       </div>
     </div>`;
+  // The "Design your own" card says so up front when live design is unavailable (e.g. the public demo).
+  liveChat().then((state) => {
+    if (state === "on") return;
+    const own = el.querySelector<HTMLElement>(".card.own");
+    if (!own) return;
+    own.classList.add("disabled");
+    own.querySelector(".card-kicker")!.textContent = state === "off" ? "Off in this public demo" : "Needs the backend";
+    own.querySelector(".card-sub")!.textContent = LIVE_CHAT_MESSAGE[state];
+    own.querySelector(".card-go")!.textContent = "See what it would look like ▸";
+  });
   await Promise.all(CASES.map(async (c) => {
     const sub = el.querySelector<HTMLElement>(`[data-case="${c.name}"] .card-sub`)!;
     try {

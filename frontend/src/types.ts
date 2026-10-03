@@ -101,4 +101,6 @@ export interface CaseSummary {
   budget_vs_bom?: { currency?: string; budget?: number; bom?: number; claim_status?: string; basis?: string };
   gate_passed?: boolean;
   limits?: string[];
+  /** Albert's what-if for growing plates in the imager instead of the hotel (shape may still change). */
+  imager_growth_whatif?: Record<string, unknown>;
 }
