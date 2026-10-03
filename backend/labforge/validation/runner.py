@@ -32,7 +32,7 @@ def run_case(case: dict) -> dict:
     if workflow is None:
         return {**row, "status": "no_design_yet"}
     return {**row, "status": "compared", **compare(cost["value_usd"], predicted_cost(workflow, cost["includes"], build=case.get("build", "turnkey"),
-                                                                  year=cost.get("year")))}
+                                                                  year=cost.get("year"), basis=case.get("price_basis")))}
 
 
 def main() -> list[dict]:

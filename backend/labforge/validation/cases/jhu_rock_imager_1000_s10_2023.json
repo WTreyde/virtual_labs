@@ -19,7 +19,7 @@
     }
   },
   "verified": true,
-  "notes": "Single-instrument price check with an exact model match; independent of the catalog's Rock Imager price source (NIH 2014 PO). Verified 3 Oct 2026 via NIH RePORTER API (1S10OD034322-01, award_amount 187457). Quote: \"This proposal requests funds to purchase a Formulatrix Rock Imager 1000 automated crystal tray imager with 500-tray capacity and dual light path capable of both visible light, ultraviolet (UV) and multi-fluorescence imaging.\" Single-instrument case: 1 of 1 items (100% by count and value) maps to formulatrix_rock_imager_1000. Useful as a clean price check of one catalog id, with the caveat that the S10 award may differ from the actual invoice (UV/fluorescence options, install, service).",
+  "notes": "price_basis=configured, set from the source wording (S10 award for an imager \"with 500-tray capacity and dual light path ... UV and multi-fluorescence\") before base/configured catalog prices were researched. Single-instrument price check with an exact model match; independent of the catalog's Rock Imager price source (NIH 2014 PO). Verified 3 Oct 2026 via NIH RePORTER API (1S10OD034322-01, award_amount 187457). Quote: \"This proposal requests funds to purchase a Formulatrix Rock Imager 1000 automated crystal tray imager with 500-tray capacity and dual light path capable of both visible light, ultraviolet (UV) and multi-fluorescence imaging.\" Single-instrument case: 1 of 1 items (100% by count and value) maps to formulatrix_rock_imager_1000. Useful as a clean price check of one catalog id, with the caveat that the S10 award may differ from the actual invoice (UV/fluorescence options, install, service).",
   "workflow": {
     "id": "jhu_rock_imager_1000_s10_2023_wf",
     "lab_spec_id": "jhu_rock_imager_1000_s10_2023",
@@ -39,5 +39,6 @@
         "duration_s": 0
       }
     ]
-  }
+  },
+  "price_basis": "configured"
 }

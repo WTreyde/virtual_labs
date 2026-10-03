@@ -27,7 +27,7 @@
     "throughput_unit": "proteins per batch (hundreds per week per user)"
   },
   "verified": true,
-  "notes": "Single-instrument price check: the reported figure is one OT-2 with pipettes/modules, so this tests the catalog price band, not whole-lab design. includes covers 'instruments' because the catalog files liquid handlers there. Verified 3 Oct 2026 via Europe PMC full text (PMC11196671): \"the OT-2 from Opentrons costs ~ $20,000-30,000 USD (at the time of writing) for the robot equipped with pipettes and accessory modules.\" Same text: Hamilton/Tecan systems \"> $150,000 USD\"; KingFisher ~$80,000. This is a robot price quoted for context, not a total-lab figure, so use as a lower-bound sanity check.",
+  "notes": "price_basis=configured, set from the source wording (\"the robot equipped with pipettes and accessory modules\") before base/configured catalog prices were researched. Single-instrument price check: the reported figure is one OT-2 with pipettes/modules, so this tests the catalog price band, not whole-lab design. includes covers 'instruments' because the catalog files liquid handlers there. Verified 3 Oct 2026 via Europe PMC full text (PMC11196671): \"the OT-2 from Opentrons costs ~ $20,000-30,000 USD (at the time of writing) for the robot equipped with pipettes and accessory modules.\" Same text: Hamilton/Tecan systems \"> $150,000 USD\"; KingFisher ~$80,000. This is a robot price quoted for context, not a total-lab figure, so use as a lower-bound sanity check.",
   "workflow": {
     "id": "ot2_protein_purification_2024_wf",
     "lab_spec_id": "ot2_protein_purification_2024",
@@ -49,5 +49,6 @@
         "duration_s": 3600
       }
     ]
-  }
+  },
+  "price_basis": "configured"
 }

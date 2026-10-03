@@ -25,7 +25,7 @@
     "throughput_unit": "constructs per run"
   },
   "verified": true,
-  "notes": "Single-instrument price check: the reported figure is one OT-2 with pipettes/modules, so this tests the catalog price band, not whole-lab design. includes covers 'instruments' because the catalog files liquid handlers there. Verified 3 Oct 2026 via Europe PMC full text of Storch et al., ACS Synth. Biol./Synth. Biol. 2020: \"At the time of writing, the OT-2 including all required modules and pipettes costs around $8k.\" Also \"consumables cost per construct was as low as $1.50 or $5.50\". Automated run: 1578 pipetting steps, 38 magnetic bead purifications, 96 heat-shock transformations. Throughput value is runs of up to 96 constructs (per run, not per day). Cost is a robot price, not a lab build.",
+  "notes": "price_basis=configured, set from the source wording (\"the OT-2 including all required modules and pipettes\") before base/configured catalog prices were researched. Single-instrument price check: the reported figure is one OT-2 with pipettes/modules, so this tests the catalog price band, not whole-lab design. includes covers 'instruments' because the catalog files liquid handlers there. Verified 3 Oct 2026 via Europe PMC full text of Storch et al., ACS Synth. Biol./Synth. Biol. 2020: \"At the time of writing, the OT-2 including all required modules and pipettes costs around $8k.\" Also \"consumables cost per construct was as low as $1.50 or $5.50\". Automated run: 1578 pipetting steps, 38 magnetic bead purifications, 96 heat-shock transformations. Throughput value is runs of up to 96 constructs (per run, not per day). Cost is a robot price, not a lab build.",
   "workflow": {
     "id": "dna_bot_opentrons_2020_wf",
     "lab_spec_id": "dna_bot_opentrons_2020",
@@ -47,5 +47,6 @@
         "duration_s": 3600
       }
     ]
-  }
+  },
+  "price_basis": "configured"
 }

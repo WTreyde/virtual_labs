@@ -54,9 +54,13 @@ def cost_category(item: dict) -> str | None:
     return "instruments"
 
 
-def price_range(item: dict) -> tuple[float, float, float]:
+def price_range(item: dict, basis: str | None = None) -> tuple[float, float, float]:
+    """(low, value, high) price. `basis` "base" (bare unit at list price) or "configured" (typical working system
+    with modules, installation and first-year warranty) uses provenance["price_usd_estimate.<basis>"] when the
+    catalog has it, else the item's default price."""
     p = item.get("price_usd_estimate", 0.0)
-    prov = item.get("provenance", {}).get("price_usd_estimate")
+    prov = item.get("provenance", {})
+    prov = (basis and prov.get(f"price_usd_estimate.{basis}")) or prov.get("price_usd_estimate")
     if prov and "low" in prov and "high" in prov:
         return prov["low"], prov.get("value", p), prov["high"]
     lo, hi = PRICE_BAND[item.get("data_confidence", "estimated")]
@@ -78,7 +82,7 @@ def year_factor(year: int | None) -> float:
 
 
 def predicted_cost(workflow: dict, includes: list[str], samples: int = 2000, seed: int = 0,
-                   build: str = "turnkey", year: int | None = None) -> dict:
+                   build: str = "turnkey", year: int | None = None, basis: str | None = None) -> dict:
     """P10/P50/P90 cost of the workflow's equipment in the given categories, in `year` dollars if given. `build`
     picks the integration range ("turnkey" vendor workcell or "self_built" academic lab); it only matters if
     integration_labour is included."""
@@ -88,7 +92,7 @@ def predicted_cost(workflow: dict, includes: list[str], samples: int = 2000, see
     factor = year_factor(year)
     totals = []
     for _ in range(samples):
-        hw = factor * sum(draw_price(rng, *price_range(it)) for it in items)
+        hw = factor * sum(draw_price(rng, *price_range(it, basis)) for it in items)
         if "integration_labour" in includes:
             lo, mode, hi = INTEGRATION_FRACTION[build]
             hw *= 1 + rng.triangular(lo, hi, mode)

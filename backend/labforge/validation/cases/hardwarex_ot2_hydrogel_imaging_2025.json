@@ -20,7 +20,7 @@
     }
   },
   "verified": true,
-  "notes": "OT-2 is 98.9% of the BOM value; the camera and printed parts are not in the catalog. Opened the PMC full text (Europe PMC XML) 3 Oct 2026. Specifications table: \"Cost of hardware $10,000 USD (OT-2) + $110 USD (Hardware Module)\". BOM table: Opentrons OT-2 1 x $10,000 (LabX); Opti-Tekscope OT-HD camera $88.08; 3D-printed PLA part $18.99; 3 stainless screws $2.16. Mapped fraction: 1 of 4 BOM lines (the OT-2) maps to catalog id opentrons_ot2 but it is 98.9% of the stated value ($10,000 of $10,109); the rest is a USB camera, a printed part and screws with no catalog id (the camera/adapter are the paper's contribution, so this is an OT-2 price check with an add-on). Weak as a whole-lab test (single instrument, author-quoted price).",
+  "notes": "price_basis=base, set from the source wording (\"$10,000 USD (OT-2)\": the bare robot) before base/configured catalog prices were researched. OT-2 is 98.9% of the BOM value; the camera and printed parts are not in the catalog. Opened the PMC full text (Europe PMC XML) 3 Oct 2026. Specifications table: \"Cost of hardware $10,000 USD (OT-2) + $110 USD (Hardware Module)\". BOM table: Opentrons OT-2 1 x $10,000 (LabX); Opti-Tekscope OT-HD camera $88.08; 3D-printed PLA part $18.99; 3 stainless screws $2.16. Mapped fraction: 1 of 4 BOM lines (the OT-2) maps to catalog id opentrons_ot2 but it is 98.9% of the stated value ($10,000 of $10,109); the rest is a USB camera, a printed part and screws with no catalog id (the camera/adapter are the paper's contribution, so this is an OT-2 price check with an add-on). Weak as a whole-lab test (single instrument, author-quoted price).",
   "workflow": {
     "id": "hardwarex_ot2_hydrogel_imaging_2025_wf",
     "lab_spec_id": "hardwarex_ot2_hydrogel_imaging_2025",
@@ -40,5 +40,6 @@
         "duration_s": 0
       }
     ]
-  }
+  },
+  "price_basis": "base"
 }

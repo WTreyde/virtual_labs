@@ -21,7 +21,7 @@
     }
   },
   "verified": true,
-  "notes": "Three-instrument crystallisation suite. Weak like-for-like: 2007 dollars (no inflation adjustment in the cost model) and the Tecan EVO 150 is costed as the newer Tecan Fluent; mosquito and Rock Imager are older model generations. Verified 3 Oct 2026 via NIH RePORTER API (project 1S10RR023543-01, FY2007, award_amount 375141). Abstract quote: \"The system will consist of (1) a Formulatrix Tecan Evo-150 liquid handling robot for the generation of screening reagents; (2) a Mosquito nanoliter dispensing robot for setting up crystallization trials; and (3) a Formulatrix Rock Imager automated microscope for rapidly imaging the trial results.\" Source gives NO per-item prices, only the total award. Mapping: 3 of 3 items by count; 2/3 exact (mosquito -> sptlabtech_mosquito_xtal3, Rock Imager -> formulatrix_rock_imager_1000), the Tecan Freedom EVO 150 is the predecessor of the catalog's Fluent 780 (closest equivalent, not identical). Catalog prices are current (2020s) whereas this is a 2007 purchase, so expect the prediction to be higher in real terms; adjust for inflation/tech generation before judging. Equipment value share unknown (no item prices).",
+  "notes": "price_basis=configured, set from the source wording (S10 award for a complete crystallisation system) before base/configured catalog prices were researched. Three-instrument crystallisation suite. Weak like-for-like: 2007 dollars (no inflation adjustment in the cost model) and the Tecan EVO 150 is costed as the newer Tecan Fluent; mosquito and Rock Imager are older model generations. Verified 3 Oct 2026 via NIH RePORTER API (project 1S10RR023543-01, FY2007, award_amount 375141). Abstract quote: \"The system will consist of (1) a Formulatrix Tecan Evo-150 liquid handling robot for the generation of screening reagents; (2) a Mosquito nanoliter dispensing robot for setting up crystallization trials; and (3) a Formulatrix Rock Imager automated microscope for rapidly imaging the trial results.\" Source gives NO per-item prices, only the total award. Mapping: 3 of 3 items by count; 2/3 exact (mosquito -> sptlabtech_mosquito_xtal3, Rock Imager -> formulatrix_rock_imager_1000), the Tecan Freedom EVO 150 is the predecessor of the catalog's Fluent 780 (closest equivalent, not identical). Catalog prices are current (2020s) whereas this is a 2007 purchase, so expect the prediction to be higher in real terms; adjust for inflation/tech generation before judging. Equipment value share unknown (no item prices).",
   "workflow": {
     "id": "ucla_formulatrix_crystallization_s10_2007_wf",
     "lab_spec_id": "ucla_formulatrix_crystallization_s10_2007",
@@ -51,5 +51,6 @@
         "duration_s": 0
       }
     ]
-  }
+  },
+  "price_basis": "configured"
 }
