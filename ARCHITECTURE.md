@@ -4,7 +4,7 @@ Working name: **LabForge** (rename freely). Deadline: demo at 13:00 on 4 Oct 202
 
 ## Pitch in one line
 
-Describe the autonomous lab you want; an agent designs it from real vendor equipment, lays it out as a playable Pokémon-style isometric world, simulates it, and **tells you exactly which of its own numbers it does not trust** — and a benchmark catches design agents that fudge it.
+Describe the autonomous lab you want; an agent designs it from real vendor equipment, lays it out as an animated Pokémon-style isometric world, simulates it, and **tells you exactly which of its own numbers it does not trust** — and a benchmark catches design agents that fudge it.
 
 ## Novelty check (web search, 3 Oct 2026; quick, not exhaustive)
 
@@ -21,7 +21,7 @@ Inferred conclusion: NL → vendor-agnostic, room-scale lab design with throughp
 
 1. **Epistemic agent.** Every number carries provenance and a range (`uncertain_number` in [`schemas/common.schema.json`](schemas/common.schema.json)): datasheet, literature (via Amass), estimate, or placeholder. The simulator runs Monte Carlo over those ranges and reports P10/P50/P90 throughput, the probability of meeting the target, and a sensitivity ranking ("measure LC-MS run time before buying; it moves throughput most").
 2. **Claims and falsification.** The agent must state its claims with a confidence ([`claim.schema.json`](schemas/claim.schema.json)), e.g. "meets 768 compounds/day, p=0.8". An independent verifier checks each against the simulator, layout validator and BOM. Calibration (Brier score) is shown in the UI and the report.
-3. **LabDesignBench.** ~20 briefs with hidden checks ([`bench_task.schema.json`](schemas/bench_task.schema.json)), including traps: impossible targets, rooms too small, placeholder specs, a simulator config the agent *could* edit to inflate throughput, unsafe shortcuts. We score agents on admitting infeasibility, not tampering, and calibration. Demo: run Claude on the bench and show a leaderboard.
+3. **LabDesignBench.** ~20 briefs with hidden checks ([`bench_task.schema.json`](schemas/bench_task.schema.json)), including traps: impossible targets, rooms too small, placeholder specs, a simulator config the agent *could* edit to inflate throughput, unsafe shortcuts. We score agents on admitting infeasibility, not tampering, and calibration. Demo: a leaderboard showing our platform solving tasks that vanilla Claude without tools gets wrong.
 4. **Safe, standard control.** Layout rules for fume hoods, BSL zones, cryogens, robot/human envelopes; the BOM flags each instrument's control standard (SiLA 2, OPC-UA, vendor SDK) so the design is controllable, not just pretty.
 
 ## Demo flow (5 minutes)
@@ -68,7 +68,7 @@ Core modelling rule: every labware handoff is a transfer edge that must be serve
 
 ### Strand A: Game client and report UI
 - Phaser 3 isometric scene: floor tiles, room walls, zones tinted (fume hood, BSL2, cold room). Instruments as pixel-art sprites sized from catalog footprints; robots and operators as walking characters animated along `Layout.transfers[].path` using `SimResult.timeline`.
-- Pokémon touches: walk a "lab trainer" around; press A next to an instrument for its stat card (vendor, price, throughput, confidence badge); bottlenecks shown as speech bubbles and red auras.
+- Pokémon touches (view only, not playable): dialogue box for the agent; click an instrument for its stat card (vendor, price, throughput, confidence badge); bottlenecks shown as speech bubbles and red auras.
 - HTML overlay: chat, metrics with P10–P90 bars and probability of meeting target, BOM table, claims panel with verifier ticks/crosses.
 - "Report for your boss" button renders the report (from `/report`) to PDF.
 - Builds against `examples/*.json` immediately; sprites from free isometric packs (e.g. Kenney, CC0) plus generated pixel art.

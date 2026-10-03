@@ -1,0 +1,280 @@
+[
+  {
+    "id": "opentrons_flex",
+    "vendor": "Opentrons",
+    "model": "Flex",
+    "category": "instrument",
+    "capabilities": [
+      "liquid_handling"
+    ],
+    "footprint": {
+      "width_m": 0.87,
+      "depth_m": 0.69,
+      "height_m": 0.84,
+      "clearance_m": 0.2,
+      "mount": "bench"
+    },
+    "access_points": [
+      {
+        "id": "deck_slot_a",
+        "position": {
+          "x": 0,
+          "y": 0.35,
+          "z": 0.1
+        },
+        "labware": [
+          "sbs_96",
+          "sbs_384"
+        ]
+      }
+    ],
+    "process": {
+      "capacity": 1,
+      "durations_s": {
+        "liquid_handling": 1800
+      }
+    },
+    "price_usd_estimate": 25000,
+    "integration": [
+      "Python API",
+      "HTTP API"
+    ],
+    "visual": {
+      "color": "#4a7bd0"
+    },
+    "source_urls": [
+      "https://opentrons.com/products/flex"
+    ],
+    "data_confidence": "estimated"
+  },
+  {
+    "id": "ur5e",
+    "vendor": "Universal Robots",
+    "model": "UR5e",
+    "category": "transporter",
+    "capabilities": [
+      "plate_transport_arm"
+    ],
+    "footprint": {
+      "width_m": 0.2,
+      "depth_m": 0.2,
+      "height_m": 0.2,
+      "clearance_m": 0,
+      "mount": "bench"
+    },
+    "access_points": [
+      {
+        "id": "gripper",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0.3
+        }
+      }
+    ],
+    "transport": {
+      "kind": "arm",
+      "reach_m": 0.85,
+      "speed_m_s": 0.5,
+      "pick_place_s": 8,
+      "payload_kg": 5
+    },
+    "price_usd_estimate": 35000,
+    "integration": [
+      "URScript",
+      "ROS2"
+    ],
+    "visual": {
+      "color": "#9aa4ad"
+    },
+    "source_urls": [
+      "https://www.universal-robots.com/products/ur5e/"
+    ],
+    "data_confidence": "estimated"
+  },
+  {
+    "id": "liconic_stx44",
+    "vendor": "LiCONiC",
+    "model": "STX44",
+    "category": "instrument",
+    "capabilities": [
+      "incubation",
+      "plate_storage"
+    ],
+    "footprint": {
+      "width_m": 0.6,
+      "depth_m": 0.7,
+      "height_m": 0.85,
+      "clearance_m": 0.3,
+      "mount": "bench"
+    },
+    "access_points": [
+      {
+        "id": "transfer_station",
+        "position": {
+          "x": 0.35,
+          "y": 0,
+          "z": 0.2
+        },
+        "labware": [
+          "sbs_96",
+          "sbs_384",
+          "deep_well_96"
+        ]
+      }
+    ],
+    "process": {
+      "capacity": 44,
+      "durations_s": {
+        "incubation": 3600
+      }
+    },
+    "storage_slots": 44,
+    "price_usd_estimate": 45000,
+    "integration": [
+      "SiLA2"
+    ],
+    "visual": {
+      "color": "#d08a4a"
+    },
+    "source_urls": [
+      "https://www.liconic.com"
+    ],
+    "data_confidence": "estimated"
+  },
+  {
+    "id": "bmg_clariostar",
+    "vendor": "BMG LABTECH",
+    "model": "CLARIOstar Plus",
+    "category": "instrument",
+    "capabilities": [
+      "absorbance_read",
+      "fluorescence_read",
+      "luminescence_read"
+    ],
+    "footprint": {
+      "width_m": 0.4,
+      "depth_m": 0.5,
+      "height_m": 0.4,
+      "clearance_m": 0.2,
+      "mount": "bench"
+    },
+    "access_points": [
+      {
+        "id": "plate_carrier",
+        "position": {
+          "x": -0.25,
+          "y": 0,
+          "z": 0.1
+        },
+        "labware": [
+          "sbs_96",
+          "sbs_384",
+          "sbs_1536"
+        ]
+      }
+    ],
+    "process": {
+      "capacity": 1,
+      "durations_s": {
+        "absorbance_read": 90,
+        "fluorescence_read": 180
+      }
+    },
+    "price_usd_estimate": 60000,
+    "integration": [
+      "vendor SDK"
+    ],
+    "visual": {
+      "color": "#5bb07a"
+    },
+    "source_urls": [
+      "https://www.bmglabtech.com/en/clariostar-plus/"
+    ],
+    "data_confidence": "estimated"
+  },
+  {
+    "id": "agilent_plateloc",
+    "vendor": "Agilent",
+    "model": "PlateLoc",
+    "category": "instrument",
+    "capabilities": [
+      "plate_sealing"
+    ],
+    "footprint": {
+      "width_m": 0.25,
+      "depth_m": 0.5,
+      "height_m": 0.45,
+      "clearance_m": 0.15,
+      "mount": "bench"
+    },
+    "access_points": [
+      {
+        "id": "stage",
+        "position": {
+          "x": 0,
+          "y": -0.25,
+          "z": 0.1
+        },
+        "labware": [
+          "sbs_96",
+          "sbs_384",
+          "deep_well_96"
+        ]
+      }
+    ],
+    "process": {
+      "capacity": 1,
+      "durations_s": {
+        "plate_sealing": 10
+      }
+    },
+    "price_usd_estimate": 20000,
+    "integration": [
+      "VWorks"
+    ],
+    "visual": {
+      "color": "#c05bb0"
+    },
+    "source_urls": [
+      "https://www.agilent.com"
+    ],
+    "data_confidence": "estimated"
+  },
+  {
+    "id": "generic_plate_hotel",
+    "vendor": "Generic",
+    "model": "20-slot plate hotel",
+    "category": "storage",
+    "capabilities": [
+      "plate_storage"
+    ],
+    "footprint": {
+      "width_m": 0.3,
+      "depth_m": 0.3,
+      "height_m": 0.6,
+      "clearance_m": 0.1,
+      "mount": "bench"
+    },
+    "access_points": [
+      {
+        "id": "front",
+        "position": {
+          "x": -0.1,
+          "y": -0.2,
+          "z": 0.1
+        },
+        "labware": [
+          "sbs_96",
+          "sbs_384"
+        ]
+      }
+    ],
+    "storage_slots": 20,
+    "price_usd_estimate": 2000,
+    "visual": {
+      "color": "#888888"
+    },
+    "data_confidence": "placeholder"
+  }
+]

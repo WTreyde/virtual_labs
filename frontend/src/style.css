@@ -1,0 +1,14 @@
+:root { --bg: #1d2b2f; --panel: #f4efe1; --ink: #222; --accent: #e0503c; --ok: #3a9d5d; }
+* { box-sizing: border-box; }
+body { margin: 0; display: flex; height: 100vh; font-family: "Press Start 2P", ui-monospace, monospace; font-size: 11px; background: var(--bg); }
+#game { flex: 1; }
+#panel { width: 340px; background: var(--panel); color: var(--ink); border-left: 6px solid #333; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+h1 { font-size: 16px; margin: 0; }
+.band { position: relative; height: 14px; background: #ddd; border: 2px solid #333; }
+.band .range { position: absolute; top: 0; bottom: 0; background: #7fb3d5; }
+.band .target { position: absolute; top: -4px; bottom: -4px; width: 3px; background: var(--accent); }
+table { width: 100%; border-collapse: collapse; } td { padding: 2px 4px; border-bottom: 1px solid #ccc; }
+.conf-placeholder { color: var(--accent); } .conf-estimated { color: #b07d00; } .conf-datasheet, .conf-literature { color: var(--ok); }
+#log { max-height: 200px; overflow-y: auto; white-space: pre-wrap; }
+#chat-form { display: flex; gap: 4px; } #chat-input { flex: 1; font: inherit; }
+button { font: inherit; border: 3px solid #333; background: #fff; cursor: pointer; padding: 4px 8px; }

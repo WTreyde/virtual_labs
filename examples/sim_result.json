@@ -6,7 +6,11 @@
     "value": 46.2,
     "unit": "plates_per_day",
     "target": 40,
-    "meets_target": true
+    "meets_target": true,
+    "p10": 42.1,
+    "p50": 46.2,
+    "p90": 47.5,
+    "prob_meets_target": 0.93
   },
   "cycle_time_s": 5640,
   "utilisation": [
@@ -66,5 +70,6 @@
       "instance_id": "lh_1",
       "step_id": "dispense"
     }
-  ]
+  ],
+  "replicates": 50
 }

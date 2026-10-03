@@ -1,0 +1,12 @@
+{
+  "_comment": "Strand B owns this file; strand D's layout validator reads it. Distances in metres.",
+  "zone_requirements": {
+    "flammable_solvents": ["fume_hood", "ventilated"],
+    "toxic_reagents": ["fume_hood"],
+    "cryogens": ["cryogen"],
+    "biohazard": ["bsl2"]
+  },
+  "min_walkway_width_m": 1.0,
+  "min_egress_width_m": 1.2,
+  "human_robot_separation_m": 0.5
+}

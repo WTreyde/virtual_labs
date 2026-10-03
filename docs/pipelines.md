@@ -52,7 +52,7 @@ Safety rules the layout must respect: synthesis and evaporation in a ventilated 
 | 10 | Fragment soaking | A | Acoustic dispenser (Beckman Echo) directly into drops | crystal plates + fragment library source plate (e.g. DSi-Poised) | ~5 min per plate, then 1–3 h soak | One fragment per crystal. |
 | 11 | Crystal harvesting ("fishing") | S | Shifter (Oxford Lab Technologies) with a human at the microscope | crystal plates → loops on pins | ~10–20 s per crystal for an expert | Human throughput limit (~150–300 crystals per operator-day). |
 | 12 | Cryo-cooling + puck loading | M | Liquid nitrogen dewar, Unipucks | pucks (16 pins) | per crystal, in-line with 11 | Cryogen safety: ventilation and O2 monitor. |
-| 13 | Diffraction data collection | X (or A in-house) | Synchrotron (e.g. Diamond I04-1, unattended mode) or in-house Rigaku XtaLAB Synergy | pucks in a dry shipper | days turnaround; ~1–5 min per crystal at the beamline | Model as an external step with queue time. |
+| 13 | Diffraction data collection | X | Synchrotron (e.g. Diamond I04-1, unattended mode) or in-house Rigaku XtaLAB Synergy | pucks in a dry shipper | days turnaround; ~1–5 min per crystal at the beamline | Model as an external step with queue time. |
 | 14 | Hit identification | in silico | PanDDA / automated processing + Claude summary | — | hours | Report hit rate with uncertainty. |
 
 Transport: plates move between dispenser, imager hotel and acoustic dispenser (arm or human); expression and purification are human-run, so operator walking distance between incubators, centrifuge and ÄKTA (often in a cold room) is the layout problem to optimise.

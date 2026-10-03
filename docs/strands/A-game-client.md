@@ -1,0 +1,16 @@
+# Strand A: game client and report UI (Roshan)
+
+**Owns:** `frontend/`. **Reads:** `Layout`, `SimResult`, `Workflow`, `CatalogItem`, `Claim` (see `schemas/`).
+
+Already working: `make frontend` shows the example lab as shaded isometric boxes with moving plates, a bottleneck bubble and a BOM/throughput panel, with or without the backend.
+
+## Tasks, in order
+1. Pixel-art look: sprite per instrument category (liquid handler, arm, incubator, reader, LC-MS, crystal imager, centrifuge, human operator). Free CC0 isometric packs (e.g. Kenney) or generated pixel art; scale sprites to `footprint`.
+2. Pokémon-style UI frame: dialogue box for agent messages at the bottom, stat card when you click an instrument (vendor, price, throughput, confidence badge from `data_confidence`/`provenance`).
+3. Animate plates and operators from `SimResult.timeline` (fast-forward slider) instead of the looping dots.
+4. Uncertainty panel: P10–P90 band, probability of meeting target, sensitivity list ("measure this first").
+5. Claims panel: each agent claim with its confidence and the verifier's ✓/✗; Brier score.
+6. Report: render `/report` Markdown to a printable page / PDF with a screenshot of the scene.
+7. LabDesignBench leaderboard view: platform vs vanilla Claude per task.
+
+Not playable: no walking character needed (team decision). Do not edit backend files; ask Albert/Maxim for API changes.
