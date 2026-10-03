@@ -1,92 +1,109 @@
 # Virtual Labs: architecture and team split
 
-Draft for alignment. Defaults are marked **(default)** and will change once the team answers the open questions.
+Working name: **LabForge** (rename freely). Deadline: demo at 13:00 on 4 Oct 2026. Track 2 (Originator).
 
-## What the demo shows
+## Pitch in one line
 
-1. A user types a lab brief in chat, e.g. *"Automated enzyme variant screening, 20 x 96-well plates per day: liquid handling, 37 °C incubation, absorbance readout, sealing."*
-2. The agent asks follow-up questions if needed, then produces a **LabSpec** (structured requirements).
-3. The agent turns the spec into a **Workflow** (ordered steps, each needing a capability) and picks real instruments from the **Catalog**.
-4. The layout engine places instruments and robots in a room and produces a **Layout**, keeping every plate handoff within reach of a transfer robot.
-5. The simulator runs the workflow on the layout and returns a **SimResult**: plates/day, utilisation per instrument, bottlenecks, transfer distances.
-6. The browser shows the lab in 3D, with bottlenecks highlighted. The user says "double the throughput" or "make it fit in 6 x 4 m" and the agent iterates.
+Describe the autonomous lab you want; an agent designs it from real vendor equipment, lays it out as a playable Pokémon-style isometric world, simulates it, and **tells you exactly which of its own numbers it does not trust** — and a benchmark catches design agents that fudge it.
 
-## System diagram
+## Novelty check (web search, 3 Oct 2026; quick, not exhaustive)
+
+| Closest work | What it does | Gap we fill |
+|---|---|---|
+| [Labware-Layout Planner, Digital Discovery 2026](https://pubs.rsc.org/en/content/articlehtml/2026/dd/d6dd00026f) | NL protocol → labware positions on one robot's deck | We do whole rooms: equipment selection, placement, transport, humans |
+| [LLM agents for reconfigurable manufacturing layout, CIRP 2026](https://www.sciencedirect.com/science/article/pii/S0007850626000144), [Digital Twin Builder, ICML 2026](https://icml.cc/virtual/2026/67875) | LLM layout / twin generation for factories | Not lab science, no protocol reasoning, no calibrated uncertainty |
+| [HighRes ready work cells](https://highresbio.com/applications/ready-work-cells/), [Cellario](https://highresbio.com/software/cellario/scheduling-software), [Biosero GBG](https://biosero.com/) | Vendor-locked workcell design and scheduling, done by sales engineers | Vendor-agnostic, from a natural-language brief, in minutes |
+| [AutoBio](https://arxiv.org/html/2505.14030v1) | Simulation benchmark for robot manipulation in bio labs | Benchmarks robot skills, not lab-design agents' honesty |
+
+Inferred conclusion: NL → vendor-agnostic, room-scale lab design with throughput simulation, uncertainty and an honesty benchmark looks unclaimed.
+
+## Track 2 angle (this is what judges should remember)
+
+1. **Epistemic agent.** Every number carries provenance and a range (`uncertain_number` in [`schemas/common.schema.json`](schemas/common.schema.json)): datasheet, literature (via Amass), estimate, or placeholder. The simulator runs Monte Carlo over those ranges and reports P10/P50/P90 throughput, the probability of meeting the target, and a sensitivity ranking ("measure LC-MS run time before buying; it moves throughput most").
+2. **Claims and falsification.** The agent must state its claims with a confidence ([`claim.schema.json`](schemas/claim.schema.json)), e.g. "meets 768 compounds/day, p=0.8". An independent verifier checks each against the simulator, layout validator and BOM. Calibration (Brier score) is shown in the UI and the report.
+3. **LabDesignBench.** ~20 briefs with hidden checks ([`bench_task.schema.json`](schemas/bench_task.schema.json)), including traps: impossible targets, rooms too small, placeholder specs, a simulator config the agent *could* edit to inflate throughput, unsafe shortcuts. We score agents on admitting infeasibility, not tampering, and calibration. Demo: run Claude on the bench and show a leaderboard.
+4. **Safe, standard control.** Layout rules for fume hoods, BSL zones, cryogens, robot/human envelopes; the BOM flags each instrument's control standard (SiLA 2, OPC-UA, vendor SDK) so the design is controllable, not just pretty.
+
+## Demo flow (5 minutes)
+
+1. Type the chemistry brief. Agent asks two follow-ups, cites literature via Amass for step durations, picks equipment.
+2. The isometric lab appears: robots and pixel-art operators carry plates; a speech bubble over the LC-MS says "I'm the bottleneck (32 h per library)".
+3. Agent proposes a second LC-MS; throughput band tightens; it flags that powder-dosing times are only estimates.
+4. Switch to the FBDD crystallography lab: crystal fishing by humans is the limit; the agent refuses to claim it can automate it without evidence.
+5. Click "Report for your boss": PDF with BOM, layout, throughput with uncertainty, risks and unknowns.
+6. LabDesignBench leaderboard: one agent quietly edited the sim config; our verifier caught it.
+
+## System
 
 ```
- ┌───────────────────────── Frontend (React + three.js) ─────────────────────────┐
- │  Chat panel  │  3D lab viewer (instruments, robots, transfer paths)  │ Metrics │
- └──────────────┬────────────────────────────────────────────────────────────────┘
-                │ REST/JSON  (+ SSE for streamed agent messages)
- ┌──────────────▼──────────── API gateway (FastAPI) ─────────────────────────────┐
- │  POST /chat   GET /catalog   POST /layout   POST /simulate   GET /project/:id │
- └───────┬────────────────────────┬──────────────────────┬──────────────────────┘
-         │                        │                      │
- ┌───────▼────────┐     ┌─────────▼────────┐   ┌─────────▼──────────────────┐
- │ Planner agent  │────▶│ Equipment catalog│   │ Layout engine + simulator  │
- │ (Claude API,   │tools│ (curated JSON of │   │ (placement optimiser,      │
- │  tool use)     │────▶│ vendor specs)    │   │  discrete-event sim)       │
- └────────────────┘     └──────────────────┘   └────────────────────────────┘
-        the agent calls catalog search, layout and simulate as tools
+ ┌──────── Game client (Phaser 3, isometric pixel art) + HTML overlay ────────┐
+ │  Lab world  │  Chat panel  │  Metrics + uncertainty │  BOM │ Report button  │
+ └──────┬──────────────────────────────────────────────────────────────────────┘
+        │ REST + SSE
+ ┌──────▼─────────────── API gateway (FastAPI, on the integrator's machine) ───┐
+ │ /chat  /catalog  /layout  /simulate  /verify  /report  /bench               │
+ └───┬──────────────┬──────────────────┬──────────────────┬───────────────────┘
+     │              │                  │                  │
+ Planner agent   Catalog (cached   Layout engine +     Verifier + bench
+ (Claude, tools; JSON, scraped     Monte Carlo sim     (claims vs sim,
+  Amass for      once on Modal)    (SimPy; fan-out     tamper checks,
+  evidence)                         on Modal)           calibration)
 ```
 
-Stack **(default)**: Python 3.11 + FastAPI backend, React + Vite + react-three-fiber frontend, Claude API for the agent, SimPy for simulation. Everything passes JSON objects defined in [`schemas/`](schemas/); examples are in [`examples/`](examples/).
+Data contracts live in [`schemas/`](schemas/); a worked example in [`examples/`](examples/); the two scientific pipelines in [`docs/pipelines.md`](docs/pipelines.md). Conventions: metres, seconds, floor `x`/`y` from the room corner, `z` up; ids are snake_case.
 
-## Shared contracts (the only thing strands must agree on)
+Core modelling rule: every labware handoff is a transfer edge that must be served by a transporter (arm, rail, mobile robot, or **human operator**) whose reach covers both access points. Humans are slow, flexible transporters with shift hours, and they also run manual steps (purification, crystal fishing).
 
-| Object | Schema | Produced by | Consumed by |
-|---|---|---|---|
-| LabSpec | `schemas/lab_spec.schema.json` | Agent | Agent, frontend |
-| CatalogItem | `schemas/catalog_item.schema.json` | Catalog | Agent, layout, sim, frontend (3D size, colour) |
-| Workflow | `schemas/workflow.schema.json` | Agent | Layout, sim, frontend |
-| Layout | `schemas/layout.schema.json` | Layout engine | Sim, frontend |
-| SimResult | `schemas/sim_result.schema.json` | Simulator | Agent, frontend |
+## Where each sponsor tool fits
 
-Conventions: metres and seconds everywhere. Floor coordinates are `x` (along room width) and `y` (along room depth) from the room's corner; `z` is height. The frontend maps this to three.js (`y` up) as `(x, z, -y)`. IDs are lowercase snake_case strings.
-
-The key modelling idea: every instrument has **access points** (where a plate goes in and out), and every workflow step that moves labware between two instruments is a **transfer edge**. A layout is valid only if each transfer edge is served by a transporter (robot arm, rail, mobile robot or human) whose reach covers both access points. Transfer time comes from distance and transporter speed, which is what lets the simulator find "robot A hands to robot B across the room" bottlenecks.
-
-## Strands
-
-Each strand can be built and tested alone against the example JSON files, so nobody blocks on anybody else.
-
-### Strand 1: Interface (frontend)
-- Chat panel with streamed agent replies and quick actions ("re-plan", "optimise layout").
-- 3D viewer: room, instruments as boxes sized from catalog footprints (GLB models later if time), robot reach circles, animated transfer paths coloured by load, bottlenecks in red.
-- Metrics panel: plates/day vs target, utilisation bars, bill of materials with cost.
-- Drag an instrument to move it, which calls `POST /simulate` and refreshes metrics.
-- **Builds against:** `examples/*.json` from hour one, no backend needed.
-
-### Strand 2: Equipment catalog (vendor specs)
-- Curate ~30 real instruments across capabilities: liquid handlers, robot arms, mobile robots, incubators, plate readers, sealers, centrifuges, plate hotels, dispensers, thermocyclers, (bio) automated colony pickers, (chem) dosing units, reactors, HPLC.
-- For each: vendor, model, footprint, height, access points, plate formats, throughput/timing, power, cost estimate, source URL.
-- `GET /catalog?capability=...` search endpoint, exposed to the agent as a tool.
-- Stretch: an LLM-assisted scraper that turns a vendor datasheet URL or PDF into a CatalogItem.
-
-### Strand 3: Agent (planner)
-- Claude conversation that elicits a LabSpec, then designs a Workflow and an equipment list.
-- Tools: `search_catalog`, `generate_layout`, `simulate`, `update_spec`.
-- Iteration loop: read SimResult bottlenecks, then add a parallel instrument, swap a model, or ask the layout engine to move things, until targets are met or the agent explains the trade-off.
-- Owns the prompt templates and 2–3 demo scenarios (one biology, one chemistry).
-
-### Strand 4: Layout engine and simulator
-- Placement: given room size, equipment and transfer edges, place footprints without overlap, with clearances and walls, minimising weighted transfer distance, and make every edge reachable by some transporter. Start with a greedy cluster-around-the-arm placer, then add simulated-annealing refinement.
-- Simulator: SimPy discrete-event run of N plates through the workflow, with instrument capacities, durations and transfer times from the layout. Outputs throughput, utilisation, queue waits and named bottlenecks.
-- Validation: overlaps, unreachable edges, room overflow, returned as `violations` in the Layout.
-
-### Lead / integrator (fifth person)
-- Owns `schemas/`, the FastAPI gateway and project storage (in-memory or JSON files), CI that validates examples against schemas, and wiring strands together.
-- Owns the demo script and pitch, and acts as the tie-breaker on interface changes.
-
-## Suggested timeline (adjust to the real deadline)
-
-| Phase | Goal |
+| Tool | Used for |
 |---|---|
-| First 2 h | Schemas frozen at v0.1, each strand runs standalone on example JSON |
-| Middle | Gateway wires agent → layout → sim → frontend end to end with a stub catalog |
-| Last third | Real catalog, layout optimiser, polished 3D, demo scenarios rehearsed |
-| Final hour | Freeze code, rehearse demo, record backup video |
+| Claude API | Planner agent, scraper extraction, report writing, crystal-image triage (vision) |
+| Amass | Evidence: literature for protocol durations and yields (BiomedCore), target and known ligands for library design (GeneCore, DrugCore, PatentCore). Cited per workflow step. |
+| Modal | One-off parallel vendor scrape; Monte Carlo simulation fan-out (hundreds of replicates); LabDesignBench runs |
+| Devin | Well-specified tickets: per-vendor scraping, schema-to-type generation, test writing |
+| Antigravity | Optional IDE agent for the game client strand |
 
-## Rules for changing a schema
+## Strands (four people, plus the integrator)
+
+### Strand A: Game client and report UI
+- Phaser 3 isometric scene: floor tiles, room walls, zones tinted (fume hood, BSL2, cold room). Instruments as pixel-art sprites sized from catalog footprints; robots and operators as walking characters animated along `Layout.transfers[].path` using `SimResult.timeline`.
+- Pokémon touches: walk a "lab trainer" around; press A next to an instrument for its stat card (vendor, price, throughput, confidence badge); bottlenecks shown as speech bubbles and red auras.
+- HTML overlay: chat, metrics with P10–P90 bars and probability of meeting target, BOM table, claims panel with verifier ticks/crosses.
+- "Report for your boss" button renders the report (from `/report`) to PDF.
+- Builds against `examples/*.json` immediately; sprites from free isometric packs (e.g. Kenney, CC0) plus generated pixel art.
+
+### Strand B: Vendor catalog, safety rules, LabDesignBench
+- Scrape ~60 instruments across both pipelines once (Modal job, Claude extraction to `CatalogItem` with per-field `provenance`), cache as `catalog/catalog.json`; hand-check the 20 that appear in demos.
+- `/catalog` search endpoint (by capability, labware, budget).
+- Safety rules file (zones, clearances, hazards) consumed by the layout validator.
+- Write the ~20 LabDesignBench tasks with traps and hidden checks.
+
+### Strand C: Planner agent and evidence
+- Claude tool-use loop: elicit `LabSpec` → `Workflow` (using the templates in `docs/pipelines.md`) → equipment → call layout and simulate → iterate on bottlenecks.
+- Amass integration: attach `evidence` to each step's durations and yields; widen ranges where no evidence exists.
+- Emit `Claim`s with confidences after each design; respond to refuted claims honestly.
+- Writes the boss report (exec summary, BOM, layout image, throughput band, risks and unknowns, assumptions).
+
+### Strand D: Layout engine, simulator, verifier
+- Placement: greedy cluster around transporters, then simulated annealing; enforce zones, clearances, egress, reachability; output `violations`.
+- SimPy model with batch steps, fan-out, operators with shifts, external queues; Monte Carlo on Modal → P10/P50/P90, `prob_meets_target`, sensitivity, bottlenecks.
+- Verifier: checks each `Claim`, hashes inputs to detect tampering, computes calibration; runs LabDesignBench and outputs a leaderboard JSON.
+
+### Integrator (your machine)
+- Owns `schemas/` and the FastAPI gateway; wires strands; runs the demo; keeps `python validate_examples.py` green.
+
+## Timeline to 13:00 tomorrow
+
+| When (3–4 Oct) | Milestone |
+|---|---|
+| by 13:00 today | Schemas v0.2 frozen; every strand runs on example JSON |
+| by 18:00 | Agent → layout → sim → game view works end to end on the chemistry demo with a stub catalog |
+| by 23:00 | Real catalog, Monte Carlo, claims + verifier, FBDD scenario |
+| by 09:00 | LabDesignBench run, boss report, polish sprites |
+| 09:00–12:00 | Freeze features, rehearse, record backup video |
+| 12:00–13:00 | Buffer |
+
+## Changing a schema
 
 Add optional fields freely. Renaming or removing a field needs a heads-up to everyone and an updated example in the same commit.

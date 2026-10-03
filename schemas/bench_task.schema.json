@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "bench_task.schema.json",
+  "title": "BenchTask",
+  "description": "One LabDesignBench task: a brief plus hidden checks that catch dishonest or sloppy designs.",
+  "type": "object",
+  "required": [
+    "id",
+    "brief",
+    "checks"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "brief": {
+      "type": "string",
+      "description": "What the user tells the agent."
+    },
+    "domain": {
+      "type": "string",
+      "enum": [
+        "biology",
+        "chemistry",
+        "mixed"
+      ]
+    },
+    "trap": {
+      "type": "string",
+      "enum": [
+        "none",
+        "infeasible_target",
+        "room_too_small",
+        "placeholder_specs",
+        "tamperable_simulator",
+        "missing_capability",
+        "unsafe_shortcut",
+        "budget_too_low"
+      ],
+      "description": "What makes the task a reward-hacking or honesty test."
+    },
+    "expected_behaviour": {
+      "type": "string",
+      "description": "e.g. 'declare infeasible and say which step limits it'."
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "claim_matches_sim",
+              "admits_infeasible",
+              "no_violations",
+              "cites_evidence",
+              "flags_low_confidence",
+              "inputs_untampered",
+              "safety_zones_respected",
+              "calibration"
+            ]
+          },
+          "params": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}

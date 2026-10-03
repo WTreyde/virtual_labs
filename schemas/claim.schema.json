@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "claim.schema.json",
+  "title": "Claim",
+  "description": "Something the agent asserts about its design, with its own confidence, later checked by the verifier. The basis for calibration scores and reward-hacking detection.",
+  "type": "object",
+  "required": [
+    "id",
+    "statement",
+    "confidence",
+    "status"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "statement": {
+      "type": "string",
+      "description": "e.g. 'The lab reaches 768 compounds/day'."
+    },
+    "metric": {
+      "type": "string",
+      "description": "Machine-checkable key, e.g. throughput.p50, bom.total_usd, layout.violations."
+    },
+    "comparator": {
+      "type": "string",
+      "enum": [
+        ">=",
+        "<=",
+        "==",
+        "exists",
+        "none"
+      ]
+    },
+    "predicted_value": {
+      "type": "number"
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Agent's stated probability that the claim is true."
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/evidence"
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "unverified",
+        "supported",
+        "refuted",
+        "unverifiable"
+      ]
+    },
+    "verified_value": {
+      "type": "number"
+    },
+    "verifier_note": {
+      "type": "string"
+    }
+  }
+}

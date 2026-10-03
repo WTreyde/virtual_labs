@@ -4,21 +4,43 @@
   "title": "Workflow",
   "description": "The protocol as a graph of steps plus the equipment chosen to run it. Transfers between consecutive steps on different equipment become transfer edges.",
   "type": "object",
-  "required": ["id", "lab_spec_id", "equipment", "steps"],
+  "required": [
+    "id",
+    "lab_spec_id",
+    "equipment",
+    "steps"
+  ],
   "properties": {
-    "id": { "$ref": "common.schema.json#/$defs/id" },
-    "lab_spec_id": { "$ref": "common.schema.json#/$defs/id" },
-    "labware": { "$ref": "common.schema.json#/$defs/labware", "description": "Main labware unit that flows through the workflow." },
+    "id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "lab_spec_id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "labware": {
+      "$ref": "common.schema.json#/$defs/labware",
+      "description": "Main labware unit that flows through the workflow."
+    },
     "equipment": {
       "description": "Instances of catalog items in this lab. Two identical readers are two instances.",
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["instance_id", "catalog_id"],
+        "required": [
+          "instance_id",
+          "catalog_id"
+        ],
         "properties": {
-          "instance_id": { "$ref": "common.schema.json#/$defs/id" },
-          "catalog_id": { "$ref": "common.schema.json#/$defs/id" },
-          "rationale": { "type": "string", "description": "Why the agent picked it, shown in the UI." }
+          "instance_id": {
+            "$ref": "common.schema.json#/$defs/id"
+          },
+          "catalog_id": {
+            "$ref": "common.schema.json#/$defs/id"
+          },
+          "rationale": {
+            "type": "string",
+            "description": "Why the agent picked it, shown in the UI."
+          }
         }
       }
     },
@@ -27,15 +49,82 @@
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["id", "name", "capability", "candidate_instances", "duration_s"],
+        "required": [
+          "id",
+          "name",
+          "capability",
+          "candidate_instances",
+          "duration_s"
+        ],
         "properties": {
-          "id": { "$ref": "common.schema.json#/$defs/id" },
-          "name": { "type": "string" },
-          "capability": { "$ref": "common.schema.json#/$defs/capability" },
-          "candidate_instances": { "type": "array", "minItems": 1, "items": { "$ref": "common.schema.json#/$defs/id" }, "description": "Equipment instances that can run this step; more than one means parallel capacity." },
-          "duration_s": { "type": "number", "minimum": 0 },
-          "after": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/id" }, "description": "Step ids that must finish first. Empty = start." },
-          "params": { "type": "object", "description": "Free-form protocol parameters (volume, temperature, wavelength)." }
+          "id": {
+            "$ref": "common.schema.json#/$defs/id"
+          },
+          "name": {
+            "type": "string"
+          },
+          "capability": {
+            "$ref": "common.schema.json#/$defs/capability"
+          },
+          "candidate_instances": {
+            "type": "array",
+            "minItems": 0,
+            "items": {
+              "$ref": "common.schema.json#/$defs/id"
+            },
+            "description": "Equipment instances that can run this step; more than one means parallel capacity. Empty for in_silico or external steps."
+          },
+          "duration_s": {
+            "type": "number",
+            "minimum": 0
+          },
+          "after": {
+            "type": "array",
+            "items": {
+              "$ref": "common.schema.json#/$defs/id"
+            },
+            "description": "Step ids that must finish first. Empty = start."
+          },
+          "params": {
+            "type": "object",
+            "description": "Free-form protocol parameters (volume, temperature, wavelength)."
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "automated",
+              "semi_automated",
+              "manual",
+              "external",
+              "in_silico"
+            ],
+            "default": "automated"
+          },
+          "duration_uncertainty": {
+            "$ref": "common.schema.json#/$defs/uncertain_number",
+            "description": "Range for duration_s; the simulator samples from it."
+          },
+          "batch_size": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 1,
+            "description": "Labware units processed together (e.g. evaporator holds 6 plates)."
+          },
+          "fan_out": {
+            "type": "number",
+            "default": 1,
+            "description": "Output labware per input labware (e.g. split into 8 plates = 8)."
+          },
+          "operator_role": {
+            "type": "string",
+            "description": "For manual or semi-automated steps."
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "$ref": "common.schema.json#/$defs/evidence"
+            }
+          }
         }
       }
     }

@@ -4,51 +4,202 @@
   "title": "LabSpec",
   "description": "Structured requirements the agent extracts from the user's brief.",
   "type": "object",
-  "required": ["id", "name", "domain", "description", "throughput_target", "room"],
+  "required": [
+    "id",
+    "name",
+    "domain",
+    "description",
+    "throughput_target",
+    "room"
+  ],
   "properties": {
-    "id": { "$ref": "common.schema.json#/$defs/id" },
-    "name": { "type": "string" },
-    "domain": { "type": "string", "enum": ["biology", "chemistry", "mixed"] },
-    "description": { "type": "string", "description": "Free-text brief, as the user gave it." },
+    "id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "name": {
+      "type": "string"
+    },
+    "domain": {
+      "type": "string",
+      "enum": [
+        "biology",
+        "chemistry",
+        "mixed"
+      ]
+    },
+    "description": {
+      "type": "string",
+      "description": "Free-text brief, as the user gave it."
+    },
     "throughput_target": {
       "type": "object",
-      "required": ["value", "unit"],
+      "required": [
+        "value",
+        "unit"
+      ],
       "properties": {
-        "value": { "type": "number", "exclusiveMinimum": 0 },
-        "unit": { "type": "string", "enum": ["plates_per_day", "samples_per_day", "reactions_per_day"] },
-        "operating_hours_per_day": { "type": "number", "default": 24 }
+        "value": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "unit": {
+          "type": "string",
+          "enum": [
+            "plates_per_day",
+            "samples_per_day",
+            "reactions_per_day",
+            "compounds_per_day",
+            "crystals_per_day"
+          ]
+        },
+        "operating_hours_per_day": {
+          "type": "number",
+          "default": 24
+        }
       }
     },
     "room": {
       "type": "object",
-      "required": ["width_m", "depth_m"],
+      "required": [
+        "width_m",
+        "depth_m"
+      ],
       "properties": {
-        "width_m": { "type": "number", "exclusiveMinimum": 0 },
-        "depth_m": { "type": "number", "exclusiveMinimum": 0 },
-        "height_m": { "type": "number", "default": 3 },
-        "doors": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/vec2" } },
+        "width_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "depth_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "height_m": {
+          "type": "number",
+          "default": 3
+        },
+        "doors": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/vec2"
+          }
+        },
         "keep_out_zones": {
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["min", "max"],
-            "properties": { "min": { "$ref": "common.schema.json#/$defs/vec2" }, "max": { "$ref": "common.schema.json#/$defs/vec2" }, "reason": { "type": "string" } }
+            "required": [
+              "min",
+              "max"
+            ],
+            "properties": {
+              "min": {
+                "$ref": "common.schema.json#/$defs/vec2"
+              },
+              "max": {
+                "$ref": "common.schema.json#/$defs/vec2"
+              },
+              "reason": {
+                "type": "string"
+              }
+            }
           }
         }
       }
     },
-    "labware": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/labware" } },
-    "required_capabilities": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/capability" } },
+    "labware": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/labware"
+      }
+    },
+    "required_capabilities": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/capability"
+      }
+    },
     "constraints": {
       "type": "object",
       "properties": {
-        "budget_usd": { "type": "number" },
-        "biosafety_level": { "type": "integer", "minimum": 1, "maximum": 4 },
-        "max_human_interventions_per_day": { "type": "integer", "minimum": 0 },
-        "preferred_vendors": { "type": "array", "items": { "type": "string" } },
-        "excluded_vendors": { "type": "array", "items": { "type": "string" } }
+        "budget_usd": {
+          "type": "number"
+        },
+        "biosafety_level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4
+        },
+        "max_human_interventions_per_day": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "preferred_vendors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "excluded_vendors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "hazards": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "flammable_solvents",
+              "toxic_reagents",
+              "cryogens",
+              "biohazard",
+              "high_g_centrifuge",
+              "laser"
+            ]
+          }
+        }
       }
     },
-    "notes": { "type": "array", "items": { "type": "string" } }
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "operators": {
+      "description": "Human operators available; modelled as slow, flexible transporters and as the workers for manual steps.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "role",
+          "count"
+        ],
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "shift_hours": {
+            "type": "number",
+            "default": 8
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "$ref": "common.schema.json#/$defs/capability"
+            }
+          }
+        }
+      }
+    },
+    "scenario": {
+      "type": "string",
+      "description": "Optional template name, e.g. chem_library_screen or fbdd_crystallography."
+    }
   }
 }

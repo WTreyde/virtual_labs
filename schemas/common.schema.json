@@ -3,34 +3,186 @@
   "$id": "common.schema.json",
   "title": "Shared definitions",
   "$defs": {
-    "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$"
+    },
     "capability": {
       "description": "What a piece of equipment can do. Workflow steps require one capability; catalog items provide one or more.",
       "type": "string",
       "enum": [
-        "liquid_handling", "reagent_dispensing", "plate_transport_arm", "plate_transport_mobile",
-        "plate_transport_rail", "plate_storage", "incubation", "shaking", "centrifugation",
-        "plate_sealing", "plate_peeling", "absorbance_read", "fluorescence_read", "luminescence_read",
-        "imaging", "thermocycling", "colony_picking", "powder_dosing", "liquid_dosing", "reaction",
-        "heating_stirring", "filtration", "evaporation", "hplc", "lcms", "nmr", "barcode_reading",
-        "delidding", "waste", "manual_bench"
+        "liquid_handling",
+        "reagent_dispensing",
+        "plate_transport_arm",
+        "plate_transport_mobile",
+        "plate_transport_rail",
+        "plate_storage",
+        "incubation",
+        "shaking",
+        "centrifugation",
+        "plate_sealing",
+        "plate_peeling",
+        "absorbance_read",
+        "fluorescence_read",
+        "luminescence_read",
+        "imaging",
+        "thermocycling",
+        "colony_picking",
+        "powder_dosing",
+        "liquid_dosing",
+        "reaction",
+        "heating_stirring",
+        "filtration",
+        "evaporation",
+        "hplc",
+        "lcms",
+        "nmr",
+        "barcode_reading",
+        "delidding",
+        "waste",
+        "manual_bench",
+        "cell_culture",
+        "bioreactor",
+        "cell_lysis",
+        "protein_purification",
+        "protein_qc",
+        "concentration_measurement",
+        "crystallization_setup",
+        "crystal_imaging",
+        "crystal_soaking",
+        "crystal_harvesting",
+        "cryo_cooling",
+        "xray_diffraction",
+        "acoustic_dispensing",
+        "solid_phase_extraction",
+        "compound_storage",
+        "inert_atmosphere",
+        "ventilated_enclosure",
+        "cold_storage",
+        "external_service",
+        "in_silico"
       ]
     },
     "labware": {
       "type": "string",
-      "enum": ["sbs_96", "sbs_384", "sbs_1536", "deep_well_96", "tip_rack", "vial_rack", "petri_dish", "tube_rack", "reservoir", "other"]
+      "enum": [
+        "sbs_96",
+        "sbs_384",
+        "sbs_1536",
+        "deep_well_96",
+        "tip_rack",
+        "vial_rack",
+        "petri_dish",
+        "tube_rack",
+        "reservoir",
+        "other",
+        "deep_well_24",
+        "crystallization_plate_96",
+        "reaction_block_96",
+        "filter_plate_96",
+        "shake_flask",
+        "bottle",
+        "puck",
+        "column"
+      ]
     },
     "vec2": {
       "type": "object",
-      "required": ["x", "y"],
-      "properties": { "x": { "type": "number" }, "y": { "type": "number" } },
+      "required": [
+        "x",
+        "y"
+      ],
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        }
+      },
       "additionalProperties": false
     },
     "vec3": {
       "type": "object",
-      "required": ["x", "y", "z"],
-      "properties": { "x": { "type": "number" }, "y": { "type": "number" }, "z": { "type": "number" } },
+      "required": [
+        "x",
+        "y",
+        "z"
+      ],
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "z": {
+          "type": "number"
+        }
+      },
       "additionalProperties": false
+    },
+    "uncertain_number": {
+      "description": "A number with an honest range and where it came from. Track 2: nothing is a bare guess.",
+      "type": "object",
+      "required": [
+        "value"
+      ],
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "low": {
+          "type": "number"
+        },
+        "high": {
+          "type": "number"
+        },
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+        "source": {
+          "type": "string",
+          "description": "URL, Amass record id, or 'agent_estimate'."
+        }
+      }
+    },
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "datasheet",
+        "literature",
+        "estimated",
+        "placeholder"
+      ]
+    },
+    "evidence": {
+      "type": "object",
+      "required": [
+        "claim",
+        "source"
+      ],
+      "properties": {
+        "claim": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string",
+          "description": "URL, DOI or Amass record id."
+        },
+        "provider": {
+          "type": "string",
+          "enum": [
+            "amass",
+            "vendor_site",
+            "web",
+            "agent"
+          ]
+        },
+        "quote": {
+          "type": "string"
+        }
+      }
     }
   }
 }
