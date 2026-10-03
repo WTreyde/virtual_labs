@@ -34,7 +34,7 @@ PYTHONPATH=backend .venv/bin/python frontend/scripts/copy_replays.py \
   backend/labforge/agent/demo/scenarios_20261003_repaired
 ```
 
-The script supplies catalog entries and produces `public/replays/chem.json` and `fbdd.json` for `?replay=chem` / `?replay=fbdd`. No frontend files are changed by this PR.
+The script supplies catalog entries and produces `public/replays/chem.json` and `fbdd.json` for `?replay=chem` / `?replay=fbdd`. The follow-up in this PR now publishes chemistry at `frontend/public/replays/chem.json`; FBDD is replaced by the newer `scenarios_20261003_harvesting` record, with full operator harvesting and explicitly reported verifier disagreement.
 
 Repeat the live gates (chargeable):
 
@@ -52,3 +52,5 @@ A temporary merge of Maxim’s pending `886e2b8` guard failed its own
 `process.hold_time_s`. It raises `StopIteration` before reaching the verifier.
 Maxim should use a historical catalog fixture or the separate hold-time field in that
 test. The merge was aborted; this PR’s merged-main `make check` passes.
+
+Update: Maxim fixed the pending test in `3e89920` with a self-contained historical shipper fixture. A temporary merge now passes `make check` (119 tests, 12 subtests); the merge was aborted. The earlier failure above is historical and no longer blocks Strand D.
