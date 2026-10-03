@@ -106,8 +106,69 @@ def test_replay_only_mode_refuses_live_chat(monkeypatch):
     assert client.get("/health").json()["live_chat"] is True
     monkeypatch.setattr(gw, "REPLAY_ONLY", True)
     monkeypatch.setattr(gw, "run_turn", lambda *_: (_ for _ in ()).throw(AssertionError("agent must not run")))
-    assert client.get("/health").json() == {"ok": True, "live_chat": False}
+    health = client.get("/health").json()
+    assert health["live_chat"] is False and health["live_agent"] is False and "recorded agent run" in health["live_agent_note"]
     for path in ("/chat", "/chat/stream"):
         response = client.post(path, json={"messages": [{"role": "user", "content": "design a lab"}]})
         assert response.status_code == 503 and "recorded agent run" in response.json()["detail"]
 
+
+
+def test_health_says_when_no_api_key_is_loaded(monkeypatch):
+    """The UI shows "live agent off: no API key loaded" instead of silently serving the offline example."""
+    import labforge.gateway as gw
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "")
+    health = TestClient(gw.app).get("/health").json()
+    assert health["live_chat"] is True and health["api_key_loaded"] is False and health["live_agent"] is False
+    assert "no API key loaded" in health["live_agent_note"]
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-test")
+    health = TestClient(gw.app).get("/health").json()
+    assert health["api_key_loaded"] is True and health["live_agent"] is True and health["live_agent_note"] is None
+
+
+def _no_agent(*_args, **_kwargs):
+    raise AssertionError("GET /validation must never run the agent")
+
+
+def test_validation_route_never_calls_the_agent(monkeypatch):
+    """With a key loaded, /validation still costs only stored designs: zero agent calls, every case gets a row."""
+    import labforge.agent.planner as planner
+    import labforge.gateway as gw
+    import labforge.validation.runner as vr
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-test")
+    monkeypatch.setattr(planner, "run_turn", _no_agent)
+    monkeypatch.setattr(gw, "run_turn", _no_agent)
+    monkeypatch.setattr(vr, "design_from_brief", _no_agent)
+    rows = TestClient(gw.app).get("/validation").json()
+    assert len(rows) == len(vr.load_cases())
+    assert {r["status"] for r in rows} <= {"compared", "not_costable", "no_design_yet"}
+    assert any(r["status"] == "compared" for r in rows)
+
+
+def test_validation_route_turns_one_failing_case_into_one_error_row(monkeypatch):
+    import labforge.gateway as gw
+    real = gw.run_case
+    cases = gw.load_cases()
+    broken = next(c["id"] for c in cases if c.get("workflow"))
+
+    def flaky(case):
+        if case["id"] == broken:
+            raise RuntimeError("cost model blew up")
+        return real(case)
+
+    monkeypatch.setattr(gw, "run_case", flaky)
+    rows = TestClient(gw.app).get("/validation").json()
+    assert len(rows) == len(cases)
+    errors = [r for r in rows if r["status"] == "error"]
+    assert [r["id"] for r in errors] == [broken] and "blew up" in errors[0]["reason"]
+
+
+def test_replay_only_validation_makes_no_agent_calls(monkeypatch):
+    import labforge.agent.planner as planner
+    import labforge.gateway as gw
+    import labforge.validation.runner as vr
+    monkeypatch.setattr(gw, "REPLAY_ONLY", True)
+    monkeypatch.setattr(planner, "run_turn", _no_agent)
+    monkeypatch.setattr(vr, "design_from_brief", _no_agent)
+    response = TestClient(gw.app).get("/validation")
+    assert response.status_code == 200 and all(r["status"] != "error" for r in response.json())
