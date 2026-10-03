@@ -63,14 +63,14 @@ export async function openReport(d: Design, snapshot: () => Promise<string | und
 
   const [img, md] = await Promise.all([
     snapshot().catch(() => undefined),
-    report(d).then((text) => ({ text, live: true })).catch(() => ({ text: offlineDraft(d), live: false })),
+    report(d).then((text) => ({ text, live: !d.report_markdown })).catch(() => ({ text: offlineDraft(d), live: false })),
   ]);
   const title = String(d.lab_spec?.name ?? "Lab design");
   const when = new Date().toLocaleString();
   w.document.open();
   w.document.write(`<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${title.replace(/</g, "&lt;")}: lab proposal</title>
     <style>${PAGE_CSS}</style></head><body>
-    <div class="bar"><span class="meta">LabForge · ${when} · ${md.live ? "report from the agent backend" : "offline draft"}</span>
+    <div class="bar"><span class="meta">LabForge · ${when} · ${d.report_markdown ? "report from a recorded agent run" : md.live ? "report from the agent backend" : "offline draft"}</span>
       <button onclick="print()">Print / Save as PDF</button></div>
     ${img ? `<img class="scene" src="${img}" alt="Isometric view of the proposed lab layout"><div class="caption">Proposed layout as shown in LabForge. Instrument sizes follow catalog footprints; art is schematic.</div>` : ""}
     ${await marked.parse(md.text.replace(/</g, "&lt;"))}

@@ -1,0 +1,122 @@
+import { marked } from "marked";
+import type { CatalogItem, Design } from "./types";
+
+/**
+ * Strand A: ?replay=<name> plays a recorded agent run from /replays/<name>.json at demo speed with no backend
+ * calls: the brief, the agent's tool calls in order, then (if the run produced one) the layout, the timeline
+ * animation and the BOM/report; otherwise the agent's own explanation of why it stopped.
+ * Files come from backend/labforge/agent/demo (python -m labforge.agent.demo_scenarios), copied by
+ * frontend/scripts/copy_replays.py, which also attaches the catalog entries the run uses.
+ */
+
+export interface RecordedRun {
+  brief: string; model?: string; source?: string;
+  /** Set by copy_replays.py when the recorded sim_result had no timeline and it was recomputed from the design. */
+  timeline_source?: string;
+  output: {
+    messages?: { role: string; content: unknown }[];
+    lab_spec?: any; workflow?: Design["workflow"]; layout?: Design["layout"]; sim_result?: Design["sim_result"];
+    claims?: unknown[]; report_markdown?: string;
+  };
+  events?: { type: string; name?: string; input?: Record<string, unknown>; step?: number; text?: string; error?: string }[];
+  gate?: { passed?: boolean; missing_capabilities?: string[] };
+  catalog?: Record<string, CatalogItem>;
+}
+
+export interface ReplayHooks {
+  say: (lines: string[], speaker?: string) => void;
+  log: (line: string) => void;
+  showDesign: (d: Design) => void;
+  showAnswer: (title: string, html: string) => void;
+}
+
+export async function loadReplay(name: string): Promise<RecordedRun> {
+  const res = await fetch(`${(import.meta as any).env?.BASE_URL ?? "/"}replays/${encodeURIComponent(name)}.json`);
+  if (!res.ok) throw new Error(`There is no recorded run called "${name}" yet, so there is nothing to replay. (Looked for public/replays/${name}.json.)`);
+  return res.json();
+}
+
+/** A room with nothing in it, shown while the recorded agent is still "working". */
+export function emptyDesign(lab_spec?: any): Design {
+  const room = lab_spec?.room ?? {};
+  return {
+    lab_spec: lab_spec ?? {}, catalog: {},
+    workflow: { id: "pending", equipment: [] },
+    layout: { id: "pending", room: { width_m: room.width_m ?? 10, depth_m: room.depth_m ?? 8 }, placements: [], transfers: [] },
+    sim_result: { throughput: { value: 0, unit: "" }, utilisation: [], bottlenecks: [] },
+  };
+}
+
+const humanise = (s: unknown) => String(s).replace(/_/g, " ");
+
+/** One line per recorded event, in the agent's voice. */
+function describe(e: NonNullable<RecordedRun["events"]>[number]): string | undefined {
+  const i = e.input ?? {};
+  switch (e.type) {
+    case "model_call": return `Thinking (step ${e.step ?? "?"})…`;
+    case "tool_error": return `${humanise(e.name)} failed: ${e.error ?? "error"}`;
+    case "tool_start":
+      switch (e.name) {
+        case "search_catalog":
+          return i.capability ? `Searching the catalog for ${humanise(i.capability)}…` : i.labware ? `Searching the catalog for ${humanise(i.labware)} labware…` : "Listing the whole catalog…";
+        case "search_evidence": return `Looking for evidence: “${i.query ?? ""}”`;
+        case "layout_and_simulate": return "Laying out the room and simulating it…";
+        case "verify_claims": return "Checking my claims against the simulator…";
+        case "create_report": return "Writing the report…";
+        case "optimise_instrument": return `Trying what-ifs on ${humanise(i.instance_id ?? "an instrument")}…`;
+        case "plan_projects": return "Planning the project order…";
+        default: return `${humanise(e.name)}…`;
+      }
+    default: return undefined; // text deltas, tool_end and assistant_text are summarised by the final message
+  }
+}
+
+const textOf = (c: unknown): string =>
+  typeof c === "string" ? c : Array.isArray(c) ? c.map((b: any) => (typeof b === "string" ? b : b?.text ?? "")).join("\n") : "";
+
+/** First heading or sentence of a Markdown answer, for the dialogue box. */
+function headline(md: string): string {
+  const h = md.match(/^#+\s*(.+)$/m)?.[1];
+  return (h ?? md.split(/(?<=[.!?])\s/)[0] ?? "").replace(/[*`_]/g, "").trim();
+}
+
+/** Resolves after ms, or as soon as skip.now is set. Timer-based so it also runs while the tab renders slowly. */
+const wait = (ms: number, skip: { now: boolean }) =>
+  new Promise<void>((resolve) => {
+    let left = ms;
+    const id = setInterval(() => { left -= 100; if (skip.now || left <= 0) { clearInterval(id); resolve(); } }, 100);
+  });
+
+/** Play the run. `skip.now = true` fast-forwards to the end state. */
+export async function playReplay(run: RecordedRun, hooks: ReplayHooks, skip: { now: boolean }) {
+  hooks.log(`You: ${run.brief}`);
+  hooks.say([run.brief], "YOU");
+  await wait(4500, skip);
+
+  for (const e of run.events ?? []) {
+    const line = describe(e);
+    if (!line) continue;
+    hooks.log(`Agent: ${line}`);
+    hooks.say([line]);
+    await wait(e.type === "model_call" ? 1400 : 700, skip);
+  }
+
+  const o = run.output;
+  const answer = textOf([...(o.messages ?? [])].reverse().find((m) => m.role === "assistant")?.content ?? "");
+  if (o.layout && o.workflow && o.sim_result && o.lab_spec) {
+    const design: Design = {
+      lab_spec: o.lab_spec, workflow: o.workflow, layout: o.layout, sim_result: o.sim_result,
+      catalog: run.catalog ?? {}, report_markdown: o.report_markdown,
+      timeline_note: run.timeline_source ? "timeline recomputed from recorded design" : "recorded run",
+    };
+    hooks.showDesign(design);
+    if (answer) hooks.log(`Agent: ${answer}`);
+    return;
+  }
+  // No design: the agent stopped. Show its own explanation; that refusal is the honest result.
+  const missing = run.gate?.missing_capabilities ?? [];
+  hooks.log(`Agent: ${answer}`);
+  hooks.say([headline(answer) || "I stopped before producing a design.",
+    ...(missing.length ? [`The catalog has nothing for: ${missing.map(humanise).join(", ")}.`] : [])]);
+  if (answer) hooks.showAnswer("The agent's answer", await marked.parse(answer.replace(/</g, "&lt;")));
+}

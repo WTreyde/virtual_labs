@@ -2,6 +2,11 @@ import type { Design } from "./types";
 
 /** Strand A: the side panel (metrics with uncertainty band, BOM). Owner: Roshan. */
 export function renderPanel(d: Design) {
+  if (!d.workflow.equipment.length) {
+    document.querySelector("#metrics")!.innerHTML = `<b>Throughput</b><br/><span class="muted">No design yet.</span>`;
+    document.querySelector("#bom")!.innerHTML = `<b>Bill of materials</b><br/><span class="muted">No equipment chosen yet.</span>`;
+    return;
+  }
   const t = d.sim_result.throughput;
   const lo = t.p10 ?? t.value, hi = t.p90 ?? t.value, target = t.target ?? t.value;
   const max = Math.max(hi, target) * 1.25;
