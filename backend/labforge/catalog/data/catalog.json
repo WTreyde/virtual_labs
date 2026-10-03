@@ -54,7 +54,8 @@
         "high": 125000,
         "confidence": "datasheet",
         "source": "https://opentrons.com/products/opentrons-flex-robot",
-        "note": "Vendor page (2026): 'Starting at $24,950' base robot. Federal full workstation packages $68-124K (2025-26)."
+        "note": "Vendor page (2026): 'Starting at $24,950' base robot. Federal full workstation packages $68-124K (2025-26).",
+        "year": 2026
       },
       "price_usd_estimate.base": {
         "value": 24950.0,
@@ -62,7 +63,8 @@
         "high": 24950.0,
         "confidence": "datasheet",
         "source": "https://opentrons.com/products/opentrons-flex-robot",
-        "note": "base price: Vendor page: Flex robot 'starts at $24,950', requires on-site install; gripper from $9,750, Stacker $15,000, HEPA/UV $14,000 extra; pipettes not in base price (OT-2 pipettes incompatible)."
+        "note": "base price: Vendor page: Flex robot 'starts at $24,950', requires on-site install; gripper from $9,750, Stacker $15,000, HEPA/UV $14,000 extra; pipettes not in base price (OT-2 pipettes incompatible).",
+        "year": 2026
       },
       "price_usd_estimate.configured": {
         "value": 94725.0,
@@ -70,7 +72,8 @@
         "high": 124200.0,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_75N98026F00341_7529_GS07F0636W_4730",
-        "note": "configured price: NIAID Aug 2026 GSA: Flex protein purification workstation (1- and 8-ch) $94,725.50. Others: Flex Prep 96-ch workstation $58,847.75 (NIH Sep 2024, CONT_AWD_75N93024P01089_7529), Flex NGS workstation $118,683 (USDA Sep 2026), Flex V2 $124,200 (NIH Jul 2026)."
+        "note": "configured price: NIAID Aug 2026 GSA: Flex protein purification workstation (1- and 8-ch) $94,725.50. Others: Flex Prep 96-ch workstation $58,847.75 (NIH Sep 2024, CONT_AWD_75N93024P01089_7529), Flex NGS workstation $118,683 (USDA Sep 2026), Flex V2 $124,200 (NIH Jul 2026).",
+        "year": 2026
       }
     }
   },
@@ -127,7 +130,8 @@
         "high": 48000,
         "confidence": "datasheet",
         "source": "https://automationdistribution.com/universal-robots-ur5e/",
-        "note": "Automation Distribution list $39,083 (arm, controller, pendant). US Army 2024 PO W911QX24P0135: UR5e with gripper $41,555."
+        "note": "Automation Distribution list $39,083 (arm, controller, pendant). US Army 2024 PO W911QX24P0135: UR5e with gripper $41,555.",
+        "year": 2024
       },
       "price_usd_estimate.base": {
         "value": 39083.0,
@@ -135,7 +139,8 @@
         "high": 43544.0,
         "confidence": "datasheet",
         "source": "https://automationdistribution.com/universal-robots-ur5e/",
-        "note": "base price: Automation Distribution (new, factory stock): $39,083.16-$43,544.43 depending on SKU; arm + controller + pendant + PolyScope, no gripper. Low: Vention EUR27,557 (https://vention.com/parts/universal-robots-ur5e-collaborative-robot-arm-2445) converted at an assumed 1.15 USD/EUR (2026) = $31.7K."
+        "note": "base price: Automation Distribution (new, factory stock): $39,083.16-$43,544.43 depending on SKU; arm + controller + pendant + PolyScope, no gripper. Low: Vention EUR27,557 (https://vention.com/parts/universal-robots-ur5e-collaborative-robot-arm-2445) converted at an assumed 1.15 USD/EUR (2026) = $31.7K.",
+        "year": 2026
       },
       "price_usd_estimate.configured": {
         "value": 48000.0,
@@ -143,7 +148,8 @@
         "high": 67345.0,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_W911QX24P0135_9700_-NONE-_-NONE-",
-        "note": "configured price: Federal buys: DoD 2024 W911QX24P0135 UR5e with precision gripper $41,555 (low); DoD 2022 SPE2D622F2B1X UR5e robot $48,000 (value); DoD 2023 SPE2D623F7EJ3 'UR5E robot pkg' $67,345 (high). Excludes custom integration/cell build."
+        "note": "configured price: Federal buys: DoD 2024 W911QX24P0135 UR5e with precision gripper $41,555 (low); DoD 2022 SPE2D622F2B1X UR5e robot $48,000 (value); DoD 2023 SPE2D623F7EJ3 'UR5E robot pkg' $67,345 (high). Excludes custom integration/cell build.",
+        "year": 2024
       }
     }
   },
@@ -205,7 +211,8 @@
         "high": 60000,
         "confidence": "estimated",
         "source": "https://www.labmakelaar.eu/shop/all/saleable/ovens-incubators-and-climate/incubator/incubators/liconic-instruments-stx44-hrsa-incubators-for-robotic-integration/",
-        "note": "No new price found. Source is a USED STX44-HRSA at EUR 14,000 (~$16.4K, 2026) = lower bound. $40K new is extrapolated from the comparable Thermo Cytomat 2C (NIH 2020, $44,787); close to a placeholder."
+        "note": "No new price found. Source is a USED STX44-HRSA at EUR 14,000 (~$16.4K, 2026) = lower bound. $40K new is extrapolated from the comparable Thermo Cytomat 2C (NIH 2020, $44,787); close to a placeholder.",
+        "year": 2026
       }
     }
   },
@@ -267,7 +274,8 @@
         "high": 67055,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_75N98026F00453_7529_GS07F057DA_4732",
-        "note": "NIH award 75N98026F00453 (Sep 2026): CLARIOstar Plus base unit, $44,450 (GSA schedule). >15 federal buys 2019-2026 span $37,589-$67,055 by configuration."
+        "note": "NIH award 75N98026F00453 (Sep 2026): CLARIOstar Plus base unit, $44,450 (GSA schedule). >15 federal buys 2019-2026 span $37,589-$67,055 by configuration.",
+        "year": 2026
       },
       "price_usd_estimate.base": {
         "value": 44450.0,
@@ -275,7 +283,8 @@
         "high": 45034.0,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_75N98026F00453_7529_GS07F057DA_4732",
-        "note": "base price: NIH 2026 order 75N98026F00453 'CLARIOSTAR PLUS BASE UNIT' $44,450 (GSA schedule GS-07F-057DA). Similar base-type buys: 75N94025F00102 $44,817 (2025), 75N95024F00133 $45,034 (2024), SPE2D626F87CZ $42,488 (DoD 2026)."
+        "note": "base price: NIH 2026 order 75N98026F00453 'CLARIOSTAR PLUS BASE UNIT' $44,450 (GSA schedule GS-07F-057DA). Similar base-type buys: 75N94025F00102 $44,817 (2025), 75N95024F00133 $45,034 (2024), SPE2D626F87CZ $42,488 (DoD 2026).",
+        "year": 2026
       },
       "price_usd_estimate.configured": {
         "value": 55587.0,
@@ -283,7 +292,8 @@
         "high": 67055.0,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_75N92022F00258_7529_-NONE-_-NONE-",
-        "note": "configured price: Federal CLARIOstar Plus buys with options/software/install: 68HE0B22P0425 EPA 2022 'with LVF monochromator and software' $67,055; 75N93022F00393 $63,035 (2022); 75N98020F00382 $58,988 (2020, with enhanced dynamic range); 75N92022F00258 $55,588 (2022, value = this, roughly median); 75N96024F00052 $54,041 (2024); 68HE0D18P0047 EPA 2018 'provide, install and train' $47,975. Outlier 36C26319P1063 $87,078 (2019) excluded."
+        "note": "configured price: Federal CLARIOstar Plus buys with options/software/install: 68HE0B22P0425 EPA 2022 'with LVF monochromator and software' $67,055; 75N93022F00393 $63,035 (2022); 75N98020F00382 $58,988 (2020, with enhanced dynamic range); 75N92022F00258 $55,588 (2022, value = this, roughly median); 75N96024F00052 $54,041 (2024); 68HE0D18P0047 EPA 2018 'provide, install and train' $47,975. Outlier 36C26319P1063 $87,078 (2019) excluded.",
+        "year": 2022
       }
     }
   },
@@ -343,7 +353,8 @@
         "high": 45143,
         "confidence": "datasheet",
         "source": "https://search.testmart.com/search/sitesearch.cfm/~q%60%20Family%20Code%201260~p2%6040000btw50000~s%60SELLING_PRICE",
-        "note": "TestMart/GSAMart open-market price $45,143 (2026). Federal buys $29,872 (2019), $31,811 (2021)."
+        "note": "TestMart/GSAMart open-market price $45,143 (2026). Federal buys $29,872 (2019), $31,811 (2021).",
+        "year": 2026
       },
       "price_usd_estimate.configured": {
         "value": 31811.0,
@@ -351,7 +362,8 @@
         "high": 37180.0,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_75N95021P00642_7529_-NONE-_-NONE-",
-        "note": "configured price: Federal single-unit buys: NIH Sep 2021 one PlateLoc $31,811.40; NIH/DOJ 2019 $29,871.90 (CONT_AWD_75D30119P05989_7523); DOJ Mar 2026 'Agilent PlateLoc sealers' $37,179.54 (CONT_AWD_15F06726P0000358, quantity unknown). Likely close to bare unit as PlateLoc has few options, so treat as base-to-typical."
+        "note": "configured price: Federal single-unit buys: NIH Sep 2021 one PlateLoc $31,811.40; NIH/DOJ 2019 $29,871.90 (CONT_AWD_75D30119P05989_7523); DOJ Mar 2026 'Agilent PlateLoc sealers' $37,179.54 (CONT_AWD_15F06726P0000358, quantity unknown). Likely close to bare unit as PlateLoc has few options, so treat as base-to-typical.",
+        "year": 2021
       }
     }
   },
@@ -397,7 +409,8 @@
         "high": 4000,
         "confidence": "datasheet",
         "source": "https://www.labsrobots.com/product-page/hotel-rack-side-grip",
-        "note": "Online store list price EUR 1,270.40 (2026), ~$1,486 at 1.17 USD/EUR. High bound from other plate hotels plus margin."
+        "note": "Online store list price EUR 1,270.40 (2026), ~$1,486 at 1.17 USD/EUR. High bound from other plate hotels plus margin.",
+        "year": 2026
       }
     },
     "source_urls": [
@@ -532,7 +545,8 @@
         "high": 30000,
         "confidence": "datasheet",
         "source": "https://opentrons.com/products/ot-2-robot",
-        "note": "Vendor page (2026): 'Starting at $15,950'. Federal buys $11,335 (2022) to $24,127 with modules (2023)."
+        "note": "Vendor page (2026): 'Starting at $15,950'. Federal buys $11,335 (2022) to $24,127 with modules (2023).",
+        "year": 2026
       },
       "price_usd_estimate.base": {
         "value": 15950.0,
@@ -540,7 +554,8 @@
         "high": 15950.0,
         "confidence": "datasheet",
         "source": "https://opentrons.com/products/ot-2-robot",
-        "note": "base price: Vendor page fetched 2026-10: 'starting at $15,950' (USD), includes one GEN2 single-channel pipette; modules/tips/labware sold separately; 1-yr warranty."
+        "note": "base price: Vendor page fetched 2026-10: 'starting at $15,950' (USD), includes one GEN2 single-channel pipette; modules/tips/labware sold separately; 1-yr warranty.",
+        "year": 2026
       },
       "price_usd_estimate.configured": {
         "value": 24127.0,
@@ -548,7 +563,35 @@
         "high": 39807.0,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_75N94023P00516_7529_-NONE-_-NONE-",
-        "note": "configured price: NIDDK Jul 2023 PO 'OT-2 ROBOT' $24,127.41. Range from NIH OT-2 workstation POs 2021: NGS library prep $20,152 (CONT_AWD_75D30121P11000_7523), nucleic acid cleanup workstation $39,807 (CONT_AWD_75D30121P10992_7523). Award descriptions are terse; the 'with modules' content of the $24,127 buy is not verified."
+        "note": "configured price: NIDDK Jul 2023 PO 'OT-2 ROBOT' $24,127.41. Range from NIH OT-2 workstation POs 2021: NGS library prep $20,152 (CONT_AWD_75D30121P11000_7523), nucleic acid cleanup workstation $39,807 (CONT_AWD_75D30121P10992_7523). Award descriptions are terse; the 'with modules' content of the $24,127 buy is not verified.",
+        "year": 2023
+      },
+      "price_usd_estimate.base.2020": {
+        "value": 5000,
+        "low": 5000,
+        "high": 5000,
+        "confidence": "datasheet",
+        "source": "https://web.archive.org/web/20200806095720/https://opentrons.com/ot-2/",
+        "year": 2020,
+        "note": "base price, vendor list in that year: Archived Opentrons OT-2 page (Aug 2020): 'from $5,000'."
+      },
+      "price_usd_estimate.base.2024": {
+        "value": 8950,
+        "low": 8950,
+        "high": 8950,
+        "confidence": "datasheet",
+        "source": "https://web.archive.org/web/20240716011111/https://opentrons.com/products/ot-2-robot",
+        "year": 2024,
+        "note": "base price, vendor list in that year: Archived product page (Jul 2024): 'OT-2 Robot $8,950.00 - $15,450.00' by configuration; base = lowest."
+      },
+      "price_usd_estimate.base.2025": {
+        "value": 15275,
+        "low": 15275,
+        "high": 15275,
+        "confidence": "datasheet",
+        "source": "https://web.archive.org/web/20250619033554/https://opentrons.com/products/ot-2-robot",
+        "year": 2025,
+        "note": "base price, vendor list in that year: Archived product page (Jun 2025): 'Starting at $15,275'."
       }
     },
     "scraped_at": "2026-10-03T13:31:44+00:00",
@@ -687,7 +730,8 @@
         "high": 302000,
         "confidence": "estimated",
         "source": "https://reporter.nih.gov/project-details/10424767",
-        "note": "NIH S10 grant 1S10OD032282-01 (FY2022): Hamilton NGS STAR incl. install/training/warranty $247,215. Federal STAR buys $182K (2021) to $302K (2025); STARlet $135-193K."
+        "note": "NIH S10 grant 1S10OD032282-01 (FY2022): Hamilton NGS STAR incl. install/training/warranty $247,215. Federal STAR buys $182K (2021) to $302K (2025); STARlet $135-193K.",
+        "year": 2022
       },
       "price_usd_estimate.configured": {
         "value": 262714.0,
@@ -695,7 +739,8 @@
         "high": 315409.0,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_HHSD2002016F92365_7529_-NONE-_-NONE-",
-        "note": "configured price: Federal buys: HHSD2002016F92365 (2016) Hamilton Microlab STAR $262,714 (value); 75N91022P00901 (NIH NCI 2022) NGS STAR $315,409; 36C26123P1173 (VA 2023) STARlet system $193,191. Our current $247,215 (NIH S10 abstract incl. install/training) is within range."
+        "note": "configured price: Federal buys: HHSD2002016F92365 (2016) Hamilton Microlab STAR $262,714 (value); 75N91022P00901 (NIH NCI 2022) NGS STAR $315,409; 36C26123P1173 (VA 2023) STARlet system $193,191. Our current $247,215 (NIH S10 abstract incl. install/training) is within range.",
+        "year": 2016
       }
     },
     "scraped_at": "2026-10-03T13:29:57Z",
@@ -852,7 +897,8 @@
         "high": 500000,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_75N98026P01440_7529_-NONE-_-NONE-",
-        "note": "NIH Aug 2026: Tecan Fluent 780 $339,999. Fluent 480 $209,528 (2022); Fluent 1080 workstation $500,483 (CDC 2019)."
+        "note": "NIH Aug 2026: Tecan Fluent 780 $339,999. Fluent 480 $209,528 (2022); Fluent 1080 workstation $500,483 (CDC 2019).",
+        "year": 2026
       },
       "price_usd_estimate.configured": {
         "value": 316495.0,
@@ -860,7 +906,8 @@
         "high": 339999.0,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_75N92022P00200_7529_-NONE-_-NONE-",
-        "note": "configured price: NIH Sep 2022 Fluent 780 with system cabinet and accessories $316,494.60. Also Fluent 780 NIH Sep 2021 $264,959 (CONT_AWD_75N93021P01504), Fluent 780 NIH Aug 2026 $339,999, Fluent 480 DOJ Mar 2022 $209,528, Fluent 780 w/ FCA&RGA DOJ 2019 $283,669. Fluent 1080 (larger) $500K-$1M excluded from range."
+        "note": "configured price: NIH Sep 2022 Fluent 780 with system cabinet and accessories $316,494.60. Also Fluent 780 NIH Sep 2021 $264,959 (CONT_AWD_75N93021P01504), Fluent 780 NIH Aug 2026 $339,999, Fluent 480 DOJ Mar 2022 $209,528, Fluent 780 w/ FCA&RGA DOJ 2019 $283,669. Fluent 1080 (larger) $500K-$1M excluded from range.",
+        "year": 2022
       }
     },
     "power_w": 500,
@@ -1000,7 +1047,8 @@
         "high": 403000,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_75N98026F00188_7529_GS07F0636W_4730",
-        "note": "NIH/NHGRI Jun 2026 (GSA): Biomek i7 Hybrid with enclosure $335,519. Other federal buys $191,683 (2024) to $402,992 (2026)."
+        "note": "NIH/NHGRI Jun 2026 (GSA): Biomek i7 Hybrid with enclosure $335,519. Other federal buys $191,683 (2024) to $402,992 (2026).",
+        "year": 2026
       }
     },
     "safety": {
@@ -1118,7 +1166,8 @@
         "high": 28700,
         "confidence": "datasheet",
         "source": "https://www.fishersci.com/shop/products/NC2237227/NC2237227",
-        "note": "Fisher US list $24,191 (web $22,743), 2026. Thermo UK GBP 21,431 (~$28.7K at 1.34). NIH 2020 older model $17,187."
+        "note": "Fisher US list $24,191 (web $22,743), 2026. Thermo UK GBP 21,431 (~$28.7K at 1.34). NIH 2020 older model $17,187.",
+        "year": 2026
       },
       "price_usd_estimate.base": {
         "value": 24191.0,
@@ -1126,7 +1175,8 @@
         "high": 24191.0,
         "confidence": "datasheet",
         "source": "https://www.fishersci.com/shop/products/NC2237227/NC2237227",
-        "note": "base price: Fisher Scientific US regular price $24,191 (online-exclusive $21,240.90) for 5840330 Multidrop Combi, seen via search snippet; the Fisher page itself timed out when fetched. Thermo UK page (fetched) shows GBP 21,431 list / 19,287.90 discounted, not converted."
+        "note": "base price: Fisher Scientific US regular price $24,191 (online-exclusive $21,240.90) for 5840330 Multidrop Combi, seen via search snippet; the Fisher page itself timed out when fetched. Thermo UK page (fetched) shows GBP 21,431 list / 19,287.90 discounted, not converted.",
+        "year": 2026
       }
     },
     "safety": {
@@ -1270,7 +1320,8 @@
         "high": 420000,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_75N98026F00251_7529_GS07F0636W_4730",
-        "note": "NIH Jul 2026 (GSA): Echo 650 system $374,093; NIH S10 grants 2020/2025 ~$375-379K. Low reflects 2025 promo of up to 1/3 off."
+        "note": "NIH Jul 2026 (GSA): Echo 650 system $374,093; NIH S10 grants 2020/2025 ~$375-379K. Low reflects 2025 promo of up to 1/3 off.",
+        "year": 2026
       },
       "price_usd_estimate.configured": {
         "value": 374093.0,
@@ -1278,7 +1329,8 @@
         "high": 374093.0,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_75N98026F00251_7529_GS07F0636W_4730",
-        "note": "configured price: NIH Jul 2026 GSA order 'Echo 650 system liquid handler for screening and omics' $374,093.05 (single purchase record found)."
+        "note": "configured price: NIH Jul 2026 GSA order 'Echo 650 system liquid handler for screening and omics' $374,093.05 (single purchase record found).",
+        "year": 2026
       }
     },
     "scraped_at": "2026-10-03T13:31:44+00:00",
@@ -1408,7 +1460,8 @@
         "high": 340000,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_W911QX19P0132_9700_-NONE-_-NONE-",
-        "note": "US Army 2019 order: Echo 525 $246,083; Navy 2018 Echo 525 system $338,376. Low reflects 2025 promo of up to 1/3 off."
+        "note": "US Army 2019 order: Echo 525 $246,083; Navy 2018 Echo 525 system $338,376. Low reflects 2025 promo of up to 1/3 off.",
+        "year": 2019
       },
       "price_usd_estimate.configured": {
         "value": 246083.0,
@@ -1416,7 +1469,8 @@
         "high": 338376.0,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_W911QX19P0132_9700_-NONE-_-NONE-",
-        "note": "configured price: US Army Jun 2019 'Echo 525 Liquid Handler' $246,083; Navy Jun 2018 'Echo 525 acoustic wave transfer liquid handling system' $338,376 (CONT_AWD_N0017318P2044_9700, may include extras)."
+        "note": "configured price: US Army Jun 2019 'Echo 525 Liquid Handler' $246,083; Navy Jun 2018 'Echo 525 acoustic wave transfer liquid handling system' $338,376 (CONT_AWD_N0017318P2044_9700, may include extras).",
+        "year": 2019
       }
     },
     "scraped_at": "2026-10-03T13:29:57Z",
@@ -1554,7 +1608,8 @@
         "high": 61450,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_SPE2D621F1NUP_9700_SPE2DE20D0006_9700",
-        "note": "DLA 2021 via Thomas Scientific: XPeel $36,400; NIH 2021 $34,124. Current list ~$52.9-61.4K seen only in search snippets (not opened)."
+        "note": "DLA 2021 via Thomas Scientific: XPeel $36,400; NIH 2021 $34,124. Current list ~$52.9-61.4K seen only in search snippets (not opened).",
+        "year": 2021
       }
     },
     "power_w": 460,
@@ -1687,7 +1742,8 @@
         "high": 150000,
         "confidence": "estimated",
         "source": "https://labautomation.io/t/integrated-microplate-centrifuge-bionex-hig-or-hettich-sbs300/3521",
-        "note": "WEAK. No list price or purchase record. Derived from a 2025 forum post: HiG3 ~3x a Hettich SBS300 and ~100K more (implies ~150K, currency unstated); HiG4 assumed lower. Used HiG4 $20.7K is a floor."
+        "note": "WEAK. No list price or purchase record. Derived from a 2025 forum post: HiG3 ~3x a Hettich SBS300 and ~100K more (implies ~150K, currency unstated); HiG4 assumed lower. Used HiG4 $20.7K is a floor.",
+        "year": 2025
       }
     },
     "safety": {
@@ -1806,7 +1862,8 @@
         "high": 1300,
         "confidence": "datasheet",
         "source": "https://www.msesupplies.com/products/ika-plate-rct-digital-magnetic-stirrers-1500rpm-310-c",
-        "note": "MSE Supplies $1,279.95 (2026); IKA list $1,280."
+        "note": "MSE Supplies $1,279.95 (2026); IKA list $1,280.",
+        "year": 2026
       }
     },
     "safety": {
@@ -1948,7 +2005,8 @@
         "high": 100000,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_W81XWH12F0057_9700_GS24F1286C_4730",
-        "note": "US Army GSA order Feb 2012: QB5 automated powder dispensing system $72,900. Other federal buys $43.7K (2014) to $99.4K (2016). 2009-2014 prices likely 30-40% below today's."
+        "note": "US Army GSA order Feb 2012: QB5 automated powder dispensing system $72,900. Other federal buys $43.7K (2014) to $99.4K (2016). 2009-2014 prices likely 30-40% below today's.",
+        "year": 2012
       },
       "price_usd_estimate.configured": {
         "value": 72900.0,
@@ -1956,7 +2014,8 @@
         "high": 99368.0,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_W81XWH12F0057_9700_GS24F1286C_4730",
-        "note": "configured price: US Army GSA order Feb 2012 QB5 automated powder dispensing system $72,900 (value). Other federal Quantos records: W81XWH09P0848 $52,442 (2009), N6890816P0202 Navy 2016 'Quantos liquid dispensing system' $99,368 (high, liquid module). No new-unit list/distributor price found: Mettler is quote-only; only used listings found (labstuff.eu like-new QB1+QS30 EUR36,000, remma used QB1-P). Base left null."
+        "note": "configured price: US Army GSA order Feb 2012 QB5 automated powder dispensing system $72,900 (value). Other federal Quantos records: W81XWH09P0848 $52,442 (2009), N6890816P0202 Navy 2016 'Quantos liquid dispensing system' $99,368 (high, liquid module). No new-unit list/distributor price found: Mettler is quote-only; only used listings found (labstuff.eu like-new QB1+QS30 EUR36,000, remma used QB1-P). Base left null.",
+        "year": 2012
       }
     },
     "scraped_at": "2026-10-03T13:31:44+00:00",
@@ -2108,7 +2167,8 @@
         "high": 1100000,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_HHSF223201710103P_7524_-NONE-_-NONE-",
-        "note": "FDA 2017 PO: Chemspeed SWING automated workstation $594,301. NASA 2022 $601,850; Strathclyde 2025 dosing platform GBP 293,760 (~$394K); DTU 2024-25 synthesis platform ~$0.93-1.09M. Configuration-dependent."
+        "note": "FDA 2017 PO: Chemspeed SWING automated workstation $594,301. NASA 2022 $601,850; Strathclyde 2025 dosing platform GBP 293,760 (~$394K); DTU 2024-25 synthesis platform ~$0.93-1.09M. Configuration-dependent.",
+        "year": 2017
       },
       "price_usd_estimate.configured": {
         "value": 594301.0,
@@ -2116,7 +2176,8 @@
         "high": 1090000.0,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_HHSF223201710103P_7524_-NONE-_-NONE-",
-        "note": "configured price: FDA 2017 PO HHSF223201710103P 'Chemspeed SWING QuEChERS automated workstation' $594,301 (verified via usaspending). Range per our catalog note (NASA 2022 $601,850; Strathclyde 2025 GBP293,760; DTU ~$1M) not re-verified by me. Chemspeed is entirely quote-only and every system is custom-configured, so no minimum-config base price exists; base left null."
+        "note": "configured price: FDA 2017 PO HHSF223201710103P 'Chemspeed SWING QuEChERS automated workstation' $594,301 (verified via usaspending). Range per our catalog note (NASA 2022 $601,850; Strathclyde 2025 GBP293,760; DTU ~$1M) not re-verified by me. Chemspeed is entirely quote-only and every system is custom-configured, so no minimum-config base price exists; base left null.",
+        "year": 2017
       }
     },
     "scraped_at": "2026-10-03T13:29:57Z",
@@ -2288,7 +2349,8 @@
         "high": 750000,
         "confidence": "estimated",
         "source": "https://www.york.ac.uk/news-and-events/news/2012/research/chemspeed/",
-        "note": "WEAK. No direct ISYNTH price. Derived from Univ. York 2012: GBP 750K for two older Chemspeed parallel-synthesis platforms (~GBP 375K / ~$500K each)."
+        "note": "WEAK. No direct ISYNTH price. Derived from Univ. York 2012: GBP 750K for two older Chemspeed parallel-synthesis platforms (~GBP 375K / ~$500K each).",
+        "year": 2012
       }
     },
     "scraped_at": "2026-10-03T13:31:44+00:00",
@@ -2437,7 +2499,8 @@
         "high": 1500000,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_75N95019P00423_7529_-NONE-_-NONE-",
-        "note": "WEAK. No direct Big Kahuna price; $800K is an agent estimate. Anchor: NIH/NCATS 2019 PO for the smaller Unchained Junior $677,898; FDA 2020 Unchained formulation system $777,090 (model unstated)."
+        "note": "WEAK. No direct Big Kahuna price; $800K is an agent estimate. Anchor: NIH/NCATS 2019 PO for the smaller Unchained Junior $677,898; FDA 2020 Unchained formulation system $777,090 (model unstated).",
+        "year": 2019
       }
     },
     "safety": {
@@ -2564,7 +2627,8 @@
         "high": 8000,
         "confidence": "datasheet",
         "source": "https://www.fishersci.com/shop/products/NC1872591/NC1872591",
-        "note": "Fisher NC1872591 $7,834.08 (2026). EPA 2016 PO $3,671. Gas supply not included."
+        "note": "Fisher NC1872591 $7,834.08 (2026). EPA 2016 PO $3,671. Gas supply not included.",
+        "year": 2026
       }
     },
     "safety": {
@@ -2708,7 +2772,8 @@
         "high": 86239,
         "confidence": "estimated",
         "source": "https://www.labx.com/resources/the-best-evaporators-and-concentrators-a-buyers-review-of-price-and-features/4827",
-        "note": "Midpoint of LabX buyer's guide (Jan 2026) range $45-60K. NIH POs $44.9K (2020) and $54.2K (2017); Fisher EZ-2.4 Elite $86,239 (high)."
+        "note": "Midpoint of LabX buyer's guide (Jan 2026) range $45-60K. NIH POs $44.9K (2020) and $54.2K (2017); Fisher EZ-2.4 Elite $86,239 (high).",
+        "year": 2026
       },
       "price_usd_estimate.configured": {
         "value": 86239.0,
@@ -2716,7 +2781,8 @@
         "high": 86239.0,
         "confidence": "datasheet",
         "source": "https://www.fishersci.com/shop/products/ez-2-4-elite-evaporator-system-2/NC3376689",
-        "note": "configured price: Fisher Scientific EZ-2.4 Elite evaporator system with dry scroll pump and touchscreen: price $86,238.83 (list shown $82,132.22), checked 2026-10. Includes pump (needed for operation); install/training not itemised."
+        "note": "configured price: Fisher Scientific EZ-2.4 Elite evaporator system with dry scroll pump and touchscreen: price $86,238.83 (list shown $82,132.22), checked 2026-10. Includes pump (needed for operation); install/training not itemised.",
+        "year": 2026
       }
     },
     "scraped_at": "2026-10-03T13:31:44+00:00",
@@ -2829,7 +2895,8 @@
         "high": 100000,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_75N94025P00513_7529_-NONE-_-NONE-",
-        "note": "WEAK. No HT-6 list price; $80K is an agent estimate. Nearest: NIH/NIAAA Aug 2025 PO to SP Industries for a solvent evaporator system $85,270 (model unstated)."
+        "note": "WEAK. No HT-6 list price; $80K is an agent estimate. Nearest: NIH/NIAAA Aug 2025 PO to SP Industries for a solvent evaporator system $85,270 (model unstated).",
+        "year": 2025
       }
     },
     "scraped_at": "2026-10-03T13:29:57Z",
@@ -2976,7 +3043,8 @@
         "high": 210000,
         "confidence": "datasheet",
         "source": "https://online.ogs.ny.gov/purchase/spg/pdfdocs/3870022962PL_Waters.pdf",
-        "note": "NY State contract list prices (Jun 2023): I-Class PLUS w/ SM-FTN-I $83,300 + QDa Performance $73,400. Low = H-Class + QDa at NYS net; high adds PDA and software. QDa II is now current."
+        "note": "NY State contract list prices (Jun 2023): I-Class PLUS w/ SM-FTN-I $83,300 + QDa Performance $73,400. Low = H-Class + QDa at NYS net; high adds PDA and software. QDa II is now current.",
+        "year": 2023
       },
       "price_usd_estimate.base": {
         "value": 135100.0,
@@ -2984,7 +3052,8 @@
         "high": 135100.0,
         "confidence": "datasheet",
         "source": "https://online.ogs.ny.gov/purchase/spg/pdfdocs/3870022962PL_Waters.pdf",
-        "note": "base price: NY State OGS contract price list for Waters (rev 2023-06-01), LIST column: ACQUITY H-Class PLUS (CH-A) core system $67,100 + ACQUITY QDa Detector (Standard) $68,000 = $135,100 (minimum UPLC+QDa, no extra modules/software/service). Detector alone (low) $68,000. Parsed from PDF text; the NYS net prices are 26-32% lower (H-Class core $49,654, QDa $46,240 => ~$95.9K net)."
+        "note": "base price: NY State OGS contract price list for Waters (rev 2023-06-01), LIST column: ACQUITY H-Class PLUS (CH-A) core system $67,100 + ACQUITY QDa Detector (Standard) $68,000 = $135,100 (minimum UPLC+QDa, no extra modules/software/service). Detector alone (low) $68,000. Parsed from PDF text; the NYS net prices are 26-32% lower (H-Class core $49,654, QDa $46,240 => ~$95.9K net).",
+        "year": 2023
       },
       "price_usd_estimate.configured": {
         "value": 156700.0,
@@ -2992,7 +3061,8 @@
         "high": 156700.0,
         "confidence": "estimated",
         "source": "https://online.ogs.ny.gov/purchase/spg/pdfdocs/3870022962PL_Waters.pdf",
-        "note": "configured price: Same NYS list (2023): I-Class PLUS w/ SM-FTN-I $83,300 + QDa Performance $73,400 = $156,700 list; low = same at NYS net ($61,642 + $49,912 = $111,554). Excludes PDA detector, Empower/MassLynx workstation, install/training (not priced here), so true configured likely higher. Federal QDa-only buys: AG6395D170812 $76,732 (2017), 1251LA18F0069 $68,747 (2018, with probe, syringe pump, MassLynx workstation)."
+        "note": "configured price: Same NYS list (2023): I-Class PLUS w/ SM-FTN-I $83,300 + QDa Performance $73,400 = $156,700 list; low = same at NYS net ($61,642 + $49,912 = $111,554). Excludes PDA detector, Empower/MassLynx workstation, install/training (not priced here), so true configured likely higher. Federal QDa-only buys: AG6395D170812 $76,732 (2017), 1251LA18F0069 $68,747 (2018, with probe, syringe pump, MassLynx workstation).",
+        "year": 2023
       }
     },
     "scraped_at": "2026-10-03T13:31:44+00:00",
@@ -3132,7 +3202,8 @@
         "high": 250000,
         "confidence": "datasheet",
         "source": "https://online.ogs.ny.gov/purchase/spg/pdfdocs/3870022962PL_Agilent.pdf",
-        "note": "NY State contract list prices (Jul 2023): pump $56,302 + multisampler $35,011 + thermostat $8,641 + LC/MSD iQ $114,230. Low = NYS net (36.5% off); high adds DAD. Succeeded by InfinityLab Pro iQ."
+        "note": "NY State contract list prices (Jul 2023): pump $56,302 + multisampler $35,011 + thermostat $8,641 + LC/MSD iQ $114,230. Low = NYS net (36.5% off); high adds DAD. Succeeded by InfinityLab Pro iQ.",
+        "year": 2023
       }
     },
     "safety": {
@@ -3253,7 +3324,8 @@
         "high": 90000,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_80NSSC24PC077_8000_-NONE-_-NONE-",
-        "note": "NASA Aug 2024 PO: MBRAUN LABstar pro SP glove box $60,303. Other federal POs $38.5K (2017) to $84.9K (2023)."
+        "note": "NASA Aug 2024 PO: MBRAUN LABstar pro SP glove box $60,303. Other federal POs $38.5K (2017) to $84.9K (2023).",
+        "year": 2024
       }
     },
     "safety": {
@@ -3384,7 +3456,8 @@
         "high": 30000,
         "confidence": "datasheet",
         "source": "https://www.fishersci.com/shop/products/labconco-protector-xstream-high-performance-by-pass-hoods-6-ft-width-230v/10369110",
-        "note": "Fisher 10-369-110 (6 ft, 230V) $16,560 (2026). Hood only; base cabinets, ductwork and install extra (high)."
+        "note": "Fisher 10-369-110 (6 ft, 230V) $16,560 (2026). Hood only; base cabinets, ductwork and install extra (high).",
+        "year": 2026
       }
     },
     "scraped_at": "2026-10-03T13:31:44+00:00",
@@ -3465,7 +3538,8 @@
         "high": 2100,
         "confidence": "datasheet",
         "source": "https://www.justrite.com/894500-45-gallon-sure-grip-ex-flammable-safety-cabinet-yellow",
-        "note": "Justrite store base price $1,873 (2026); Jendco $1,591."
+        "note": "Justrite store base price $1,873 (2026); Jendco $1,591.",
+        "year": 2026
       }
     },
     "scraped_at": "2026-10-03T13:29:57Z",
@@ -3609,7 +3683,8 @@
         "high": 158785,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_75F40122F80457_7524_GS07F057DA_4732",
-        "note": "FDA award 75F40122F80457 (Sep 2022): 3 PHERAstar FSX for $307,653.75 (~$102.6K each). Range: NIH 2017 basic unit $86,120; NIH 2020 2 readers with options ~$158.8K each. Vendor price is quote-only."
+        "note": "FDA award 75F40122F80457 (Sep 2022): 3 PHERAstar FSX for $307,653.75 (~$102.6K each). Range: NIH 2017 basic unit $86,120; NIH 2020 2 readers with options ~$158.8K each. Vendor price is quote-only.",
+        "year": 2022
       },
       "price_usd_estimate.base": {
         "value": 86120.0,
@@ -3617,7 +3692,8 @@
         "high": 102551.0,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_HHSN271201700614P_7529_-NONE-_-NONE-",
-        "note": "base price: NIH 2017 PO HHSN271201700614P: 'PHERAstar FSX BASIC & ACCESSORIES' (cat 0472-101A) $86,120, purchase record not list price. 2022 FDA award 75F40122F80457 3 readers $307,653.75 = $102.6K each (lower-spec buy). BMG list is quote-only; a $114.5K reseller figure (terrauniversal) appeared in search snippet but page was 403 and unverified, so not used."
+        "note": "base price: NIH 2017 PO HHSN271201700614P: 'PHERAstar FSX BASIC & ACCESSORIES' (cat 0472-101A) $86,120, purchase record not list price. 2022 FDA award 75F40122F80457 3 readers $307,653.75 = $102.6K each (lower-spec buy). BMG list is quote-only; a $114.5K reseller figure (terrauniversal) appeared in search snippet but page was 403 and unverified, so not used.",
+        "year": 2017
       },
       "price_usd_estimate.configured": {
         "value": 158785.0,
@@ -3625,7 +3701,8 @@
         "high": 177418.0,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_75N95020P00224_7529_-NONE-_-NONE-",
-        "note": "configured price: NIH 2020 PO 75N95020P00224: 2 PHERAstar FSX readers brand-name-or-equal $317,569.16 = $158.8K each. Also 75N95021P00440 (2021) 'PHERAstar FSX and accessories' 1 unit $177,418; 75N95024P00166 (2024) readers $156,391. Low = 2022 3-reader buy at $102.6K each."
+        "note": "configured price: NIH 2020 PO 75N95020P00224: 2 PHERAstar FSX readers brand-name-or-equal $317,569.16 = $158.8K each. Also 75N95021P00440 (2021) 'PHERAstar FSX and accessories' 1 unit $177,418; 75N95024P00166 (2024) readers $156,391. Low = 2022 3-reader buy at $102.6K each.",
+        "year": 2020
       }
     },
     "power_w": 50,
@@ -3772,7 +3849,8 @@
         "high": 80000,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_75N92020P00205_7529_-NONE-_-NONE-",
-        "note": "NIH award 75N92020P00205 (Aug 2020): Cytomat 2C automated incubator, $44,787. Range is agent judgement of configuration spread."
+        "note": "NIH award 75N92020P00205 (Aug 2020): Cytomat 2C automated incubator, $44,787. Range is agent judgement of configuration spread.",
+        "year": 2020
       }
     },
     "safety": {
@@ -3894,7 +3972,8 @@
         "high": 3500000,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_75N95020P00654_7529_-NONE-_-NONE-",
-        "note": "NIH award 75N95020P00654 (Sep 2020): SampleStore system + C18 upgrade, $3,161,424 (large library scale). Low bound: CDC 75D30119P06795 (2019) LiCONiC STX110 -20 C plate store, $206,330. Pick a small store for small labs."
+        "note": "NIH award 75N95020P00654 (Sep 2020): SampleStore system + C18 upgrade, $3,161,424 (large library scale). Low bound: CDC 75D30119P06795 (2019) LiCONiC STX110 -20 C plate store, $206,330. Pick a small store for small labs.",
+        "year": 2020
       }
     },
     "safety": {
@@ -4023,7 +4102,8 @@
         "high": 35150,
         "confidence": "datasheet",
         "source": "https://labproinc.com/products/ult-fz-tsx40086a-115v-60hz-tsx40086a",
-        "note": "LabPro TSX40086A new $24,985 (list $26,300); model now discontinued. Federal buys $10.7-21.7K (2023-24); Fisher TSX60086RAK package $35,150."
+        "note": "LabPro TSX40086A new $24,985 (list $26,300); model now discontinued. Federal buys $10.7-21.7K (2023-24); Fisher TSX60086RAK package $35,150.",
+        "year": 2023
       }
     },
     "scraped_at": "2026-10-03T13:31:44+00:00",
@@ -4125,7 +4205,8 @@
         "high": 18300,
         "confidence": "datasheet",
         "source": "https://www.fishersci.com/shop/products/thermo-scientific-tsx-series-high-performance-lab-refrigerators/TSX2305GA",
-        "note": "Fisher list $13,930 (2026). Other resellers reportedly $8.2K-18.3K (not opened)."
+        "note": "Fisher list $13,930 (2026). Other resellers reportedly $8.2K-18.3K (not opened).",
+        "year": 2026
       }
     },
     "scraped_at": "2026-10-03T13:29:57Z",
@@ -4241,7 +4322,8 @@
         "high": 60000,
         "confidence": "estimated",
         "source": "https://www.rewonline.com/restaurant-equipment-new/Nor-Lake-KLB7788-C-Walk-In-Cooler-Modular-Self-Contained/NOR-KLB7788-C.html",
-        "note": "REW price $14,144 (2026), food-service grade, no installation. High ($60K) is an agent estimate for an installed lab-grade cold room with monitoring."
+        "note": "REW price $14,144 (2026), food-service grade, no installation. High ($60K) is an agent estimate for an installed lab-grade cold room with monitoring.",
+        "year": 2026
       }
     },
     "storage_slots": 300,
@@ -4369,7 +4451,8 @@
         "high": 25000,
         "confidence": "datasheet",
         "source": "https://www.fishersci.com/shop/products/1300-series-class-ii-type-a2-biological-safety-cabinet-packages/13261223",
-        "note": "Fisher cat. 13-261-223, stainless package with stand, $21,480 list (2026). Range is agent estimate of discounts/options."
+        "note": "Fisher cat. 13-261-223, stainless package with stand, $21,480 list (2026). Range is agent estimate of discounts/options.",
+        "year": 2026
       }
     },
     "safety": {
@@ -4485,7 +4568,8 @@
         "high": 8000,
         "confidence": "datasheet",
         "source": "https://www.fishersci.com/shop/products/adjustable-height-basic-work-bench-leveling-glides-3/06000654",
-        "note": "Fisher cat. 06-000-654, $5,530 list (2026). Range: cheaper phenolic tables to epoxy/casework (agent estimate)."
+        "note": "Fisher cat. 06-000-654, $5,530 list (2026). Range: cheaper phenolic tables to epoxy/casework (agent estimate).",
+        "year": 2026
       }
     },
     "safety": {
@@ -4588,7 +4672,8 @@
         "high": 9665,
         "confidence": "datasheet",
         "source": "https://empireoptics.com/products/tmc-cleanbench-63-500-series-vibration-isolation-laboratory-table",
-        "note": "Empire Optics list (2026): $6,010-6,910 smooth tops, $7,155-9,065 tapped tops. Needs compressed air/N2."
+        "note": "Empire Optics list (2026): $6,010-6,910 smooth tops, $7,155-9,065 tapped tops. Needs compressed air/N2.",
+        "year": 2026
       }
     },
     "scraped_at": "2026-10-03T13:31:44+00:00",
@@ -4717,7 +4802,8 @@
         "high": 56000,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_HHSN268201700311PC_7529_-NONE-_-NONE-",
-        "note": "NIH PO 2017: Multitron Pro 25 mm incubated shaker $24,988.50. Recent single 'Multitron' orders with accessories ~$49-56K (2023-26). Pro appears superseded by current Multitron (unconfirmed)."
+        "note": "NIH PO 2017: Multitron Pro 25 mm incubated shaker $24,988.50. Recent single 'Multitron' orders with accessories ~$49-56K (2023-26). Pro appears superseded by current Multitron (unconfirmed).",
+        "year": 2017
       }
     },
     "scraped_at": "2026-10-03T13:29:57Z",
@@ -4870,7 +4956,8 @@
         "high": 2300000,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_HT942525PE019_9700_-NONE-_-NONE-",
-        "note": "DHA/Walter Reed Aug 2025: one Ambr 250 HT (12-way + sampling, chiller, CIP, qualification, 1st-year service) $1,134,892. NIAID 2024: two 24-way systems $4.51M (~$2.26M each)."
+        "note": "DHA/Walter Reed Aug 2025: one Ambr 250 HT (12-way + sampling, chiller, CIP, qualification, 1st-year service) $1,134,892. NIAID 2024: two 24-way systems $4.51M (~$2.26M each).",
+        "year": 2025
       },
       "price_usd_estimate.configured": {
         "value": 1134892.0,
@@ -4878,7 +4965,8 @@
         "high": 2255396.0,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_HT942525PE019_9700_-NONE-_-NONE-",
-        "note": "configured price: DHA Aug 2025: one Ambr 250 HT $1,134,892.47. NIAID Sep 2024 (CONT_AWD_75N93024P01219_7529): two systems $4,510,792 (~$2.26M each, larger/24-way). Commerce Sep 2024 'Ambr 250 Modular' incl. delivery, install, training $279,007.85 (CONT_AWD_1333ND24PNB640607_1341) is a smaller modular system (low-end alt)."
+        "note": "configured price: DHA Aug 2025: one Ambr 250 HT $1,134,892.47. NIAID Sep 2024 (CONT_AWD_75N93024P01219_7529): two systems $4,510,792 (~$2.26M each, larger/24-way). Commerce Sep 2024 'Ambr 250 Modular' incl. delivery, install, training $279,007.85 (CONT_AWD_1333ND24PNB640607_1341) is a smaller modular system (low-end alt).",
+        "year": 2025
       }
     },
     "scraped_at": "2026-10-03T13:31:44+00:00",
@@ -5007,7 +5095,8 @@
         "high": 80000,
         "confidence": "datasheet",
         "source": "https://www.geneseesci.com/product/95-145-avanti-jxn-26-floor-centrifuge-rotor-not-included-1-centrifuge-unit/",
-        "note": "Genesee Scientific online $60,107.79 (list $67,037.60), rotor not included (2026). Rotor adds ~$10-20K (agent estimate). Federal buys $32-56K (2021-23)."
+        "note": "Genesee Scientific online $60,107.79 (list $67,037.60), rotor not included (2026). Rotor adds ~$10-20K (agent estimate). Federal buys $32-56K (2021-23).",
+        "year": 2026
       },
       "price_usd_estimate.base": {
         "value": 60108.0,
@@ -5015,7 +5104,8 @@
         "high": 67038.0,
         "confidence": "datasheet",
         "source": "https://www.geneseesci.com/product/95-145-avanti-jxn-26-floor-centrifuge-rotor-not-included-1-centrifuge-unit/",
-        "note": "base price: Genesee Scientific: Avanti JXN-26 floor centrifuge, rotor NOT included: online price $60,107.79, list $67,037.60 (2026)."
+        "note": "base price: Genesee Scientific: Avanti JXN-26 floor centrifuge, rotor NOT included: online price $60,107.79, list $67,037.60 (2026).",
+        "year": 2026
       },
       "price_usd_estimate.configured": {
         "value": 65000.0,
@@ -5023,7 +5113,8 @@
         "high": 69718.0,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_75N98026P00966_7529_-NONE-_-NONE-",
-        "note": "configured price: Federal buys with rotor/delivery: 75N98026P00966 (NIDDK 2026) JXN-26 + JA-25.50 rotor + white-glove delivery, net of two trade-ins, $69,718; SPE2D621F2FEN $67,609 (2021); SPE2D625F41BV $62,959 (2025); 75N96024F00054 $52,795 (2024). Value 65,000 is a judgement within this range; rotor list price not verified (rotor pages blocked)."
+        "note": "configured price: Federal buys with rotor/delivery: 75N98026P00966 (NIDDK 2026) JXN-26 + JA-25.50 rotor + white-glove delivery, net of two trade-ins, $69,718; SPE2D621F2FEN $67,609 (2021); SPE2D625F41BV $62,959 (2025); 75N96024F00054 $52,795 (2024). Value 65,000 is a judgement within this range; rotor list price not verified (rotor pages blocked).",
+        "year": 2026
       }
     },
     "safety": {
@@ -5160,7 +5251,8 @@
         "high": 22800,
         "confidence": "datasheet",
         "source": "https://www.fishersci.com/shop/products/eppendorf-5810r-centrifuge-rotor-packages-16/0540061",
-        "note": "Fisher $21,619 (2026) for rotor package. Genesee: $18,224 without rotor, $22,799 with 4x750 mL rotor."
+        "note": "Fisher $21,619 (2026) for rotor package. Genesee: $18,224 without rotor, $22,799 with 4x750 mL rotor.",
+        "year": 2026
       }
     },
     "safety": {
@@ -5299,7 +5391,8 @@
         "high": 36229,
         "confidence": "datasheet",
         "source": "https://www.fishersci.com/shop/products/emulsifx-c3-hg-pres-homogeniz/NC1538390",
-        "note": "Fisher NC1538390 $34,258 (2026). Federal direct buys $28,979 (2019) to $36,229 (2026). Heat exchanger +$2,818."
+        "note": "Fisher NC1538390 $34,258 (2026). Federal direct buys $28,979 (2019) to $36,229 (2026). Heat exchanger +$2,818.",
+        "year": 2026
       }
     },
     "scraped_at": "2026-10-03T13:31:44+00:00",
@@ -5412,7 +5505,8 @@
         "high": 9201,
         "confidence": "datasheet",
         "source": "https://www.sonicator.com/products/q700-sonicator",
-        "note": "Vendor online price (2026): $6,100 with standard probe, $5,500 no probe. Distributors up to ~$9.2K (not opened)."
+        "note": "Vendor online price (2026): $6,100 with standard probe, $5,500 no probe. Distributors up to ~$9.2K (not opened).",
+        "year": 2026
       }
     },
     "scraped_at": "2026-10-03T13:29:57Z",
@@ -5549,7 +5643,8 @@
         "high": 110000,
         "confidence": "datasheet",
         "source": "https://www.govsci.com/product-detail/Cytiva/29018226/EA/",
-        "note": "Government Scientific Source list $79,872.87 (2026); 25 L base $44,200. Configured NIH buys $106-111K (2025)."
+        "note": "Government Scientific Source list $79,872.87 (2026); 25 L base $44,200. Configured NIH buys $106-111K (2025).",
+        "year": 2026
       },
       "price_usd_estimate.base": {
         "value": 44200.0,
@@ -5557,7 +5652,8 @@
         "high": 44200.0,
         "confidence": "datasheet",
         "source": "https://www.govsci.com/product-detail/Cytiva/29018224/EA/",
-        "note": "base price: Government Scientific Source list for AKTA pure 25 L (base system) $44,200.00. The 25 M (second pump/valves, $79,872.87 at https://www.govsci.com/product-detail/Cytiva/29018226/EA/) is the more usual bench configuration."
+        "note": "base price: Government Scientific Source list for AKTA pure 25 L (base system) $44,200.00. The 25 M (second pump/valves, $79,872.87 at https://www.govsci.com/product-detail/Cytiva/29018226/EA/) is the more usual bench configuration.",
+        "year": 2026
       },
       "price_usd_estimate.configured": {
         "value": 85000.0,
@@ -5565,7 +5661,8 @@
         "high": 88262.0,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_75N96022F00051_7529_GS07F4569K_4730",
-        "note": "configured price: Federal buys of AKTA pure 25: 75N96022F00051 '25M and accessories' $88,261 (2022); 75N93023F00329 25M $83,210 (2023); 75N93020F00142 25 L with software and workstation $79,869 (2020); 75N96025F00038 25 L $87,278 (2025). Note: 2025 NIH buys of $106-111K cited in our catalog were not re-verified."
+        "note": "configured price: Federal buys of AKTA pure 25: 75N96022F00051 '25M and accessories' $88,261 (2022); 75N93023F00329 25M $83,210 (2023); 75N93020F00142 25 L with software and workstation $79,869 (2020); 75N96025F00038 25 L $87,278 (2025). Note: 2025 NIH buys of $106-111K cited in our catalog were not re-verified.",
+        "year": 2022
       }
     },
     "power_w": 300,
@@ -5697,7 +5794,8 @@
         "high": 200000,
         "confidence": "datasheet",
         "source": "https://www.govsci.com/product-detail/Cytiva/28976337/EA/",
-        "note": "Government Scientific Source list $190,500 (2026). Federal buys $132-149K (2021-23)."
+        "note": "Government Scientific Source list $190,500 (2026). Federal buys $132-149K (2021-23).",
+        "year": 2026
       }
     },
     "safety": {
@@ -5813,7 +5911,8 @@
         "high": 160000,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_SPE2D620F0Q7Z_9700_SPE2DE19D0004_9700",
-        "note": "DLA 2020: HT LabChip GX II Touch $153,302; CDC 2018: $134,202 (may include accessories). No public list price."
+        "note": "DLA 2020: HT LabChip GX II Touch $153,302; CDC 2018: $134,202 (may include accessories). No public list price.",
+        "year": 2020
       }
     },
     "safety": {
@@ -5938,7 +6037,8 @@
         "high": 19140,
         "confidence": "datasheet",
         "source": "https://www.fishersci.com/shop/products/nanodrop-ultra-31/13400603",
-        "note": "Fisher NanoDrop Ultra $15,167 (2026). NanoDrop One discontinued; last Fisher price $19,140."
+        "note": "Fisher NanoDrop Ultra $15,167 (2026). NanoDrop One discontinued; last Fisher price $19,140.",
+        "year": 2026
       }
     },
     "scraped_at": "2026-10-03T13:31:44+00:00",
@@ -6058,7 +6158,8 @@
         "high": 65000,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_75N95019P00349_7529_-NONE-_-NONE-",
-        "note": "No new price for standard Lunatic. Bounds: NIH 2019 Big Lunatic $57,647; used Lunatic EUR 14,130 (~$16.5K). $45K is agent midpoint."
+        "note": "No new price for standard Lunatic. Bounds: NIH 2019 Big Lunatic $57,647; used Lunatic EUR 14,130 (~$16.5K). $45K is agent midpoint.",
+        "year": 2019
       }
     },
     "scraped_at": "2026-10-03T13:29:57Z",
@@ -6192,7 +6293,8 @@
         "high": 1700,
         "confidence": "datasheet",
         "source": "https://www.flinnsci.com/mini-protean-tetra-cell-for-4-handcast-or-precast-gels/fb2366/",
-        "note": "Flinn Scientific (2026): Tetra cell $1,149 + PowerPac Basic $419 (https://www.flinnsci.com/powerpac-basic-power-supply/fb2564/)."
+        "note": "Flinn Scientific (2026): Tetra cell $1,149 + PowerPac Basic $419 (https://www.flinnsci.com/powerpac-basic-power-supply/fb2564/).",
+        "year": 2026
       }
     },
     "scraped_at": "2026-10-03T13:31:44+00:00",
@@ -6320,7 +6422,8 @@
         "high": 110000,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_75N93023P01298_7529_-NONE-_-NONE-",
-        "note": "NIH/NIAID PO Sep 2023: mosquito Xtal3 plus accessories and training $95,573. NIH 2024 PO $95,137."
+        "note": "NIH/NIAID PO Sep 2023: mosquito Xtal3 plus accessories and training $95,573. NIH 2024 PO $95,137.",
+        "year": 2023
       },
       "price_usd_estimate.configured": {
         "value": 95573.0,
@@ -6328,7 +6431,8 @@
         "high": 95573.0,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_75N93023P01298_7529_-NONE-_-NONE-",
-        "note": "configured price: NIAID Sep 2023 PO 'mosquito Xtal3 plus accessories and training' $95,573.16; NIH Sep 2024 PO 'mosquito crystallization robot' $95,137.36 (CONT_AWD_75N96024P00191_7529)."
+        "note": "configured price: NIAID Sep 2023 PO 'mosquito Xtal3 plus accessories and training' $95,573.16; NIH Sep 2024 PO 'mosquito crystallization robot' $95,137.36 (CONT_AWD_75N96024P00191_7529).",
+        "year": 2023
       }
     },
     "safety": {
@@ -6452,7 +6556,8 @@
         "high": 100000,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_75N92018P00116_7529_-NONE-_-NONE-",
-        "note": "NIH/NHLBI PO May 2018: NT8 drop setter $70,450. High allows for options and inflation since 2018."
+        "note": "NIH/NHLBI PO May 2018: NT8 drop setter $70,450. High allows for options and inflation since 2018.",
+        "year": 2018
       },
       "price_usd_estimate.configured": {
         "value": 70450.0,
@@ -6460,7 +6565,8 @@
         "high": 70450.0,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_75N92018P00116_7529_-NONE-_-NONE-",
-        "note": "configured price: NIH/NHLBI May 2018 brand-name-or-equal PO for NT8 $70,450 (2018 USD; not inflated). Only NT8 purchase record found in USAspending."
+        "note": "configured price: NIH/NHLBI May 2018 brand-name-or-equal PO for NT8 $70,450 (2018 USD; not inflated). Only NT8 purchase record found in USAspending.",
+        "year": 2018
       }
     },
     "safety": {
@@ -6607,7 +6713,8 @@
         "high": 450000,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_HHSN275201400443P_7529_-NONE-_-NONE-",
-        "note": "NIH PO Sep 2014: Rock Imager 1000 4 C $385,105 (optics unknown). Rock Imager 182 $240,144 (NIH 2022). $350K is an agent central figure in that range, not a quote."
+        "note": "NIH PO Sep 2014: Rock Imager 1000 4 C $385,105 (optics unknown). Rock Imager 182 $240,144 (NIH 2022). $350K is an agent central figure in that range, not a quote.",
+        "year": 2014
       },
       "price_usd_estimate.configured": {
         "value": 385105.0,
@@ -6615,7 +6722,8 @@
         "high": 385105.0,
         "confidence": "estimated",
         "source": "https://www.usaspending.gov/award/CONT_AWD_HHSN275201400443P_7529_-NONE-_-NONE-",
-        "note": "configured price: NIH Sep 2014 PO: Rock Imager 1000 4C (cat RI4OC) $385,105. Smaller models: RI 182 w/ software $240,144 (NIH 2022), RI 54 w/ software $238,605 (DoD 2020). Note: RI1000 award is 2014 USD, not inflation adjusted. Current value 350000 is an agent figure within this range."
+        "note": "configured price: NIH Sep 2014 PO: Rock Imager 1000 4C (cat RI4OC) $385,105. Smaller models: RI 182 w/ software $240,144 (NIH 2022), RI 54 w/ software $238,605 (DoD 2020). Note: RI1000 award is 2014 USD, not inflation adjusted. Current value 350000 is an agent figure within this range.",
+        "year": 2014
       }
     },
     "scraped_at": "2026-10-03T13:31:44+00:00",
@@ -6732,7 +6840,8 @@
         "high": 27000,
         "confidence": "estimated",
         "source": "https://www.oxfordlabtech.com/en/crystal-shifter",
-        "note": "Vendor page machine-readable offer data: GBP 9,999.99 (~$13.4K at 1.34); not shown as visible text, so possibly a web-shop placeholder. High is agent allowance for accessories/installation."
+        "note": "Vendor page machine-readable offer data: GBP 9,999.99 (~$13.4K at 1.34); not shown as visible text, so possibly a web-shop placeholder. High is agent allowance for accessories/installation.",
+        "year": 2026
       }
     },
     "scraped_at": "2026-10-03T13:29:57Z",
@@ -6870,7 +6979,8 @@
         "high": 4000,
         "confidence": "datasheet",
         "source": "https://www.mitegen.com/product/tw35-10-cryogenic-freezer/",
-        "note": "MiTeGen list $2,049 (2026). UniPuck canes/cassettes extra (in high)."
+        "note": "MiTeGen list $2,049 (2026). UniPuck canes/cassettes extra (in high).",
+        "year": 2026
       }
     },
     "storage_slots": 10,
@@ -6985,7 +7095,8 @@
         "high": 2500,
         "confidence": "datasheet",
         "source": "https://www.mitegen.com/product/cryo-express-dry-shipper-cx100/",
-        "note": "MiTeGen list $1,398 (2026); puck shipping canes extra."
+        "note": "MiTeGen list $1,398 (2026); puck shipping canes extra.",
+        "year": 2026
       },
       "process.durations_s.cold_storage": {
         "value": 300,
@@ -7118,7 +7229,8 @@
         "high": 12000,
         "confidence": "estimated",
         "source": "https://www.bnl.gov/nsls2/docs/pdf/proprietaryresearchpolicyandprocedure.pdf",
-        "note": "PER 8 h SHIFT, not a purchase price. PROXY: Diamond does not publish its proprietary rate; this is NSLS-II's published FY2026 full-cost-recovery rate of $790/h x 8 h. Academic access via peer review is free."
+        "note": "PER 8 h SHIFT, not a purchase price. PROXY: Diamond does not publish its proprietary rate; this is NSLS-II's published FY2026 full-cost-recovery rate of $790/h x 8 h. Academic access via peer review is free.",
+        "year": 2026
       }
     },
     "safety": {
@@ -7270,7 +7382,8 @@
         "high": 45000,
         "confidence": "estimated",
         "source": "https://www.dotmed.com/listing/liquid-handling/brooks/preciseflex-400/4915093",
-        "note": "WEAK. Source is a USED PF400 at $12,995 (Sep 2026) = lower bound. $30K new is an agent estimate (~2-2.5x used), not a quote."
+        "note": "WEAK. Source is a USED PF400 at $12,995 (Sep 2026) = lower bound. $30K new is an agent estimate (~2-2.5x used), not a quote.",
+        "year": 2026
       }
     },
     "scraped_at": "2026-10-03T13:31:44+00:00",
@@ -7388,7 +7501,8 @@
         "high": 18000,
         "confidence": "estimated",
         "source": "https://www.labx.com/item/precise-automation-linear-axis-rail-for-pf400-1-5m/13998109",
-        "note": "New 1.5 m rail listed by a reseller on LabX $13,236; 1.0 m $12,626. High is agent estimate for 2.0 m plus install."
+        "note": "New 1.5 m rail listed by a reseller on LabX $13,236; 1.0 m $12,626. High is agent estimate for 2.0 m plus install.",
+        "year": 2026
       }
     },
     "scraped_at": "2026-10-03T13:29:57Z",
@@ -7536,7 +7650,8 @@
         "high": 200000,
         "confidence": "estimated",
         "source": "https://www.newsweek.com/ai-autonomous-robot-scientist-created-1516255",
-        "note": "Newsweek Jul 2020: Cooper's mobile robotic chemist (KMR iiwa + custom tooling) cost ~GBP 100,000; ~$134K at 1.34."
+        "note": "Newsweek Jul 2020: Cooper's mobile robotic chemist (KMR iiwa + custom tooling) cost ~GBP 100,000; ~$134K at 1.34.",
+        "year": 2020
       }
     },
     "transport": {
@@ -7682,7 +7797,8 @@
         "high": 75000,
         "confidence": "estimated",
         "source": "https://www.kingbarcode.com/37222-00000",
-        "note": "King Barcode $57,191 (no battery), seen via search index only; page returned 403 so not directly confirmed. Battery, fleet manager, integration push toward high."
+        "note": "King Barcode $57,191 (no battery), seen via search index only; page returned 403 so not directly confirmed. Battery, fleet manager, integration push toward high.",
+        "year": 2026
       }
     },
     "safety": {
