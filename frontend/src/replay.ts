@@ -28,7 +28,10 @@ export type AgentEvent = { type: string; name?: string; input?: Record<string, u
 
 export interface ReplayHooks {
   say: (lines: string[], speaker?: string) => void;
-  log: (line: string) => void;
+  /** A plain log entry: the brief, or the agent's answer. */
+  log: (line: string, kind: "user" | "agent") => void;
+  /** Every recorded agent event, for the structured agent log. */
+  event: (e: AgentEvent) => void;
   showDesign: (d: Design) => void;
   showAnswer: (title: string, html: string) => void;
 }
@@ -132,14 +135,14 @@ const wait = (ms: number, skip: { now: boolean }) =>
 
 /** Play the run. `skip.now = true` fast-forwards to the end state. */
 export async function playReplay(run: RecordedRun, hooks: ReplayHooks, skip: { now: boolean }) {
-  hooks.log(`You: ${run.brief}`);
+  hooks.log(`You: ${run.brief}`, "user");
   hooks.say([run.brief], "YOU");
   await wait(4500, skip);
 
   for (const e of run.events ?? []) {
+    hooks.event(e);
     const line = describe(e);
-    if (!line) continue;
-    hooks.log(`Agent: ${line}`);
+    if (!line) continue; // ends and results update the log but don't pace the replay
     if (!skip.now) hooks.say([line]);
     await wait(e.type === "model_call" ? 1400 : 700, skip);
   }
@@ -153,12 +156,12 @@ export async function playReplay(run: RecordedRun, hooks: ReplayHooks, skip: { n
       timeline_note: run.timeline_source ? "timeline recomputed from recorded design" : "recorded run",
     };
     hooks.showDesign(design);
-    if (answer) hooks.log(`Agent: ${answer}`);
+    if (answer) hooks.log(`Agent: ${answer}`, "agent");
     return;
   }
   // No design: the agent stopped. Show its own explanation; that refusal is the honest result.
   const missing = run.gate?.missing_capabilities ?? [];
-  hooks.log(`Agent: ${answer}`);
+  hooks.log(`Agent: ${answer}`, "agent");
   hooks.say([headline(answer) || "I stopped before producing a design.",
     ...(missing.length ? [`The catalog has nothing for: ${missing.map(humanise).join(", ")}.`] : [])]);
   if (answer) hooks.showAnswer("The agent's answer", await marked.parse(answer.replace(/</g, "&lt;")));

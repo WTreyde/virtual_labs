@@ -208,3 +208,17 @@ body.page-view #modal table.bench thead th { top: 46px; }
 #verdicts .v-status { font: 8px "Press Start 2P", monospace; text-transform: uppercase; padding: 3px 5px; border-radius: 3px; color: #fff; background: #8a8880; }
 #verdicts .refuted .v-status { background: #a3271a; } #verdicts .supported .v-status { background: #1f6b3a; }
 #verdicts .v-label { font-weight: 700; }
+
+/* Structured agent log: one collapsible block per step, one row per tool call. */
+#log { white-space: normal; }
+#log .log-note { white-space: pre-wrap; margin: 4px 0 8px; }
+#log .log-note.user { color: #1f5fae; } #log .log-note.agent { color: #1d2330; }
+#log .log-step { margin: 4px 0; border-left: 3px solid #c8ccd2; padding-left: 6px; }
+#log .log-step > summary { cursor: pointer; list-style: none; } #log .log-step > summary::-webkit-details-marker { display: none; }
+#log .log-step > summary::before { content: "▸ "; color: #778; } #log .log-step[open] > summary::before { content: "▾ "; }
+#log .log-step ul { list-style: none; margin: 4px 0 6px; padding: 0 0 0 10px; }
+#log .log-tool { margin: 3px 0; }
+#log .st { display: inline-block; width: 12px; text-align: center; font-weight: bold; }
+#log .st.succeeded { color: #1f6b3a; } #log .st.failed { color: #a3271a; } #log .st.running { color: #b07d00; }
+#log .ms { color: #6b8fb3; margin-left: 4px; }
+#log .sum { color: #556; margin: 1px 0 0 16px; }
