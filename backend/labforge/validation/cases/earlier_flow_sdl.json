@@ -1,17 +1,24 @@
 {
   "id": "earlier_flow_sdl",
-  "name": "Earlier-generation flow self-driving lab from the same team",
+  "name": "RoboChem (original platform, Noël group, Science 2024)",
   "domain": "chemistry",
-  "sources": ["https://www.chemistryworld.com/news/human-in-the-loop-approach-could-cut-costs-of-robotic-labs-by-90/4023311.article"],
-  "brief": "The same closed-loop reaction optimisation lab built from commercial pumps, reactor and liquid handling instead of 3D-printed parts, using an existing in-house analytical instrument.",
+  "sources": [
+    "https://doi.org/10.1038/s44160-026-01053-0",
+    "https://doi.org/10.1126/science.adj1817",
+    "https://phys.org/news/2026-04-robotic-chemistry-built-deployed-lab.html"
+  ],
+  "brief": "A closed-loop flow photochemistry optimisation platform with a robotic sampler, pumps, a photoreactor and an inline benchtop NMR, used to optimise and scale up photocatalytic reactions.",
   "reported": {
     "cost": {
       "value_usd": 50000,
-      "original": "$50,000 (£36,900), not including analytical equipment",
-      "includes": ["instruments", "robots"],
-      "excludes_note": "Analytical equipment excluded."
+      "original": "approximately US$50,000 for essential components alone, not including the benchtop NMR spectrometer (stated retrospectively in Pilon et al. 2026)",
+      "includes": [
+        "robots"
+      ],
+      "excludes_note": "Excludes the benchtop NMR (the most expensive component); 'essential components alone'; labour and integration not stated.",
+      "year": 2024
     }
   },
   "verified": false,
-  "notes": "Pairs with low_cost_flow_sdl_2026: a good test is whether LabForge predicts the 10x gap between commercial and 3D-printed builds. TODO(Max): find the 2024 primary paper and its BOM."
+  "notes": "The ~US$50,000 figure is confirmed in the 2026 Nat. Synth. paper (\"cost approximately US$50,000 for essential components alone, not including ... a benchtop NMR\"), but the platform paper (Slattery et al., Science 2024) has not been read, so the case stays unverified. The earlier GBP 36,900 conversion could not be confirmed and was removed. Not like-for-like with RoboChem-Flex: that build also drops inline analytics."
 }

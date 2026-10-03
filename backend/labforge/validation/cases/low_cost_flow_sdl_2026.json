@@ -1,21 +1,25 @@
 {
   "id": "low_cost_flow_sdl_2026",
-  "name": "Low-cost 3D-printed self-driving lab for reaction optimisation (2026)",
+  "name": "RoboChem-Flex: low-cost 3D-printed self-driving lab for reaction optimisation (Noël group, 2026)",
   "domain": "chemistry",
   "sources": [
-    "https://www.chemistryworld.com/news/human-in-the-loop-approach-could-cut-costs-of-robotic-labs-by-90/4023311.article",
-    "https://www.nature.com/articles/s44160-026-01053-0"
+    "https://doi.org/10.1038/s44160-026-01053-0",
+    "https://www.nature.com/articles/s44160-026-01053-0",
+    "https://phys.org/news/2026-04-robotic-chemistry-built-deployed-lab.html",
+    "https://www.chemistryworld.com/news/human-in-the-loop-approach-could-cut-costs-of-robotic-labs-by-90/4023311.article"
   ],
-  "brief": "A self-driving lab for optimising organic reaction conditions: pumps dose reagents into a reactor, a liquid sample collector takes aliquots, and an existing in-house analytical instrument (HPLC, NMR or Raman) measures yield in a closed loop. One fume hood, academic budget.",
+  "brief": "A flow self-driving lab for optimising organic reaction conditions at 5-50 micromole scale: syringe pumps dose reagents into a flow reactor and a liquid sampling unit on a Cartesian robot collects reaction aliquots, which are analysed offline on a shared analytical instrument (human-in-the-loop).",
   "reported": {
     "cost": {
       "value_usd": 5000,
-      "original": "$5000, a 90% reduction on the team's earlier $50,000 version",
+      "original": "approximately US$5,000 (human-in-the-loop configuration with 3D-printed liquid sampling unit, excluding analytical equipment)",
       "year": 2026,
-      "includes": ["instruments", "robots"],
-      "excludes_note": "Analytical instruments are not included in the reported figure."
+      "includes": [
+        "robots"
+      ],
+      "excludes_note": "Excludes analytical instruments (assumed available in a shared facility) and the inline-analytics configuration; assembly labour not stated. The authors call it approximate."
     }
   },
-  "verified": false,
-  "notes": "From a Chemistry World news summary. TODO(Max): confirm from the primary paper which platform this is (possibly RoboChem Flex), the exact cost breakdown, and throughput."
+  "verified": true,
+  "notes": "Verified 3 Oct 2026 against the primary paper (Pilon et al., Nat. Synth. 2026, DOI 10.1038/s44160-026-01053-0): \"reducing the overall system cost to approximately US$5,000\". Supplementary BOM not yet read; no throughput in the main text, so reported.throughput is left empty. Chemistry World page could not be read in full."
 }

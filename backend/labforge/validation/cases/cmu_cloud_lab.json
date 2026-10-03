@@ -2,17 +2,24 @@
   "id": "cmu_cloud_lab",
   "name": "Carnegie Mellon University Cloud Lab (with Emerald Cloud Lab)",
   "domain": "mixed",
-  "sources": ["https://www.cmu.edu/news/stories/archives/2021/august/first-academic-cloud-lab.html"],
+  "sources": [
+    "https://www.cmu.edu/news/stories/archives/2021/august/first-academic-cloud-lab.html",
+    "https://www.ddw-online.com/learn-about-carnegie-mellons-40-million-life-science-gamble-14670-202111/",
+    "https://www.labmanager.com/this-lab-allows-scientists-to-conduct-experiments-remotely-at-any-time-27609"
+  ],
   "brief": "A remotely operated university lab with more than 100 types of instruments for life sciences and chemistry, able to run more than 100 complex experiments at once.",
   "reported": {
     "cost": {
       "value_usd": 40000000,
-      "original": "$40 million project",
+      "original": "$40 million project (CMU, Aug 2021)",
       "year": 2021,
-      "includes": ["instruments", "robots", "analytics", "software", "integration_labour", "construction"],
-      "excludes_note": "Project cost; split between building works and equipment not published."
+      "includes": [
+        "instruments",
+        "construction"
+      ],
+      "excludes_note": "CMU calls it a '$40 million project' including construction and gives no split. An unconfirmed secondary report puts about $26M on instruments. Operating costs not included."
     }
   },
   "verified": false,
-  "notes": "Order-of-magnitude scale check only, because construction is bundled in. TODO(Max): look for an equipment-only figure."
+  "notes": "CMU confirms the $40M total and construction, but not what else it covers, so includes is limited to what is stated. Lead to check by hand: Tradeline and C&EN reportedly give ~$26M for instruments (https://www.tradelineinc.com/reports/2023-1/carnegie-mellon-open-first-ever-academic-cloud-lab, https://cen.acs.org/business/informatics/Carnegie-Mellon-partners-cloud-based/99/i32). Order-of-magnitude check only."
 }
