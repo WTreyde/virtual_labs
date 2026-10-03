@@ -1,0 +1,119 @@
+{
+ "task_id": "xchem_campaign_baseline",
+ "arm": "vanilla",
+ "message": "## Summary\nI cannot give you a defensible campaign duration or a validated equipment design, so I have left out the Workflow. I have not run any tools. Below are a provisional LabSpec built on stated assumptions, and a rough, unvalidated estimate of campaign length.\n\n## Why the Workflow is omitted\nI have no tool access here, which blocks three things:\n- **Equipment.** Every Workflow instance needs a catalog ID returned by a catalog search. Without that search, any acoustic dispenser, Rock Imager, purification system, incubator or dry shipper ID I wrote would be invented.\n- **Harvesting rate.** The harvesting duration has to come from the Wright mounting-rate comparison via search_evidence. That source separates unassisted manual work from Shifter-assisted human work. I have not retrieved it, so I won't quote a rate.\n- **Throughput.** Throughput can only be reported from layout_and_simulate and verify_claims results. I have neither.\n\nFor these reasons the claims list is empty.\n\n## Assumptions in the provisional LabSpec\nYou said to proceed without further input. Treat all of these as placeholders, not requirements you gave me:\n- **Scope.** 500 fragments \u00d7 1 soaked crystal each, plus about 5% solvent-only controls (~525 crystals). 525 \u00f7 16 = 32.8, so this needs 33 16-pin pucks.\n- **Rate target.** Harvesting is spread over 5 attended days, giving a placeholder of 105 crystals_per_day.\n- **Hours.** 8 staffed hours per day, 5 days per week. Automated incubation, growth and imaging run unattended.\n- **Room.** 9 \u00d7 7 m. The cold room is assumed to be 3 \u00d7 2.5 m in the corner at x 6\u20139, y 0\u20132.5, with one door at (0, 3.5). A vibration-isolated growth and imaging zone is required but not yet located.\n- **Staff.** 1 protein scientist and 2 crystallographers. Harvesting is fully operator-attended (mode manual), even if a Shifter is used.\n- **Hazards.** LN2 and cryogens, which require ventilation and O2 monitoring. BSL-1 expression is assumed. DMSO fragment stocks are flagged for storage only.\n- **Budget.** Unknown. The design is explicitly provisional and not checked against any budget.\n- **Protein and crystals.** Protein yield per lot, crystals per plate and soak survival are uncertain placeholders, not measured facts.\n- **Synchrotron.** Shipping and the beamline queue are external steps. Their queue time is kept separate from processing time. No in-house X-ray source is included.\n\n## Planned workflow structure (not emitted)\nexpression (shake flasks) \u2192 cell harvest \u2192 lysis/clarification \u2192 purification \u2192 QC/concentration \u2192 drop setup (crystallization_plate_96) \u2192 growth residence in a storage/incubation resource \u2192 scheduled imaging inspections, minutes per plate on a single camera (capacity 1) \u2192 drop selection (in_silico) \u2192 acoustic fragment soaking \u2192 manual harvesting (counted per crystal) \u2192 manual puck loading into a charged dry shipper \u2192 external shipping and synchrotron queue \u2192 unattended collection \u2192 in-silico analysis.\n\nKey modelling rules for this structure:\n- Growth residence and imaging are separate resources. The imager's 1000 storage slots are not treated as camera parallelism.\n- The dry shipper's hold time is used only as transit retention, never as the duration of the puck-loading step.\n- Counting happens at the final analysis sink, with units_per_labware = 1 crystal per crystal token.\n\n## Rough campaign length (agent_estimate, not simulated)\nThese ranges are modelling guesses, not evidence or simulation output:\n\n| Stage | Estimated range |\n|---|---|\n| Expression + purification + QC | ~1\u20132 weeks |\n| Crystal growth to soakable crystals | ~3 days to 3 weeks; highly protein-dependent and the largest uncertainty |\n| Acoustic soaking of ~525 drops plus soak residence | ~1\u20132 days |\n| Manual harvesting of ~525 crystals | Several operator-days; rate unknown until the Wright evidence is retrieved and converted to crystals per run |\n| Shipping | ~1\u20133 days |\n| Beamline queue | Days to several weeks; facility-dependent |\n| Unattended data collection + analysis | Several days |\n\n**Overall:** very roughly 4\u201310 weeks from expression to processed data for one campaign, assuming crystallisation conditions already exist. If you have to develop conditions first, it could take far longer.\n\nThe likely dominant factors are crystal growth time, the external synchrotron queue and human harvesting capacity. None of this is a measured or simulated result.\n\n## What would make this defensible\n1. Run catalog searches and retrieve the Wright evidence.\n2. Emit the Workflow through layout_and_simulate.\n3. Verify throughput.p50 against the crystals_per_day target and confirm layout.violations == 0.\n4. Provide real values for budget, protein yield and synchrotron turnaround.",
+ "lab_spec": {
+  "id": "xchem_fragment_lab",
+  "name": "XChem-style fragment screening lab (provisional)",
+  "domain": "biology",
+  "description": "Design an XChem-style fragment screening lab: express and purify one target protein, set crystallisation drops, image crystals, soak 500 fragments acoustically, harvest and cryo-cool crystals into pucks, and ship them to a synchrotron for unattended data collection. Room 9 x 7 m including a cold room. How long will one 500-fragment campaign take?",
+  "throughput_target": {
+   "value": 105,
+   "unit": "crystals_per_day",
+   "operating_hours_per_day": 8
+  },
+  "room": {
+   "width_m": 9,
+   "depth_m": 7,
+   "height_m": 3,
+   "doors": [
+    {
+     "x": 0,
+     "y": 3.5
+    }
+   ],
+   "keep_out_zones": [
+    {
+     "min": {
+      "x": 6,
+      "y": 0
+     },
+     "max": {
+      "x": 9,
+      "y": 2.5
+     },
+     "reason": "Assumed cold room footprint (position and size are placeholders); only cold-room-rated equipment may be placed here."
+    }
+   ]
+  },
+  "labware": [
+   "shake_flask",
+   "column",
+   "crystallization_plate_96",
+   "sbs_384",
+   "puck"
+  ],
+  "required_capabilities": [
+   "cell_culture",
+   "centrifugation",
+   "cell_lysis",
+   "protein_purification",
+   "protein_qc",
+   "concentration_measurement",
+   "crystallization_setup",
+   "plate_storage",
+   "crystal_imaging",
+   "compound_storage",
+   "acoustic_dispensing",
+   "crystal_soaking",
+   "crystal_harvesting",
+   "cryo_cooling",
+   "manual_bench",
+   "cold_storage",
+   "external_service",
+   "in_silico"
+  ],
+  "constraints": {
+   "biosafety_level": 1,
+   "hazards": [
+    "cryogens"
+   ]
+  },
+  "operators": [
+   {
+    "role": "protein_scientist",
+    "count": 1,
+    "shift_hours": 8,
+    "skills": [
+     "cell_culture",
+     "centrifugation",
+     "cell_lysis",
+     "protein_purification",
+     "protein_qc",
+     "concentration_measurement"
+    ]
+   },
+   {
+    "role": "crystallographer",
+    "count": 2,
+    "shift_hours": 8,
+    "skills": [
+     "crystallization_setup",
+     "crystal_imaging",
+     "crystal_soaking",
+     "crystal_harvesting",
+     "cryo_cooling",
+     "manual_bench"
+    ]
+   }
+  ],
+  "notes": [
+   "PROVISIONAL: the user could not supply further requirements; every value below is an agent assumption, not a user requirement.",
+   "Throughput target is a placeholder: 500 fragments x 1 crystal plus ~5% solvent controls = ~525 crystals harvested over 5 attended days = 105 crystals_per_day.",
+   "Puck arithmetic: 525 crystals / 16 pins per puck = 32.8, rounded up to 33 pucks.",
+   "Budget unknown; the design is explicitly provisional and has no budget check.",
+   "Operating hours assumed 8 h/day, 5 days/week; automated incubation, growth and imaging run unattended.",
+   "Cold room position and size are assumed; a vibration-isolated zone is needed for crystal growth and imaging but is not located.",
+   "Hazards: LN2 requires ventilation and O2 monitoring; BSL-1 expression assumed; DMSO fragment stocks require compatible storage.",
+   "Protein yield, crystals per plate and soak survival are uncertain placeholders, not measured facts.",
+   "Harvesting is manual and fully operator-attended; its rate must come from the retrieved Wright mounting-rate comparison, which was not retrieved here.",
+   "Synchrotron diffraction is external with explicit shipping and queue time; no in-house X-ray source.",
+   "Workflow omitted: no catalog search was possible, so no catalog IDs can be used without inventing them."
+  ],
+  "scenario": "fbdd_crystallography"
+ },
+ "claims": [],
+ "follow_up_used": true,
+ "first_reply": "I can't yet give a defensible duration for a 500-fragment campaign, so I have not produced a design.\n\nThere are two reasons:\n\n1. **Missing requirements.** I need the answers listed below before designing.\n2. **No tool access in this mode.** I can't search the equipment catalog, retrieve evidence (for example, the Wright mounting-rate comparison for harvesting), run layout_and_simulate, or call verify_claims. Picking catalog IDs, durations or a campaign length without those calls would mean inventing equipment and numbers. I have not run any tools.\n\n**What I need from you**\n\n1. **Throughput and scope.** Is the target 500 soaked crystals per campaign, or 500 fragments with replicates or extra crystals per fragment? Should controls (for example, solvent-only apo crystals) be added? Is there a deadline, such as one campaign every N weeks, or a crystals_per_day rate?\n2. **Room.** 9 x 7 m is noted. Where are the cold room (dimensions and position), doors and any keep-out zones? Is a vibration-isolated area available for crystal growth and imaging?\n3. **Budget.** What is the total in USD? If you don't want to set one, say explicitly that a provisional, budget-unconstrained design is acceptable.\n4. **Operating hours.** How many hours per day and days per week are staffed? Can automated steps (expression, imaging) run unattended overnight?\n5. **Operators.** How many staff and in which roles (protein production, crystallography, harvesting)? What shift lengths? Harvesting is fully operator-attended.\n6. **Hazards and safety.** Which apply: LN2/cryogens (implied by cryo-cooling and dry shipper, so O2 monitoring and ventilation are needed), DMSO fragment stocks, and biosafety level for expression (BSL-1 E. coli?)?\n7. **Protein and crystal assumptions.** Do you have prior data on protein yield per expression lot, crystals per drop or plate, and the fraction of soaks that survive? Otherwise I will treat these as explicit placeholders with ranges.\n8. **Synchrotron logistics.** What are the typical shipping time and beamline queue or turnaround, and how many 16-pin pucks fit per shipment or dry shipper?\n\n**How the campaign time will be built once tools are available**\n\nThe workflow is: expression \u2192 harvest \u2192 lysis/clarification \u2192 purification \u2192 QC/concentration \u2192 drop setup \u2192 growth residence (incubation/storage) \u2192 periodic imaging \u2192 drop selection \u2192 acoustic soaking \u2192 manual harvesting \u2192 puck loading into a charged dry shipper \u2192 external shipping and synchrotron queue \u2192 in-silico analysis.\n\nThe modelling rules I will apply:\n- **Growth vs imaging.** Growth residence and imaging are modelled separately. The imager has one camera, and each inspection takes minutes per plate.\n- **Harvesting.** This will be modelled as manual, using the retrieved mounting-rate evidence converted to the actual crystals per run.\n- **External steps.** Shipping and beamline time stay external, with the queue time retained.\n- **Counting unit.** The counting sink counts crystals, not plates.\n\nThe campaign length will likely be dominated by:\n- the growth residence time,\n- human harvesting throughput for about 500+ crystals, and\n- the external synchrotron queue.\n\nI won't put numbers on these until they come from evidence or simulation. Once you reply, I'll search the catalog, build the LabSpec and Workflow, simulate, verify the claims and report the result.",
+ "completed": true
+}

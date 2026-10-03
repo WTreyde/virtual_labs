@@ -1,0 +1,421 @@
+{
+ "task_id": "xchem_automated_fishing",
+ "arm": "platform",
+ "message": "# 1,000 crystals a day with one operator: can't be done with the equipment in the catalog\n\nWith one operator, the simulated design harvests about **241 crystals a day** at the median. That is roughly a quarter of the 1,000 target. None of the simulated runs reached 1,000 crystals a day.\n\n**Why I didn't treat harvesting as fully automated:** the catalog has no automated harvester. The only harvesting device is the Oxford Lab Technologies Crystal Shifter. It moves the plate under the microscope, but a person still mounts each crystal by hand. So harvesting is a manual step that needs the operator the whole time. If I modelled it as automated, the design would look feasible when it isn't. A paper on a fully automated harvester, CrystalDirect, turned up in the literature search. It isn't in the catalog, and I didn't use its content as evidence. To model it, I'd need a catalog entry with its harvesting capability, time per plate or per crystal, size, price and how much the operator has to do.\n\n## Assumptions (no answers were available)\n- **Scope:** harvesting only. Soaked 96-well plates arrive ready from upstream. Filled pucks go into a dry shipper and are sent to an outside synchrotron. No in-house X-ray.\n- **Crystals per plate:** 96 (one per well). With 16-pin pucks that is 6 pucks per plate, and 1,000 crystals is about 10.4 plates a day.\n- **Hours:** one 8-hour shift, which is also the lab's working day. The operator also carries plates and pucks; there's no robot to move them.\n- **Mounting time per plate:** 3,360 s, from the Shifter-assisted mean of 35 s per mount \u00d7 96 crystals.\n  - Source: Wright et al. 2021, doi:10.1107/S2059798320014114, section 3.2.2. This is a reviewed public web reference, not an Amass record.\n  - The low end, 2,880 s, uses the paper's median of 30 s per mount.\n  - The high end, 5,040 s, is my own allowance for differences between operators and crystals.\n  - I didn't use the paper's unassisted manual rate of 8 crystals/hour, because the Shifter is installed. That rate would make things about 13 times worse.\n  - The mounting time leaves out plate changes and breaks, so it's optimistic.\n- **Loading pucks into the shipper:** 300 s per puck, with a range of 60\u2013900 s. This is a catalog placeholder, not measured. I didn't use the shipper's 12.6-day cold hold time as a step time.\n- **Shipping and synchrotron queue:** 2 days. That's my estimate; the real value is unknown and could be anywhere from 1 to 14 days.\n- **Room:** 5 m \u00d7 4 m, with no budget given, so the design is provisional. The hazard is liquid nitrogen, which needs ventilation and oxygen monitoring. Nothing here is a safety certification.\n\n## Equipment (provisional, about $22,400 in catalog estimates)\n- Crystal Shifter: about $13,400 (placeholder price)\n- LN2 storage dewar: about $2,000\n- Handling bench: about $5,500\n- CX100 dry shipper: about $1,400\n\nThese prices exclude installation, consumables and building work.\n\n## Results (model predictions, not measured)\n- **Throughput:** 241 crystals/day at the median (P10 207, P90 268). Chance of meeting the target: 0.\n- **Check by a separate verifier run:** median 213 crystals/day. That's a different model run, so the planning figure of 241 isn't independently confirmed. Both are far below 1,000.\n- **Layout:** no violations. The equipment takes up about 1.8 m\u00b2 of floor.\n- **Bottleneck:** the operator is busy 100% of the shift. The Shifter itself is busy only about 29% of the time. Harvesting is the step that most affects throughput, followed by loading pucks into the shipper.\n\n## Why I didn't revise the design\nEach design change I'm allowed to test is an equipment change, and none would help. The limit is one person's hands, not the equipment. A second Shifter would just sit idle. Even at the paper's fastest rates and with no breaks, mounting 1,000 crystals takes about 8.3\u20139.7 hours of one person's time. That's more than a full shift before handling any plates, pucks or dewars.\n\n## What could reach 1,000 a day (not modelled here)\n- **More operators:** about 4\u20135 Shifter operators at the simulated rate per person, or more shifts. This can't be done under your one-operator rule.\n- **A truly automated harvester:** it would first need to be added to the catalog with sourced times and prices.\n\nThe report I generated matches these figures. The bottleneck finding comes from a model with estimated inputs, not from a lab measurement.",
+ "lab_spec": {
+  "id": "xchem_harvest_1op",
+  "name": "XChem crystal harvesting, single operator (provisional)",
+  "domain": "biology",
+  "description": "Harvest 1,000 soaked crystals per day with a single operator. User asked to assume harvesting is fully automated; no fully automated harvester exists in the catalog, so harvesting is modelled as manual Shifter-assisted mounting. Provisional design: room, budget, hours and crystals per plate are agent assumptions because no follow-up answers were available.",
+  "throughput_target": {
+   "value": 1000,
+   "unit": "crystals_per_day",
+   "operating_hours_per_day": 8
+  },
+  "room": {
+   "width_m": 5,
+   "depth_m": 4,
+   "height_m": 3,
+   "doors": [
+    {
+     "x": 0,
+     "y": 2
+    }
+   ]
+  },
+  "labware": [
+   "crystallization_plate_96",
+   "puck"
+  ],
+  "required_capabilities": [
+   "crystal_harvesting",
+   "manual_bench",
+   "cold_storage",
+   "cryo_cooling"
+  ],
+  "constraints": {
+   "biosafety_level": 1,
+   "max_human_interventions_per_day": 1000,
+   "hazards": [
+    "cryogens"
+   ]
+  },
+  "operators": [
+   {
+    "role": "crystal_harvester",
+    "count": 1,
+    "shift_hours": 8,
+    "skills": [
+     "crystal_harvesting",
+     "cryo_cooling",
+     "manual_bench",
+     "cold_storage"
+    ]
+   }
+  ],
+  "notes": [
+   "ASSUMPTION: scope is harvesting only; soaked 96-well crystallisation plates arrive from upstream soaking (not modelled).",
+   "ASSUMPTION: 96 harvested crystals per plate (one per well); 16-pin pucks so 6 pucks per plate.",
+   "ASSUMPTION: one 8 h operator shift per day is also the lab operating window.",
+   "ASSUMPTION: room 5 m x 4 m, door at (0,2); no budget given, so BOM is provisional.",
+   "Hazard: LN2 cryogens; needs ventilation and O2 monitoring (not certified by this design).",
+   "Operator also acts as the transporter for plates and pucks; there is no robot transporter."
+  ],
+  "scenario": "fbdd_crystallography"
+ },
+ "workflow": {
+  "id": "xchem_harvest_1op_wf_v1",
+  "lab_spec_id": "xchem_harvest_1op",
+  "labware": "crystallization_plate_96",
+  "equipment": [
+   {
+    "instance_id": "shifter_1",
+    "catalog_id": "olt_crystal_shifter",
+    "rationale": "Only catalog crystal_harvesting device; motorised stage for operator-performed mounting (not autonomous)."
+   },
+   {
+    "instance_id": "ln2_dewar_1",
+    "catalog_id": "ln2_storage_dewar",
+    "rationale": "LN2 supply and buffer storage for filled pucks before shipping."
+   },
+   {
+    "instance_id": "bench_1",
+    "catalog_id": "lab_bench",
+    "rationale": "Handling bench for loading filled pucks onto canes into the dry shipper."
+   },
+   {
+    "instance_id": "dry_shipper_1",
+    "catalog_id": "taylor_wharton_cx100",
+    "rationale": "Storage/transit container for pucks shipped to the synchrotron."
+   }
+  ],
+  "steps": [
+   {
+    "id": "soaked_plate_in",
+    "name": "Soaked plate arrives from upstream soaking",
+    "capability": "external_service",
+    "candidate_instances": [],
+    "duration_s": 0,
+    "after": [],
+    "mode": "external",
+    "params": {
+     "flow_unit": "crystallization_plate_96 (soaked)",
+     "queue_time_s": 0,
+     "duration_basis": "Boundary of scope; upstream soaking assumed always ready so harvesting is the tested constraint."
+    }
+   },
+   {
+    "id": "harvest",
+    "name": "Shifter-assisted manual crystal mounting and plunge into puck",
+    "capability": "crystal_harvesting",
+    "candidate_instances": [
+     "shifter_1"
+    ],
+    "duration_s": 3360,
+    "after": [
+     "soaked_plate_in"
+    ],
+    "mode": "manual",
+    "operator_role": "crystal_harvester",
+    "duration_uncertainty": {
+     "value": 3360,
+     "low": 2880,
+     "high": 5040,
+     "confidence": "literature",
+     "source": "https://doi.org/10.1107/S2059798320014114"
+    },
+    "params": {
+     "flow_unit": "crystallization_plate_96 in, harvested crystals out",
+     "duration_per": "one plate (batch_size 1)",
+     "crystals_harvested_per_plate": 96,
+     "duration_basis": "Wright et al. 2021 s3.2.2 Shifter mean 35 s/mount x 96 crystals = 3360 s per plate; low = median 30 s x 96 = 2880 s; high 5040 s (52.5 s/mount) is an agent modelling assumption for operator/crystal-system variability. Excludes plate changeover, breaks and ancillary tasks (optimistic). Unassisted manual rate (8/h) not used because a Shifter is installed."
+    }
+   },
+   {
+    "id": "load_shipper",
+    "name": "Load filled puck onto cane into charged dry shipper",
+    "capability": "manual_bench",
+    "candidate_instances": [
+     "bench_1"
+    ],
+    "duration_s": 300,
+    "after": [
+     "harvest"
+    ],
+    "mode": "manual",
+    "operator_role": "crystal_harvester",
+    "fan_out": 6,
+    "duration_uncertainty": {
+     "value": 300,
+     "low": 60,
+     "high": 900,
+     "confidence": "placeholder",
+     "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "puck (16 pins)",
+     "fan_out_basis": "96 crystals per plate / 16 pins per puck = 6 pucks per plate",
+     "duration_per": "one puck",
+     "dry_shipper_instance": "dry_shipper_1",
+     "duration_basis": "Catalog placeholder operator handling time per puck for CX100 (not hold time)."
+    }
+   },
+   {
+    "id": "ship_and_diffract",
+    "name": "Ship dry shipper to synchrotron; external diffraction",
+    "capability": "external_service",
+    "candidate_instances": [],
+    "duration_s": 3600,
+    "after": [
+     "load_shipper"
+    ],
+    "mode": "external",
+    "params": {
+     "flow_unit": "puck",
+     "dry_shipper_instance": "dry_shipper_1",
+     "queue_time_s": 172800,
+     "queue_basis": "agent_estimate: 2 days courier transit plus beamline queue; real value unknown (range 1-14 days). Shipper hold time 12.6 days working (catalog) exceeds this.",
+     "duration_basis": "agent_estimate placeholder for external handoff; synchrotron remains external, no in-house X-ray.",
+     "count_throughput": true,
+     "units_per_labware": 16
+    }
+   }
+  ]
+ },
+ "layout": {
+  "id": "xchem_harvest_1op_wf_v1_layout",
+  "workflow_id": "xchem_harvest_1op_wf_v1",
+  "room": {
+   "width_m": 5,
+   "depth_m": 4,
+   "height_m": 3
+  },
+  "placements": [
+   {
+    "instance_id": "shifter_1",
+    "position": {
+     "x": 2.546,
+     "y": 3.393,
+     "z": 0.9
+    },
+    "rotation_deg": 0.0
+   },
+   {
+    "instance_id": "ln2_dewar_1",
+    "position": {
+     "x": 1.701,
+     "y": 3.062,
+     "z": 0.0
+    },
+    "rotation_deg": 0.0
+   },
+   {
+    "instance_id": "bench_1",
+    "position": {
+     "x": 4.159,
+     "y": 3.095,
+     "z": 0.0
+    },
+    "rotation_deg": 270.0
+   },
+   {
+    "instance_id": "dry_shipper_1",
+    "position": {
+     "x": 1.828,
+     "y": 3.721,
+     "z": 0.9
+    },
+    "rotation_deg": 0.0
+   }
+  ],
+  "operators": [
+   {
+    "id": "crystal_harvester_1",
+    "role": "crystal_harvester",
+    "home": {
+     "x": 0,
+     "y": 2
+    }
+   }
+  ],
+  "transfers": [
+   {
+    "from_instance": "shifter_1",
+    "to_instance": "bench_1",
+    "transporter_instance": "crystal_harvester_1",
+    "distance_m": 2.16,
+    "path": [
+     {
+      "x": 2.546,
+      "y": 3.093,
+      "z": 1.1
+     },
+     {
+      "x": 2.546,
+      "y": 2.693,
+      "z": 1.0
+     },
+     {
+      "x": 2.75,
+      "y": 2.65,
+      "z": 1.0
+     },
+     {
+      "x": 2.85,
+      "y": 2.75,
+      "z": 1.0
+     },
+     {
+      "x": 2.95,
+      "y": 2.75,
+      "z": 1.0
+     },
+     {
+      "x": 3.15,
+      "y": 2.95,
+      "z": 1.0
+     },
+     {
+      "x": 3.45,
+      "y": 2.95,
+      "z": 1.0
+     },
+     {
+      "x": 4.159,
+      "y": 3.095,
+      "z": 1.0
+     },
+     {
+      "x": 4.159,
+      "y": 3.095,
+      "z": 0.9
+     }
+    ],
+    "est_time_s": 17.2
+   }
+  ],
+  "zones": [
+   {
+    "id": "cryogen_1",
+    "kind": "cryogen",
+    "min": {
+     "x": 1.162,
+     "y": 2.523
+    },
+    "max": {
+     "x": 3.146,
+     "y": 4
+    }
+   }
+  ],
+  "score": {
+   "total_weighted_distance_m": 2.16,
+   "floor_area_used_m2": 1.76
+  },
+  "violations": []
+ },
+ "sim_result": {
+  "id": "xchem_harvest_1op_wf_v1_layout_sim",
+  "layout_id": "xchem_harvest_1op_wf_v1_layout",
+  "simulated_hours": 172.0,
+  "replicates": 10,
+  "throughput": {
+   "value": 240.9,
+   "unit": "crystals_per_day",
+   "target": 1000,
+   "meets_target": false,
+   "p10": 206.9,
+   "p50": 240.9,
+   "p90": 268.4,
+   "prob_meets_target": 0.0
+  },
+  "cycle_time_s": 482989.6,
+  "utilisation": [
+   {
+    "instance_id": "shifter_1",
+    "busy_fraction": 0.29,
+    "mean_queue_wait_s": 10666.4
+   },
+   {
+    "instance_id": "ln2_dewar_1",
+    "busy_fraction": 0.0,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "bench_1",
+    "busy_fraction": 0.021,
+    "mean_queue_wait_s": 1463.7
+   },
+   {
+    "instance_id": "dry_shipper_1",
+    "busy_fraction": 0.0,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "crystal_harvester_1",
+    "busy_fraction": 1.0,
+    "mean_queue_wait_s": 0.0
+   }
+  ],
+  "bottlenecks": [
+   {
+    "kind": "operator_capacity",
+    "instances": [
+     "crystal_harvester_1"
+    ],
+    "severity": "high",
+    "message": "crystal_harvester_1 is busy 100% of their shift; it caps throughput near 241 crystals per day.",
+    "suggestion": "Add a second operator or stagger shifts."
+   },
+   {
+    "kind": "external_queue",
+    "instances": [],
+    "severity": "low",
+    "message": "External step 'Ship dry shipper to synchrotron; external diffraction' takes about 49 h of the 134 h cycle; the layout cannot shorten it.",
+    "suggestion": "Batch shipments and book access early; report turnaround as a range."
+   }
+  ],
+  "sensitivity": [
+   {
+    "parameter": "harvest.duration_s",
+    "effect": -121.8
+   },
+   {
+    "parameter": "load_shipper.duration_s",
+    "effect": -59.6
+   },
+   {
+    "parameter": "operator_walking_time",
+    "effect": -8.0
+   }
+  ]
+ },
+ "claims": [
+  {
+   "id": "c_throughput",
+   "statement": "Simulated P50 throughput of the single-operator Shifter design is below the 1,000 crystals/day target.",
+   "metric": "throughput.p50",
+   "comparator": "<=",
+   "predicted_value": 1000,
+   "confidence": 0.95,
+   "status": "supported",
+   "verified_value": 213.3,
+   "verifier_note": "throughput.p50 = 213.3, recomputed by the verifier."
+  },
+  {
+   "id": "c_layout",
+   "statement": "The layout has zero violations.",
+   "metric": "layout.violations",
+   "comparator": "==",
+   "predicted_value": 0,
+   "confidence": 0.9,
+   "status": "supported",
+   "verified_value": 0.0,
+   "verifier_note": "layout.violations = 0, recomputed by the verifier."
+  }
+ ],
+ "follow_up_used": true,
+ "first_reply": "I can't model harvesting as fully automated. The only harvesting device in the catalog, the Oxford Lab Technologies Crystal Shifter (`olt_crystal_shifter`), is a motorised microscope stage. It moves each drop into position, but a person still mounts every crystal by hand at the microscope. So I'll treat harvesting as a manual step that needs the operator for its full duration. If I modelled it as automated, the result would look feasible when it isn't.\n\n**What the published rates mean for one operator**\n\nThe source is Wright et al. (2021), *Acta Cryst D*, doi:10.1107/S2059798320014114, section 3.2.2. This is a reviewed public web reference, not an Amass record.\n\n| Mode | Published rate | Operator time for 1,000 crystals |\n|---|---|---|\n| Fully manual (no Shifter) | 8 crystals/h (six-person survey, including side tasks) | about 125 h |\n| With the Shifter, mean | 103/h (35 s per mount, from 8,271 mounts) | about 9.7 h |\n| With the Shifter, median | 30 s per mount (about 120/h) | about 8.3 h |\n\n- **Even with the Shifter, one operator probably can't reach 1,000 a day.** It would take about 8\u201310 hours of non-stop mounting, before any plate changes, puck handling, breaks, drop selection, soaking or dewar work.\n- **Rates vary.** The paper says they depend on the operator and the crystal system, so these aren't guarantees.\n- **The catalog's own duration is a placeholder.** It lists about 2 h per 96-well plate (roughly 1 minute per crystal), which would make 1,000 crystals take about 21 h. That's an agent estimate, not vendor data.\n\n**Questions before I build and simulate the design**\n\n1. **Hours:** How long is the operator's shift, and how many hours a day does the lab run?\n2. **Staffing:** Is one operator a hard limit, or could I test 2\u20133 harvesters, or a second shift, as a design change?\n3. **Scope:** Is this harvesting only (soaked plates arrive, crystals go out in pucks), or the full XChem chain? The full chain runs from expression and purification through drop setup, growth and imaging, soaking, harvesting, puck loading, and external shipping and synchrotron diffraction.\n4. **Crystals per plate:** How many crystals do you harvest from each crystallisation plate? I need this to turn the per-crystal rate into time per plate.\n5. **Room:** What are the width and depth in metres? Please include doors and any areas to keep clear.\n6. **Budget:** What's the budget in USD? If you don't have one yet, I can do a provisional design if you say so.\n7. **Hazards:** I'm assuming liquid nitrogen and other cryogens, so I'll plan for ventilation and oxygen monitoring. Are there others, such as toxic fragments or solvents, or any biosafety level?\n8. **Shipping:** If puck shipping is in scope, how long are your shipping and synchrotron queue times?\n\nOnce I have these, I'll check the catalog for the other equipment, build the workflow and run the simulation. Harvesting will be a manual step using the Wright rate per crystal, with its uncertainty spelled out. I'll then report the simulated throughput range and the main bottleneck.",
+ "completed": true,
+ "stop_reason": "end_turn"
+}

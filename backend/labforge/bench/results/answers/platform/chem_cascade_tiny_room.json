@@ -1,0 +1,1171 @@
+{
+ "task_id": "chem_cascade_tiny_room",
+ "arm": "platform",
+ "message": "# Library cascade in a 3 \u00d7 2.5 m room: it doesn't fit\n\nThe full cascade won't fit in 7.5 m\u00b2. The best layout I could model had **22 layout violations**, and an independent check confirmed that count. With the throughput target I had to assume, the predicted median was **90 compounds/day**, under half that target. These are model predictions, not measurements, and this isn't a safety review.\n\n## Assumptions I made because nothing was specified\n- **Throughput target:** 192 compounds/day, which is two 96-product reaction blocks a day. A 768-product run (8 \u00d7 12 \u00d7 8) is 8 blocks.\n- **Hours and staff:** instruments run 24 h/day, with one chemist on an 8 h shift.\n- **Budget:** none given, so cost wasn't checked against a budget.\n- **Hazards:** flammable solvents and toxic reagents, because the catalog lists them for the synthesis platform, evaporator and LC-MS. No inert atmosphere.\n- **Room:** door at the middle of one short wall, 3 m ceiling, no areas that must stay clear.\n- **Left out because you didn't list them:** workup/filtration between the two reaction stages, purification, compound storage and incubation before the readout.\n- **One manual step kept:** an operator reformats each reaction block into a source plate the Echo can use. None of your listed instruments can do this, so it's modelled as 15 minutes of bench work per block (a placeholder).\n\n## Equipment (smallest suitable catalog models; estimated prices)\n| Station | Model | Est. USD |\n|---|---|---|\n| Powder dosing | Mettler Quantos QB5 | 72,900 |\n| Synthesis (both stages) | Chemspeed ISYNTH | 500,000 (placeholder) |\n| Fume hood (the catalog says the ISYNTH needs one) | Labconco XStream 6 ft | 16,560 |\n| Evaporator | Genevac EZ-2 4.0 | 52,500 |\n| LC-MS | Agilent 1290 + LC/MSD iQ | 214,184 |\n| Reformat bench | Fisher work bench | 5,530 |\n| Acoustic dispenser | Echo 650 Plus | 374,093 |\n| Reagent dispenser | Multidrop Combi | 24,191 |\n| Plate reader | CLARIOstar Plus | 44,450 |\n| Robot arm | UR5e | 39,083 |\n| **Subtotal** | | **\u2248 $1.34M**, not including installation, ducting, service or consumables |\n\n## Why it can't be done in this room\n- **Space:** the instruments' footprints alone come to **5.74 m\u00b2 of the 7.5 m\u00b2**, before service clearances and a walkway. The ISYNTH needs about 0.8 m of clearance, and the fume hood is 1.83 m wide.\n- **Layout violations (22):**\n  - The ISYNTH, fume hood and LC-MS extend outside the room.\n  - There are 7 overlaps between instruments.\n  - The ISYNTH and LC-MS can't be placed in a ventilated or fume-hood zone, as the catalog requires.\n  - The plate reader blocks the door, and there's no 1 m walkway to the ISYNTH, Quantos or Multidrop.\n  - The arm isn't rated to work alongside people, yet someone would hand reaction blocks into its reach at the ISYNTH.\n\n## Throughput (model result, not measured)\n- **Result:** median 90 compounds/day, with a range of 61\u201396 (10th\u201390th percentile). The chance of reaching 192 is 0.\n- **Bottleneck:** the ISYNTH is busy 74% of the time. Both reaction stages run on it, using the catalog's placeholder of 4 h per stage, and its reaction time is the result's most sensitive input. Every other instrument is busy less than 20% of the time.\n- **Arm usage:** in this model the arm moved nothing. The layout tool sent every transfer through the chemist, so this isn't yet an automated cell.\n\n## Why I didn't try a revised design\nThe fix for the throughput gap would be a second synthesis platform. That adds at least another 1.2 m\u00b2 of floor, which would only make the space problem worse. Nothing in the catalog is smaller than the ISYNTH for synthesis. So no design using catalog equipment can fit this whole cascade into 7.5 m\u00b2.\n\n## What could work (not yet modelled)\nSplit the cascade across two rooms:\n- **A ventilated chemistry room:** fume hood, ISYNTH (or two of them), Quantos, evaporator and probably the LC-MS.\n- **Your 3 \u00d7 2.5 m room:** Echo, Multidrop, plate reader, reformat bench and the arm. That's about 2.3 m\u00b2 of footprint, which looks workable with clearances, but I haven't run it through the layout tool.\n\nTo run that two-room design and check it properly, I'd need a real throughput target, a budget, and the size and ventilation of a second room.",
+ "lab_spec": {
+  "id": "lib_cascade_small_room",
+  "name": "Two-stage library cascade in 3 x 2.5 m room (provisional)",
+  "domain": "chemistry",
+  "description": "Fit the full library cascade (powder dosing, synthesis platform, evaporator, LC-MS, acoustic dispenser, reagent dispenser, plate reader and a robot arm) into a 3 x 2.5 m room. User supplied no target, hours, budget or hazards; all such values below are agent assumptions for a provisional design.",
+  "throughput_target": {
+   "value": 192,
+   "unit": "compounds_per_day",
+   "operating_hours_per_day": 24
+  },
+  "room": {
+   "width_m": 3,
+   "depth_m": 2.5,
+   "height_m": 3,
+   "doors": [
+    {
+     "x": 0,
+     "y": 1.25
+    }
+   ]
+  },
+  "labware": [
+   "reaction_block_96",
+   "sbs_384",
+   "sbs_96",
+   "vial_rack"
+  ],
+  "required_capabilities": [
+   "powder_dosing",
+   "reaction",
+   "liquid_dosing",
+   "evaporation",
+   "lcms",
+   "manual_bench",
+   "acoustic_dispensing",
+   "reagent_dispensing",
+   "fluorescence_read",
+   "plate_transport_arm",
+   "ventilated_enclosure"
+  ],
+  "constraints": {
+   "hazards": [
+    "flammable_solvents",
+    "toxic_reagents"
+   ]
+  },
+  "operators": [
+   {
+    "role": "chemist",
+    "count": 1,
+    "shift_hours": 8,
+    "skills": [
+     "manual_bench",
+     "powder_dosing"
+    ]
+   }
+  ],
+  "notes": [
+   "ASSUMED target: 192 compounds/day = 2 x 96-product reaction blocks/day; a 768-product campaign (8 x 12 x 8) = 8 reaction blocks.",
+   "ASSUMED 24 h unattended instrument operation, 1 chemist on an 8 h shift.",
+   "ASSUMED no budget given: provisional design, cost check not verified.",
+   "ASSUMED hazards flammable_solvents and toxic_reagents (catalog lists them for synthesis/evaporation/LC-MS); no inert atmosphere assumed.",
+   "ASSUMED door at x=0, y=1.25 and 3 m ceiling; no keep-out zones known.",
+   "OUT OF SCOPE (not listed by user): inter-stage workup/filtration, purification, compound storage, pre-read incubation. A manual reformat step from reaction block to Echo source plate is retained because no listed instrument can do it."
+  ],
+  "scenario": "chem_library_screen"
+ },
+ "workflow": {
+  "id": "lib_cascade_wf_v1",
+  "lab_spec_id": "lib_cascade_small_room",
+  "labware": "reaction_block_96",
+  "equipment": [
+   {
+    "instance_id": "quantos_1",
+    "catalog_id": "mettler_quantos",
+    "rationale": "Smallest catalog powder doser (0.33 x 0.40 m)."
+   },
+   {
+    "instance_id": "isynth_1",
+    "catalog_id": "chemspeed_isynth",
+    "rationale": "Smallest catalog synthesis platform (1.3 x 0.9 m vs 2.35 m SWING XL); runs both reaction stages on 96-position blocks."
+   },
+   {
+    "instance_id": "hood_1",
+    "catalog_id": "labconco_fume_hood",
+    "rationale": "Catalog lists fume_hood/ventilated zone as a requirement for ISYNTH and ventilation for evaporator/LC-MS/Quantos."
+   },
+   {
+    "instance_id": "evap_1",
+    "catalog_id": "genevac_ez2",
+    "rationale": "Smallest catalog evaporator (0.61 x 0.65 m), 4 plate positions."
+   },
+   {
+    "instance_id": "lcms_1",
+    "catalog_id": "agilent_1290_lcmsd_iq",
+    "rationale": "Shallower LC-MS (0.55 m) and shorter catalog per-plate run (14400 s/96 samples) than the Waters option."
+   },
+   {
+    "instance_id": "bench_1",
+    "catalog_id": "lab_bench",
+    "rationale": "Operator bench for manual reformat of reaction block into Echo-qualified 384 source plate (no listed instrument provides this)."
+   },
+   {
+    "instance_id": "echo_1",
+    "catalog_id": "beckman_echo_650",
+    "rationale": "Acoustic dispenser; accepts sbs_384 source and sbs_96 destination."
+   },
+   {
+    "instance_id": "multidrop_1",
+    "catalog_id": "thermo_multidrop_combi",
+    "rationale": "Very small reagent dispenser (0.36 x 0.22 m)."
+   },
+   {
+    "instance_id": "reader_1",
+    "catalog_id": "bmg_clariostar",
+    "rationale": "Fluorescence reader; smallest/cheapest catalog option."
+   },
+   {
+    "instance_id": "arm_1",
+    "catalog_id": "ur5e",
+    "rationale": "0.85 m reach and 5 kg payload for reaction blocks and plates (PF400 payload 0.5 kg)."
+   }
+  ],
+  "steps": [
+   {
+    "id": "dose_stocks",
+    "name": "Powder dosing of building-block stock vials",
+    "capability": "powder_dosing",
+    "candidate_instances": [
+     "quantos_1"
+    ],
+    "duration_s": 1200,
+    "mode": "semi_automated",
+    "operator_role": "chemist",
+    "after": [],
+    "params": {
+     "flow_unit": "reaction block (96 products) worth of stock vials",
+     "vials_per_block": 4,
+     "duration_basis": "Catalog estimate 300 s per vial x assumed 4 vials per block (28 building-block stocks for 8+12+8 over 8 blocks, rounded up). Per reaction block."
+    },
+    "duration_uncertainty": {
+     "value": 1200,
+     "low": 480,
+     "high": 3600,
+     "confidence": "estimated",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "stage1_reaction",
+    "name": "Reaction stage 1",
+    "capability": "reaction",
+    "candidate_instances": [
+     "isynth_1"
+    ],
+    "duration_s": 14400,
+    "after": [
+     "dose_stocks"
+    ],
+    "params": {
+     "flow_unit": "reaction_block_96",
+     "duration_basis": "Catalog ISYNTH reaction 14400 s per block run (placeholder 4 h)."
+    },
+    "duration_uncertainty": {
+     "value": 14400,
+     "low": 3600,
+     "high": 86400,
+     "confidence": "estimated",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "stage2_dosing",
+    "name": "Stage-2 building-block liquid dosing",
+    "capability": "liquid_dosing",
+    "candidate_instances": [
+     "isynth_1"
+    ],
+    "duration_s": 900,
+    "after": [
+     "stage1_reaction"
+    ],
+    "params": {
+     "flow_unit": "reaction_block_96",
+     "duration_basis": "Catalog ISYNTH liquid_dosing 900 s per block array."
+    },
+    "duration_uncertainty": {
+     "value": 900,
+     "low": 300,
+     "high": 3600,
+     "confidence": "placeholder",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "stage2_reaction",
+    "name": "Reaction stage 2",
+    "capability": "reaction",
+    "candidate_instances": [
+     "isynth_1"
+    ],
+    "duration_s": 14400,
+    "after": [
+     "stage2_dosing"
+    ],
+    "params": {
+     "flow_unit": "reaction_block_96",
+     "duration_basis": "Catalog ISYNTH reaction 14400 s per block run."
+    },
+    "duration_uncertainty": {
+     "value": 14400,
+     "low": 3600,
+     "high": 86400,
+     "confidence": "estimated",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "evaporate",
+    "name": "Solvent evaporation",
+    "capability": "evaporation",
+    "candidate_instances": [
+     "evap_1"
+    ],
+    "duration_s": 5400,
+    "after": [
+     "stage2_reaction"
+    ],
+    "params": {
+     "flow_unit": "reaction_block_96",
+     "duration_basis": "Catalog EZ-2 5400 s per run; capacity 4 positions."
+    },
+    "duration_uncertainty": {
+     "value": 5400,
+     "low": 1800,
+     "high": 14400,
+     "confidence": "estimated",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "lcms_qc",
+    "name": "LC-MS QC of all 96 products",
+    "capability": "lcms",
+    "candidate_instances": [
+     "lcms_1"
+    ],
+    "duration_s": 14400,
+    "after": [
+     "evaporate"
+    ],
+    "params": {
+     "flow_unit": "reaction_block_96",
+     "samples_per_block": 96,
+     "duration_basis": "Catalog 150 s per sample x 96 samples = 14400 s per block."
+    },
+    "duration_uncertainty": {
+     "value": 14400,
+     "low": 9600,
+     "high": 28800,
+     "confidence": "estimated",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "reformat_manual",
+    "name": "Manual reformat to Echo 384 source plate",
+    "capability": "manual_bench",
+    "candidate_instances": [
+     "bench_1"
+    ],
+    "duration_s": 900,
+    "mode": "manual",
+    "operator_role": "chemist",
+    "after": [
+     "lcms_qc"
+    ],
+    "params": {
+     "flow_unit": "reaction_block_96 in -> one sbs_384 Echo source plate out",
+     "fan_out_basis": "1 source plate per block (96 of 384 wells used)",
+     "duration_basis": "Catalog bench placeholder 900 s per plate handling step; operator-attended."
+    },
+    "duration_uncertainty": {
+     "value": 900,
+     "low": 300,
+     "high": 3600,
+     "confidence": "placeholder",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "acoustic_transfer",
+    "name": "Acoustic transfer to assay plate",
+    "capability": "acoustic_dispensing",
+    "candidate_instances": [
+     "echo_1"
+    ],
+    "duration_s": 180,
+    "after": [
+     "reformat_manual"
+    ],
+    "params": {
+     "flow_unit": "sbs_384 source in -> one sbs_96 assay plate (96 compounds) out",
+     "duration_basis": "Catalog Echo 650 180 s per destination plate."
+    },
+    "duration_uncertainty": {
+     "value": 180,
+     "low": 60,
+     "high": 600,
+     "confidence": "estimated",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "reagent_add",
+    "name": "Assay reagent dispensing",
+    "capability": "reagent_dispensing",
+    "candidate_instances": [
+     "multidrop_1"
+    ],
+    "duration_s": 70,
+    "after": [
+     "acoustic_transfer"
+    ],
+    "params": {
+     "flow_unit": "sbs_96 assay plate",
+     "duration_basis": "Catalog 10 s dispense + 60 s setup per plate (setup placeholder)."
+    },
+    "duration_uncertainty": {
+     "value": 70,
+     "low": 35,
+     "high": 321,
+     "confidence": "estimated",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "fluor_read",
+    "name": "Fluorescence readout",
+    "capability": "fluorescence_read",
+    "candidate_instances": [
+     "reader_1"
+    ],
+    "duration_s": 180,
+    "after": [
+     "reagent_add"
+    ],
+    "params": {
+     "flow_unit": "sbs_96 assay plate",
+     "duration_basis": "Catalog CLARIOstar 180 s per plate."
+    },
+    "duration_uncertainty": {
+     "value": 180,
+     "low": 90,
+     "high": 360,
+     "confidence": "estimated",
+     "source": "agent_estimate"
+    }
+   },
+   {
+    "id": "hit_analysis",
+    "name": "Data/hit analysis",
+    "capability": "in_silico",
+    "candidate_instances": [],
+    "duration_s": 300,
+    "mode": "in_silico",
+    "after": [
+     "fluor_read"
+    ],
+    "params": {
+     "flow_unit": "sbs_96 assay plate",
+     "count_throughput": true,
+     "units_per_labware": 96,
+     "duration_basis": "Placeholder 300 s per plate of data processing."
+    },
+    "duration_uncertainty": {
+     "value": 300,
+     "low": 60,
+     "high": 1800,
+     "confidence": "placeholder",
+     "source": "agent_estimate"
+    }
+   }
+  ]
+ },
+ "layout": {
+  "id": "lib_cascade_wf_v1_layout",
+  "workflow_id": "lib_cascade_wf_v1",
+  "room": {
+   "width_m": 3,
+   "depth_m": 2.5,
+   "height_m": 3
+  },
+  "placements": [
+   {
+    "instance_id": "quantos_1",
+    "position": {
+     "x": 2.541,
+     "y": 1.882,
+     "z": 0.9
+    },
+    "rotation_deg": 270.0
+   },
+   {
+    "instance_id": "isynth_1",
+    "position": {
+     "x": 0.1,
+     "y": 2.4,
+     "z": 0.0
+    },
+    "rotation_deg": 0.0
+   },
+   {
+    "instance_id": "hood_1",
+    "position": {
+     "x": 2.6,
+     "y": 2.388,
+     "z": 0.0
+    },
+    "rotation_deg": 0.0
+   },
+   {
+    "instance_id": "evap_1",
+    "position": {
+     "x": 1.576,
+     "y": 0.692,
+     "z": 0.9
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "lcms_1",
+    "position": {
+     "x": 0.265,
+     "y": 0.1,
+     "z": 0.9
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "bench_1",
+    "position": {
+     "x": 2.023,
+     "y": 1.17,
+     "z": 0.0
+    },
+    "rotation_deg": 270.0
+   },
+   {
+    "instance_id": "echo_1",
+    "position": {
+     "x": 2.592,
+     "y": 0.953,
+     "z": 0.9
+    },
+    "rotation_deg": 270.0
+   },
+   {
+    "instance_id": "multidrop_1",
+    "position": {
+     "x": 0.221,
+     "y": 0.211,
+     "z": 0.9
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "reader_1",
+    "position": {
+     "x": 0.557,
+     "y": 0.896,
+     "z": 0.9
+    },
+    "rotation_deg": 180.0
+   },
+   {
+    "instance_id": "arm_1",
+    "position": {
+     "x": 0.1,
+     "y": 2.296,
+     "z": 0.9
+    },
+    "rotation_deg": 0.0
+   }
+  ],
+  "operators": [
+   {
+    "id": "chemist_1",
+    "role": "chemist",
+    "home": {
+     "x": 0,
+     "y": 1.25
+    }
+   }
+  ],
+  "transfers": [
+   {
+    "from_instance": "quantos_1",
+    "to_instance": "isynth_1",
+    "transporter_instance": "chemist_1",
+    "distance_m": 4.62,
+    "path": [
+     {
+      "x": 2.541,
+      "y": 1.882,
+      "z": 1.1
+     },
+     {
+      "x": 2.541,
+      "y": 1.882,
+      "z": 1.0
+     },
+     {
+      "x": 0.1,
+      "y": 3.591,
+      "z": 1.0
+     },
+     {
+      "x": 0.1,
+      "y": 1.95,
+      "z": 0.9
+     }
+    ],
+    "est_time_s": 19.6
+   },
+   {
+    "from_instance": "isynth_1",
+    "to_instance": "evap_1",
+    "transporter_instance": "chemist_1",
+    "distance_m": 5.35,
+    "path": [
+     {
+      "x": 0.1,
+      "y": 1.95,
+      "z": 0.9
+     },
+     {
+      "x": 0.1,
+      "y": 3.591,
+      "z": 1.0
+     },
+     {
+      "x": 0.25,
+      "y": 1.65,
+      "z": 1.0
+     },
+     {
+      "x": 0.35,
+      "y": 1.65,
+      "z": 1.0
+     },
+     {
+      "x": 0.65,
+      "y": 1.35,
+      "z": 1.0
+     },
+     {
+      "x": 1.05,
+      "y": 1.35,
+      "z": 1.0
+     },
+     {
+      "x": 1.576,
+      "y": 0.692,
+      "z": 1.0
+     },
+     {
+      "x": 1.576,
+      "y": 0.692,
+      "z": 1.46
+     }
+    ],
+    "est_time_s": 20.4
+   },
+   {
+    "from_instance": "evap_1",
+    "to_instance": "lcms_1",
+    "transporter_instance": "chemist_1",
+    "distance_m": 1.41,
+    "path": [
+     {
+      "x": 1.576,
+      "y": 0.692,
+      "z": 1.46
+     },
+     {
+      "x": 1.576,
+      "y": 0.692,
+      "z": 1.0
+     },
+     {
+      "x": 1.05,
+      "y": 0.35,
+      "z": 1.0
+     },
+     {
+      "x": 0.748,
+      "y": 0.583,
+      "z": 1.0
+     },
+     {
+      "x": 0.465,
+      "y": 0.3,
+      "z": 1.35
+     }
+    ],
+    "est_time_s": 16.4
+   },
+   {
+    "from_instance": "lcms_1",
+    "to_instance": "bench_1",
+    "transporter_instance": "chemist_1",
+    "distance_m": 1.8,
+    "path": [
+     {
+      "x": 0.465,
+      "y": 0.3,
+      "z": 1.35
+     },
+     {
+      "x": 0.748,
+      "y": 0.583,
+      "z": 1.0
+     },
+     {
+      "x": 2.023,
+      "y": 1.17,
+      "z": 1.0
+     },
+     {
+      "x": 2.023,
+      "y": 1.17,
+      "z": 0.9
+     }
+    ],
+    "est_time_s": 16.8
+   },
+   {
+    "from_instance": "bench_1",
+    "to_instance": "echo_1",
+    "transporter_instance": "chemist_1",
+    "distance_m": 0.7,
+    "path": [
+     {
+      "x": 2.023,
+      "y": 1.17,
+      "z": 0.9
+     },
+     {
+      "x": 2.023,
+      "y": 1.17,
+      "z": 1.0
+     },
+     {
+      "x": 1.822,
+      "y": 0.953,
+      "z": 1.0
+     },
+     {
+      "x": 2.222,
+      "y": 0.953,
+      "z": 1.3
+     }
+    ],
+    "est_time_s": 15.7
+   },
+   {
+    "from_instance": "echo_1",
+    "to_instance": "multidrop_1",
+    "transporter_instance": "chemist_1",
+    "distance_m": 3.21,
+    "path": [
+     {
+      "x": 2.222,
+      "y": 0.953,
+      "z": 1.3
+     },
+     {
+      "x": 1.822,
+      "y": 0.953,
+      "z": 1.0
+     },
+     {
+      "x": 1.15,
+      "y": 1.25,
+      "z": 1.0
+     },
+     {
+      "x": 1.05,
+      "y": 1.35,
+      "z": 1.0
+     },
+     {
+      "x": 0.15,
+      "y": 1.35,
+      "z": 1.0
+     },
+     {
+      "x": 0.221,
+      "y": 0.721,
+      "z": 1.0
+     },
+     {
+      "x": 0.221,
+      "y": 0.321,
+      "z": 0.95
+     }
+    ],
+    "est_time_s": 18.2
+   },
+   {
+    "from_instance": "multidrop_1",
+    "to_instance": "reader_1",
+    "transporter_instance": "chemist_1",
+    "distance_m": 2.81,
+    "path": [
+     {
+      "x": 0.221,
+      "y": 0.321,
+      "z": 0.95
+     },
+     {
+      "x": 0.221,
+      "y": 0.721,
+      "z": 1.0
+     },
+     {
+      "x": 0.15,
+      "y": 1.35,
+      "z": 1.0
+     },
+     {
+      "x": 1.05,
+      "y": 1.35,
+      "z": 1.0
+     },
+     {
+      "x": 1.207,
+      "y": 0.896,
+      "z": 1.0
+     },
+     {
+      "x": 0.807,
+      "y": 0.896,
+      "z": 1.0
+     }
+    ],
+    "est_time_s": 17.8
+   }
+  ],
+  "zones": [
+   {
+    "id": "fume_hood_1",
+    "kind": "fume_hood",
+    "min": {
+     "x": 2.041,
+     "y": 1.417
+    },
+    "max": {
+     "x": 3,
+     "y": 2.347
+    }
+   },
+   {
+    "id": "fume_hood_2",
+    "kind": "fume_hood",
+    "min": {
+     "x": 0.0,
+     "y": 1.65
+    },
+    "max": {
+     "x": 1.05,
+     "y": 2.5
+    }
+   },
+   {
+    "id": "fume_hood_3",
+    "kind": "fume_hood",
+    "min": {
+     "x": 0.97,
+     "y": 0.068
+    },
+    "max": {
+     "x": 2.183,
+     "y": 1.316
+    }
+   },
+   {
+    "id": "fume_hood_4",
+    "kind": "fume_hood",
+    "min": {
+     "x": 0.0,
+     "y": 0.0
+    },
+    "max": {
+     "x": 0.965,
+     "y": 0.675
+    }
+   },
+   {
+    "id": "ventilated_1",
+    "kind": "ventilated",
+    "min": {
+     "x": 2.041,
+     "y": 1.417
+    },
+    "max": {
+     "x": 3,
+     "y": 2.347
+    }
+   },
+   {
+    "id": "ventilated_2",
+    "kind": "ventilated",
+    "min": {
+     "x": 0.97,
+     "y": 0.068
+    },
+    "max": {
+     "x": 2.183,
+     "y": 1.316
+    }
+   },
+   {
+    "id": "ventilated_3",
+    "kind": "ventilated",
+    "min": {
+     "x": 0.0,
+     "y": 0.0
+    },
+    "max": {
+     "x": 0.965,
+     "y": 0.675
+    }
+   },
+   {
+    "id": "vibration_free_1",
+    "kind": "vibration_free",
+    "min": {
+     "x": 1.919,
+     "y": 0.384
+    },
+    "max": {
+     "x": 3,
+     "y": 1.522
+    }
+   }
+  ],
+  "score": {
+   "total_weighted_distance_m": 19.9,
+   "floor_area_used_m2": 5.74
+  },
+  "violations": [
+   {
+    "kind": "out_of_room",
+    "instances": [
+     "isynth_1"
+    ],
+    "message": "isynth_1 sticks out of the room."
+   },
+   {
+    "kind": "out_of_room",
+    "instances": [
+     "hood_1"
+    ],
+    "message": "hood_1 sticks out of the room."
+   },
+   {
+    "kind": "out_of_room",
+    "instances": [
+     "lcms_1"
+    ],
+    "message": "lcms_1 sticks out of the room."
+   },
+   {
+    "kind": "overlap",
+    "instances": [
+     "quantos_1",
+     "hood_1"
+    ],
+    "message": "quantos_1 and hood_1 overlap."
+   },
+   {
+    "kind": "overlap",
+    "instances": [
+     "quantos_1",
+     "bench_1"
+    ],
+    "message": "quantos_1 and bench_1 overlap."
+   },
+   {
+    "kind": "overlap",
+    "instances": [
+     "isynth_1",
+     "arm_1"
+    ],
+    "message": "isynth_1 and arm_1 overlap."
+   },
+   {
+    "kind": "overlap",
+    "instances": [
+     "hood_1",
+     "bench_1"
+    ],
+    "message": "hood_1 and bench_1 overlap."
+   },
+   {
+    "kind": "overlap",
+    "instances": [
+     "evap_1",
+     "bench_1"
+    ],
+    "message": "evap_1 and bench_1 overlap."
+   },
+   {
+    "kind": "overlap",
+    "instances": [
+     "lcms_1",
+     "multidrop_1"
+    ],
+    "message": "lcms_1 and multidrop_1 overlap."
+   },
+   {
+    "kind": "clearance",
+    "instances": [
+     "lcms_1",
+     "reader_1"
+    ],
+    "message": "lcms_1 and reader_1 are closer than their service clearance."
+   },
+   {
+    "kind": "overlap",
+    "instances": [
+     "bench_1",
+     "echo_1"
+    ],
+    "message": "bench_1 and echo_1 overlap."
+   },
+   {
+    "kind": "zone_mismatch",
+    "instances": [
+     "isynth_1"
+    ],
+    "message": "isynth_1 must sit in a fume hood or ventilated zone (catalog: chemspeed_isynth requires fume_hood/ventilated)."
+   },
+   {
+    "kind": "zone_mismatch",
+    "instances": [
+     "isynth_1"
+    ],
+    "message": "isynth_1 must sit in a fume hood or ventilated zone (catalog: chemspeed_isynth has flammable solvents)."
+   },
+   {
+    "kind": "zone_mismatch",
+    "instances": [
+     "isynth_1"
+    ],
+    "message": "isynth_1 must sit in a fume hood zone (catalog: chemspeed_isynth has toxic reagents)."
+   },
+   {
+    "kind": "zone_mismatch",
+    "instances": [
+     "lcms_1"
+    ],
+    "message": "lcms_1 must sit in a ventilated zone (catalog: agilent_1290_lcmsd_iq requires ventilated)."
+   },
+   {
+    "kind": "zone_mismatch",
+    "instances": [
+     "lcms_1"
+    ],
+    "message": "lcms_1 must sit in a fume hood or ventilated zone (catalog: agilent_1290_lcmsd_iq has flammable solvents)."
+   },
+   {
+    "kind": "zone_mismatch",
+    "instances": [
+     "lcms_1"
+    ],
+    "message": "lcms_1 must sit in a fume hood zone (catalog: agilent_1290_lcmsd_iq has toxic reagents)."
+   },
+   {
+    "kind": "egress_blocked",
+    "instances": [
+     "reader_1"
+    ],
+    "message": "reader_1 block the door at (0, 1.25)."
+   },
+   {
+    "kind": "egress_blocked",
+    "instances": [
+     "isynth_1"
+    ],
+    "message": "No 1.0 m walkway from the door to where someone works at isynth_1."
+   },
+   {
+    "kind": "egress_blocked",
+    "instances": [
+     "multidrop_1"
+    ],
+    "message": "No 1.0 m walkway from the door to where someone works at multidrop_1."
+   },
+   {
+    "kind": "egress_blocked",
+    "instances": [
+     "quantos_1"
+    ],
+    "message": "No 1.0 m walkway from the door to where someone works at quantos_1."
+   },
+   {
+    "kind": "safety",
+    "instances": [
+     "arm_1",
+     "isynth_1"
+    ],
+    "message": "People hand labware into arm_1's reach at isynth_1, and arm_1 has no collaborative rating in the catalog; add a light curtain or a pass-through hotel at the cell edge."
+   }
+  ]
+ },
+ "sim_result": {
+  "id": "lib_cascade_wf_v1_layout_sim",
+  "layout_id": "lib_cascade_wf_v1_layout",
+  "simulated_hours": 1198.0,
+  "replicates": 10,
+  "throughput": {
+   "value": 90.0,
+   "unit": "compounds_per_day",
+   "target": 192,
+   "meets_target": false,
+   "p10": 61.4,
+   "p50": 90.0,
+   "p90": 96.0,
+   "prob_meets_target": 0.0
+  },
+  "cycle_time_s": 968102.9,
+  "utilisation": [
+   {
+    "instance_id": "quantos_1",
+    "busy_fraction": 0.018,
+    "mean_queue_wait_s": 213.4
+   },
+   {
+    "instance_id": "isynth_1",
+    "busy_fraction": 0.737,
+    "mean_queue_wait_s": 139495.1
+   },
+   {
+    "instance_id": "hood_1",
+    "busy_fraction": 0.0,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "evap_1",
+    "busy_fraction": 0.018,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "lcms_1",
+    "busy_fraction": 0.171,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "bench_1",
+    "busy_fraction": 0.008,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "echo_1",
+    "busy_fraction": 0.003,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "multidrop_1",
+    "busy_fraction": 0.002,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "reader_1",
+    "busy_fraction": 0.002,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "arm_1",
+    "busy_fraction": 0.0,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "chemist_1",
+    "busy_fraction": 0.059,
+    "mean_queue_wait_s": 0.0
+   }
+  ],
+  "bottlenecks": [
+   {
+    "kind": "instrument_capacity",
+    "instances": [
+     "isynth_1"
+    ],
+    "severity": "medium",
+    "message": "isynth_1 is busy 74% of the time.",
+    "suggestion": "Add a parallel unit or move slow steps elsewhere."
+   },
+   {
+    "kind": "long_transfer",
+    "instances": [
+     "isynth_1",
+     "evap_1"
+    ],
+    "severity": "medium",
+    "message": "Labware travels 5.35 m from isynth_1 to evap_1."
+   }
+  ],
+  "sensitivity": [
+   {
+    "parameter": "stage2_reaction.duration_s",
+    "effect": -83.0
+   },
+   {
+    "parameter": "stage1_reaction.duration_s",
+    "effect": -78.0
+   },
+   {
+    "parameter": "lcms_qc.duration_s",
+    "effect": -4.0
+   },
+   {
+    "parameter": "stage2_dosing.duration_s",
+    "effect": 0.0
+   },
+   {
+    "parameter": "reformat_manual.duration_s",
+    "effect": 0.0
+   },
+   {
+    "parameter": "dose_stocks.duration_s",
+    "effect": 0.0
+   }
+  ]
+ },
+ "claims": [
+  {
+   "id": "c_throughput",
+   "statement": "Provisional design P50 throughput meets the assumed 192 compounds/day target",
+   "metric": "throughput.p50",
+   "comparator": ">=",
+   "predicted_value": 192,
+   "confidence": 0.05,
+   "status": "refuted",
+   "verified_value": 90.0,
+   "verifier_note": "throughput.p50 = 90, recomputed by the verifier."
+  },
+  {
+   "id": "c_layout",
+   "statement": "Layout in the 3 x 2.5 m room has zero violations",
+   "metric": "layout.violations",
+   "comparator": "==",
+   "predicted_value": 0,
+   "confidence": 0.02,
+   "status": "refuted",
+   "verified_value": 22.0,
+   "verifier_note": "layout.violations = 22, recomputed by the verifier."
+  }
+ ],
+ "follow_up_used": true,
+ "first_reply": "Before I build the layout I need a few details. I don't want to guess at requirements, because they decide how many of each instrument you need and whether everything can fit.\n\n**What I still need:**\n\n1. **Throughput target:** a number and a unit, such as reaction blocks per day, compounds per day or plates per day. For a two-stage library, it would also help to know whether you're aiming for 768 products per campaign (8 \u00d7 12 \u00d7 8) or a different number.\n2. **Operating hours:** hours per day the system runs, and how many operators are available per shift. Manual restocking and handling steps will be modelled as operator work.\n3. **Budget (USD):** if you don't have one yet, you can tell me to do a **provisional design without a budget**, and I'll mark the cost check as not verified.\n4. **Hazards and containment:**\n   - Will the room contain flammable solvents or toxic reagents?\n   - Does synthesis or powder dosing need an inert atmosphere, such as a glovebox or nitrogen?\n   - Are there existing fume hoods or a ventilated enclosure, and a separate cabinet for flammable-solvent storage?\n5. **Room details:** where the door is, the ceiling height, and any areas that must stay clear (service access, existing benches, utility drops).\n6. **Scope check:** your list doesn't include the steps between reactions (workup/filtration), purification, compound storage/reformatting or incubation before the readout. Should I include them, or are they handled outside this room or not needed?\n\n**Early warning about the room:** 3 \u00d7 2.5 m is 7.5 m\u00b2. An evaporator, LC-MS, synthesis platform, powder doser, acoustic dispenser, reagent dispenser, plate reader and robot arm will probably need more space than that once you allow for service clearances, the arm's reach and ventilated enclosures. When I run the layout, any overlaps or clearance problems will show up as layout violations. I'll report them as such rather than calling the design feasible, and I'll suggest options like moving some instruments to a neighbouring room or sharing equipment.\n\nOnce you send these details, I'll search the catalog, build the workflow and run the layout and throughput simulation.",
+ "completed": true,
+ "stop_reason": "end_turn"
+}

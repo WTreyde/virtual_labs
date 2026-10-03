@@ -73,7 +73,11 @@ def step_units(step: dict) -> float | None:
 
 
 def catalog_units(item: dict | None, capability: str) -> float | None:
-    """Units the catalog's duration covers: provenance `units_per_run`, else the wells of its first known labware."""
+    """Units the catalog's duration covers: 1 if process.duration_basis names a per-unit basis (e.g. 'crystal'),
+    else provenance `units_per_run`, else the wells of its first known labware."""
+    basis = (((item or {}).get("process") or {}).get("duration_basis") or {}).get(capability)
+    if basis and basis != "labware":
+        return 1.0
     prov = ((item or {}).get("provenance") or {}).get(f"process.durations_s.{capability}") or {}
     if isinstance(prov.get("units_per_run"), (int, float)):
         return float(prov["units_per_run"])
@@ -105,12 +109,17 @@ def basis_scale(workflow: dict, step: dict, item: dict | None) -> tuple[float, s
     is kept on that basis. If the workflow later counts more units than the step says it handles, the per-unit
     basis is refused (it would let a step dodge the floor while throughput still counts every unit)."""
     units, basis = step_units(step), catalog_units(item, step["capability"])
-    if not units or not basis:
+    if not basis:
         return 1.0, None
     counted = counted_downstream(workflow, step["id"])
-    if counted is not None and counted > units * 1.05:
-        return 1.0, (f"Step {step['id']} says it handles {units:g} units per run but the workflow counts {counted:g} "
-                     f"downstream; its duration is compared with the catalog per labware instead.")
+    if units and counted is not None and counted > units * 1.05:
+        return counted / basis, (f"Step {step['id']} says it handles {units:g} units per run but the workflow counts "
+                                 f"{counted:g} downstream; its duration is held to the catalog time for {counted:g}.")
+    if not units:
+        per_unit = (((item or {}).get("process") or {}).get("duration_basis") or {}).get(step["capability"], "labware")
+        if per_unit != "labware" and counted:
+            return counted / basis, None  # per-crystal catalog time, step silent: use what the workflow counts
+        return 1.0, None
     return units / basis, None
 
 
