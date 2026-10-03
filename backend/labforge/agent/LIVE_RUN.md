@@ -321,3 +321,12 @@ PYTHONPATH=backend .venv/bin/python -m labforge.agent.replay_summary frontend/pu
 Fresh XChem recording is blocked until verifier PR #26 merges. Until then the published
 FBDD summary explicitly retains the historical 312 versus 112 disagreement. Hotel
 what-if PR #23 remains a separate follow-up; do not replace the baseline with a remedy.
+
+Compatibility check against pending #26 (`9dabf23`) after the per-crystal catalog update:
+`test_duration_floor_is_compared_per_unit_not_per_plate` fails because it still expects
+`7200 * 32 / 96`, while the catalog now gives 35 seconds per crystal. Its
+`catalog_units` helper does not yet read `process.duration_basis`, so it infers 96
+from the plate instead of one crystal. Maxim owns updating that conversion and test:
+for 32 attempts, mean is 1120 seconds and the catalog low is 15 * 32 = 480 seconds;
+a 300-second proposal should be restored on that basis. The temporary merge was
+aborted; this PR does not modify verifier code or pretend that compatibility passes.
