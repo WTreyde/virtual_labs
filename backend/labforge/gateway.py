@@ -83,7 +83,7 @@ def simulate_design(req: DesignRequest):
 
 @app.post("/verify")
 def verify(req: DesignRequest):
-    claims = verify_claims(req.claims, req.workflow, req.layout, req.sim_result)
+    claims = verify_claims(req.claims, req.workflow, req.layout, req.sim_result, spec=req.lab_spec)
     return {"claims": claims, "brier": brier_score(claims)}
 
 

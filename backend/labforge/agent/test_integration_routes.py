@@ -36,3 +36,12 @@ def test_stream_route_uses_existing_adapter():
     assert response.status_code == 200
     assert response.headers['content-type'].startswith('text/event-stream')
     assert '"type":"result"' in response.text
+
+
+def test_verify_route_recomputes_with_backend_spec():
+    spec = load_example('lab_spec')
+    workflow = load_example('workflow')
+    with patch('labforge.gateway.verify_claims', return_value=[]) as verify:
+        response = TestClient(app).post('/verify', json={'lab_spec':spec, 'workflow':workflow})
+    assert response.status_code == 200
+    verify.assert_called_once_with([], workflow, None, None, spec=spec)
