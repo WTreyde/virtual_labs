@@ -10,6 +10,7 @@ from labforge.layout.geometry import Grid, aabb, arm_bases, human_spot, outside_
 from labforge.layout.safety import door_box, load_rules, zone_needs
 
 ZONE_TOLERANCE_M2 = 0.01
+OVERLAP_TOLERANCE_M2 = 1e-4
 
 
 def find_violations(layout: dict, items: dict[str, dict], spec: dict | None = None, rules: dict | None = None,
@@ -29,7 +30,7 @@ def find_violations(layout: dict, items: dict[str, dict], spec: dict | None = No
             out.append({"kind": "out_of_room", "instances": [inst], "message": f"{inst} sticks out of the room."})
     for k, a in enumerate(solid):
         for b in solid[k + 1:]:
-            if overlap(boxes[a], boxes[b]):
+            if overlap_area(boxes[a], boxes[b]) > OVERLAP_TOLERANCE_M2:  # touching after mm rounding is not a collision
                 out.append({"kind": "overlap", "instances": [a, b], "message": f"{a} and {b} overlap."})
             elif a not in movers and b not in movers and \
                     overlap_area(pads[a], boxes[b]) + overlap_area(boxes[a], pads[b]) > ZONE_TOLERANCE_M2:

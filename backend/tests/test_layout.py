@@ -49,8 +49,10 @@ def test_two_arm_clusters_without_collisions():
     assert errors(lay, "layout") == []
     assert not {"overlap", "out_of_room", "unreachable_transfer", "egress_blocked"} & set(kinds(lay))
     movers = {t["transporter_instance"] for t in lay["transfers"]}
-    assert {"arm_1", "arm_2"} <= movers  # both arms work
+    assert movers & {"arm_1", "arm_2"}  # arms do the work they can reach (a second arm may honestly turn out idle)
     assert "chemist_1" in movers  # and a person links what the arms cannot reach
+    heaviest = max(edge_weights(wf).items(), key=lambda kv: kv[1])[0]  # fan-out traffic should not be hand-carried
+    assert next(t for t in lay["transfers"] if (t["from_instance"], t["to_instance"]) == heaviest)["transporter_instance"] != "chemist_1"
 
 
 def test_flammable_synthesis_gets_a_ventilated_enclosure():

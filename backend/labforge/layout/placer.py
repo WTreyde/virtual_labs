@@ -12,6 +12,7 @@
 5. Each transfer goes to the fastest transporter that reaches both access points: arm or rail,
    then mobile robot, then a human operator walking an A* path around the equipment.
 """
+import copy
 import math
 import random
 
@@ -32,6 +33,7 @@ PLACEHOLDER_ITEM = {  # geometry for catalog ids the catalog does not have (yet)
     "access_points": [{"id": "front", "position": {"x": 0.0, "y": -0.35, "z": 0.1}}], "data_confidence": "placeholder",
 }
 W_OVERLAP, W_ROOM, W_KEEP_OUT, W_DOOR, W_CLEARANCE, W_ACCESS, W_COHESION = 2e4, 2e4, 2e4, 1e4, 300, 500, 30
+HARD_S = 5000.0  # fixed cost per collision, out-of-room item or keep-out breach: worse than any transfer saving
 
 
 def transfer_edges(workflow: dict) -> list[tuple[str, str]]:
@@ -227,14 +229,17 @@ class Placer:
         ids = self.placeable
         for k, a in enumerate(ids):
             ba = boxes[a]
-            c += W_ROOM * outside_area(ba, self.room_box)
+            out_area = outside_area(ba, self.room_box)
+            c += W_ROOM * out_area + (HARD_S if out_area > 1e-6 else 0)
             for z in self.keep_out:
-                c += W_KEEP_OUT * overlap_area(ba, z)
+                ko = overlap_area(ba, z)
+                c += W_KEEP_OUT * ko + (HARD_S if ko > 1e-6 else 0)
             if a not in self.arms:
                 for d in self.door_boxes:
                     c += W_DOOR * overlap_area(ba, d)
             for b in ids[k + 1:]:
-                c += W_OVERLAP * overlap_area(ba, boxes[b])
+                ov = overlap_area(ba, boxes[b])
+                c += W_OVERLAP * ov + (HARD_S if ov > 1e-9 else 0)
                 if a not in self.arms and b not in self.arms:
                     c += W_CLEARANCE * (overlap_area(pads[a], boxes[b]) + overlap_area(ba, pads[b]))
         for kind, group in self.zone_groups.items():  # keep each hazard group together so one enclosure covers it
@@ -361,7 +366,20 @@ class Placer:
                 cur, cur_cost = cand, c
                 if c < best_cost:
                     best, best_cost = dict(cand), c
-        return best
+        return self.repair(best, best_cost)
+
+    def repair(self, state: dict, cost: float, tries: int = 400) -> dict:
+        """Greedy clean-up: nudge items until hard constraints hold (only accepts improvements)."""
+        if cost < HARD_S:
+            return state
+        for _ in range(tries):
+            cand = self._neighbour(state, 0.2, local=True)
+            c = self.cost(cand)
+            if c < cost:
+                state, cost = cand, c
+                if cost < HARD_S:
+                    break
+        return state
 
     def _neighbour(self, state: dict, frac: float, local: bool = False) -> dict:
         s = dict(state)
@@ -479,3 +497,29 @@ def generate_layout(spec: dict, workflow: dict, previous: dict | None = None, se
     layout = placer.build(state)
     layout["violations"] = find_violations(layout, placer.items, spec, placer.rules, workflow=workflow)
     return validate(layout, "layout")
+
+
+def rederive(spec: dict, workflow: dict, layout: dict) -> dict:
+    """Recompute everything derived from a layout's placements: transfers, times, score, violations.
+
+    Used by the verifier so a layout's own transfer times or violation list are never trusted.
+    Zones the layout declares are kept (they are a design choice); instances it forgot are placed
+    and reported as violations."""
+    prev = copy.deepcopy(layout)
+    pinned = {p["instance_id"]: p.get("locked", False) for p in prev.get("placements", [])}
+    for p in prev.get("placements", []):
+        p["locked"] = True
+    placer = Placer(spec, workflow, prev, seed=0)
+    out = placer.build(placer.initial())
+    for p in out["placements"]:
+        if not pinned.get(p["instance_id"]):
+            p.pop("locked", None)
+    out["id"] = layout.get("id", out["id"])
+    if "zones" in layout:
+        out["zones"] = layout["zones"]
+    out["violations"] = find_violations(out, placer.items, spec, placer.rules, workflow=workflow)
+    missing = [i for i in placer.placeable if i not in pinned]
+    if missing:
+        out["violations"].append({"kind": "out_of_room", "instances": missing,
+                                  "message": f"The layout does not place {', '.join(missing)}; placed them automatically."})
+    return validate(out, "layout")
