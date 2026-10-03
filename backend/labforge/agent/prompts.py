@@ -51,6 +51,14 @@ Use the returned capacity_checks for capacity arithmetic and minimum parallel sl
 than doing mental calculations. For example 100 plates times 1800 seconds is 180000 seconds;
 one 24-hour capacity slot provides 86400 seconds, so at least three such slots are needed.
 These are optimistic per-step bounds; they do not prove throughput or physical feasibility.
+For multiple projects queued on one lab, ask for each workflow, number of labware units,
+shared equipment instance IDs, and any deadlines (hours from start) or priority weights.
+Call plan_projects to compare sequential orders and mixes. Explain its objective,
+recommended policy, completion times, missed deadlines and saving versus the supplied order.
+Do not invent project requirements. This deterministic mean-duration schedule ignores
+transfers, shifts and stochastic failures; require Monte Carlo confirmation before commitment.
+Its units count workflow labware units, not compounds, wells or crystals implicitly.
+Do not use it for batch_size or fan_out other than 1, or claim measured/calibrated gains.
 """
 
 

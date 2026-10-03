@@ -15,7 +15,7 @@ from labforge.contracts import load_example
 from labforge.agent.prompts import SYSTEM, system_prompt
 from labforge.agent.session import ToolSession
 
-MODEL = "claude-sonnet-5-5"
+MODEL = "claude-opus-5-5"
 
 
 
@@ -125,6 +125,8 @@ def run_turn(history: list[dict], max_steps: int = 12, on_event=None, stream_tex
         produced['evidence_searches'] = session.evidence
     if session.optimisations:
         produced['instrument_optimisations'] = session.optimisations
+    if session.project_schedule is not None:
+        produced['project_schedule'] = session.project_schedule
     if session.claim_history:
         produced['claim_history'] = session.claim_history
     return {"messages": [{"role": "assistant", "content": text.strip()}],

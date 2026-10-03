@@ -16,6 +16,7 @@ class ToolSession:
         self.claims = []
         self.claim_history = []
         self.optimisations = {}
+        self.project_schedule = None
         self.evidence = []
         self.known_sources = set()
         self.base_tools = base_tools
@@ -32,6 +33,8 @@ class ToolSession:
         if 'search_catalog' in self.tools:
             definition, _ = self.tools['search_catalog']
             self.tools['search_catalog'] = (definition, self.search_catalog)
+        from labforge.agent.projects import PROJECT_TOOL
+        self.tools['plan_projects'] = (PROJECT_TOOL, self.plan_projects)
         self.tools.update({
             'search_evidence': ({'name': 'search_evidence', 'description': 'Retrieve cached Amass literature candidates. A paper title is not evidence of a numerical duration or yield. Missing access is returned explicitly.',
                 'input_schema': {'type': 'object', 'properties': {'query': {'type': 'string'}, 'limit': {'type': 'integer', 'minimum': 1, 'maximum': 10}}, 'required': ['query'], 'additionalProperties': False}}, self.search_evidence),
@@ -39,7 +42,7 @@ class ToolSession:
                 'input_schema': {'type': 'object', 'properties': {'claims': {'type': 'array', 'minItems': 1, 'maxItems': 20, 'items': {'type': 'object', 'properties': {'id': {'type': 'string'}, 'statement': {'type': 'string'}, 'metric': {'type': 'string'}, 'comparator': {'type': 'string', 'enum': ['>=', '<=', '==']}, 'predicted_value': {'type': 'number'}, 'confidence': {'type': 'number', 'minimum': 0, 'maximum': 1}}, 'required': ['id', 'statement', 'metric', 'comparator', 'predicted_value', 'confidence'], 'additionalProperties': False}}}, 'required': ['claims'], 'additionalProperties': False}}, self.verify),
             'create_report': ({'name': 'create_report', 'description': 'Render a deterministic report from the last design and checked claims. Includes costs, unknowns, assumptions, evidence and simulation limitations.',
                 'input_schema': {'type': 'object', 'properties': {}, 'additionalProperties': False}}, self.report),
-            'optimise_instrument': ({'name': 'optimise_instrument', 'description': 'Use the vendor what-if engine on the backend-held design. Sweep cycle time and capacity for an existing instrument; return throughput bands, elasticity, headroom and the next bottleneck. This is hypothetical analysis, not a physical equipment upgrade.',
+            'optimise_instrument': ({'name': 'optimise_instrument', 'description': 'Use the vendor what-if engine on the backend-held design. Sweep cycle time, capacity, transfer time and uptime for an existing instrument; return throughput bands, elasticity, headroom and the next bottleneck. This is hypothetical analysis, not a physical equipment upgrade.',
                 'input_schema': {'type': 'object', 'properties': {'instance_id': {'type': 'string'}}, 'required': ['instance_id'], 'additionalProperties': False}}, self.optimise),
         })
 
@@ -152,3 +155,9 @@ class ToolSession:
                 'cycle_time_scope': [{'step_id': s['id'], 'candidate_instances': s['candidate_instances']}
                                      for s in d['workflow']['steps'] if instance_id in s['candidate_instances']],
                 'limitation': 'Cycle-time sweeps scale the whole affected step, including every parallel candidate. Capacity sweeps change only the selected instance. The sweep baseline uses 48 hours and 8 replicates and may differ from the design simulation.'}
+
+    def plan_projects(self, lab_spec, projects):
+        from labforge.agent.projects import plan_projects
+        result = plan_projects(lab_spec, projects)
+        self.project_schedule = result['project_schedule']
+        return result

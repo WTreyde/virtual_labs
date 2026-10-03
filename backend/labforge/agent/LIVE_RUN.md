@@ -19,7 +19,7 @@ Keep the source checkout: the planner reads shared schemas, examples and pipelin
 Edit the repository-root `.env`:
 
 ```dotenv
-ANTHROPIC_MODEL=claude-sonnet-5-5
+ANTHROPIC_MODEL=claude-opus-5-5
 ANTHROPIC_API_KEY=your-api-key
 ANTHROPIC_WORKSPACE_ID=
 ```
@@ -229,3 +229,29 @@ sweeps change only the selected instance. Tool metadata and prompts disclose thi
 The saved vendor response predates that disclosure; interpret its handler gains as step-wide.
 The sensitivity baseline uses 48 hours and 8 replicates, so it differs from the main simulation.
 Amass was unconfigured in this run; all duration estimates remain explicitly unvalidated.
+
+## Project scheduling
+
+`plan_projects(lab_spec, projects)` wraps `labforge.sim.portfolio.prioritise`. Every project
+has an ID, a validated Workflow on the shared lab, a positive integer `units` count of
+workflow labware units, and optional positive `weight` and nonnegative `deadline_h`.
+Shared equipment IDs must identify the same catalog item in all projects. The interactive
+tool supports up to six projects and 1000 total units; batch_size and fan_out must be 1.
+The returned `project_schedule` validates against the shared schema and is exposed in
+the planner response. Scheduling leaves the current design and checked claims unchanged.
+This compares mean-duration release policies; it omits transfers, operator shifts and
+stochastic failures. Monte Carlo confirmation remains Strand D's responsibility.
+
+## Chemistry and XChem acceptance
+
+```bash
+ANTHROPIC_MODEL=claude-opus-5-5 PYTHONPATH=backend .venv/bin/python \
+  -m labforge.agent.demo_scenarios --env-file /absolute/path/to/.env \
+  --out /tmp/labforge-scenarios --live
+```
+
+Omit `--live` for catalog coverage only. Live mode makes chargeable calls for both full
+demo briefs and stores credential-redacted results without model/tool history. Success
+requires the complete pipeline, simulation, checked claims and report. XChem must retain
+manual harvesting, external diffraction and no in-house X-ray equipment. A catalog-blocked
+response is saved but does not pass the end-to-end gate; exit status 2 signals unmet gates.
