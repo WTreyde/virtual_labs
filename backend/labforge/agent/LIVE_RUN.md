@@ -320,5 +320,30 @@ proposal for those invariants before publishing; report any new bottleneck or no
 
 Copy the baseline with `frontend/scripts/copy_replays.py <committed-record-directory> fbdd`.
 Keep the what-if beside it for review; it is not substituted for the observed baseline.
-Do not spend another live run against the old 7200-second harvesting placeholder: the
-required catalog/verifier fixes were not yet on main `8dbabe9` when this was prepared.
+The catalog and verifier fixes are now on main via PR #26. Do not reuse a baseline
+recorded against the old 7200-second harvesting placeholder.
+
+## Per-unit catalog times and landing summaries
+
+Catalog `process.duration_basis` is a capability-to-unit map. The Shifter now gives
+`durations_s.crystal_harvesting = 35` and `duration_basis.crystal_harvesting = "crystal"`.
+Workflow durations still describe one processing run: declare numeric
+`params.units_per_run` (mount attempts), multiply per-crystal time and uncertainty
+bounds by the count, and distinguish attempts from successful output. For 32 attempts,
+the mean is 1120 seconds, not 35 seconds per plate. Planner validation requires an
+explicit count and rejects durations below the scaled catalog floor. The independent
+verifier owns checking that the count also agrees with downstream output/fan-out.
+
+The landing assets `frontend/public/replays/{chem,fbdd}.summary.json` report the exact
+recorded planning P10/P50/P90, independent P50, busiest instrument, checked BOM versus
+budget and refuted claims. They do not recompute an old replay against a new catalog.
+After copying a new replay, regenerate both summaries with:
+
+```bash
+PYTHONPATH=backend .venv/bin/python -m labforge.agent.replay_summary frontend/public/replays
+```
+
+PR #26 now scales the independent verifier on the same per-crystal basis. Record the
+fresh XChem baseline before running the hotel what-if, and never replace the baseline
+with a remedy. For 32 attempts, the catalog mean is 1120 seconds and its low bound is
+480 seconds; a 300-second proposal is restored on that basis.

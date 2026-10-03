@@ -14,7 +14,9 @@ def test_shifter_still_requires_full_operator_time():
     with pytest.raises(ValueError, match='operator performs the entire'):
         validate_design(run['lab_spec'], run['workflow'])
     corrected = copy.deepcopy(run['workflow'])
-    next(s for s in corrected['steps'] if s['capability'] == 'crystal_harvesting')['mode'] = 'manual'
+    harvesting = next(s for s in corrected['steps'] if s['capability'] == 'crystal_harvesting')
+    harvesting['mode'] = 'manual'
+    harvesting['params']['units_per_run'] = 48  # Count stated in the historical flow-unit text.
     validate_design(run['lab_spec'], corrected)
 
 

@@ -10,6 +10,7 @@ from labforge.layout.geometry import Grid, aabb, arm_bases, human_spot, outside_
 from labforge.layout.safety import door_box, load_rules, zone_needs
 
 ZONE_TOLERANCE_M2 = 0.01
+GRID_SLACK_M = 0.05  # half a 0.1 m grid cell: a true 1.0 m aisle must not fail on rounding
 OVERLAP_TOLERANCE_M2 = 1e-4
 
 
@@ -97,23 +98,42 @@ def _egress_violations(layout, items, spec, rules, pl, boxes, workflow) -> list[
     if not touched:
         return out
     walkway = rules.get("min_walkway_width_m", 1.0)
-    grid = Grid(W, D, list(boxes.values()))
-    door = doors[0]
-    db = door_box(door, W, D, 0.6)
-    start = ((db[0] + db[2]) / 2, (db[1] + db[3]) / 2)
-    reach = grid.reachable(start, walkway / 2)
-    if not reach:
+    arms = arm_bases(pl, items)
+    spots = {inst: human_spot(pl[inst], items[inst], arms) for inst in touched}
+    cut_off, _ = walkway_unreachable(W, D, list(boxes.values()), spots, doors[0], walkway)
+    if cut_off is None:
         out.append({"kind": "egress_blocked", "instances": sorted(touched),
                     "message": f"No {walkway} m walkway leads in from the door{note}."})
         return out
-    centres = [grid.centre(*c) for c in reach]
-    arms = arm_bases(pl, items)
-    for inst in sorted(touched):
-        sx, sy = human_spot(pl[inst], items[inst], arms)
-        if not any(math.hypot(cx - sx, cy - sy) <= walkway / 2 + 0.5 for cx, cy in centres):
-            out.append({"kind": "egress_blocked", "instances": [inst],
-                        "message": f"No {walkway} m walkway from the door to where someone works at {inst}{note}."})
+    for inst in cut_off:
+        out.append({"kind": "egress_blocked", "instances": [inst],
+                    "message": f"No {walkway} m walkway from the door to where someone works at {inst}{note}."})
     return out
+
+
+def walkway_unreachable(width: float, depth: float, boxes: list[tuple], spots: dict[str, tuple[float, float]],
+                        door: dict, walkway: float) -> tuple[list[str] | None, list[tuple[float, float]]]:
+    """(work spots a `walkway`-wide path from the door cannot reach, pinch points where that path narrows).
+
+    None instead of a list means no such path enters the room at all. Pinch points are where a slightly
+    narrower path gets through but the full width does not: moving equipment there opens the route."""
+    grid = Grid(width, depth, boxes)
+    db = door_box(door, width, depth, 0.6)
+    start = ((db[0] + db[2]) / 2, (db[1] + db[3]) / 2)
+    need = walkway / 2 - GRID_SLACK_M
+    reach = grid.reachable(start, need)
+    if not reach:
+        return None, [start]
+    centres = [grid.centre(*c) for c in reach]
+    cut_off = sorted(i for i, (sx, sy) in spots.items()
+                     if not any(math.hypot(cx - sx, cy - sy) <= walkway / 2 + 0.5 for cx, cy in centres))
+    pinches = []
+    if cut_off:
+        clear = grid.clearance()
+        narrow = grid.reachable(start, max(0.2, need - 0.25)) - reach
+        pinches = [grid.centre(*c) for c in narrow if clear[c[0]][c[1]] < need
+                   and any((c[0] + di, c[1] + dj) in reach for di, dj in ((1, 0), (-1, 0), (0, 1), (0, -1)))]
+    return cut_off, pinches
 
 
 def _separation_violations(layout, items, rules, pl, movers) -> list[dict]:
