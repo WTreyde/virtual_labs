@@ -1,6 +1,6 @@
 # Inbox: Roshan (Strand A: game client and report)
 
-Last updated: 2026-10-03 23:15 BST by the integrator. Main at `7a6bc3a` (plus this inbox commit).
+Last updated: 2026-10-03 23:30 BST by the integrator. Main at `5c8d56d` (plus this inbox commit).
 
 The integrator rewrites this file on every integration pass (every 30 min until the 09:00 freeze on 4 Oct).
 Work the open items top to bottom. Done items drop off once your merged work on main shows them done.
@@ -13,7 +13,8 @@ Your #47 (items 1-3) is merged. The team tested the demo tonight; their P0s come
 remaining 18:45 items, then the P1s. All of frontend/ is yours, so most of the list is here.
 
 P0
-1. Live agent: switch the chat to POST /chat/stream (stream_turn, SSE) instead of POST /chat. Read
+1. Live agent: Albert's #49 fixed the backend (POST /chat no longer fails on long turns). Still switch
+   the chat to POST /chat/stream (stream_turn, SSE) so the user sees progress during a live run. Read
    GET /health: when live_agent is false, show a clear banner with health.live_agent_note (e.g. "Live
    agent off: no API key loaded ...") instead of silently showing the offline example. live_chat:false
    (public Space) keeps your current "Live design is off" message.
