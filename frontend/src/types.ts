@@ -38,3 +38,31 @@ export interface Design {
   /** Client-side note on where the timeline came from, shown under the time controls. */
   timeline_note?: string;
 }
+
+/** Mirrors schemas/instrument_optimisation.schema.json (POST /optimise). */
+export interface InstrumentOptimisation {
+  instance_id: string; catalog_id: string; layout_id: string;
+  baseline: { throughput_p50: number; unit?: string; utilisation?: number };
+  sweeps: {
+    parameter: "cycle_time" | "capacity" | "transfer_time" | "uptime";
+    points: { value: number; throughput_p50: number; throughput_p10?: number; throughput_p90?: number }[];
+    elasticity?: number;
+  }[];
+  headroom_note?: string; next_bottleneck?: string;
+}
+
+/** Mirrors schemas/project_schedule.schema.json (POST /prioritise). */
+export interface ProjectSchedule {
+  lab_id: string; objective: "makespan" | "weighted_tardiness";
+  candidates: {
+    policy: string; order?: string[]; makespan_h: number; mean_utilisation: number;
+    utilisation?: Record<string, number>; project_finish_h?: Record<string, number>;
+    weighted_tardiness_h?: number; deadline_misses?: string[];
+  }[];
+  recommended: string; gain_vs_naive?: number;
+  gantt?: { project: string; unit: number; step: string; instance: string; start_s: number; end_s: number }[];
+  caveat?: string;
+}
+
+/** One project for POST /prioritise: a workflow on the lab's equipment ids, labware units, optional weight and deadline. */
+export interface ProjectRequest { id: string; workflow: Workflow & Record<string, unknown>; units: number; weight?: number; deadline_h?: number }

@@ -131,7 +131,7 @@ export class LabScene extends Phaser.Scene {
       badge.setText(`×${steps.length}`).setPosition(top.x + w / 2 + 6, y + 2);
     }
     const last = this.design.workflow.steps?.at(-1)?.id;
-    this.game.events.emit("tick", { t, end: tl.end, done: tl.finishedBy(t, last), moving: seen.size });
+    this.game.events.emit("tick", { t, end: tl.end, done: tl.finishedBy(t, last), moving: tl.movesAt(t, 0).length });
   }
 
   private plateFor(lab: string) {

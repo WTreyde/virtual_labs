@@ -21,6 +21,8 @@
         <input id="scrub" type="range" min="0" max="1000" value="0" aria-label="Sim time" />
         <div class="stats"><span id="clock-done"></span><span id="clock-src"></span></div>
       </div>
+      <div id="modal" class="frame hidden" role="dialog" aria-modal="true"></div>
+      <div id="viz-tip" class="hidden"></div>
       <div id="dialogue" class="frame hidden"><div class="speaker">LABFORGE</div><div class="text"></div><span class="caret">▼</span></div>
     </div>
     <aside id="panel">
@@ -32,6 +34,7 @@
         <form id="chat-form"><input id="chat-input" placeholder="Describe your lab..." /><button>Send</button></form>
       </section>
       <button id="report-btn">Report for your boss</button>
+      <button id="plan-btn">Plan projects</button>
     </aside>
     <script type="module" src="/src/main.ts"></script>
   </body>

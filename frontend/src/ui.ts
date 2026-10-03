@@ -147,6 +147,7 @@ export function showStatCard(d: Design, instanceId: string, sprite?: string) {
   }
   for (const b of flagged) body += `<div class="warn">⚠ ${esc(b.message)}</div>`;
   if (eq?.rationale) body += `<div class="why">“${esc(eq.rationale)}”</div>`;
+  if (item) body += `<button class="whatif" data-id="${esc(instanceId)}">How could this be better?</button>`;
 
   const title = item ? `${esc(item.vendor)} ${esc(item.model)}` : op ? esc(op.role) : esc(instanceId);
   card.innerHTML = `<button class="close" aria-label="Close">✕</button>

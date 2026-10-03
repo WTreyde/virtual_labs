@@ -3,8 +3,10 @@ import labSpec from "../../examples/lab_spec.json";
 import layout from "../../examples/layout.json";
 import simResult from "../../examples/sim_result.json";
 import workflow from "../../examples/workflow.json";
+import cachedOptimise from "./fixtures/example_optimise.json";
+import cachedSchedule from "./fixtures/example_schedule.json";
 import cachedTimeline from "./fixtures/example_timeline.json";
-import type { CatalogItem, Design } from "./types";
+import type { CatalogItem, Design, InstrumentOptimisation, ProjectRequest, ProjectSchedule } from "./types";
 
 export const API = (import.meta as any).env?.VITE_API ?? "http://localhost:8000";
 
@@ -39,4 +41,30 @@ export async function report(d: Design): Promise<string> {
   const body = { lab_spec: d.lab_spec, workflow: d.workflow, layout: d.layout, sim_result: d.sim_result };
   const res = await fetch(`${API}/report`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
   return res.text();
+}
+
+const post = async <T>(path: string, body: unknown): Promise<T> => {
+  const res = await fetch(`${API}${path}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), signal: AbortSignal.timeout(30000) });
+  if (!res.ok) throw new Error(`${path}: HTTP ${res.status}`);
+  return res.json();
+};
+
+/** Vendor what-if for one instance. Offline, falls back to a cached run for the bundled example only. */
+export async function optimise(d: Design, instance_id: string): Promise<{ result: InstrumentOptimisation; cached: boolean }> {
+  try {
+    return { result: await post<InstrumentOptimisation>("/optimise", { lab_spec: d.lab_spec, workflow: d.workflow, layout: d.layout, instance_id }), cached: false };
+  } catch (e) {
+    const hit = d.layout.id === layout.id ? (cachedOptimise.by_instance as Record<string, InstrumentOptimisation>)[instance_id] : undefined;
+    if (!hit) throw e;
+    return { result: hit, cached: true };
+  }
+}
+
+/** Best order or mix for several projects. Offline, falls back to a cached run of the bundled fixture projects. */
+export async function prioritise(projects: ProjectRequest[], lab_id: string): Promise<{ result: ProjectSchedule; cached: boolean }> {
+  try {
+    return { result: await post<ProjectSchedule>("/prioritise", { projects, lab_id }), cached: false };
+  } catch {
+    return { result: cachedSchedule.schedule as ProjectSchedule, cached: true };
+  }
 }
