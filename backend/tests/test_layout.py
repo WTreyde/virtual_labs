@@ -112,3 +112,67 @@ def test_unknown_catalog_id_gets_placeholder_geometry():
     wf["steps"].append(st("mystery", ["mystery_1"], "manual_bench", ["read"]))
     lay = generate_layout(spec, wf)
     assert any(p["instance_id"] == "mystery_1" for p in lay["placements"])
+
+
+def _manual_lab():
+    """A hands-on lab with no arms: every instrument is free-standing, so all of them should line the walls."""
+    eq = {"lh_1": "opentrons_flex", "inc_1": "liconic_stx44", "reader_1": "bmg_clariostar", "seal_1": "agilent_plateloc",
+          "bench_1": "lab_bench"}
+    steps = [st("prep", ["bench_1"], "manual_bench", mode="manual"), st("dispense", ["lh_1"], "liquid_handling", ["prep"]),
+             st("seal", ["seal_1"], "plate_sealing", ["dispense"]), st("incubate", ["inc_1"], "incubation", ["seal"]),
+             st("read", ["reader_1"], "fluorescence_read", ["incubate"])]
+    spec = {"id": "m", "name": "m", "domain": "biology", "description": "m", "throughput_target": {"value": 10, "unit": "plates_per_day"},
+            "room": {"width_m": 8, "depth_m": 6, "doors": [{"x": 0, "y": 3}]}, "operators": [{"role": "tech", "count": 3}]}
+    wf = {"id": "w", "lab_spec_id": "m", "equipment": [{"instance_id": i, "catalog_id": c} for i, c in eq.items()], "steps": steps}
+    return spec, wf
+
+
+def test_free_standing_instruments_line_the_walls_in_process_order():
+    from labforge.layout.geometry import aabb
+    from labforge.layout.placer import Placer
+    spec, wf = _manual_lab()
+    lay = generate_layout(spec, wf)
+    assert not lay["violations"], lay["violations"]
+    items, W, D = resolve_items(wf), 8, 6
+    order = ["bench_1", "lh_1", "seal_1", "inc_1", "reader_1"]
+    pos = {p["instance_id"]: p for p in lay["placements"]}
+    for i in order:  # every bench backs onto a wall
+        x0, y0, x1, y1 = aabb(pos[i], items[i])
+        assert min(x0, y0, W - x1, D - y1) <= 0.08, (i, (x0, y0, x1, y1))
+    p = Placer(spec, wf, None, 0)  # ...and they follow the process around the room from the door, in one direction
+    perim = []
+    for i in order:
+        x, y = pos[i]["position"]["x"], pos[i]["position"]["y"]
+        wall = p._wall_of(aabb(pos[i], items[i]))
+        t = {"W": y, "N": D + x, "E": D + W + (D - y), "S": 2 * D + W + (W - x)}[wall]  # clockwise from (0, 0)
+        perim.append((t - spec["room"]["doors"][0]["y"]) % (2 * (W + D)))
+    steps = [b - a for a, b in zip(perim, perim[1:])]
+    assert all(s > 0 for s in steps) or all(s < 0 for s in steps), perim
+
+
+def test_lab_like_layout_never_has_more_violations_than_the_annealed_one():
+    from labforge.layout.placer import Placer, _one_layout
+    for spec, wf in (chem(2), _manual_lab(), (load_example("lab_spec"), load_example("workflow"))):
+        p = Placer(spec, wf, None, 0)
+        state = p.anneal(p.initial(), min(6000, 1500 + 200 * len(p.movable)))
+        annealed = p.build(state)
+        annealed_v = find_violations(annealed, p.items, spec, p.rules, workflow=wf)
+        assert len(_one_layout(spec, wf, None, 0, None)["violations"]) <= len(annealed_v)
+
+
+def test_break_area_gives_idle_staff_their_own_spots_clear_of_equipment_and_hazards():
+    from labforge.layout.geometry import aabb, overlap_area
+    from labforge.layout.safety import door_box
+    spec, wf = _manual_lab()
+    lay = generate_layout(spec, wf)
+    [rest] = [z for z in lay["zones"] if z["id"] == "break_area"]
+    assert rest["kind"] == "human_only"
+    box = (rest["min"]["x"], rest["min"]["y"], rest["max"]["x"], rest["max"]["y"])
+    items = resolve_items(wf)
+    assert all(overlap_area(box, aabb(p, items[p["instance_id"]], clearance=True)) == 0 for p in lay["placements"])
+    assert overlap_area(box, door_box(spec["room"]["doors"][0], 8, 6, 1.2)) == 0
+    assert all(overlap_area(box, (z["min"]["x"], z["min"]["y"], z["max"]["x"], z["max"]["y"])) == 0
+               for z in lay["zones"] if z is not rest)
+    homes = [(o["home"]["x"], o["home"]["y"]) for o in lay["operators"]]
+    assert len(homes) == 3 and len(set(homes)) == 3  # not all back to one spot
+    assert all(box[0] <= x <= box[2] and box[1] <= y <= box[3] for x, y in homes)
