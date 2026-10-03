@@ -22,7 +22,7 @@ class FirstLayerTests(unittest.TestCase):
     def test_valid_example_and_prompt(self):
         validate_design(self.spec, self.workflow)
         self.assertIn('duration_uncertainty', system_prompt())
-        self.assertIn('Suzuki', system_prompt())
+        self.assertIn('reaction stage 1', system_prompt())
 
     def test_invalid_designs(self):
         mutations = [
