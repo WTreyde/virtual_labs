@@ -1,6 +1,6 @@
 # Inbox: Max (Strand B: catalog, safety, bench tasks, validation)
 
-Last updated: 2026-10-03 23:15 BST by the integrator. Main at `7a6bc3a` (plus this inbox commit).
+Last updated: 2026-10-03 23:30 BST by the integrator. Main at `5c8d56d` (plus this inbox commit).
 
 The integrator rewrites this file on every integration pass (every 30 min until the 09:00 freeze on 4 Oct).
 Work the open items top to bottom. Done items drop off once your merged work on main shows them done.
