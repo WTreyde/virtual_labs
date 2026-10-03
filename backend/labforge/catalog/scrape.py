@@ -144,6 +144,37 @@ VENDOR_PAGES: dict[str, str] = {
     "kuka_kmr_iiwa": "https://www.kuka.com/en-us/products/amr-autonomous-mobile-robotics/mobile-robot-systems/kmr-iiwa",
     # Omron: LD-250 autonomous mobile robot (37222-00000)
     "omron_ld250": "https://robotics.omron.com/products/mobile-robots/ld-series/ld-250/",
+    # --- Added 3 Oct: models named in validation cases (crystallisation, liquid handling, bioreactors) ---
+    # Formulatrix: Rock Imager 2
+    "formulatrix_rock_imager_2": "https://formulatrix.com/protein-crystallization-systems/rock-imager-protein-images/",
+    # Formulatrix: Rock Imager 182
+    "formulatrix_rock_imager_182": "https://formulatrix.com/protein-crystallization-systems/rock-imager-protein-images/",
+    # Formulatrix: Mantis
+    "formulatrix_mantis": "https://formulatrix.com/liquid-handling-systems/mantis-liquid-handler/",
+    # SPT Labtech: dragonfly discovery
+    "sptlabtech_dragonfly": "https://www.sptlabtech.com/products/dragonfly",
+    # SPT Labtech: mosquito LCP
+    "sptlabtech_mosquito_lcp": "https://www.sptlabtech.com/products/mosquito",
+    # Tecan: Freedom EVO 150
+    "tecan_freedom_evo_150": "https://lifesciences.tecan.com/freedom-evo-platform",
+    # Hamilton: Microlab STARlet
+    "hamilton_starlet": "https://www.hamiltoncompany.com/automated-liquid-handling/platforms/microlab-starlet",
+    # Agilent: Bravo
+    "agilent_bravo": "https://www.agilent.com/en/product/automated-liquid-handling/automated-liquid-handling-platforms/bravo-automated-liquid-handling-platform",
+    # Beckman Coulter: Biomek 4000
+    "beckman_biomek_4000": "https://www.beckman.com/liquid-handlers/biomek-4000",
+    # Beckman Coulter: Echo 555
+    "beckman_echo_555": "https://www.beckman.com/liquid-handlers/echo-acoustic",
+    # Thermo Fisher Scientific: KingFisher Flex (96 deep-well head)
+    "thermo_kingfisher_flex": "https://www.thermofisher.com/order/catalog/product/5400630",
+    # Sartorius: Ambr 15 Cell Culture (24-vessel)
+    "sartorius_ambr15": "https://www.sartorius.com/en/products/fermentation-bioreactors/ambr-multi-parallel-bioreactors/ambr-15-cell-culture",
+    # Sartorius: Ambr 250 Modular (4-vessel)
+    "sartorius_ambr250_modular": "https://www.sartorius.com/en/products/fermentation-bioreactors/ambr-multi-parallel-bioreactors/ambr-250-modular",
+    # Unchained Labs: Junior
+    "unchained_junior": "https://www.unchainedlabs.com/junior/",
+    # Cytiva: AKTA go
+    "cytiva_akta_go": "https://www.cytivalifesciences.com/en/us/products/items/akta-go-protein-purification-system-p-21891",
 }
 
 PRICE_REFERENCES: dict[str, dict] = {
@@ -632,6 +663,142 @@ PRICE_REFERENCES: dict[str, dict] = {
         "source": "https://www.kingbarcode.com/37222-00000",
         "note": "King Barcode $57,191 (no battery), seen via search index only; page returned 403 so not directly confirmed. Battery, fleet manager, integration push toward high.",
     },
+    # --- Added 3 Oct: models named in validation cases (crystallisation, liquid handling, bioreactors) ---
+    "formulatrix_rock_imager_2": {
+        "value": 100000,
+        "low": 50000,
+        "high": 240000,
+        "confidence": "placeholder",
+        "source": "https://api.usaspending.gov/api/v2/search/spending_by_award/ (awards 75N96021P00363, SPE2D620F9BQ1)",
+        "note": "No sourced price for the RI 2 specifically: vendor says Please Inquire. Anchors that do not name the model: HHS 2021 Rock Imager purchase $183,143 (75N96021P00363); DLA 2020 Rock Imager 54 w/ software $238,605. Value is a guess for a 2-plate benchtop unit below those; wide range. Used listing $10K is a floor.",
+        "year": 2021,
+    },
+    "formulatrix_rock_imager_182": {
+        "value": 240144,
+        "low": 180903,
+        "high": 240144,
+        "confidence": "estimated",
+        "source": "https://api.usaspending.gov/api/v2/search/spending_by_award/ (award 75N93022P01021)",
+        "note": "NIH award 75N93022P01021 (Aug 2022): 'Formulatrix Rock Imager 182 with controlling software' $240,144 = configured system with software. Low: NIH Sep 2019 award 75N92019P00404 $180,903 for a protein crystallization imager with Compound Zoom UV option (catalog 360180, model not stated).",
+        "year": 2022,
+    },
+    "formulatrix_mantis": {
+        "value": 62940,
+        "low": 42820,
+        "high": 64602,
+        "confidence": "estimated",
+        "source": "https://api.usaspending.gov/api/v2/search/spending_by_award/ (award 75N91024P00535)",
+        "note": "NIH Aug 2024 PO 75N91024P00535: one Mantis V.4 liquid dispenser and associated instrumentation $62,940. Range: NIH 2018 $42,820 (75N91018P00348), 2018 $53,324, 2020 $46,745, 2019 $64,602 (with accessories). Older years likely lower than today.",
+        "year": 2024,
+    },
+    "sptlabtech_dragonfly": {
+        "value": 98371,
+        "low": 64240,
+        "high": 163013,
+        "confidence": "estimated",
+        "source": "https://api.usaspending.gov/api/v2/search/spending_by_award/ (award 75N93022P00640)",
+        "note": "NIH Apr 2022 PO 75N93022P00640: dragonfly discovery 6-head with all items $98,371 (configured). Range: NIH Jul 2020 $64,240 (75D30120P08773, config unstated) to CDC Sep 2020 $163,013 (75D30120P09059).",
+        "year": 2022,
+    },
+    "sptlabtech_mosquito_lcp": {
+        "value": 149999,
+        "low": 145591,
+        "high": 149999,
+        "confidence": "estimated",
+        "source": "https://api.usaspending.gov/api/v2/search/spending_by_award/ (award 75N93018P00988)",
+        "note": "NIH Jul 2018 PO 75N93018P00988: nanolitre 4-position deck mosquito LCP with computer and humidity chamber $149,999. Consistent with NCI Sep 2015 $149,900 and Army Sep 2017 $145,591. 2015-2018 prices; likely higher today.",
+        "year": 2018,
+    },
+    "tecan_freedom_evo_150": {
+        "value": 221030,
+        "low": 154099,
+        "high": 494158,
+        "confidence": "estimated",
+        "source": "https://api.usaspending.gov/api/v2/search/spending_by_award/ (award 15F06719P0003989)",
+        "note": "FBI Sep 2019 PO 15F06719P0003989: additional TEDAC Freedom EVO 150 robotic instrument $221,030 (configured). High: NIH Sep 2022 75N95022P00630 EVO150 liquid handling platform $494,158 (large configuration). Low: VA Sep 2018 36C25918F4479 Freedom EVO system $154,099 (model size unstated). Bare unit is cheaper than these.",
+        "year": 2019,
+    },
+    "hamilton_starlet": {
+        "value": 193191,
+        "low": 128958,
+        "high": 193191,
+        "confidence": "estimated",
+        "source": "https://api.usaspending.gov/api/v2/search/spending_by_award/ (award 36C26123P1173)",
+        "note": "VA May 2023 PO 36C26123P1173: Hamilton Microlab STARlet system $193,191 (configuration not stated, likely with extras). Low: USDA 2011 STARlet 454 bead enrichment/PCR system $128,958 (AG91H2P110025). No list price published.",
+        "year": 2023,
+    },
+    "agilent_bravo": {
+        "value": 132922,
+        "low": 39037,
+        "high": 132922,
+        "confidence": "estimated",
+        "source": "https://api.usaspending.gov/api/v2/search/spending_by_award/ (award 1232SA25P0554)",
+        "note": "USDA Sep 2025 PO 1232SA25P0554: Agilent Bravo liquid handling platform $132,922 (configuration unstated). Low: 2016 refurbished Bravo without gripper (with PC, VWorks, 96 head) $39,037 (N3239816P0249), a used-class floor.",
+        "year": 2025,
+    },
+    "beckman_biomek_4000": {
+        "value": 51525,
+        "low": 40588.95,
+        "high": 55800,
+        "confidence": "estimated",
+        "source": "https://api.usaspending.gov/api/v2/search/spending_by_award/ (awards 3721 Dec 2016 'Biomek 4000 liquid handling package' $51,525; HHSN272201600287U Jul 2016 $40,588.95; 75N95020P00592 Sep 2020 Illumina NGS system $55,800)",
+        "note": "Legacy product. Purchase records, not list price; configured systems (package with accessories/installation), not necessarily a bare unit.",
+        "year": 2016,
+    },
+    "beckman_echo_555": {
+        "value": 300000,
+        "low": 246083,
+        "high": 301000,
+        "confidence": "estimated",
+        "source": "https://api.usaspending.gov/api/v2/search/spending_by_award/ (Echo 550 proxy: HHSD200201690301C Jun 2016 $301,000.50; DOCSB134118SU0244 Jun 2018 $298,747 incl. 4-yr service; Echo 525 Army 2019 $246,083 as low end)",
+        "note": "No purchase record found for the Echo 555 itself (only service contracts). Price is proxied from its predecessor Echo 550 and sibling Echo 525; 555 may cost more. Configured system.",
+        "year": 2018,
+    },
+    "thermo_kingfisher_flex": {
+        "value": 62928,
+        "low": 51707,
+        "high": 63247,
+        "confidence": "estimated",
+        "source": "https://api.usaspending.gov/api/v2/search/spending_by_award/ (CONT_AWD_75F40123F80118 May 2023 $62,928; CONT_AWD_123A9424P0056 Jul 2024 $63,138.52; CONT_AWD_AG32SCD160213 Sep 2016 SKU 5400630 $51,707)",
+        "note": "US federal purchase records for KingFisher Flex with 96 deep-well head (SKU 5400630); some include SmartStart service/accessories. Not a list price.",
+        "year": 2023,
+    },
+    "sartorius_ambr15": {
+        "value": 279008,
+        "low": 65000,
+        "high": 600000,
+        "confidence": "placeholder",
+        "source": "no sourced Ambr 15 system price. Proxy: US Commerce 2024 Ambr 250 Modular $279,007.85 (CONT_AWD_1333ND24PNB640607_1341); low = used listing $65,000 (americanlaboratorytrading.com, lower bound only)",
+        "note": "Sartorius shop shows 'Request a Quote'; usaspending shows only Ambr 15 service/parts. Value is a placeholder proxy, not a measured price; configured vs bare unknown. High is an agent guess.",
+        "year": 2024,
+    },
+    "sartorius_ambr250_modular": {
+        "value": 279007.85,
+        "low": 279007.85,
+        "high": 279007.85,
+        "confidence": "estimated",
+        "source": "https://www.usaspending.gov/award/CONT_AWD_1333ND24PNB640607_1341_-NONE-_-NONE- (US Commerce Sep 2024, Ambr 250 Modular incl. delivery, installation, training, service)",
+        "note": "Single purchase record; vessel count not stated (low=high=value, true range unknown). Configured system incl. install/training/service.",
+        "year": 2024,
+    },
+    "unchained_junior": {
+        "value": 677898,
+        "low": 677898,
+        "high": 677898,
+        "confidence": "estimated",
+        "source": "https://api.usaspending.gov/api/v2/search/spending_by_award/ (NIAID 75N95019P00423, Jul 2019, 'one Junior automated reaction dosing system')",
+        "note": "Single purchase record for a configured system (dosing/reaction modules); other configurations will differ. low=high=value because only one record found.",
+        "year": 2019,
+    },
+    "cytiva_akta_go": {
+        "value": 49590,
+        "low": 38913,
+        "high": 71440,
+        "confidence": "estimated",
+        "source": "https://api.usaspending.gov/api/v2/search/spending_by_award/ (NIH 75N93023F00292 Jul 2023 $49,589.87; 75N94025P00659 Sep 2025 $56,269.34 w/ UNICORN; 75N90025P00776 Sep 2025 $38,912.96; 75N92025F00165 Aug 2025 $71,439.69)",
+        "note": "Median-ish of US federal purchase records 2021-2025; configured with accessories/software, not a list price.",
+        "year": 2023,
+    },
 }
 
 # Category and capabilities each item must provide, so scraped items line up with the workflow
@@ -697,6 +864,22 @@ CAPABILITY_HINTS: dict[str, tuple[str, list[str]]] = {
     "lab_linear_rail": ("transporter", ["plate_transport_rail"]),
     "kuka_kmr_iiwa": ("transporter", ["plate_transport_mobile"]),
     "omron_ld250": ("transporter", ["plate_transport_mobile"]),
+    # --- Added 3 Oct: models named in validation cases (crystallisation, liquid handling, bioreactors) ---
+    "formulatrix_rock_imager_2": ("instrument", ["crystal_imaging", "plate_storage"]),
+    "formulatrix_rock_imager_182": ("instrument", ["crystal_imaging", "plate_storage"]),
+    "formulatrix_mantis": ("instrument", ["reagent_dispensing"]),
+    "sptlabtech_dragonfly": ("instrument", ["reagent_dispensing"]),
+    "sptlabtech_mosquito_lcp": ("instrument", ["crystallization_setup"]),
+    "tecan_freedom_evo_150": ("instrument", ["liquid_handling"]),
+    "hamilton_starlet": ("instrument", ["liquid_handling"]),
+    "agilent_bravo": ("instrument", ["liquid_handling"]),
+    "beckman_biomek_4000": ("instrument", ["liquid_handling"]),
+    "beckman_echo_555": ("instrument", ["acoustic_dispensing"]),
+    "thermo_kingfisher_flex": ("instrument", ["protein_purification"]),
+    "sartorius_ambr15": ("instrument", ["bioreactor", "cell_culture"]),
+    "sartorius_ambr250_modular": ("instrument", ["bioreactor", "cell_culture"]),
+    "unchained_junior": ("instrument", ["powder_dosing", "liquid_dosing", "reaction"]),
+    "cytiva_akta_go": ("instrument", ["protein_purification"]),
 }
 
 assert VENDOR_PAGES.keys() == PRICE_REFERENCES.keys() == CAPABILITY_HINTS.keys()

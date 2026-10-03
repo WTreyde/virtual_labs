@@ -1,0 +1,49 @@
+{
+  "id": "osu_mosquito_s10_2010",
+  "name": "Ohio State University crystallography facility: TTP/SPT Labtech mosquito nano-volume pipetter (NIH S10; 2010)",
+  "domain": "biology",
+  "sources": [
+    "https://api.reporter.nih.gov/v2/projects/search (project_num 1S10RR027187-01)",
+    "https://reporter.nih.gov/project-details/7794649"
+  ],
+  "build": "turnkey",
+  "brief": "A university X-ray crystallography facility with no automation acquires a nanolitre-volume automated pipetter to set up many crystallisation trials from little protein sample.",
+  "reported": {
+    "cost": {
+      "value_usd": 111200,
+      "original": "US$111,200 (NIH S10 award, FY2010)",
+      "year": 2010,
+      "includes": [
+        "instruments"
+      ],
+      "excludes_note": "NIH S10 award for one mosquito; no service contract itemised. Dollar year 2010, older than most catalog prices."
+    }
+  },
+  "verified": true,
+  "notes": "Out-of-sample round 2: collected blind after the model was frozen at commit 973d0f5. Out-of-sample (oos2 set), found after the cost model was frozen; not used for catalog prices. price_basis=configured (grant award; variant not stated). Quote: \"through the acquisition of a Mosquito nano-volume automated pipetter.\" Verified 3 Oct 2026 via RePORTER API, award_amount 111200. Variant unknown so proxy to mosquito Xtal3.",
+  "workflow": {
+    "id": "osu_mosquito_s10_2010_wf",
+    "lab_spec_id": "osu_mosquito_s10_2010",
+    "equipment": [
+      {
+        "instance_id": "sptlabtech_mosquito_xtal3_1",
+        "catalog_id": "sptlabtech_mosquito_xtal3",
+        "rationale": "Closest catalog model to the item named in the source.",
+        "match": "proxy"
+      }
+    ],
+    "steps": [
+      {
+        "id": "use",
+        "name": "Placeholder step (cost comparison only)",
+        "capability": "manual_bench",
+        "candidate_instances": [],
+        "duration_s": 0
+      }
+    ]
+  },
+  "price_basis": "configured",
+  "condition": "new",
+  "split": "out_of_sample",
+  "figure_type": "grant_award"
+}

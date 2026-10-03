@@ -23,5 +23,6 @@
   },
   "verified": true,
   "notes": "Verified 3 Oct 2026 against the project README (primary source, author repo): \"We extend the light-mixing demo to a color-matching materials optimization problem using dilute colored dyes. This optimization task costs less than 300 USD, requires less than three square feet of desk space, and less than three hours of total setup time from the shopping cart to the first 'autonomous drive.'\" Educational demo, a lower bound on what any real chemistry SDL costs; the sibling CLSLab:Light (<$100) is optics, not chemistry, so excluded. Peer-reviewed protocol for CLSLab:Light is PMID 37267112; Liquid is only documented in the repo. Year 2023 is approximate (repo date).",
-  "split": "in_sample"
+  "split": "in_sample",
+  "figure_type": "paper_quote"
 }

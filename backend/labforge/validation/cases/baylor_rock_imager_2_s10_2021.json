@@ -26,9 +26,9 @@
     "equipment": [
       {
         "instance_id": "formulatrix_rock_imager_1000_1",
-        "catalog_id": "formulatrix_rock_imager_1000",
-        "rationale": "Closest catalog model to the bought model (proxy).",
-        "match": "proxy"
+        "catalog_id": "formulatrix_rock_imager_2",
+        "rationale": "Named in the source; exact catalog model (added 3 Oct).",
+        "match": "exact"
       }
     ],
     "steps": [
@@ -43,5 +43,6 @@
   },
   "price_basis": "configured",
   "condition": "new",
-  "split": "out_of_sample"
+  "split": "out_of_sample",
+  "figure_type": "grant_award"
 }
