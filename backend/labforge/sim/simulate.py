@@ -540,6 +540,21 @@ def simulate(spec: dict, workflow: dict, layout: dict, hours: float = 72, replic
     return result
 
 
+def simulate_many(spec: dict, variants: list[dict], hours: float = 48, replicates: int = 8, seed: int = 0,
+                  backend: str | None = None) -> list[dict]:
+    """Several design variants ({workflow, layout, capacity_overrides?}) with the same seeds, as one batch of jobs.
+
+    Common random numbers make differences between variants the change itself, not noise; one batch lets
+    local processes or Modal run every point of a sweep at once."""
+    rng = random.Random(seed)
+    seeds = [rng.randrange(2**31) for _ in range(replicates)]
+    jobs = [dict(spec=spec, workflow=v["workflow"], layout=v["layout"], hours=hours, seed=s,
+                 capacity_overrides=v.get("capacity_overrides")) for v in variants for s in seeds]
+    runs = map_replicates(jobs, backend)
+    n = len(seeds)
+    return [summarise(spec, v["workflow"], v["layout"], hours, runs[k * n:(k + 1) * n]) for k, v in enumerate(variants)]
+
+
 def sensitivity_candidates(workflow: dict, layout: dict, util: dict[str, float]) -> list[tuple[str, str, float]]:
     """(parameter, pin key, screening score) for inputs that could move throughput: wide ranges on busy resources."""
     catalog = load_catalog()

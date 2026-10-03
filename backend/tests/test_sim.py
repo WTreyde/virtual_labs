@@ -176,3 +176,20 @@ def test_parallel_backends_match_serial():
     remote = simulate(spec(), w, layout(), hours=24, replicates=30, backend="modal")  # no token in CI: falls back locally
     assert serial["throughput"] == pooled["throughput"] == remote["throughput"]
     assert serial["sensitivity"] == pooled["sensitivity"]
+
+
+def test_whatif_sweeps_cover_transfer_and_uptime():
+    from labforge.contracts import load_example
+    from labforge.layout.placer import generate_layout
+    from labforge.sim.whatif import optimise_instrument
+    s, w = load_example("lab_spec"), load_example("workflow")
+    lay = generate_layout(s, w)
+    lh = optimise_instrument(s, w, lay, "lh_1", hours=24, replicates=4)
+    sweeps = {sw["parameter"]: sw for sw in lh["sweeps"]}
+    assert set(sweeps) == {"cycle_time", "capacity", "transfer_time", "uptime"}
+    assert sweeps["cycle_time"]["elasticity"] > 0.7  # the bottleneck: throughput tracks its speed
+    assert sweeps["capacity"]["points"][1]["throughput_p50"] > 1.7 * sweeps["capacity"]["points"][0]["throughput_p50"]
+    up = sweeps["uptime"]["points"]
+    assert up[0]["value"] == 0.8 and up[0]["throughput_p50"] < up[-1]["throughput_p50"]
+    arm = optimise_instrument(s, w, lay, "arm_1", hours=24, replicates=4)
+    assert "transfer speed" in arm["headroom_note"]
