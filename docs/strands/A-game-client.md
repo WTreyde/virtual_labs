@@ -18,3 +18,6 @@ Not playable: no walking character needed (team decision). Do not edit backend f
 ## Added after judge feedback (see docs/validation.md)
 8. Vendor view: clicking an instrument offers "How could this instrument be better?", calling `POST /optimise` with its `instance_id`; chart throughput vs cycle-time multiplier (P10–P90 band) and show `headroom_note` in the dialogue box.
 9. Validation view: scatter of predicted (P10–P90 bar) vs reported cost for each case from `GET /validation`, log scale, unverified cases greyed out.
+
+## Added: project prioritisation (see docs/prioritisation.md)
+10. Nice to have: Gantt chart from `POST /prioritise` (`gantt` rows, coloured by project) and lab-busy % for the recommended vs the given order.

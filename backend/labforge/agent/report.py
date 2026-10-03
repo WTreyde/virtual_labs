@@ -8,7 +8,8 @@ def cell(value):
 
 
 def render_report(lab_spec: dict, workflow: dict, layout: dict, sim: dict,
-                  claims: list[dict] | None = None, evidence: list[dict] | None = None) -> str:
+                  claims: list[dict] | None = None, evidence: list[dict] | None = None,
+                  claim_history: list[dict] | None = None) -> str:
     t = sim['throughput']
     median = t.get('p50', t['value'])
     target = lab_spec['throughput_target']['value']
@@ -52,6 +53,11 @@ def render_report(lab_spec: dict, workflow: dict, layout: dict, sim: dict,
         lines.append('| ' + ' | '.join(cell(c.get(k, '')) for k in ('statement', 'confidence', 'status', 'verified_value', 'verifier_note')) + ' |')
     if not claims:
         lines += ['| No claims checked | | unverified | | |']
+    refutations = [(h.get('workflow_id', '?'), c) for h in claim_history or [] for c in h['claims'] if c.get('status') == 'refuted']
+    if refutations:
+        lines += ['', '## Refutation history', '', 'These are historical checks; a later revision may supersede the design or assertion.']
+        for workflow_id, c in refutations:
+            lines.append(f'- {workflow_id}: {c["statement"]} — refuted; observed {c.get("verified_value", "unknown")}.')
     lines += ['', '## Bottlenecks and risks', '']
     lines += [f'- **{b["severity"]}**: {b["message"]} {b.get("suggestion", "")}' for b in sim.get('bottlenecks', [])] or ['- None reported by the model.']
     lines += ['', '## Layout issues', '']

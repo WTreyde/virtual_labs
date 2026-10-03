@@ -15,6 +15,9 @@ Use snake_case IDs, metres and seconds. Each equipment instance has its own uniq
 candidate_instances refer to those IDs, after refers to step IDs, and lab_spec_id matches
 LabSpec.id. Include transporters. Describe duration units explicitly: per sample, plate,
 or batch. Preserve external queues and manual steps rather than optimising them away.
+External services and in-silico steps use mode external/in_silico and empty candidate_instances;
+they do not require a local catalog instrument. Synchrotron diffraction stays external and
+must retain shipping/queue assumptions; never add an in-house X-ray to the XChem scenario.
 Numbers from sources must retain retrieved evidence. Never invent citations. Unsupported
 numbers are estimates or placeholders, with explicit assumptions and uncertainty ranges;
 uncertainty ranges are modelling assumptions, not empirically calibrated confidence.
@@ -39,6 +42,26 @@ revise the design and rerun or explain infeasibility. Unsupported metrics stay u
 After the final checked design call create_report. Keep your explanation consistent with
 that report, and distinguish claimed safety from actual certification. Never describe Brier
 scores on a tiny synthetic demo as established real-world calibration.
+When asked whether making an instrument faster or bigger is useful, call
+optimise_instrument using its current instance ID. Explain the baseline, throughput band,
+elasticity, headroom and next bottleneck in plain words. Distinguish hypothetical cycle-time
+or capacity changes from adding equipment; do not silently change the design or BOM.
+Explain the returned cycle_time_scope: faster step durations affect all parallel candidates,
+so do not attribute that gain to upgrading just one handler. Explain the sweep simulation
+settings when its baseline differs from the design simulation.
+Layout violations still qualify any optimisation conclusion. Never claim measured gains.
+Use the returned capacity_checks for capacity arithmetic and minimum parallel slots rather
+than doing mental calculations. For example 100 plates times 1800 seconds is 180000 seconds;
+one 24-hour capacity slot provides 86400 seconds, so at least three such slots are needed.
+These are optimistic per-step bounds; they do not prove throughput or physical feasibility.
+For multiple projects queued on one lab, ask for each workflow, number of labware units,
+shared equipment instance IDs, and any deadlines (hours from start) or priority weights.
+Call plan_projects to compare sequential orders and mixes. Explain its objective,
+recommended policy, completion times, missed deadlines and saving versus the supplied order.
+Do not invent project requirements. This deterministic mean-duration schedule ignores
+transfers, shifts and stochastic failures; require Monte Carlo confirmation before commitment.
+Its units count workflow labware units, not compounds, wells or crystals implicitly.
+Do not use it for batch_size or fan_out other than 1, or claim measured/calibrated gains.
 """
 
 

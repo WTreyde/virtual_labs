@@ -14,6 +14,9 @@ class ToolSession:
         self.design = None
         self.previous_input = None
         self.claims = []
+        self.claim_history = []
+        self.optimisations = {}
+        self.project_schedule = None
         self.evidence = []
         self.known_sources = set()
         self.base_tools = base_tools
@@ -30,6 +33,8 @@ class ToolSession:
         if 'search_catalog' in self.tools:
             definition, _ = self.tools['search_catalog']
             self.tools['search_catalog'] = (definition, self.search_catalog)
+        from labforge.agent.projects import PROJECT_TOOL
+        self.tools['plan_projects'] = (PROJECT_TOOL, self.plan_projects)
         self.tools.update({
             'search_evidence': ({'name': 'search_evidence', 'description': 'Retrieve cached Amass literature candidates. A paper title is not evidence of a numerical duration or yield. Missing access is returned explicitly.',
                 'input_schema': {'type': 'object', 'properties': {'query': {'type': 'string'}, 'limit': {'type': 'integer', 'minimum': 1, 'maximum': 10}}, 'required': ['query'], 'additionalProperties': False}}, self.search_evidence),
@@ -37,6 +42,8 @@ class ToolSession:
                 'input_schema': {'type': 'object', 'properties': {'claims': {'type': 'array', 'minItems': 1, 'maxItems': 20, 'items': {'type': 'object', 'properties': {'id': {'type': 'string'}, 'statement': {'type': 'string'}, 'metric': {'type': 'string'}, 'comparator': {'type': 'string', 'enum': ['>=', '<=', '==']}, 'predicted_value': {'type': 'number'}, 'confidence': {'type': 'number', 'minimum': 0, 'maximum': 1}}, 'required': ['id', 'statement', 'metric', 'comparator', 'predicted_value', 'confidence'], 'additionalProperties': False}}}, 'required': ['claims'], 'additionalProperties': False}}, self.verify),
             'create_report': ({'name': 'create_report', 'description': 'Render a deterministic report from the last design and checked claims. Includes costs, unknowns, assumptions, evidence and simulation limitations.',
                 'input_schema': {'type': 'object', 'properties': {}, 'additionalProperties': False}}, self.report),
+            'optimise_instrument': ({'name': 'optimise_instrument', 'description': 'Use the vendor what-if engine on the backend-held design. Sweep cycle time, capacity, transfer time and uptime for an existing instrument; return throughput bands, elasticity, headroom and the next bottleneck. This is hypothetical analysis, not a physical equipment upgrade.',
+                'input_schema': {'type': 'object', 'properties': {'instance_id': {'type': 'string'}}, 'required': ['instance_id'], 'additionalProperties': False}}, self.optimise),
         })
 
     def search_catalog(self, **kwargs):
@@ -64,6 +71,7 @@ class ToolSession:
                     raise ValueError('Search evidence/catalog before citing a source: ' + str(evidence.get('source')))
         self.design = None
         self.claims = []
+        self.optimisations = {}
         result = self.base_tools['layout_and_simulate'][1](lab_spec=lab_spec, workflow=workflow)
         self.design = copy.deepcopy({'lab_spec': lab_spec, 'workflow': workflow, **result})
         self.previous_input = copy.deepcopy({'lab_spec': lab_spec, 'workflow': workflow})
@@ -116,7 +124,12 @@ class ToolSession:
                 checked.append(c)
         else:
             checked = verify_claims(ordinary, d['workflow'], d['layout'], d['sim_result'])
-        self.claims = [validate(c, 'claim') for c in checked]
+        checked = [validate(c, 'claim') for c in checked]
+        self.claim_history.append({'workflow_id': d['workflow']['id'], 'claims': copy.deepcopy(checked)})
+        # A second batch (e.g. BOM/layout) must not erase a throughput refutation.
+        current = {c['id']: c for c in self.claims}
+        current.update({c['id']: c for c in checked})
+        self.claims = list(current.values())
         return {'claims': self.claims, 'brier': brier_score(self.claims),
                 'scope': 'Consistency with backend model outputs; confidence is not empirically calibrated.',
                 'recompute': 'Prior-turn designs are recomputed before checks; model-supplied results are ignored.'}
@@ -125,4 +138,26 @@ class ToolSession:
         self.ensure_design()
         d = self.design
         return {'report_markdown': render_report(d['lab_spec'], d['workflow'], d['layout'], d['sim_result'],
-                                                claims=self.claims, evidence=self.evidence)}
+                                                claims=self.claims, evidence=self.evidence, claim_history=self.claim_history)}
+
+    def optimise(self, instance_id):
+        self.ensure_design()
+        d = self.design
+        if instance_id not in {e['instance_id'] for e in d['workflow']['equipment']}:
+            raise ValueError('Optimise an instance ID from the current design, not a catalog ID')
+        from labforge.sim.whatif import optimise_instrument
+        result = optimise_instrument(d['lab_spec'], d['workflow'], d['layout'], instance_id)
+        validate(result, 'instrument_optimisation')
+        self.optimisations[instance_id] = result
+        return {'instrument_optimisation': result,
+                'scope': 'Hypothetical spec sensitivity; layout, catalog prices and actual design are unchanged.',
+                'simulation_config': {'hours': 48, 'replicates': 8, 'seed': 0},
+                'cycle_time_scope': [{'step_id': s['id'], 'candidate_instances': s['candidate_instances']}
+                                     for s in d['workflow']['steps'] if instance_id in s['candidate_instances']],
+                'limitation': 'Cycle-time sweeps scale the whole affected step, including every parallel candidate. Capacity sweeps change only the selected instance. The sweep baseline uses 48 hours and 8 replicates and may differ from the design simulation.'}
+
+    def plan_projects(self, lab_spec, projects):
+        from labforge.agent.projects import plan_projects
+        result = plan_projects(lab_spec, projects)
+        self.project_schedule = result['project_schedule']
+        return result

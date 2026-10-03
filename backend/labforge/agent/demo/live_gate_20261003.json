@@ -1,0 +1,2302 @@
+{
+  "date": "2026-10-03",
+  "gate": {
+    "checks": {
+      "baseline_complete": true,
+      "challenge_complete": true,
+      "revision_complete": true,
+      "challenge_refuted": true,
+      "revision_improves_throughput": true,
+      "challenge_keeps_design_assumptions": true,
+      "revision_keeps_duration_assumptions": true,
+      "vendor_tools_ran": true,
+      "vendor_preserves_design": true
+    },
+    "passed": true,
+    "scope": "Live orchestration and model-based consistency, not real-world validation."
+  },
+  "limitations": [
+    "Amass key was unavailable; durations are estimates.",
+    "Revision improves throughput but still misses 100 plates/day and has a layout overlap.",
+    "Vendor cycle-time sweep scales the whole step including both parallel handlers; saved response predates the explicit tool disclosure.",
+    "Sweep baseline uses 48 hours/8 replicates, compared with design simulation settings.",
+    "This verifies orchestration and model consistency, not measured throughput or cost calibration."
+  ],
+  "phases": [
+    {
+      "phase": "baseline",
+      "brief": "Design an enzyme-screening lab for 40 96-well plates/day, operating 24 hours/day in a 6 m by 4 m room, with a USD 400000 equipment budget. BSL1; no flammable solvents or cryogens. Dispense enzyme and substrate, seal, incubate at 37 C for one hour, then read absorbance at 405 nm. For this baseline use exactly one opentrons_flex, one agilent_plateloc, one liconic_stx44, one bmg_clariostar, one ur5e and one generic_plate_hotel. Use 1800 seconds per plate for dispensing, 10 seconds for sealing, 3600 for incubation and 90 for reading. These are estimates: label them and supply plausible uncertainty ranges. Do not add equipment or optimise this baseline. Search evidence for enzyme-screening protocol duration; if unavailable disclose that. Simulate, verify throughput/budget/layout claims and create the report. Do not claim measured or safety-certified performance.",
+      "output": {
+        "completed": true,
+        "verification_complete": true,
+        "claims": [
+          {
+            "id": "c_throughput",
+            "statement": "Simulated P50 throughput meets the 40 plates/day target",
+            "metric": "throughput.p50",
+            "comparator": ">=",
+            "predicted_value": 40,
+            "confidence": 0.7,
+            "status": "supported",
+            "verified_value": 47.0
+          },
+          {
+            "id": "c_budget",
+            "statement": "Equipment BOM total is within the USD 400000 budget",
+            "metric": "bom.total_usd",
+            "comparator": "<=",
+            "predicted_value": 400000,
+            "confidence": 0.9,
+            "status": "supported",
+            "verified_value": 187000
+          },
+          {
+            "id": "c_layout",
+            "statement": "Layout has zero violations",
+            "metric": "layout.violations",
+            "comparator": "==",
+            "predicted_value": 0,
+            "confidence": 0.85,
+            "status": "supported",
+            "verified_value": 0
+          }
+        ],
+        "lab_spec": {
+          "id": "enzyme_screen_baseline",
+          "name": "Enzyme screening baseline",
+          "domain": "biology",
+          "description": "Enzyme-screening lab: 40 x 96-well plates/day, 24 h/day, 6 m x 4 m room, USD 400000 equipment budget, BSL1, no flammable solvents or cryogens. Dispense enzyme and substrate, seal, incubate at 37 C for 1 h, read absorbance at 405 nm.",
+          "throughput_target": {
+            "value": 40,
+            "unit": "plates_per_day",
+            "operating_hours_per_day": 24
+          },
+          "room": {
+            "width_m": 6,
+            "depth_m": 4,
+            "height_m": 3
+          },
+          "labware": [
+            "sbs_96"
+          ],
+          "required_capabilities": [
+            "plate_storage",
+            "liquid_handling",
+            "plate_sealing",
+            "incubation",
+            "absorbance_read",
+            "plate_transport_arm"
+          ],
+          "constraints": {
+            "budget_usd": 400000,
+            "biosafety_level": 1
+          },
+          "notes": [
+            "Step durations are agent estimates, per plate, not measured or sourced from literature (evidence search unavailable: AMASS_API_KEY missing).",
+            "Baseline: exactly one of each specified instrument; no added equipment or optimisation."
+          ]
+        },
+        "workflow": {
+          "id": "enzyme_screen_baseline_wf_v1",
+          "lab_spec_id": "enzyme_screen_baseline",
+          "labware": "sbs_96",
+          "equipment": [
+            {
+              "instance_id": "hotel_1",
+              "catalog_id": "generic_plate_hotel",
+              "rationale": "Input/output stack for empty and finished plates."
+            },
+            {
+              "instance_id": "lh_1",
+              "catalog_id": "opentrons_flex",
+              "rationale": "Dispenses enzyme and substrate."
+            },
+            {
+              "instance_id": "sealer_1",
+              "catalog_id": "agilent_plateloc",
+              "rationale": "Seals plates before incubation."
+            },
+            {
+              "instance_id": "incubator_1",
+              "catalog_id": "liconic_stx44",
+              "rationale": "44 slots hold plates during 1 h incubation at 37 C."
+            },
+            {
+              "instance_id": "reader_1",
+              "catalog_id": "bmg_clariostar",
+              "rationale": "Absorbance readout at 405 nm."
+            },
+            {
+              "instance_id": "arm_1",
+              "catalog_id": "ur5e",
+              "rationale": "Central arm moves plates between stations."
+            }
+          ],
+          "steps": [
+            {
+              "id": "load",
+              "name": "Pick empty plate",
+              "capability": "plate_storage",
+              "candidate_instances": [
+                "hotel_1"
+              ],
+              "duration_s": 0,
+              "after": []
+            },
+            {
+              "id": "dispense",
+              "name": "Dispense enzyme and substrate (per plate)",
+              "capability": "liquid_handling",
+              "candidate_instances": [
+                "lh_1"
+              ],
+              "duration_s": 1800,
+              "after": [
+                "load"
+              ],
+              "duration_uncertainty": {
+                "value": 1800,
+                "low": 1200,
+                "high": 2400,
+                "confidence": "estimated",
+                "source": "agent_estimate"
+              }
+            },
+            {
+              "id": "seal",
+              "name": "Heat seal (per plate)",
+              "capability": "plate_sealing",
+              "candidate_instances": [
+                "sealer_1"
+              ],
+              "duration_s": 10,
+              "after": [
+                "dispense"
+              ],
+              "duration_uncertainty": {
+                "value": 10,
+                "low": 8,
+                "high": 20,
+                "confidence": "estimated",
+                "source": "agent_estimate"
+              }
+            },
+            {
+              "id": "incubate",
+              "name": "Incubate at 37 C (per plate)",
+              "capability": "incubation",
+              "candidate_instances": [
+                "incubator_1"
+              ],
+              "duration_s": 3600,
+              "after": [
+                "seal"
+              ],
+              "params": {
+                "temperature_c": 37
+              },
+              "duration_uncertainty": {
+                "value": 3600,
+                "low": 3500,
+                "high": 3900,
+                "confidence": "estimated",
+                "source": "agent_estimate"
+              }
+            },
+            {
+              "id": "read",
+              "name": "Read absorbance 405 nm (per plate)",
+              "capability": "absorbance_read",
+              "candidate_instances": [
+                "reader_1"
+              ],
+              "duration_s": 90,
+              "after": [
+                "incubate"
+              ],
+              "params": {
+                "wavelength_nm": 405
+              },
+              "duration_uncertainty": {
+                "value": 90,
+                "low": 60,
+                "high": 150,
+                "confidence": "estimated",
+                "source": "agent_estimate"
+              }
+            },
+            {
+              "id": "unload",
+              "name": "Return finished plate",
+              "capability": "plate_storage",
+              "candidate_instances": [
+                "hotel_1"
+              ],
+              "duration_s": 0,
+              "after": [
+                "read"
+              ]
+            }
+          ]
+        },
+        "layout": {
+          "id": "enzyme_screen_baseline_wf_v1_layout",
+          "workflow_id": "enzyme_screen_baseline_wf_v1",
+          "room": {
+            "width_m": 6,
+            "depth_m": 4,
+            "height_m": 3
+          },
+          "placements": [
+            {
+              "instance_id": "arm_1",
+              "rotation_deg": 0,
+              "position": {
+                "x": 3.0,
+                "y": 2.0,
+                "z": 0.9
+              }
+            },
+            {
+              "instance_id": "hotel_1",
+              "rotation_deg": 296.6,
+              "position": {
+                "x": 3.904,
+                "y": 2.0,
+                "z": 0.9
+              }
+            },
+            {
+              "instance_id": "lh_1",
+              "rotation_deg": 162.0,
+              "position": {
+                "x": 3.318,
+                "y": 2.98,
+                "z": 0.9
+              }
+            },
+            {
+              "instance_id": "sealer_1",
+              "rotation_deg": 54.0,
+              "position": {
+                "x": 2.248,
+                "y": 2.547,
+                "z": 0.9
+              }
+            },
+            {
+              "instance_id": "incubator_1",
+              "rotation_deg": 36.0,
+              "position": {
+                "x": 2.167,
+                "y": 1.395,
+                "z": 0.9
+              }
+            },
+            {
+              "instance_id": "reader_1",
+              "rotation_deg": 288.0,
+              "position": {
+                "x": 3.287,
+                "y": 1.116,
+                "z": 0.9
+              }
+            }
+          ],
+          "operators": [],
+          "transfers": [
+            {
+              "from_instance": "hotel_1",
+              "to_instance": "lh_1",
+              "transporter_instance": "arm_1",
+              "distance_m": 1.42,
+              "path": [
+                {
+                  "x": 3.68,
+                  "y": 2.0,
+                  "z": 1.0
+                },
+                {
+                  "x": 3.0,
+                  "y": 2.0,
+                  "z": 1.2
+                },
+                {
+                  "x": 3.21,
+                  "y": 2.647,
+                  "z": 1.0
+                }
+              ],
+              "est_time_s": 10.8
+            },
+            {
+              "from_instance": "lh_1",
+              "to_instance": "sealer_1",
+              "transporter_instance": "arm_1",
+              "distance_m": 1.42,
+              "path": [
+                {
+                  "x": 3.21,
+                  "y": 2.647,
+                  "z": 1.0
+                },
+                {
+                  "x": 3.0,
+                  "y": 2.0,
+                  "z": 1.2
+                },
+                {
+                  "x": 2.45,
+                  "y": 2.4,
+                  "z": 1.0
+                }
+              ],
+              "est_time_s": 10.8
+            },
+            {
+              "from_instance": "sealer_1",
+              "to_instance": "incubator_1",
+              "transporter_instance": "arm_1",
+              "distance_m": 1.4,
+              "path": [
+                {
+                  "x": 2.45,
+                  "y": 2.4,
+                  "z": 1.0
+                },
+                {
+                  "x": 3.0,
+                  "y": 2.0,
+                  "z": 1.2
+                },
+                {
+                  "x": 2.45,
+                  "y": 1.601,
+                  "z": 1.1
+                }
+              ],
+              "est_time_s": 10.8
+            },
+            {
+              "from_instance": "incubator_1",
+              "to_instance": "reader_1",
+              "transporter_instance": "arm_1",
+              "distance_m": 1.4,
+              "path": [
+                {
+                  "x": 2.45,
+                  "y": 1.601,
+                  "z": 1.1
+                },
+                {
+                  "x": 3.0,
+                  "y": 2.0,
+                  "z": 1.2
+                },
+                {
+                  "x": 3.21,
+                  "y": 1.354,
+                  "z": 1.0
+                }
+              ],
+              "est_time_s": 10.8
+            },
+            {
+              "from_instance": "reader_1",
+              "to_instance": "hotel_1",
+              "transporter_instance": "arm_1",
+              "distance_m": 1.42,
+              "path": [
+                {
+                  "x": 3.21,
+                  "y": 1.354,
+                  "z": 1.0
+                },
+                {
+                  "x": 3.0,
+                  "y": 2.0,
+                  "z": 1.2
+                },
+                {
+                  "x": 3.68,
+                  "y": 2.0,
+                  "z": 1.0
+                }
+              ],
+              "est_time_s": 10.8
+            }
+          ],
+          "score": {
+            "total_weighted_distance_m": 7.06
+          },
+          "violations": []
+        },
+        "sim_result": {
+          "id": "enzyme_screen_baseline_wf_v1_layout_sim",
+          "layout_id": "enzyme_screen_baseline_wf_v1_layout",
+          "simulated_hours": 72,
+          "replicates": 10,
+          "throughput": {
+            "value": 47.0,
+            "unit": "plates_per_day",
+            "target": 40,
+            "meets_target": true,
+            "p10": 46.6,
+            "p50": 47.0,
+            "p90": 47.7,
+            "prob_meets_target": 1.0
+          },
+          "cycle_time_s": 74683.2,
+          "utilisation": [
+            {
+              "instance_id": "hotel_1",
+              "busy_fraction": 0.0,
+              "mean_queue_wait_s": 0.0
+            },
+            {
+              "instance_id": "lh_1",
+              "busy_fraction": 0.997,
+              "mean_queue_wait_s": 69803.0
+            },
+            {
+              "instance_id": "sealer_1",
+              "busy_fraction": 0.007,
+              "mean_queue_wait_s": 0.0
+            },
+            {
+              "instance_id": "incubator_1",
+              "busy_fraction": 0.045,
+              "mean_queue_wait_s": 0.0
+            },
+            {
+              "instance_id": "reader_1",
+              "busy_fraction": 0.055,
+              "mean_queue_wait_s": 0.0
+            },
+            {
+              "instance_id": "arm_1",
+              "busy_fraction": 0.032,
+              "mean_queue_wait_s": 0.0
+            }
+          ],
+          "bottlenecks": [
+            {
+              "kind": "instrument_capacity",
+              "instances": [
+                "lh_1"
+              ],
+              "severity": "high",
+              "message": "lh_1 is busy 100% of the time.",
+              "suggestion": "Add a parallel unit or move slow steps elsewhere."
+            }
+          ],
+          "sensitivity": []
+        },
+        "report_markdown": "# Enzyme screening baseline: automated lab proposal\n\n## Executive summary\n\nModelled median throughput is 47.0 plates_per_day against a requested 40 plates_per_day.\n\nThese are model-based predictions, not measured throughput or safety certification.\n\nEnzyme-screening lab: 40 x 96-well plates/day, 24 h/day, 6 m x 4 m room, USD 400000 equipment budget, BSL1, no flammable solvents or cryogens. Dispense enzyme and substrate, seal, incubate at 37 C for 1 h, read absorbance at 405 nm.\n\n## Bill of materials\n\n| Instance | Vendor | Model | Est. price (USD) | Data confidence |\n|---|---|---|---|---|\n| hotel_1 | Generic | 20-slot plate hotel | 2,000 | placeholder |\n| lh_1 | Opentrons | Flex | 25,000 | estimated |\n| sealer_1 | Agilent | PlateLoc | 20,000 | estimated |\n| incubator_1 | LiCONiC | STX44 | 45,000 | estimated |\n| reader_1 | BMG LABTECH | CLARIOstar Plus | 60,000 | estimated |\n| arm_1 | Universal Robots | UR5e | 35,000 | estimated |\n| **Known-price subtotal** | | | **187,000** | |\n\nEquipment budget: USD 400,000. Known-price subtotal: USD 187,000.\n\nCosts are catalog estimates and exclude installation, service, consumables and building work.\n\n## Throughput\n\nMedian 47.0 plates_per_day; P10 46.6; P90 47.7.\nProbability of meeting the simulated target: 1.0.\nThis probability describes duration sampling under the model; it is not confidence that the design is correct in reality.\n\n## Checked claims\n\n| Claim | Confidence | Status | Observed value | Note |\n|---|---|---|---|---|\n| Simulated P50 throughput meets the 40 plates/day target | 0.7 | supported | 47.0 |  |\n| Equipment BOM total is within the USD 400000 budget | 0.9 | supported | 187000 |  |\n| Layout has zero violations | 0.85 | supported | 0 |  |\n\n## Bottlenecks and risks\n\n- **high**: lh_1 is busy 100% of the time. Add a parallel unit or move slow steps elsewhere.\n\n## Layout issues\n\n- None reported by the layout engine.\n\n## Assumptions and unknowns\n\n- Pick empty plate: 0 seconds; range unspecified\u2013unspecified; source agent_estimate; basis estimated.\n- Dispense enzyme and substrate (per plate): 1800 seconds; range 1200\u20132400; source agent_estimate; basis estimated.\n- Heat seal (per plate): 10 seconds; range 8\u201320; source agent_estimate; basis estimated.\n- Incubate at 37 C (per plate): 3600 seconds; range 3500\u20133900; source agent_estimate; basis estimated.\n- Read absorbance 405 nm (per plate): 90 seconds; range 60\u2013150; source agent_estimate; basis estimated.\n- Return finished plate: 0 seconds; range unspecified\u2013unspecified; source agent_estimate; basis estimated.\n- Duration ranges are modelling assumptions unless supported by relevant measurements.\n- Batch/fan-out, operator shifts and external queues depend on simulator support; check these before interpreting complex workflows.\n- Verification checks consistency with catalog and simulation results; it does not validate the physical lab.\n\n## Evidence\n\n- Literature search `enzyme screening protocol duration 96-well plate absorbance 405 nm incubation 37 C`: unconfigured.\n- No retrieved literature cited; processing times remain estimates.\n"
+      },
+      "tools": [
+        "search_catalog",
+        "search_catalog",
+        "search_catalog",
+        "search_catalog",
+        "search_catalog",
+        "search_catalog",
+        "search_evidence",
+        "layout_and_simulate",
+        "verify_claims",
+        "create_report"
+      ]
+    },
+    {
+      "phase": "challenge",
+      "brief": "Now the target is 100 plates/day. Keep the same equipment, room, budget, durations and uncertainty ranges exactly unchanged. Rerun with the new target and submit a throughput.p50 >= 100 claim to the verifier so the explicit test is visible. Treat it as a candidate claim; do not assert it is true without support. Report whether it is refuted, retract it if so and create a report. Do not add equipment or revise the durations in this turn.",
+      "output": {
+        "completed": true,
+        "verification_complete": true,
+        "claims": [
+          {
+            "id": "c_throughput_100",
+            "statement": "Candidate: simulated P50 throughput meets the new 100 plates/day target",
+            "metric": "throughput.p50",
+            "comparator": ">=",
+            "predicted_value": 100,
+            "confidence": 0.05,
+            "status": "refuted",
+            "verified_value": 47.0
+          },
+          {
+            "id": "c_budget_100",
+            "statement": "Equipment BOM total is within the USD 400000 budget",
+            "metric": "bom.total_usd",
+            "comparator": "<=",
+            "predicted_value": 400000,
+            "confidence": 0.9,
+            "status": "supported",
+            "verified_value": 187000
+          },
+          {
+            "id": "c_layout_100",
+            "statement": "Layout has zero violations",
+            "metric": "layout.violations",
+            "comparator": "==",
+            "predicted_value": 0,
+            "confidence": 0.85,
+            "status": "supported",
+            "verified_value": 0
+          }
+        ],
+        "claim_history": [
+          {
+            "workflow_id": "enzyme_screen_baseline_wf_v1",
+            "claims": [
+              {
+                "id": "c_throughput_100",
+                "statement": "Candidate: simulated P50 throughput meets the new 100 plates/day target",
+                "metric": "throughput.p50",
+                "comparator": ">=",
+                "predicted_value": 100,
+                "confidence": 0.05,
+                "status": "refuted",
+                "verified_value": 47.0
+              },
+              {
+                "id": "c_budget_100",
+                "statement": "Equipment BOM total is within the USD 400000 budget",
+                "metric": "bom.total_usd",
+                "comparator": "<=",
+                "predicted_value": 400000,
+                "confidence": 0.9,
+                "status": "supported",
+                "verified_value": 187000
+              },
+              {
+                "id": "c_layout_100",
+                "statement": "Layout has zero violations",
+                "metric": "layout.violations",
+                "comparator": "==",
+                "predicted_value": 0,
+                "confidence": 0.85,
+                "status": "supported",
+                "verified_value": 0
+              }
+            ]
+          }
+        ],
+        "lab_spec": {
+          "id": "enzyme_screen_baseline",
+          "name": "Enzyme screening baseline",
+          "domain": "biology",
+          "description": "Enzyme-screening lab: 100 x 96-well plates/day, 24 h/day, 6 m x 4 m room, USD 400000 equipment budget, BSL1, no flammable solvents or cryogens. Dispense enzyme and substrate, seal, incubate at 37 C for 1 h, read absorbance at 405 nm.",
+          "throughput_target": {
+            "value": 100,
+            "unit": "plates_per_day",
+            "operating_hours_per_day": 24
+          },
+          "room": {
+            "width_m": 6,
+            "depth_m": 4,
+            "height_m": 3
+          },
+          "labware": [
+            "sbs_96"
+          ],
+          "required_capabilities": [
+            "plate_storage",
+            "liquid_handling",
+            "plate_sealing",
+            "incubation",
+            "absorbance_read",
+            "plate_transport_arm"
+          ],
+          "constraints": {
+            "budget_usd": 400000,
+            "biosafety_level": 1
+          },
+          "notes": [
+            "Step durations are agent estimates, per plate, not measured or sourced from literature (evidence search unavailable: AMASS_API_KEY missing).",
+            "Same equipment, room, budget, durations and ranges as baseline; only target changed to 100 plates/day."
+          ]
+        },
+        "workflow": {
+          "id": "enzyme_screen_baseline_wf_v1",
+          "lab_spec_id": "enzyme_screen_baseline",
+          "labware": "sbs_96",
+          "equipment": [
+            {
+              "instance_id": "hotel_1",
+              "catalog_id": "generic_plate_hotel",
+              "rationale": "Input/output stack for empty and finished plates."
+            },
+            {
+              "instance_id": "lh_1",
+              "catalog_id": "opentrons_flex",
+              "rationale": "Dispenses enzyme and substrate."
+            },
+            {
+              "instance_id": "sealer_1",
+              "catalog_id": "agilent_plateloc",
+              "rationale": "Seals plates before incubation."
+            },
+            {
+              "instance_id": "incubator_1",
+              "catalog_id": "liconic_stx44",
+              "rationale": "44 slots hold plates during 1 h incubation at 37 C."
+            },
+            {
+              "instance_id": "reader_1",
+              "catalog_id": "bmg_clariostar",
+              "rationale": "Absorbance readout at 405 nm."
+            },
+            {
+              "instance_id": "arm_1",
+              "catalog_id": "ur5e",
+              "rationale": "Central arm moves plates between stations."
+            }
+          ],
+          "steps": [
+            {
+              "id": "load",
+              "name": "Pick empty plate",
+              "capability": "plate_storage",
+              "candidate_instances": [
+                "hotel_1"
+              ],
+              "duration_s": 0,
+              "after": []
+            },
+            {
+              "id": "dispense",
+              "name": "Dispense enzyme and substrate (per plate)",
+              "capability": "liquid_handling",
+              "candidate_instances": [
+                "lh_1"
+              ],
+              "duration_s": 1800,
+              "after": [
+                "load"
+              ],
+              "duration_uncertainty": {
+                "value": 1800,
+                "low": 1200,
+                "high": 2400,
+                "confidence": "estimated",
+                "source": "agent_estimate"
+              }
+            },
+            {
+              "id": "seal",
+              "name": "Heat seal (per plate)",
+              "capability": "plate_sealing",
+              "candidate_instances": [
+                "sealer_1"
+              ],
+              "duration_s": 10,
+              "after": [
+                "dispense"
+              ],
+              "duration_uncertainty": {
+                "value": 10,
+                "low": 8,
+                "high": 20,
+                "confidence": "estimated",
+                "source": "agent_estimate"
+              }
+            },
+            {
+              "id": "incubate",
+              "name": "Incubate at 37 C (per plate)",
+              "capability": "incubation",
+              "candidate_instances": [
+                "incubator_1"
+              ],
+              "duration_s": 3600,
+              "after": [
+                "seal"
+              ],
+              "params": {
+                "temperature_c": 37
+              },
+              "duration_uncertainty": {
+                "value": 3600,
+                "low": 3500,
+                "high": 3900,
+                "confidence": "estimated",
+                "source": "agent_estimate"
+              }
+            },
+            {
+              "id": "read",
+              "name": "Read absorbance 405 nm (per plate)",
+              "capability": "absorbance_read",
+              "candidate_instances": [
+                "reader_1"
+              ],
+              "duration_s": 90,
+              "after": [
+                "incubate"
+              ],
+              "params": {
+                "wavelength_nm": 405
+              },
+              "duration_uncertainty": {
+                "value": 90,
+                "low": 60,
+                "high": 150,
+                "confidence": "estimated",
+                "source": "agent_estimate"
+              }
+            },
+            {
+              "id": "unload",
+              "name": "Return finished plate",
+              "capability": "plate_storage",
+              "candidate_instances": [
+                "hotel_1"
+              ],
+              "duration_s": 0,
+              "after": [
+                "read"
+              ]
+            }
+          ]
+        },
+        "layout": {
+          "id": "enzyme_screen_baseline_wf_v1_layout",
+          "workflow_id": "enzyme_screen_baseline_wf_v1",
+          "room": {
+            "width_m": 6,
+            "depth_m": 4,
+            "height_m": 3
+          },
+          "placements": [
+            {
+              "instance_id": "arm_1",
+              "rotation_deg": 0,
+              "position": {
+                "x": 3.0,
+                "y": 2.0,
+                "z": 0.9
+              }
+            },
+            {
+              "instance_id": "hotel_1",
+              "rotation_deg": 296.6,
+              "position": {
+                "x": 3.904,
+                "y": 2.0,
+                "z": 0.9
+              }
+            },
+            {
+              "instance_id": "lh_1",
+              "rotation_deg": 162.0,
+              "position": {
+                "x": 3.318,
+                "y": 2.98,
+                "z": 0.9
+              }
+            },
+            {
+              "instance_id": "sealer_1",
+              "rotation_deg": 54.0,
+              "position": {
+                "x": 2.248,
+                "y": 2.547,
+                "z": 0.9
+              }
+            },
+            {
+              "instance_id": "incubator_1",
+              "rotation_deg": 36.0,
+              "position": {
+                "x": 2.167,
+                "y": 1.395,
+                "z": 0.9
+              }
+            },
+            {
+              "instance_id": "reader_1",
+              "rotation_deg": 288.0,
+              "position": {
+                "x": 3.287,
+                "y": 1.116,
+                "z": 0.9
+              }
+            }
+          ],
+          "operators": [],
+          "transfers": [
+            {
+              "from_instance": "hotel_1",
+              "to_instance": "lh_1",
+              "transporter_instance": "arm_1",
+              "distance_m": 1.42,
+              "path": [
+                {
+                  "x": 3.68,
+                  "y": 2.0,
+                  "z": 1.0
+                },
+                {
+                  "x": 3.0,
+                  "y": 2.0,
+                  "z": 1.2
+                },
+                {
+                  "x": 3.21,
+                  "y": 2.647,
+                  "z": 1.0
+                }
+              ],
+              "est_time_s": 10.8
+            },
+            {
+              "from_instance": "lh_1",
+              "to_instance": "sealer_1",
+              "transporter_instance": "arm_1",
+              "distance_m": 1.42,
+              "path": [
+                {
+                  "x": 3.21,
+                  "y": 2.647,
+                  "z": 1.0
+                },
+                {
+                  "x": 3.0,
+                  "y": 2.0,
+                  "z": 1.2
+                },
+                {
+                  "x": 2.45,
+                  "y": 2.4,
+                  "z": 1.0
+                }
+              ],
+              "est_time_s": 10.8
+            },
+            {
+              "from_instance": "sealer_1",
+              "to_instance": "incubator_1",
+              "transporter_instance": "arm_1",
+              "distance_m": 1.4,
+              "path": [
+                {
+                  "x": 2.45,
+                  "y": 2.4,
+                  "z": 1.0
+                },
+                {
+                  "x": 3.0,
+                  "y": 2.0,
+                  "z": 1.2
+                },
+                {
+                  "x": 2.45,
+                  "y": 1.601,
+                  "z": 1.1
+                }
+              ],
+              "est_time_s": 10.8
+            },
+            {
+              "from_instance": "incubator_1",
+              "to_instance": "reader_1",
+              "transporter_instance": "arm_1",
+              "distance_m": 1.4,
+              "path": [
+                {
+                  "x": 2.45,
+                  "y": 1.601,
+                  "z": 1.1
+                },
+                {
+                  "x": 3.0,
+                  "y": 2.0,
+                  "z": 1.2
+                },
+                {
+                  "x": 3.21,
+                  "y": 1.354,
+                  "z": 1.0
+                }
+              ],
+              "est_time_s": 10.8
+            },
+            {
+              "from_instance": "reader_1",
+              "to_instance": "hotel_1",
+              "transporter_instance": "arm_1",
+              "distance_m": 1.42,
+              "path": [
+                {
+                  "x": 3.21,
+                  "y": 1.354,
+                  "z": 1.0
+                },
+                {
+                  "x": 3.0,
+                  "y": 2.0,
+                  "z": 1.2
+                },
+                {
+                  "x": 3.68,
+                  "y": 2.0,
+                  "z": 1.0
+                }
+              ],
+              "est_time_s": 10.8
+            }
+          ],
+          "score": {
+            "total_weighted_distance_m": 7.06
+          },
+          "violations": []
+        },
+        "sim_result": {
+          "id": "enzyme_screen_baseline_wf_v1_layout_sim",
+          "layout_id": "enzyme_screen_baseline_wf_v1_layout",
+          "simulated_hours": 72,
+          "replicates": 10,
+          "throughput": {
+            "value": 47.0,
+            "unit": "plates_per_day",
+            "target": 100,
+            "meets_target": false,
+            "p10": 46.6,
+            "p50": 47.0,
+            "p90": 47.7,
+            "prob_meets_target": 0.0
+          },
+          "cycle_time_s": 74683.2,
+          "utilisation": [
+            {
+              "instance_id": "hotel_1",
+              "busy_fraction": 0.0,
+              "mean_queue_wait_s": 0.0
+            },
+            {
+              "instance_id": "lh_1",
+              "busy_fraction": 0.997,
+              "mean_queue_wait_s": 69803.0
+            },
+            {
+              "instance_id": "sealer_1",
+              "busy_fraction": 0.007,
+              "mean_queue_wait_s": 0.0
+            },
+            {
+              "instance_id": "incubator_1",
+              "busy_fraction": 0.045,
+              "mean_queue_wait_s": 0.0
+            },
+            {
+              "instance_id": "reader_1",
+              "busy_fraction": 0.055,
+              "mean_queue_wait_s": 0.0
+            },
+            {
+              "instance_id": "arm_1",
+              "busy_fraction": 0.032,
+              "mean_queue_wait_s": 0.0
+            }
+          ],
+          "bottlenecks": [
+            {
+              "kind": "instrument_capacity",
+              "instances": [
+                "lh_1"
+              ],
+              "severity": "high",
+              "message": "lh_1 is busy 100% of the time.",
+              "suggestion": "Add a parallel unit or move slow steps elsewhere."
+            }
+          ],
+          "sensitivity": []
+        },
+        "report_markdown": "# Enzyme screening baseline: automated lab proposal\n\n## Executive summary\n\nModelled median throughput is 47.0 plates_per_day against a requested 100 plates_per_day. The median prediction falls below the requested target.\n\nThese are model-based predictions, not measured throughput or safety certification.\n\nEnzyme-screening lab: 100 x 96-well plates/day, 24 h/day, 6 m x 4 m room, USD 400000 equipment budget, BSL1, no flammable solvents or cryogens. Dispense enzyme and substrate, seal, incubate at 37 C for 1 h, read absorbance at 405 nm.\n\n## Bill of materials\n\n| Instance | Vendor | Model | Est. price (USD) | Data confidence |\n|---|---|---|---|---|\n| hotel_1 | Generic | 20-slot plate hotel | 2,000 | placeholder |\n| lh_1 | Opentrons | Flex | 25,000 | estimated |\n| sealer_1 | Agilent | PlateLoc | 20,000 | estimated |\n| incubator_1 | LiCONiC | STX44 | 45,000 | estimated |\n| reader_1 | BMG LABTECH | CLARIOstar Plus | 60,000 | estimated |\n| arm_1 | Universal Robots | UR5e | 35,000 | estimated |\n| **Known-price subtotal** | | | **187,000** | |\n\nEquipment budget: USD 400,000. Known-price subtotal: USD 187,000.\n\nCosts are catalog estimates and exclude installation, service, consumables and building work.\n\n## Throughput\n\nMedian 47.0 plates_per_day; P10 46.6; P90 47.7.\nProbability of meeting the simulated target: 0.0.\nThis probability describes duration sampling under the model; it is not confidence that the design is correct in reality.\n\n## Checked claims\n\n| Claim | Confidence | Status | Observed value | Note |\n|---|---|---|---|---|\n| Candidate: simulated P50 throughput meets the new 100 plates/day target | 0.05 | refuted | 47.0 |  |\n| Equipment BOM total is within the USD 400000 budget | 0.9 | supported | 187000 |  |\n| Layout has zero violations | 0.85 | supported | 0 |  |\n\n## Refutation history\n\nThese are historical checks; a later revision may supersede the design or assertion.\n- enzyme_screen_baseline_wf_v1: Candidate: simulated P50 throughput meets the new 100 plates/day target \u2014 refuted; observed 47.0.\n\n## Bottlenecks and risks\n\n- **high**: lh_1 is busy 100% of the time. Add a parallel unit or move slow steps elsewhere.\n\n## Layout issues\n\n- None reported by the layout engine.\n\n## Assumptions and unknowns\n\n- Pick empty plate: 0 seconds; range unspecified\u2013unspecified; source agent_estimate; basis estimated.\n- Dispense enzyme and substrate (per plate): 1800 seconds; range 1200\u20132400; source agent_estimate; basis estimated.\n- Heat seal (per plate): 10 seconds; range 8\u201320; source agent_estimate; basis estimated.\n- Incubate at 37 C (per plate): 3600 seconds; range 3500\u20133900; source agent_estimate; basis estimated.\n- Read absorbance 405 nm (per plate): 90 seconds; range 60\u2013150; source agent_estimate; basis estimated.\n- Return finished plate: 0 seconds; range unspecified\u2013unspecified; source agent_estimate; basis estimated.\n- Duration ranges are modelling assumptions unless supported by relevant measurements.\n- Batch/fan-out, operator shifts and external queues depend on simulator support; check these before interpreting complex workflows.\n- Verification checks consistency with catalog and simulation results; it does not validate the physical lab.\n\n## Evidence\n\n- No retrieved literature cited; processing times remain estimates.\n"
+      },
+      "tools": [
+        "layout_and_simulate",
+        "verify_claims",
+        "create_report"
+      ]
+    },
+    {
+      "phase": "revision",
+      "brief": "Add exactly one additional opentrons_flex liquid handler to the last design and let both units serve the existing dispensing step in parallel. Preserve the 100 plates/day target, all other equipment, room, budget and duration assumptions. Stop after this single equipment change. Rerun simulation, check throughput/budget/layout claims, create the report and compare with the previous result. Explicitly disclose any layout violations or unmet target; do not claim physical feasibility if the layout fails.",
+      "output": {
+        "completed": true,
+        "verification_complete": true,
+        "claims": [
+          {
+            "id": "r1_throughput",
+            "statement": "Candidate: simulated P50 throughput meets the 100 plates/day target with two Flex units",
+            "metric": "throughput.p50",
+            "comparator": ">=",
+            "predicted_value": 100,
+            "confidence": 0.05,
+            "status": "refuted",
+            "verified_value": 93.3
+          },
+          {
+            "id": "r1_budget",
+            "statement": "Equipment BOM total is within the USD 400000 budget",
+            "metric": "bom.total_usd",
+            "comparator": "<=",
+            "predicted_value": 400000,
+            "confidence": 0.9,
+            "status": "supported",
+            "verified_value": 212000
+          },
+          {
+            "id": "r1_layout",
+            "statement": "Layout has zero violations",
+            "metric": "layout.violations",
+            "comparator": "==",
+            "predicted_value": 0,
+            "confidence": 0.1,
+            "status": "refuted",
+            "verified_value": 1
+          }
+        ],
+        "claim_history": [
+          {
+            "workflow_id": "enzyme_screen_baseline_wf_v1",
+            "claims": [
+              {
+                "id": "r1_throughput",
+                "statement": "Candidate: simulated P50 throughput meets the 100 plates/day target with two Flex units",
+                "metric": "throughput.p50",
+                "comparator": ">=",
+                "predicted_value": 100,
+                "confidence": 0.05,
+                "status": "refuted",
+                "verified_value": 93.3
+              },
+              {
+                "id": "r1_budget",
+                "statement": "Equipment BOM total is within the USD 400000 budget",
+                "metric": "bom.total_usd",
+                "comparator": "<=",
+                "predicted_value": 400000,
+                "confidence": 0.9,
+                "status": "supported",
+                "verified_value": 212000
+              },
+              {
+                "id": "r1_layout",
+                "statement": "Layout has zero violations",
+                "metric": "layout.violations",
+                "comparator": "==",
+                "predicted_value": 0,
+                "confidence": 0.1,
+                "status": "refuted",
+                "verified_value": 1
+              }
+            ]
+          }
+        ],
+        "lab_spec": {
+          "id": "enzyme_screen_baseline",
+          "name": "Enzyme screening baseline",
+          "domain": "biology",
+          "description": "Enzyme-screening lab: 100 x 96-well plates/day, 24 h/day, 6 m x 4 m room, USD 400000 equipment budget, BSL1, no flammable solvents or cryogens. Dispense enzyme and substrate, seal, incubate at 37 C for 1 h, read absorbance at 405 nm.",
+          "throughput_target": {
+            "value": 100,
+            "unit": "plates_per_day",
+            "operating_hours_per_day": 24
+          },
+          "room": {
+            "width_m": 6,
+            "depth_m": 4,
+            "height_m": 3
+          },
+          "labware": [
+            "sbs_96"
+          ],
+          "required_capabilities": [
+            "plate_storage",
+            "liquid_handling",
+            "plate_sealing",
+            "incubation",
+            "absorbance_read",
+            "plate_transport_arm"
+          ],
+          "constraints": {
+            "budget_usd": 400000,
+            "biosafety_level": 1
+          },
+          "notes": [
+            "Step durations are agent estimates, per plate, not measured or sourced from literature (evidence search unavailable: AMASS_API_KEY missing).",
+            "Revision 1: one additional opentrons_flex (lh_2) added as parallel capacity for the dispensing step; all else unchanged."
+          ]
+        },
+        "workflow": {
+          "id": "enzyme_screen_baseline_wf_v1",
+          "lab_spec_id": "enzyme_screen_baseline",
+          "labware": "sbs_96",
+          "equipment": [
+            {
+              "instance_id": "hotel_1",
+              "catalog_id": "generic_plate_hotel",
+              "rationale": "Input/output stack for empty and finished plates."
+            },
+            {
+              "instance_id": "lh_1",
+              "catalog_id": "opentrons_flex",
+              "rationale": "Dispenses enzyme and substrate."
+            },
+            {
+              "instance_id": "lh_2",
+              "catalog_id": "opentrons_flex",
+              "rationale": "Second liquid handler for parallel dispensing capacity."
+            },
+            {
+              "instance_id": "sealer_1",
+              "catalog_id": "agilent_plateloc",
+              "rationale": "Seals plates before incubation."
+            },
+            {
+              "instance_id": "incubator_1",
+              "catalog_id": "liconic_stx44",
+              "rationale": "44 slots hold plates during 1 h incubation at 37 C."
+            },
+            {
+              "instance_id": "reader_1",
+              "catalog_id": "bmg_clariostar",
+              "rationale": "Absorbance readout at 405 nm."
+            },
+            {
+              "instance_id": "arm_1",
+              "catalog_id": "ur5e",
+              "rationale": "Central arm moves plates between stations."
+            }
+          ],
+          "steps": [
+            {
+              "id": "load",
+              "name": "Pick empty plate",
+              "capability": "plate_storage",
+              "candidate_instances": [
+                "hotel_1"
+              ],
+              "duration_s": 0,
+              "after": []
+            },
+            {
+              "id": "dispense",
+              "name": "Dispense enzyme and substrate (per plate)",
+              "capability": "liquid_handling",
+              "candidate_instances": [
+                "lh_1",
+                "lh_2"
+              ],
+              "duration_s": 1800,
+              "after": [
+                "load"
+              ],
+              "duration_uncertainty": {
+                "value": 1800,
+                "low": 1200,
+                "high": 2400,
+                "confidence": "estimated",
+                "source": "agent_estimate"
+              }
+            },
+            {
+              "id": "seal",
+              "name": "Heat seal (per plate)",
+              "capability": "plate_sealing",
+              "candidate_instances": [
+                "sealer_1"
+              ],
+              "duration_s": 10,
+              "after": [
+                "dispense"
+              ],
+              "duration_uncertainty": {
+                "value": 10,
+                "low": 8,
+                "high": 20,
+                "confidence": "estimated",
+                "source": "agent_estimate"
+              }
+            },
+            {
+              "id": "incubate",
+              "name": "Incubate at 37 C (per plate)",
+              "capability": "incubation",
+              "candidate_instances": [
+                "incubator_1"
+              ],
+              "duration_s": 3600,
+              "after": [
+                "seal"
+              ],
+              "params": {
+                "temperature_c": 37
+              },
+              "duration_uncertainty": {
+                "value": 3600,
+                "low": 3500,
+                "high": 3900,
+                "confidence": "estimated",
+                "source": "agent_estimate"
+              }
+            },
+            {
+              "id": "read",
+              "name": "Read absorbance 405 nm (per plate)",
+              "capability": "absorbance_read",
+              "candidate_instances": [
+                "reader_1"
+              ],
+              "duration_s": 90,
+              "after": [
+                "incubate"
+              ],
+              "params": {
+                "wavelength_nm": 405
+              },
+              "duration_uncertainty": {
+                "value": 90,
+                "low": 60,
+                "high": 150,
+                "confidence": "estimated",
+                "source": "agent_estimate"
+              }
+            },
+            {
+              "id": "unload",
+              "name": "Return finished plate",
+              "capability": "plate_storage",
+              "candidate_instances": [
+                "hotel_1"
+              ],
+              "duration_s": 0,
+              "after": [
+                "read"
+              ]
+            }
+          ]
+        },
+        "layout": {
+          "id": "enzyme_screen_baseline_wf_v1_layout",
+          "workflow_id": "enzyme_screen_baseline_wf_v1",
+          "room": {
+            "width_m": 6,
+            "depth_m": 4,
+            "height_m": 3
+          },
+          "placements": [
+            {
+              "instance_id": "arm_1",
+              "rotation_deg": 0,
+              "position": {
+                "x": 3.0,
+                "y": 2.0,
+                "z": 0.9
+              }
+            },
+            {
+              "instance_id": "hotel_1",
+              "rotation_deg": 296.6,
+              "position": {
+                "x": 3.904,
+                "y": 2.0,
+                "z": 0.9
+              }
+            },
+            {
+              "instance_id": "lh_1",
+              "rotation_deg": 150.0,
+              "position": {
+                "x": 3.515,
+                "y": 2.892,
+                "z": 0.9
+              }
+            },
+            {
+              "instance_id": "lh_2",
+              "rotation_deg": 210.0,
+              "position": {
+                "x": 2.485,
+                "y": 2.892,
+                "z": 0.9
+              }
+            },
+            {
+              "instance_id": "sealer_1",
+              "rotation_deg": 90.0,
+              "position": {
+                "x": 2.07,
+                "y": 2.0,
+                "z": 0.9
+              }
+            },
+            {
+              "instance_id": "incubator_1",
+              "rotation_deg": 60.0,
+              "position": {
+                "x": 2.485,
+                "y": 1.108,
+                "z": 0.9
+              }
+            },
+            {
+              "instance_id": "reader_1",
+              "rotation_deg": 300.0,
+              "position": {
+                "x": 3.465,
+                "y": 1.195,
+                "z": 0.9
+              }
+            }
+          ],
+          "operators": [],
+          "transfers": [
+            {
+              "from_instance": "hotel_1",
+              "to_instance": "lh_1",
+              "transporter_instance": "arm_1",
+              "distance_m": 1.42,
+              "path": [
+                {
+                  "x": 3.68,
+                  "y": 2.0,
+                  "z": 1.0
+                },
+                {
+                  "x": 3.0,
+                  "y": 2.0,
+                  "z": 1.2
+                },
+                {
+                  "x": 3.34,
+                  "y": 2.589,
+                  "z": 1.0
+                }
+              ],
+              "est_time_s": 10.8
+            },
+            {
+              "from_instance": "hotel_1",
+              "to_instance": "lh_2",
+              "transporter_instance": "arm_1",
+              "distance_m": 1.42,
+              "path": [
+                {
+                  "x": 3.68,
+                  "y": 2.0,
+                  "z": 1.0
+                },
+                {
+                  "x": 3.0,
+                  "y": 2.0,
+                  "z": 1.2
+                },
+                {
+                  "x": 2.66,
+                  "y": 2.589,
+                  "z": 1.0
+                }
+              ],
+              "est_time_s": 10.8
+            },
+            {
+              "from_instance": "lh_1",
+              "to_instance": "sealer_1",
+              "transporter_instance": "arm_1",
+              "distance_m": 1.42,
+              "path": [
+                {
+                  "x": 3.34,
+                  "y": 2.589,
+                  "z": 1.0
+                },
+                {
+                  "x": 3.0,
+                  "y": 2.0,
+                  "z": 1.2
+                },
+                {
+                  "x": 2.32,
+                  "y": 2.0,
+                  "z": 1.0
+                }
+              ],
+              "est_time_s": 10.8
+            },
+            {
+              "from_instance": "lh_2",
+              "to_instance": "sealer_1",
+              "transporter_instance": "arm_1",
+              "distance_m": 1.42,
+              "path": [
+                {
+                  "x": 2.66,
+                  "y": 2.589,
+                  "z": 1.0
+                },
+                {
+                  "x": 3.0,
+                  "y": 2.0,
+                  "z": 1.2
+                },
+                {
+                  "x": 2.32,
+                  "y": 2.0,
+                  "z": 1.0
+                }
+              ],
+              "est_time_s": 10.8
+            },
+            {
+              "from_instance": "sealer_1",
+              "to_instance": "incubator_1",
+              "transporter_instance": "arm_1",
+              "distance_m": 1.4,
+              "path": [
+                {
+                  "x": 2.32,
+                  "y": 2.0,
+                  "z": 1.0
+                },
+                {
+                  "x": 3.0,
+                  "y": 2.0,
+                  "z": 1.2
+                },
+                {
+                  "x": 2.66,
+                  "y": 1.411,
+                  "z": 1.1
+                }
+              ],
+              "est_time_s": 10.8
+            },
+            {
+              "from_instance": "incubator_1",
+              "to_instance": "reader_1",
+              "transporter_instance": "arm_1",
+              "distance_m": 1.4,
+              "path": [
+                {
+                  "x": 2.66,
+                  "y": 1.411,
+                  "z": 1.1
+                },
+                {
+                  "x": 3.0,
+                  "y": 2.0,
+                  "z": 1.2
+                },
+                {
+                  "x": 3.34,
+                  "y": 1.412,
+                  "z": 1.0
+                }
+              ],
+              "est_time_s": 10.8
+            },
+            {
+              "from_instance": "reader_1",
+              "to_instance": "hotel_1",
+              "transporter_instance": "arm_1",
+              "distance_m": 1.42,
+              "path": [
+                {
+                  "x": 3.34,
+                  "y": 1.412,
+                  "z": 1.0
+                },
+                {
+                  "x": 3.0,
+                  "y": 2.0,
+                  "z": 1.2
+                },
+                {
+                  "x": 3.68,
+                  "y": 2.0,
+                  "z": 1.0
+                }
+              ],
+              "est_time_s": 10.8
+            }
+          ],
+          "score": {
+            "total_weighted_distance_m": 9.9
+          },
+          "violations": [
+            {
+              "kind": "overlap",
+              "instances": [
+                "lh_1",
+                "lh_2"
+              ],
+              "message": "lh_1 and lh_2 overlap."
+            }
+          ]
+        },
+        "sim_result": {
+          "id": "enzyme_screen_baseline_wf_v1_layout_sim",
+          "layout_id": "enzyme_screen_baseline_wf_v1_layout",
+          "simulated_hours": 72,
+          "replicates": 10,
+          "throughput": {
+            "value": 93.3,
+            "unit": "plates_per_day",
+            "target": 100,
+            "meets_target": false,
+            "p10": 93.0,
+            "p50": 93.3,
+            "p90": 94.0,
+            "prob_meets_target": 0.0
+          },
+          "cycle_time_s": 42279.8,
+          "utilisation": [
+            {
+              "instance_id": "hotel_1",
+              "busy_fraction": 0.0,
+              "mean_queue_wait_s": 0.0
+            },
+            {
+              "instance_id": "lh_1",
+              "busy_fraction": 0.996,
+              "mean_queue_wait_s": 41307.2
+            },
+            {
+              "instance_id": "lh_2",
+              "busy_fraction": 0.973,
+              "mean_queue_wait_s": 32016.9
+            },
+            {
+              "instance_id": "sealer_1",
+              "busy_fraction": 0.014,
+              "mean_queue_wait_s": 0.0
+            },
+            {
+              "instance_id": "incubator_1",
+              "busy_fraction": 0.09,
+              "mean_queue_wait_s": 0.0
+            },
+            {
+              "instance_id": "reader_1",
+              "busy_fraction": 0.108,
+              "mean_queue_wait_s": 3.2
+            },
+            {
+              "instance_id": "arm_1",
+              "busy_fraction": 0.061,
+              "mean_queue_wait_s": 0.0
+            }
+          ],
+          "bottlenecks": [
+            {
+              "kind": "instrument_capacity",
+              "instances": [
+                "lh_1"
+              ],
+              "severity": "high",
+              "message": "lh_1 is busy 100% of the time.",
+              "suggestion": "Add a parallel unit or move slow steps elsewhere."
+            },
+            {
+              "kind": "instrument_capacity",
+              "instances": [
+                "lh_2"
+              ],
+              "severity": "high",
+              "message": "lh_2 is busy 97% of the time.",
+              "suggestion": "Add a parallel unit or move slow steps elsewhere."
+            }
+          ],
+          "sensitivity": []
+        },
+        "report_markdown": "# Enzyme screening baseline: automated lab proposal\n\n## Executive summary\n\nModelled median throughput is 93.3 plates_per_day against a requested 100 plates_per_day. The median prediction falls below the requested target. There are 1 layout issues; feasibility is qualified.\n\nThese are model-based predictions, not measured throughput or safety certification.\n\nEnzyme-screening lab: 100 x 96-well plates/day, 24 h/day, 6 m x 4 m room, USD 400000 equipment budget, BSL1, no flammable solvents or cryogens. Dispense enzyme and substrate, seal, incubate at 37 C for 1 h, read absorbance at 405 nm.\n\n## Bill of materials\n\n| Instance | Vendor | Model | Est. price (USD) | Data confidence |\n|---|---|---|---|---|\n| hotel_1 | Generic | 20-slot plate hotel | 2,000 | placeholder |\n| lh_1 | Opentrons | Flex | 25,000 | estimated |\n| lh_2 | Opentrons | Flex | 25,000 | estimated |\n| sealer_1 | Agilent | PlateLoc | 20,000 | estimated |\n| incubator_1 | LiCONiC | STX44 | 45,000 | estimated |\n| reader_1 | BMG LABTECH | CLARIOstar Plus | 60,000 | estimated |\n| arm_1 | Universal Robots | UR5e | 35,000 | estimated |\n| **Known-price subtotal** | | | **212,000** | |\n\nEquipment budget: USD 400,000. Known-price subtotal: USD 212,000.\n\nCosts are catalog estimates and exclude installation, service, consumables and building work.\n\n## Throughput\n\nMedian 93.3 plates_per_day; P10 93.0; P90 94.0.\nProbability of meeting the simulated target: 0.0.\nThis probability describes duration sampling under the model; it is not confidence that the design is correct in reality.\n\n## Checked claims\n\n| Claim | Confidence | Status | Observed value | Note |\n|---|---|---|---|---|\n| Candidate: simulated P50 throughput meets the 100 plates/day target with two Flex units | 0.05 | refuted | 93.3 |  |\n| Equipment BOM total is within the USD 400000 budget | 0.9 | supported | 212000 |  |\n| Layout has zero violations | 0.1 | refuted | 1 |  |\n\n## Refutation history\n\nThese are historical checks; a later revision may supersede the design or assertion.\n- enzyme_screen_baseline_wf_v1: Candidate: simulated P50 throughput meets the 100 plates/day target with two Flex units \u2014 refuted; observed 93.3.\n- enzyme_screen_baseline_wf_v1: Layout has zero violations \u2014 refuted; observed 1.\n\n## Bottlenecks and risks\n\n- **high**: lh_1 is busy 100% of the time. Add a parallel unit or move slow steps elsewhere.\n- **high**: lh_2 is busy 97% of the time. Add a parallel unit or move slow steps elsewhere.\n\n## Layout issues\n\n- lh_1 and lh_2 overlap.\n\n## Assumptions and unknowns\n\n- Pick empty plate: 0 seconds; range unspecified\u2013unspecified; source agent_estimate; basis estimated.\n- Dispense enzyme and substrate (per plate): 1800 seconds; range 1200\u20132400; source agent_estimate; basis estimated.\n- Heat seal (per plate): 10 seconds; range 8\u201320; source agent_estimate; basis estimated.\n- Incubate at 37 C (per plate): 3600 seconds; range 3500\u20133900; source agent_estimate; basis estimated.\n- Read absorbance 405 nm (per plate): 90 seconds; range 60\u2013150; source agent_estimate; basis estimated.\n- Return finished plate: 0 seconds; range unspecified\u2013unspecified; source agent_estimate; basis estimated.\n- Duration ranges are modelling assumptions unless supported by relevant measurements.\n- Batch/fan-out, operator shifts and external queues depend on simulator support; check these before interpreting complex workflows.\n- Verification checks consistency with catalog and simulation results; it does not validate the physical lab.\n\n## Evidence\n\n- No retrieved literature cited; processing times remain estimates.\n"
+      },
+      "tools": [
+        "layout_and_simulate",
+        "verify_claims",
+        "create_report"
+      ]
+    },
+    {
+      "phase": "vendor",
+      "brief": "For the current design, is it useful for a vendor to make the liquid handler faster, compared with making the reader faster? Call optimise_instrument for one liquid handler and the reader, and explain returned elasticity, headroom and next-bottleneck results. Keep the design unchanged and disclose layout and model limitations.",
+      "output": {
+        "completed": true,
+        "verification_complete": false,
+        "claims": [],
+        "lab_spec": {
+          "id": "enzyme_screen_baseline",
+          "name": "Enzyme screening baseline",
+          "domain": "biology",
+          "description": "Enzyme-screening lab: 100 x 96-well plates/day, 24 h/day, 6 m x 4 m room, USD 400000 equipment budget, BSL1, no flammable solvents or cryogens. Dispense enzyme and substrate, seal, incubate at 37 C for 1 h, read absorbance at 405 nm.",
+          "throughput_target": {
+            "value": 100,
+            "unit": "plates_per_day",
+            "operating_hours_per_day": 24
+          },
+          "room": {
+            "width_m": 6,
+            "depth_m": 4,
+            "height_m": 3
+          },
+          "labware": [
+            "sbs_96"
+          ],
+          "required_capabilities": [
+            "plate_storage",
+            "liquid_handling",
+            "plate_sealing",
+            "incubation",
+            "absorbance_read",
+            "plate_transport_arm"
+          ],
+          "constraints": {
+            "budget_usd": 400000,
+            "biosafety_level": 1
+          },
+          "notes": [
+            "Step durations are agent estimates, per plate, not measured or sourced from literature (evidence search unavailable: AMASS_API_KEY missing).",
+            "Revision 1: one additional opentrons_flex (lh_2) added as parallel capacity for the dispensing step; all else unchanged."
+          ]
+        },
+        "workflow": {
+          "id": "enzyme_screen_baseline_wf_v1",
+          "lab_spec_id": "enzyme_screen_baseline",
+          "labware": "sbs_96",
+          "equipment": [
+            {
+              "instance_id": "hotel_1",
+              "catalog_id": "generic_plate_hotel",
+              "rationale": "Input/output stack for empty and finished plates."
+            },
+            {
+              "instance_id": "lh_1",
+              "catalog_id": "opentrons_flex",
+              "rationale": "Dispenses enzyme and substrate."
+            },
+            {
+              "instance_id": "lh_2",
+              "catalog_id": "opentrons_flex",
+              "rationale": "Second liquid handler for parallel dispensing capacity."
+            },
+            {
+              "instance_id": "sealer_1",
+              "catalog_id": "agilent_plateloc",
+              "rationale": "Seals plates before incubation."
+            },
+            {
+              "instance_id": "incubator_1",
+              "catalog_id": "liconic_stx44",
+              "rationale": "44 slots hold plates during 1 h incubation at 37 C."
+            },
+            {
+              "instance_id": "reader_1",
+              "catalog_id": "bmg_clariostar",
+              "rationale": "Absorbance readout at 405 nm."
+            },
+            {
+              "instance_id": "arm_1",
+              "catalog_id": "ur5e",
+              "rationale": "Central arm moves plates between stations."
+            }
+          ],
+          "steps": [
+            {
+              "id": "load",
+              "name": "Pick empty plate",
+              "capability": "plate_storage",
+              "candidate_instances": [
+                "hotel_1"
+              ],
+              "duration_s": 0,
+              "after": []
+            },
+            {
+              "id": "dispense",
+              "name": "Dispense enzyme and substrate (per plate)",
+              "capability": "liquid_handling",
+              "candidate_instances": [
+                "lh_1",
+                "lh_2"
+              ],
+              "duration_s": 1800,
+              "after": [
+                "load"
+              ],
+              "duration_uncertainty": {
+                "value": 1800,
+                "low": 1200,
+                "high": 2400,
+                "confidence": "estimated",
+                "source": "agent_estimate"
+              }
+            },
+            {
+              "id": "seal",
+              "name": "Heat seal (per plate)",
+              "capability": "plate_sealing",
+              "candidate_instances": [
+                "sealer_1"
+              ],
+              "duration_s": 10,
+              "after": [
+                "dispense"
+              ],
+              "duration_uncertainty": {
+                "value": 10,
+                "low": 8,
+                "high": 20,
+                "confidence": "estimated",
+                "source": "agent_estimate"
+              }
+            },
+            {
+              "id": "incubate",
+              "name": "Incubate at 37 C (per plate)",
+              "capability": "incubation",
+              "candidate_instances": [
+                "incubator_1"
+              ],
+              "duration_s": 3600,
+              "after": [
+                "seal"
+              ],
+              "params": {
+                "temperature_c": 37
+              },
+              "duration_uncertainty": {
+                "value": 3600,
+                "low": 3500,
+                "high": 3900,
+                "confidence": "estimated",
+                "source": "agent_estimate"
+              }
+            },
+            {
+              "id": "read",
+              "name": "Read absorbance 405 nm (per plate)",
+              "capability": "absorbance_read",
+              "candidate_instances": [
+                "reader_1"
+              ],
+              "duration_s": 90,
+              "after": [
+                "incubate"
+              ],
+              "params": {
+                "wavelength_nm": 405
+              },
+              "duration_uncertainty": {
+                "value": 90,
+                "low": 60,
+                "high": 150,
+                "confidence": "estimated",
+                "source": "agent_estimate"
+              }
+            },
+            {
+              "id": "unload",
+              "name": "Return finished plate",
+              "capability": "plate_storage",
+              "candidate_instances": [
+                "hotel_1"
+              ],
+              "duration_s": 0,
+              "after": [
+                "read"
+              ]
+            }
+          ]
+        },
+        "layout": {
+          "id": "enzyme_screen_baseline_wf_v1_layout",
+          "workflow_id": "enzyme_screen_baseline_wf_v1",
+          "room": {
+            "width_m": 6,
+            "depth_m": 4,
+            "height_m": 3
+          },
+          "placements": [
+            {
+              "instance_id": "arm_1",
+              "rotation_deg": 0,
+              "position": {
+                "x": 3.0,
+                "y": 2.0,
+                "z": 0.9
+              }
+            },
+            {
+              "instance_id": "hotel_1",
+              "rotation_deg": 296.6,
+              "position": {
+                "x": 3.904,
+                "y": 2.0,
+                "z": 0.9
+              }
+            },
+            {
+              "instance_id": "lh_1",
+              "rotation_deg": 150.0,
+              "position": {
+                "x": 3.515,
+                "y": 2.892,
+                "z": 0.9
+              }
+            },
+            {
+              "instance_id": "lh_2",
+              "rotation_deg": 210.0,
+              "position": {
+                "x": 2.485,
+                "y": 2.892,
+                "z": 0.9
+              }
+            },
+            {
+              "instance_id": "sealer_1",
+              "rotation_deg": 90.0,
+              "position": {
+                "x": 2.07,
+                "y": 2.0,
+                "z": 0.9
+              }
+            },
+            {
+              "instance_id": "incubator_1",
+              "rotation_deg": 60.0,
+              "position": {
+                "x": 2.485,
+                "y": 1.108,
+                "z": 0.9
+              }
+            },
+            {
+              "instance_id": "reader_1",
+              "rotation_deg": 300.0,
+              "position": {
+                "x": 3.465,
+                "y": 1.195,
+                "z": 0.9
+              }
+            }
+          ],
+          "operators": [],
+          "transfers": [
+            {
+              "from_instance": "hotel_1",
+              "to_instance": "lh_1",
+              "transporter_instance": "arm_1",
+              "distance_m": 1.42,
+              "path": [
+                {
+                  "x": 3.68,
+                  "y": 2.0,
+                  "z": 1.0
+                },
+                {
+                  "x": 3.0,
+                  "y": 2.0,
+                  "z": 1.2
+                },
+                {
+                  "x": 3.34,
+                  "y": 2.589,
+                  "z": 1.0
+                }
+              ],
+              "est_time_s": 10.8
+            },
+            {
+              "from_instance": "hotel_1",
+              "to_instance": "lh_2",
+              "transporter_instance": "arm_1",
+              "distance_m": 1.42,
+              "path": [
+                {
+                  "x": 3.68,
+                  "y": 2.0,
+                  "z": 1.0
+                },
+                {
+                  "x": 3.0,
+                  "y": 2.0,
+                  "z": 1.2
+                },
+                {
+                  "x": 2.66,
+                  "y": 2.589,
+                  "z": 1.0
+                }
+              ],
+              "est_time_s": 10.8
+            },
+            {
+              "from_instance": "lh_1",
+              "to_instance": "sealer_1",
+              "transporter_instance": "arm_1",
+              "distance_m": 1.42,
+              "path": [
+                {
+                  "x": 3.34,
+                  "y": 2.589,
+                  "z": 1.0
+                },
+                {
+                  "x": 3.0,
+                  "y": 2.0,
+                  "z": 1.2
+                },
+                {
+                  "x": 2.32,
+                  "y": 2.0,
+                  "z": 1.0
+                }
+              ],
+              "est_time_s": 10.8
+            },
+            {
+              "from_instance": "lh_2",
+              "to_instance": "sealer_1",
+              "transporter_instance": "arm_1",
+              "distance_m": 1.42,
+              "path": [
+                {
+                  "x": 2.66,
+                  "y": 2.589,
+                  "z": 1.0
+                },
+                {
+                  "x": 3.0,
+                  "y": 2.0,
+                  "z": 1.2
+                },
+                {
+                  "x": 2.32,
+                  "y": 2.0,
+                  "z": 1.0
+                }
+              ],
+              "est_time_s": 10.8
+            },
+            {
+              "from_instance": "sealer_1",
+              "to_instance": "incubator_1",
+              "transporter_instance": "arm_1",
+              "distance_m": 1.4,
+              "path": [
+                {
+                  "x": 2.32,
+                  "y": 2.0,
+                  "z": 1.0
+                },
+                {
+                  "x": 3.0,
+                  "y": 2.0,
+                  "z": 1.2
+                },
+                {
+                  "x": 2.66,
+                  "y": 1.411,
+                  "z": 1.1
+                }
+              ],
+              "est_time_s": 10.8
+            },
+            {
+              "from_instance": "incubator_1",
+              "to_instance": "reader_1",
+              "transporter_instance": "arm_1",
+              "distance_m": 1.4,
+              "path": [
+                {
+                  "x": 2.66,
+                  "y": 1.411,
+                  "z": 1.1
+                },
+                {
+                  "x": 3.0,
+                  "y": 2.0,
+                  "z": 1.2
+                },
+                {
+                  "x": 3.34,
+                  "y": 1.412,
+                  "z": 1.0
+                }
+              ],
+              "est_time_s": 10.8
+            },
+            {
+              "from_instance": "reader_1",
+              "to_instance": "hotel_1",
+              "transporter_instance": "arm_1",
+              "distance_m": 1.42,
+              "path": [
+                {
+                  "x": 3.34,
+                  "y": 1.412,
+                  "z": 1.0
+                },
+                {
+                  "x": 3.0,
+                  "y": 2.0,
+                  "z": 1.2
+                },
+                {
+                  "x": 3.68,
+                  "y": 2.0,
+                  "z": 1.0
+                }
+              ],
+              "est_time_s": 10.8
+            }
+          ],
+          "score": {
+            "total_weighted_distance_m": 9.9
+          },
+          "violations": [
+            {
+              "kind": "overlap",
+              "instances": [
+                "lh_1",
+                "lh_2"
+              ],
+              "message": "lh_1 and lh_2 overlap."
+            }
+          ]
+        },
+        "sim_result": {
+          "id": "enzyme_screen_baseline_wf_v1_layout_sim",
+          "layout_id": "enzyme_screen_baseline_wf_v1_layout",
+          "simulated_hours": 72,
+          "replicates": 10,
+          "throughput": {
+            "value": 93.3,
+            "unit": "plates_per_day",
+            "target": 100,
+            "meets_target": false,
+            "p10": 93.0,
+            "p50": 93.3,
+            "p90": 94.0,
+            "prob_meets_target": 0.0
+          },
+          "cycle_time_s": 42279.8,
+          "utilisation": [
+            {
+              "instance_id": "hotel_1",
+              "busy_fraction": 0.0,
+              "mean_queue_wait_s": 0.0
+            },
+            {
+              "instance_id": "lh_1",
+              "busy_fraction": 0.996,
+              "mean_queue_wait_s": 41307.2
+            },
+            {
+              "instance_id": "lh_2",
+              "busy_fraction": 0.973,
+              "mean_queue_wait_s": 32016.9
+            },
+            {
+              "instance_id": "sealer_1",
+              "busy_fraction": 0.014,
+              "mean_queue_wait_s": 0.0
+            },
+            {
+              "instance_id": "incubator_1",
+              "busy_fraction": 0.09,
+              "mean_queue_wait_s": 0.0
+            },
+            {
+              "instance_id": "reader_1",
+              "busy_fraction": 0.108,
+              "mean_queue_wait_s": 3.2
+            },
+            {
+              "instance_id": "arm_1",
+              "busy_fraction": 0.061,
+              "mean_queue_wait_s": 0.0
+            }
+          ],
+          "bottlenecks": [
+            {
+              "kind": "instrument_capacity",
+              "instances": [
+                "lh_1"
+              ],
+              "severity": "high",
+              "message": "lh_1 is busy 100% of the time.",
+              "suggestion": "Add a parallel unit or move slow steps elsewhere."
+            },
+            {
+              "kind": "instrument_capacity",
+              "instances": [
+                "lh_2"
+              ],
+              "severity": "high",
+              "message": "lh_2 is busy 97% of the time.",
+              "suggestion": "Add a parallel unit or move slow steps elsewhere."
+            }
+          ],
+          "sensitivity": []
+        },
+        "instrument_optimisations": {
+          "lh_1": {
+            "instance_id": "lh_1",
+            "catalog_id": "opentrons_flex",
+            "layout_id": "enzyme_screen_baseline_wf_v1_layout",
+            "baseline": {
+              "throughput_p50": 91.0,
+              "unit": "plates_per_day",
+              "utilisation": 0.996
+            },
+            "sweeps": [
+              {
+                "parameter": "cycle_time",
+                "points": [
+                  {
+                    "value": 0.5,
+                    "throughput_p50": 184.5,
+                    "throughput_p10": 183.4,
+                    "throughput_p90": 185.7
+                  },
+                  {
+                    "value": 0.7,
+                    "throughput_p50": 131.0,
+                    "throughput_p10": 130.0,
+                    "throughput_p90": 131.9
+                  },
+                  {
+                    "value": 0.85,
+                    "throughput_p50": 108.2,
+                    "throughput_p10": 107.0,
+                    "throughput_p90": 109.5
+                  },
+                  {
+                    "value": 1.0,
+                    "throughput_p50": 91.0,
+                    "throughput_p10": 90.5,
+                    "throughput_p90": 92.0
+                  },
+                  {
+                    "value": 1.2,
+                    "throughput_p50": 76.2,
+                    "throughput_p10": 75.2,
+                    "throughput_p90": 77.2
+                  }
+                ],
+                "elasticity": 1.26
+              },
+              {
+                "parameter": "capacity",
+                "points": [
+                  {
+                    "value": 1,
+                    "throughput_p50": 91.0,
+                    "throughput_p10": 90.5,
+                    "throughput_p90": 92.0
+                  },
+                  {
+                    "value": 2,
+                    "throughput_p50": 138.0,
+                    "throughput_p10": 136.8,
+                    "throughput_p90": 139.3
+                  },
+                  {
+                    "value": 3,
+                    "throughput_p50": 185.5,
+                    "throughput_p10": 184.2,
+                    "throughput_p90": 186.0
+                  }
+                ]
+              }
+            ],
+            "headroom_note": "Halving lh_1's cycle time raises throughput 103%; lh_1 is still the bottleneck, so further gains are possible."
+          },
+          "reader_1": {
+            "instance_id": "reader_1",
+            "catalog_id": "bmg_clariostar",
+            "layout_id": "enzyme_screen_baseline_wf_v1_layout",
+            "baseline": {
+              "throughput_p50": 91.0,
+              "unit": "plates_per_day",
+              "utilisation": 0.106
+            },
+            "sweeps": [
+              {
+                "parameter": "cycle_time",
+                "points": [
+                  {
+                    "value": 0.5,
+                    "throughput_p50": 91.8,
+                    "throughput_p10": 90.3,
+                    "throughput_p90": 93.2
+                  },
+                  {
+                    "value": 0.7,
+                    "throughput_p50": 91.8,
+                    "throughput_p10": 91.3,
+                    "throughput_p90": 92.0
+                  },
+                  {
+                    "value": 0.85,
+                    "throughput_p50": 91.2,
+                    "throughput_p10": 90.8,
+                    "throughput_p90": 92.0
+                  },
+                  {
+                    "value": 1.0,
+                    "throughput_p50": 91.0,
+                    "throughput_p10": 90.5,
+                    "throughput_p90": 92.0
+                  },
+                  {
+                    "value": 1.2,
+                    "throughput_p50": 91.0,
+                    "throughput_p10": 90.7,
+                    "throughput_p90": 91.5
+                  }
+                ],
+                "elasticity": 0.01
+              },
+              {
+                "parameter": "capacity",
+                "points": [
+                  {
+                    "value": 1,
+                    "throughput_p50": 91.0,
+                    "throughput_p10": 90.5,
+                    "throughput_p90": 92.0
+                  },
+                  {
+                    "value": 2,
+                    "throughput_p50": 91.8,
+                    "throughput_p10": 91.0,
+                    "throughput_p90": 92.7
+                  },
+                  {
+                    "value": 3,
+                    "throughput_p50": 91.8,
+                    "throughput_p10": 91.0,
+                    "throughput_p90": 92.7
+                  }
+                ]
+              }
+            ],
+            "headroom_note": "Making reader_1 faster barely helps here (elasticity 0.01); it is not the limiting instrument in this lab.",
+            "next_bottleneck": "lh_1"
+          }
+        }
+      },
+      "tools": [
+        "optimise_instrument",
+        "optimise_instrument"
+      ]
+    }
+  ]
+}
