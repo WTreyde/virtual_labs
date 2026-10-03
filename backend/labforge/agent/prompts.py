@@ -15,6 +15,9 @@ Use snake_case IDs, metres and seconds. Each equipment instance has its own uniq
 candidate_instances refer to those IDs, after refers to step IDs, and lab_spec_id matches
 LabSpec.id. Include transporters. Describe duration units explicitly: per sample, plate,
 or batch. Preserve external queues and manual steps rather than optimising them away.
+External services and in-silico steps use mode external/in_silico and empty candidate_instances;
+they do not require a local catalog instrument. Synchrotron diffraction stays external and
+must retain shipping/queue assumptions; never add an in-house X-ray to the XChem scenario.
 Numbers from sources must retain retrieved evidence. Never invent citations. Unsupported
 numbers are estimates or placeholders, with explicit assumptions and uncertainty ranges;
 uncertainty ranges are modelling assumptions, not empirically calibrated confidence.

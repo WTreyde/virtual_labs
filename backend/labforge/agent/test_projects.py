@@ -1,5 +1,7 @@
 """Scheduling boundary tests: shared hardware, supported semantics and output contract."""
 import copy
+import sys
+from types import SimpleNamespace
 
 import pytest
 
@@ -60,3 +62,32 @@ def test_schedule_output_is_validated(monkeypatch):
     monkeypatch.setattr('labforge.sim.portfolio.prioritise', lambda *args, **kwargs: {'recommended': 'invented'})
     with pytest.raises(ValueError):
         ToolSession(TOOLS, []).plan_projects(spec, projects)
+
+
+@pytest.mark.parametrize('override', [None, 'user-selected-model'])
+def test_planner_forwards_schedule_and_respects_model_override(monkeypatch, override):
+    from labforge.agent.planner import run_turn
+    spec, projects = inputs()
+    block = {'type': 'tool_use', 'id': 'schedule_call', 'name': 'plan_projects',
+             'input': {'lab_spec': spec, 'projects': projects}}
+    text = {'type': 'text', 'text': 'Compare mean-duration policies; confirm with Monte Carlo.'}
+    replies = iter([
+        SimpleNamespace(content=[SimpleNamespace(**block, model_dump=lambda **kw: block)], stop_reason='tool_use'),
+        SimpleNamespace(content=[SimpleNamespace(**text, model_dump=lambda **kw: text)], stop_reason='end_turn'),
+    ])
+    requests = []
+    def create(**kwargs):
+        requests.append(kwargs)
+        return next(replies)
+    sdk = SimpleNamespace(Anthropic=lambda **kw: SimpleNamespace(messages=SimpleNamespace(create=create)))
+    monkeypatch.setitem(sys.modules, 'anthropic', sdk)
+    monkeypatch.setattr('labforge.agent.planner.load_env', lambda: None)
+    monkeypatch.setenv('ANTHROPIC_API_KEY', 'test-only')
+    if override: monkeypatch.setenv('ANTHROPIC_MODEL', override)
+    else: monkeypatch.delenv('ANTHROPIC_MODEL', raising=False)
+    output = run_turn([{'role': 'user', 'content': 'What order should these projects run?'}])
+    assert output['completed']
+    validate(output['project_schedule'], 'project_schedule')
+    assert output['project_schedule']['gain_vs_naive'] > .2
+    assert all(r['model'] == (override or 'claude-opus-5-5') for r in requests)
+    assert 'workflow' not in output  # scheduling does not fabricate a new lab design

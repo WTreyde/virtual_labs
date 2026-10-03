@@ -255,3 +255,11 @@ demo briefs and stores credential-redacted results without model/tool history. S
 requires the complete pipeline, simulation, checked claims and report. XChem must retain
 manual harvesting, external diffraction and no in-house X-ray equipment. A catalog-blocked
 response is saved but does not pass the end-to-end gate; exit status 2 signals unmet gates.
+
+On main `3535097`, both live Opus scenario attempts completed but stopped on missing
+catalog entries; neither returned a full design, simulation or checked report. Saved results
+are in `demo/scenarios_20261003/`. Missing equipment is assigned to Max in
+[issue #9](https://github.com/WTreyde/virtual_labs/issues/9). Rerun after catalog expansion.
+External/in-silico steps do not require local catalog instruments; the XChem response's
+suggestion of a service catalog entry is optional, not a prerequisite. The prompt now makes
+that distinction explicit. No in-house diffraction item is required or permitted in this demo.

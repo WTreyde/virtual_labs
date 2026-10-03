@@ -43,7 +43,7 @@ def check_scenario(name, output, coverage):
     if checks['design_returned']:
         validate_design(output['lab_spec'], workflow)
     if name == 'xchem':
-        checks['external_diffraction'] = any(s['mode'] == 'external' and s['capability'] in ('xray_diffraction', 'external_service') for s in steps if s.get('mode'))
+        checks['external_diffraction'] = any(s['mode'] == 'external' and (s['capability'] == 'xray_diffraction' or (s['capability'] == 'external_service' and any(word in s['name'].lower() for word in ('diffraction', 'synchrotron', 'beamline')))) for s in steps if s.get('mode'))
         checks['no_inhouse_xray'] = not any('xray_diffraction' in load_catalog()[e['catalog_id']]['capabilities'] for e in workflow.get('equipment', []))
         checks['manual_harvesting'] = any(s['capability'] == 'crystal_harvesting' and s.get('mode') in ('manual', 'semi_automated') for s in steps)
     return {'passed': all(checks.values()), 'checks': checks, **coverage}
