@@ -154,10 +154,45 @@ def _separation_violations(layout, items, rules, pl, movers) -> list[dict]:
         base = pl[arm]["position"]
         envelope = item["transport"].get("reach_m", 1.0) + sep
         inside = sorted(i for i, (x, y) in human_spots.items() if math.hypot(x - base["x"], y - base["y"]) < envelope)
+        inside = [i for i in inside if i != arm] or inside  # handing straight to the arm names the arm once
         if inside:
             rated = "is not rated collaborative" if "collaborative" in (item.get("safety") or {}) else \
                 "has no collaborative rating in the catalog"
-            out.append({"kind": "safety", "instances": [arm] + inside,
+            out.append({"kind": "safety", "instances": list(dict.fromkeys([arm] + inside)),
                         "message": f"People hand labware into {arm}'s reach at {', '.join(inside)}, and {arm} {rated}; "
-                                   "add a light curtain or a pass-through hotel at the cell edge."})
+                                   "add a light curtain or a pass-through hotel at the cell edge.",
+                        "mitigation": arm_guard_mitigation(arm, inside, rules)})
     return out
+
+
+# Not in the catalog: a typical type 4 safety light curtain pair plus safety relay, hardware only. A placeholder
+# for the BOM, not a quote; mounting, integration and the risk assessment are extra.
+LIGHT_CURTAIN_USD = (1500, 4000, 8000)
+
+
+def arm_guard_mitigation(arm: str, stations: list[str], rules: dict) -> dict:
+    """A proposed BOM line that guards a non-collaborative arm where people hand it labware."""
+    rule = rules.get("robot_arm_non_collaborative") or {}
+    low, mid, high = LIGHT_CURTAIN_USD
+    return {
+        "id": f"light_curtain_{arm}",
+        "item": "Safety light curtain (type 4, IEC 61496) with safety relay",
+        "guards": list(dict.fromkeys([arm] + stations)),
+        "where": f"on the edge of {arm}'s envelope, facing the manual stations {', '.join(stations)}",
+        "price_usd_estimate": mid, "price_range_usd": [low, high], "confidence": "placeholder", "in_catalog": False,
+        "alternatives": ["pass-through plate hotel at the cell edge, so people load outside the envelope"] +
+                        [o.replace("_", " ") for o in rule.get("safeguarding", []) if o != "presence_sensing_device"],
+        "note": "Not a quote: hardware only, with mounting and integration extra. Safe distance: "
+                f"{rule.get('separation_formula', 'S = K*T + C (ISO 13855)')}. It needs {arm}'s stopping time T from its "
+                "datasheet, which the catalog does not have.",
+    }
+
+
+def proposed_mitigations(layout: dict) -> list[dict]:
+    """BOM lines the layout's violations propose (one per guarded arm), for reports and the BOM panel."""
+    seen = {}
+    for v in layout.get("violations", []):
+        m = v.get("mitigation")
+        if m and m["id"] not in seen:
+            seen[m["id"]] = m
+    return list(seen.values())

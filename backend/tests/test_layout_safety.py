@@ -60,3 +60,23 @@ def test_crowded_hands_on_lab_keeps_a_walkway_to_every_work_spot():
     spec["operators"] = [{"role": "tech", "count": 2}]
     lay = generate_layout(spec, _wf(eq, steps))
     assert not [v for v in lay["violations"] if v["kind"] in ("egress_blocked", "overlap", "out_of_room")], lay["violations"]
+
+
+def test_unguarded_arm_next_to_manual_work_proposes_a_placeholder_priced_guard():
+    from labforge.layout.validate import _separation_violations, proposed_mitigations
+    arm = {"transport": {"kind": "arm", "reach_m": 1.0}, "safety": {}, "access_points": [{"position": {"x": 0, "y": 0, "z": 0.9}}]}
+    bench = {"access_points": [{"position": {"x": 0, "y": 0, "z": 0.9}}]}
+    pos = lambda i, x: {"instance_id": i, "position": {"x": x, "y": 1, "z": 0.9}, "rotation_deg": 0}
+    layout = {"operators": [{"id": "op_1"}], "placements": [pos("arm_1", 1), pos("bench_1", 1.5)],
+              "transfers": [{"from_instance": "bench_1", "to_instance": "arm_1", "transporter_instance": "op_1"}]}
+    found = _separation_violations(layout, {"arm_1": arm, "bench_1": bench}, load_rules(),
+                                   {p["instance_id"]: p for p in layout["placements"]}, {"arm_1"})
+    assert [v["kind"] for v in found] == ["safety"]
+    layout["violations"] = found + found  # one line per arm, however many violations name it
+    [line] = proposed_mitigations(layout)
+    assert line["guards"] == ["arm_1", "bench_1"] and line["confidence"] == "placeholder" and not line["in_catalog"]
+    assert line["price_range_usd"][0] < line["price_usd_estimate"] < line["price_range_usd"][1]
+    assert any("pass-through" in a for a in line["alternatives"])
+    arm["safety"]["collaborative"] = True
+    assert not _separation_violations(layout, {"arm_1": arm, "bench_1": bench}, load_rules(),
+                                      {p["instance_id"]: p for p in layout["placements"]}, {"arm_1"})
