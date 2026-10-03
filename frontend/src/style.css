@@ -172,3 +172,4 @@ body.page-view #app { display: block; overflow-y: auto; }
 
 #agent-banner { position: absolute; top: 56px; left: 50%; transform: translateX(-50%); z-index: 16; max-width: min(720px, calc(100% - 340px));
   padding: 10px 14px; background: #fde4df; color: #7a1d12; border: 3px solid #a3271a; border-radius: 8px; font: 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; box-shadow: 0 4px 0 #0005; }
+#modal .lead { font-size: 16px; margin: 4px 0; }

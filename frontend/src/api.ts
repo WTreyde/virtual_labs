@@ -10,6 +10,11 @@ import type { CatalogItem, ChatMessage, Design, InstrumentOptimisation, Leaderbo
 
 export const API = (import.meta as any).env?.VITE_API ?? "http://localhost:8000";
 
+/** The backend answered, but with an HTTP error (as opposed to not being reachable at all). */
+export class HttpError extends Error {
+  constructor(readonly status: number, message: string) { super(message); }
+}
+
 /** Replay mode sets this so nothing talks to the backend; every call then fails fast into its offline fallback. */
 let offline = false;
 export function setOffline(on: boolean) { offline = on; }
@@ -122,7 +127,7 @@ export async function prioritise(projects: ProjectRequest[], lab_id: string, cac
 /** GET /validation: one row per published lab case, with LabForge's predicted cost band where a design exists. */
 export async function validation(): Promise<ValidationRow[]> {
   const res = await apiFetch("/validation", { signal: AbortSignal.timeout(60000) });
-  if (!res.ok) throw new Error(`/validation: HTTP ${res.status}`);
+  if (!res.ok) throw new HttpError(res.status, `/validation: HTTP ${res.status}`);
   return res.json();
 }
 

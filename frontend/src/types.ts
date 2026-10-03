@@ -76,9 +76,19 @@ export interface ProjectRequest { id: string; workflow: Workflow & Record<string
 /** One row of GET /validation (backend/labforge/validation/runner.py run_case). */
 export interface ValidationRow {
   id: string; name: string; verified: boolean; includes?: string[];
-  status: "compared" | "no_design_yet" | string;
-  reported_usd?: number; predicted?: { p10: number; p50: number; p90: number; n_items?: number };
-  within_p10_p90?: boolean; log10_error?: number;
+  status: "compared" | "no_design_yet" | "error" | "not_costable" | string;
+  /** Why there is no comparison (no_design_yet, error, not_costable). */
+  reason?: string;
+  reported_usd?: number;
+  predicted?: {
+    p10: number; p50: number; p90: number; n_items?: number;
+    /** Experimental: does not yet beat a constant baseline (docs/validation.md). */
+    confidence?: { within_25pct?: number; label?: string; data_coverage?: number };
+  };
+  within_p10_p90?: boolean; log10_error?: number; within_25pct?: boolean; like_for_like?: boolean;
+  unmodelled_categories?: string[];
+  /** Set when the design was made by the agent (with the reported cost withheld from it). */
+  design_provenance?: unknown;
 }
 
 /** GET /bench/leaderboard (backend/labforge/bench/runner.py leaderboard()). */

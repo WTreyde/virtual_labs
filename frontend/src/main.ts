@@ -1,6 +1,6 @@
 import "@fontsource/press-start-2p";
 import Phaser from "phaser";
-import { chatStream, exampleDesign, health, LIVE_CHAT_MESSAGE, leaderboard, liveCatalog, optimise, prioritise, setOffline, validation } from "./api";
+import { chatStream, exampleDesign, health, HttpError, LIVE_CHAT_MESSAGE, leaderboard, liveCatalog, optimise, prioritise, setOffline, validation } from "./api";
 import demoQueue from "../../backend/labforge/catalog/data/demo_prioritise_queue.json";
 import cachedDemoSchedule from "./fixtures/demo_schedule.json";
 import { galleryDesign } from "./fixtures/gallery";
@@ -310,7 +310,9 @@ async function openSchedule() {
 }
 async function openValidation() {
   showLoading("Does LabForge price real labs right?", "Comparing against published labs…");
-  try { showValidation(await validation()); } catch { showError("Does LabForge price real labs right?", "Needs the backend (make backend)."); }
+  try { showValidation(await validation()); } catch (e) {
+    showError("Does LabForge price real labs right?", e instanceof HttpError ? `The backend returned an error (${e.status}).` : "Needs the backend (make backend).");
+  }
 }
 async function openBench() {
   showLoading("LabDesignBench", "Loading the leaderboard…");
