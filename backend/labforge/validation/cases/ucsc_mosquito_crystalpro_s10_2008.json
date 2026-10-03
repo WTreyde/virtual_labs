@@ -21,5 +21,6 @@
   },
   "verified": true,
   "notes": "No workflow: the CrystalPro imager is not in the catalog, so only half the hardware can be costed. Verified 3 Oct 2026 via NIH RePORTER API (1S10RR024611-01, award_amount 250093). Quote: \"we are requesting funds to purchase a TTP Labtech mosquito crystallization robot and CrystalPro HT-80D microscope imaging system.\" No per-item prices. Mapping: 1 of 2 items (mosquito -> sptlabtech_mosquito_xtal3). The CrystalPro HT-80D imager is a microscope-based imager (Rigaku/ CrystalPro) that is NOT the Rock Imager (no incubated plate storage); an imperfect proxy could be formulatrix_rock_imager_1000, left null here. Value share unknown; mosquito is the larger item by catalog price. 2008 purchase, so inflation/technology-generation caveat applies.",
-  "split": "in_sample"
+  "split": "in_sample",
+  "figure_type": "grant_award"
 }

@@ -43,5 +43,6 @@
   },
   "price_basis": "configured",
   "condition": "new",
-  "split": "out_of_sample"
+  "split": "out_of_sample",
+  "figure_type": "grant_award"
 }

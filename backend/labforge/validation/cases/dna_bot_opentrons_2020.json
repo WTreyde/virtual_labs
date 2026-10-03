@@ -49,5 +49,6 @@
     ]
   },
   "price_basis": "configured",
-  "split": "in_sample"
+  "split": "in_sample",
+  "figure_type": "paper_quote"
 }

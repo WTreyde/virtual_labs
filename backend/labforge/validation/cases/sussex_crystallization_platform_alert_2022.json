@@ -21,5 +21,6 @@
   },
   "verified": true,
   "notes": "No workflow: the award names no makes or models. Opened the Gateway to Research API 3 Oct 2026: 'Sussex Crystallization Platform for Bioscience discovery' (Univ. Sussex), fund GBP 715,568, 2022-08 to 2023-07. Abstract: \"The platform platform has integrated software and comprises a crystallization robot, an advanced large capacity automated crystal imaging system and a next-generation liquid handler for crystallization screen building.\" WEAK CASE: the abstract names no makes or models, so mapping is a guess (likely Formulatrix NT8/mosquito LCP, Rock Imager, and a Formulatrix Mantis/Tempest-class handler) and is left as catalog_id null except by-function guesses flagged in the names. 0 of 3 confirmed; 3 of 3 plausible. Use only as a function-level prediction target (does our designer produce ~one dispenser + one large imager + one screen-builder at roughly this price?). Capacity of the imager is not stated.",
-  "split": "in_sample"
+  "split": "in_sample",
+  "figure_type": "grant_award"
 }

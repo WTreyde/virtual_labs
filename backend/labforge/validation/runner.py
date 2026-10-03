@@ -33,7 +33,8 @@ def run_case(case: dict) -> dict:
     if workflow is None:
         return {**row, "status": "no_design_yet"}
     predicted = predicted_cost(workflow, cost["includes"], build=case.get("build", "turnkey"),
-                               year=cost.get("year"), basis=case.get("price_basis"))
+                               year=cost.get("year"), basis=case.get("price_basis"),
+                               figure_type=case.get("figure_type"))
     out = {**row, "status": "compared", **compare(cost["value_usd"], predicted)}
     out["within_25pct"] = predicted["p50"] / CONFIDENCE_TOLERANCE <= cost["value_usd"] <= predicted["p50"] * CONFIDENCE_TOLERANCE
     # Used equipment cannot be matched: the catalog only prices new purchases.
