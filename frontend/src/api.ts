@@ -6,7 +6,7 @@ import workflow from "../../examples/workflow.json";
 import cachedOptimise from "./fixtures/example_optimise.json";
 import cachedTimeline from "./fixtures/example_timeline.json";
 import type { AgentEvent } from "./replay";
-import type { CatalogItem, ChatMessage, Design, InstrumentOptimisation, Leaderboard, ProjectRequest, ProjectSchedule, ValidationRow } from "./types";
+import type { BenchTask, CatalogItem, ChatMessage, Design, InstrumentOptimisation, Leaderboard, ProjectRequest, ProjectSchedule, ValidationRow } from "./types";
 
 export const API = (import.meta as any).env?.VITE_API ?? "http://localhost:8000";
 
@@ -135,7 +135,7 @@ export async function validation(): Promise<ValidationRow[]> {
 export async function leaderboard(): Promise<Leaderboard | null> {
   const res = await apiFetch("/bench/leaderboard", { signal: AbortSignal.timeout(10000) });
   if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`/bench/leaderboard: HTTP ${res.status}`);
+  if (!res.ok) throw new HttpError(res.status, `/bench/leaderboard: HTTP ${res.status}`);
   return res.json();
 }
 
@@ -163,3 +163,13 @@ export const LIVE_CHAT_MESSAGE = {
   off: "Live design is off in this public demo. Watch the two recorded cases instead.",
   unreachable: "Live design needs the backend (make backend or make demo), which isn't reachable right now.",
 };
+
+/** GET /bench/tasks (briefs, traps, expected behaviour); empty if unavailable, since the leaderboard works without it. */
+export async function benchTasks(): Promise<BenchTask[]> {
+  try {
+    const res = await apiFetch("/bench/tasks", { signal: AbortSignal.timeout(10000) });
+    return res.ok ? res.json() : [];
+  } catch {
+    return [];
+  }
+}

@@ -1,6 +1,6 @@
 import "@fontsource/press-start-2p";
 import Phaser from "phaser";
-import { chatStream, exampleDesign, health, HttpError, LIVE_CHAT_MESSAGE, leaderboard, liveCatalog, optimise, prioritise, setOffline, validation } from "./api";
+import { benchTasks, chatStream, exampleDesign, health, HttpError, LIVE_CHAT_MESSAGE, leaderboard, liveCatalog, optimise, prioritise, setOffline, validation } from "./api";
 import demoQueue from "../../backend/labforge/catalog/data/demo_prioritise_queue.json";
 import cachedDemoSchedule from "./fixtures/demo_schedule.json";
 import { galleryDesign } from "./fixtures/gallery";
@@ -316,7 +316,12 @@ async function openValidation() {
 }
 async function openBench() {
   showLoading("LabDesignBench", "Loading the leaderboard…");
-  try { showLeaderboard(await leaderboard()); } catch { showError("LabDesignBench", "Needs the backend (make backend)."); }
+  try {
+    const [board, tasks] = await Promise.all([leaderboard(), benchTasks()]);
+    showLeaderboard(board, tasks);
+  } catch (e) {
+    showError("LabDesignBench", e instanceof HttpError ? `The backend returned an error (${e.status}).` : "Needs the backend (make backend).");
+  }
 }
 
 go(route);
