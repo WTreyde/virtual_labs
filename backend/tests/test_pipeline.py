@@ -43,7 +43,8 @@ def test_report_and_bench():
     assert load_tasks()
 
 
-def test_gateway_offline_chat():
+def test_gateway_offline_chat(monkeypatch):
+    monkeypatch.setenv('ANTHROPIC_API_KEY', '')
     client = TestClient(app)
     out = client.post("/chat", json={"messages": [{"role": "user", "content": "hi"}]}).json()
     assert errors(out["layout"], "layout") == []
