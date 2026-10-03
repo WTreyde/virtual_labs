@@ -193,3 +193,30 @@ def test_whatif_sweeps_cover_transfer_and_uptime():
     assert up[0]["value"] == 0.8 and up[0]["throughput_p50"] < up[-1]["throughput_p50"]
     arm = optimise_instrument(s, w, lay, "arm_1", hours=24, replicates=4)
     assert "transfer speed" in arm["headroom_note"]
+
+
+def test_downtime_is_off_by_default_and_scales_a_bottleneck():
+    w = wf([step("load", ["src_1"], 0), step("work", ["lh_1"], 3600, ["load"])], {**SOURCE, "lh_1": "opentrons_flex"})
+    base = run(spec(), w, layout(), hours=72)
+    assert base == simulate(spec(), w, layout(), hours=72, replicates=2, downtime=None)
+    half = simulate(spec(), w, layout(), hours=72, replicates=2, downtime={"lh_1": {"availability": 0.5, "cycle_h": 2}})
+    assert errors(half, "sim_result") == []
+    assert half["throughput"]["p50"] == pytest.approx(12, rel=0.1)  # up half the time: half the plates
+    util = next(u for u in half["utilisation"] if u["instance_id"] == "lh_1")["busy_fraction"]
+    assert util == pytest.approx(0.5, abs=0.05)  # down time is not counted as busy
+
+
+def test_robot_failures_delay_transfers():
+    w = wf([step("load", ["src_1"], 0), step("read", ["reader_1"], 60, ["load"])],
+           {**SOURCE, "reader_1": "bmg_clariostar", "arm_1": "ur5e"})
+    lay = layout(transfers=[{"from_instance": "src_1", "to_instance": "reader_1", "transporter_instance": "arm_1",
+                             "distance_m": 1, "est_time_s": 600}])
+    up = run(spec(), w, lay)["throughput"]["p50"]
+    flaky = simulate(spec(), w, lay, hours=48, replicates=4, downtime={"arm_1": {"mtbf_h": 1, "mttr_h": 1}})
+    assert flaky["throughput"]["p50"] < 0.7 * up
+
+
+def test_downtime_for_unknown_instance_is_an_error():
+    w = wf([step("load", ["src_1"], 0)], SOURCE)
+    with pytest.raises(ValueError, match="not in workflow.equipment"):
+        simulate(spec(), w, layout(), hours=24, replicates=1, downtime={"ghost_1": {"availability": 0.9}})

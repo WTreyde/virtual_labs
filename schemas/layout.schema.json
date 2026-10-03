@@ -169,6 +169,7 @@
             "enum": [
               "fume_hood",
               "ventilated",
+              "vibration_free",
               "bsl2",
               "cold_room",
               "cryogen",

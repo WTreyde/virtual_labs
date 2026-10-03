@@ -9,7 +9,8 @@ def cell(value):
 
 def render_report(lab_spec: dict, workflow: dict, layout: dict, sim: dict,
                   claims: list[dict] | None = None, evidence: list[dict] | None = None,
-                  claim_history: list[dict] | None = None) -> str:
+                  claim_history: list[dict] | None = None,
+                  simulation_limitations: list[str] | None = None) -> str:
     t = sim['throughput']
     median = t.get('p50', t['value'])
     target = lab_spec['throughput_target']['value']
@@ -44,6 +45,8 @@ def render_report(lab_spec: dict, workflow: dict, layout: dict, sim: dict,
         lines += [f'Equipment budget: USD {budget:,.0f}. Known-price subtotal: USD {total:,.0f}.', '']
         if total > budget:
             lines += ['The known-price subtotal exceeds the budget.', '']
+    if simulation_limitations:
+        lines += ['## Simulator limitations', '', *['- ' + note for note in simulation_limitations], '']
     lines += ['Costs are catalog estimates and exclude installation, service, consumables and building work.', '',
               '## Throughput', '', f'Median {median} {t["unit"]}; P10 {t.get("p10", "unavailable")}; P90 {t.get("p90", "unavailable")}.',
               f'Probability of meeting the simulated target: {t.get("prob_meets_target", "unavailable")}.',
@@ -58,6 +61,13 @@ def render_report(lab_spec: dict, workflow: dict, layout: dict, sim: dict,
         lines += ['', '## Refutation history', '', 'These are historical checks; a later revision may supersede the design or assertion.']
         for workflow_id, c in refutations:
             lines.append(f'- {workflow_id}: {c["statement"]} — refuted; observed {c.get("verified_value", "unknown")}.')
+    observed = sorted({c['verified_value'] for c in claims or []
+                       if c.get('metric') == 'throughput.p50' and 'verified_value' in c})
+    if observed and any(not math.isclose(value, median, rel_tol=0.01, abs_tol=0.01) for value in observed):
+        lines += ['', '## Independent verifier comparison', '',
+                  f'The planning simulation reports P50 {median}; the verifier observed {observed}. '
+                  'These are different model runs/assumptions. Use the verifier notes to identify restored catalog durations; '
+                  'do not present the planning number as independently confirmed.']
     lines += ['', '## Bottlenecks and risks', '']
     lines += [f'- **{b["severity"]}**: {b["message"]} {b.get("suggestion", "")}' for b in sim.get('bottlenecks', [])] or ['- None reported by the model.']
     lines += ['', '## Layout issues', '']

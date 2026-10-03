@@ -33,11 +33,13 @@ export interface SimResult {
   bottlenecks: { kind: string; severity: string; message: string; instances?: string[]; suggestion?: string }[];
   timeline?: TimelineEvent[]; simulated_hours?: number;
 }
+export type ChatMessage = { role: string; content: string | unknown[] };
+
 export interface Design {
   lab_spec: any; workflow: Workflow; layout: Layout; sim_result: SimResult; catalog: Record<string, CatalogItem>;
   /** Client-side note on where the timeline came from, shown under the time controls. */
   timeline_note?: string;
-  /** Report Markdown carried by a recorded run, used instead of POST /report. */
+  /** Report Markdown from the agent (chat or a recorded run), used instead of POST /report. */
   report_markdown?: string;
 }
 

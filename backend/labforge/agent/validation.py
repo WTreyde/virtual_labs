@@ -57,6 +57,15 @@ def validate_design(spec: dict, workflow: dict) -> None:
                 raise ValueError(f"{step['id']}: duration range must satisfy 0 <= low <= duration_s == value <= high")
         if step.get("fan_out", 1) <= 0:
             raise ValueError(f"{step['id']}: fan_out must be positive")
+    if spec['throughput_target']['unit'] != 'plates_per_day':
+        parents = {parent for step in steps.values() for parent in step.get('after', [])}
+        sinks = [step for sid, step in steps.items() if sid not in parents]
+        counting = [step for step in sinks if step.get('params', {}).get('count_throughput') is True]
+        if len(counting) != 1:
+            raise ValueError('Non-plate throughput needs exactly one sink with params.count_throughput=true and explicit params.units_per_labware.')
+        units = counting[0].get('params', {}).get('units_per_labware')
+        if type(units) not in (int, float) or not math.isfinite(units) or units <= 0:
+            raise ValueError('Counting sink units_per_labware must be finite and positive; do not relabel plate counts as compounds/crystals.')
     done = set()
     while len(done) < len(steps):
         ready = {sid for sid, step in steps.items() if sid not in done and set(step.get("after", [])) <= done}

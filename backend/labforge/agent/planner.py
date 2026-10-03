@@ -11,6 +11,7 @@ import os
 
 from labforge.agent.tools import TOOLS
 from labforge.agent.config import load_env
+from labforge.agent.errors import BackendContractError
 from labforge.contracts import load_example
 from labforge.agent.prompts import SYSTEM, system_prompt
 from labforge.agent.session import ToolSession
@@ -75,11 +76,14 @@ def run_turn(history: list[dict], max_steps: int = 12, on_event=None, stream_tex
             completed = response.stop_reason == "end_turn"
             break
         results = []
+        backend_blocked = False
         for block in response.content:
             if block.type != "tool_use":
                 continue
             emit({"type": "tool_start", "name": block.name, "input": block.input})
             try:
+                if backend_blocked:
+                    raise BackendContractError('Skipped: a previous backend output failed its contract.')
                 _, fn = available_tools[block.name]
                 out = fn(**block.input)
                 produced.update({k: v for k, v in out.items() if k in ("layout", "sim_result")})
@@ -101,13 +105,23 @@ def run_turn(history: list[dict], max_steps: int = 12, on_event=None, stream_tex
                 emit({"type": "tool_end", "name": block.name, "output": compact})
                 results.append({"type": "tool_result", "tool_use_id": block.id, "content": json.dumps(compact)})
             except Exception as e:  # report tool failures back to Claude instead of crashing the loop
+                if isinstance(e, BackendContractError):
+                    backend_blocked = True
+                    produced.setdefault('backend_errors', []).append(str(e))
+                    if block.name == 'layout_and_simulate':
+                        produced['failed_proposal'] = block.input
+                    for key in ('lab_spec', 'workflow', 'layout', 'sim_result', 'claims', 'report_markdown', 'brier'):
+                        produced.pop(key, None)
                 emit({"type": "tool_error", "name": block.name, "error": str(e)})
                 results.append({"type": "tool_result", "tool_use_id": block.id, "content": str(e), "is_error": True})
         messages.append({"role": "user", "content": results})
+        if backend_blocked:
+            stop_reason = 'backend_contract_error'
+            break
 
     text = "".join(b.get("text", "") for b in messages[-1]["content"] if b.get("type") == "text") if messages[-1]["role"] == "assistant" else ""
     if not completed:
-        reason = 'the API declined the request' if stop_reason == 'refusal' else 'the response or tool-call limit was reached'
+        reason = 'a backend output broke a shared contract; the integrator must repair it before retrying' if stop_reason == 'backend_contract_error' else 'the API declined the request' if stop_reason == 'refusal' else 'the response or tool-call limit was reached'
         text += f"\nPlanning is incomplete: {reason}. Any returned design is provisional."
     if session.design is not None:
         produced.update(session.design)
@@ -130,4 +144,4 @@ def run_turn(history: list[dict], max_steps: int = 12, on_event=None, stream_tex
     if session.claim_history:
         produced['claim_history'] = session.claim_history
     return {"messages": [{"role": "assistant", "content": text.strip()}],
-            "history": messages, "completed": completed, **produced}
+            "history": messages, "completed": completed, "stop_reason": stop_reason, **produced}

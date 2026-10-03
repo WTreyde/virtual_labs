@@ -6,7 +6,7 @@ import workflow from "../../examples/workflow.json";
 import cachedOptimise from "./fixtures/example_optimise.json";
 import cachedSchedule from "./fixtures/example_schedule.json";
 import cachedTimeline from "./fixtures/example_timeline.json";
-import type { CatalogItem, Design, InstrumentOptimisation, Leaderboard, ProjectRequest, ProjectSchedule, ValidationRow } from "./types";
+import type { CatalogItem, ChatMessage, Design, InstrumentOptimisation, Leaderboard, ProjectRequest, ProjectSchedule, ValidationRow } from "./types";
 
 export const API = (import.meta as any).env?.VITE_API ?? "http://localhost:8000";
 
@@ -27,12 +27,14 @@ export function exampleDesign(): Design {
   return d;
 }
 
-export async function chat(messages: { role: string; content: string }[], current: Design): Promise<{ reply: string; design: Design }> {
+export async function chat(messages: ChatMessage[], current: Design): Promise<{ reply: string; design: Design; history: ChatMessage[] }> {
   const res = await apiFetch("/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages }) });
   const out = await res.json();
+  if (!res.ok || out.type === "error") throw new Error(out.detail ?? out.message ?? `Chat failed: HTTP ${res.status}`);
   const catalog = byId(await (await apiFetch("/catalog")).json());
-  const design = out.layout ? { lab_spec: out.lab_spec, workflow: out.workflow, layout: out.layout, sim_result: out.sim_result, catalog } : current;
-  return { reply: out.messages?.at(-1)?.content ?? "", design };
+  const design = out.layout ? { lab_spec: out.lab_spec, workflow: out.workflow, layout: out.layout, sim_result: out.sim_result, catalog, report_markdown: out.report_markdown } : current;
+  const reply = out.messages?.at(-1)?.content ?? "";
+  return { reply, design, history: out.history ?? [...messages, { role: "assistant", content: reply }] };
 }
 
 /** Live catalog entries for the design's items, so the BOM matches the backend report. Throws when offline. */

@@ -11,6 +11,8 @@ import type { CatalogItem, Design } from "./types";
 
 export interface RecordedRun {
   brief: string; model?: string; source?: string;
+  /** Set by copy_replays.py when the recorded sim_result had no timeline and it was recomputed from the design. */
+  timeline_source?: string;
   output: {
     messages?: { role: string; content: unknown }[];
     lab_spec?: any; workflow?: Design["workflow"]; layout?: Design["layout"]; sim_result?: Design["sim_result"];
@@ -30,7 +32,7 @@ export interface ReplayHooks {
 
 export async function loadReplay(name: string): Promise<RecordedRun> {
   const res = await fetch(`${(import.meta as any).env?.BASE_URL ?? "/"}replays/${encodeURIComponent(name)}.json`);
-  if (!res.ok) throw new Error(`No recorded run called "${name}" (looked for public/replays/${name}.json).`);
+  if (!res.ok) throw new Error(`There is no recorded run called "${name}" yet, so there is nothing to replay. (Looked for public/replays/${name}.json.)`);
   return res.json();
 }
 
@@ -104,7 +106,8 @@ export async function playReplay(run: RecordedRun, hooks: ReplayHooks, skip: { n
   if (o.layout && o.workflow && o.sim_result && o.lab_spec) {
     const design: Design = {
       lab_spec: o.lab_spec, workflow: o.workflow, layout: o.layout, sim_result: o.sim_result,
-      catalog: run.catalog ?? {}, report_markdown: o.report_markdown, timeline_note: "recorded run",
+      catalog: run.catalog ?? {}, report_markdown: o.report_markdown,
+      timeline_note: run.timeline_source ? "timeline recomputed from recorded design" : "recorded run",
     };
     hooks.showDesign(design);
     if (answer) hooks.log(`Agent: ${answer}`);

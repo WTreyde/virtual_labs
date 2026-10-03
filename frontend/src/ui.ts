@@ -180,6 +180,6 @@ export function setupClock(d: Design) {
 
 export function onTick(e: { t: number; end: number; done: number; moving: number }) {
   bar.querySelector("#clock-t")!.textContent = `T+${hms(e.t)}`;
-  bar.querySelector("#clock-done")!.textContent = `${e.done} plates done · ${e.moving} moving`;
+  bar.querySelector("#clock-done")!.textContent = `${e.done} finished · ${e.moving} in transit`;
   if (!scrubbing) scrub.value = String(Math.round((1000 * e.t) / Math.max(1, e.end)));
 }

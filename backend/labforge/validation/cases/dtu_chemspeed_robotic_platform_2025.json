@@ -1,0 +1,23 @@
+{
+  "id": "dtu_chemspeed_robotic_platform_2025",
+  "name": "DTU Chemistry robotic platform for automated synthesis and catalysis (TED award, Chemspeed, 2025)",
+  "domain": "chemistry",
+  "sources": [
+    "https://ted.europa.eu/en/notice/229731-2025/html"
+  ],
+  "brief": "A university chemistry department buys one modular robotic platform for automated synthesis and catalysis: it dispenses liquids volumetrically and solids gravimetrically into reaction vials, caps and uncaps vials, and runs parallel reactions in reaction blocks with controlled mixing, temperature, pressure and atmosphere, with room for later add-ons for sample separation or analysis. Used for research and a new teaching course in laboratory robotics.",
+  "build": "turnkey",
+  "reported": {
+    "cost": {
+      "value_usd": 935000,
+      "original": "DKK 6,378,981.53 excl. VAT (winning tender, Chemspeed Technologies AG; contract 7 Apr 2025). Converted at about 0.147 USD/DKK (estimate)",
+      "year": 2025,
+      "includes": [
+        "instruments"
+      ],
+      "excludes_note": "Excl. VAT. Notice does not itemise modules; unclear whether install/training/warranty are bundled (an optional second warranty year was a tender option). Pre-tender estimate was DKK 6,000,000."
+    }
+  },
+  "verified": true,
+  "notes": "No workflow on purpose: this tender is already cited in the catalog's Chemspeed SWING XL price range, so the comparison would be partly circular. Opened the TED award notice 229731-2025 (OJ S 70/2025, 9 Apr 2025). Quotes: \"Winner: Chemspeed Technologies AG ... Value of the tender: 6 378 981,53 DKK\"; \"Estimated value excluding VAT: 6 000 000,00 DKK\"; one tender received. Equipment list is only the functional spec (liquid + gravimetric solid dosing, capping, reaction blocks, modular add-ons); the notice names no module models, so the equipment file is an inference: one Chemspeed SWING-class platform (catalog chemspeed_swing_xl, 100% of the hardware by count and value if the SWING assumption holds; the exact configuration is not stated). USD conversion is mine and approximate. Only one bid, so price is not competition-tested."
+}

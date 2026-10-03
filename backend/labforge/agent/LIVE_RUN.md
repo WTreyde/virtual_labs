@@ -263,3 +263,21 @@ are in `demo/scenarios_20261003/`. Missing equipment is assigned to Max in
 External/in-silico steps do not require local catalog instruments; the XChem response's
 suggestion of a service catalog entry is optional, not a prerequisite. The prompt now makes
 that distinction explicit. No in-house diffraction item is required or permitted in this demo.
+
+## Combined-main integration (3 Oct)
+
+The planner passes the backend-held LabSpec to the new independent verifier. Non-plate
+workflows need exactly one terminal counting step with positive `params.units_per_labware`.
+The sink must have no successor; a counter on the assay readout is insufficient when storage
+or hit analysis follows it. Legacy simulator limitations keep throughput unverifiable.
+
+Backend output contract errors stop the loop with `stop_reason=backend_contract_error` and
+retain `failed_proposal` for the owning strand; the model is not asked to redesign around a
+backend/schema defect. The shared layout schema accepts the catalog's vibration_free zones.
+The game retains full model/tool history and uses the checked planner report. Gateway
+`POST /chat/stream` exposes the existing SSE adapter; the game still uses synchronous chat.
+
+The demo runner supports `--scenario chemistry` or `--scenario xchem`, writes events as they
+arrive, and records the API stop reason. Gate success means complete orchestration and
+checked model claims, not that the target, budget or physical layout are feasible. Inspect
+refuted claims and layout violations separately. Missing evidence remains an explicit estimate.

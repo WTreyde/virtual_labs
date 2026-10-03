@@ -1,0 +1,25 @@
+{
+  "id": "ucla_htsc_unchained_junior_s10_2023",
+  "name": "UCLA High Throughput Synthesis and Catalysis Facility (NIH S10 OD034287, 2023)",
+  "domain": "chemistry",
+  "sources": [
+    "https://reporter.nih.gov/project-details/S10OD034287",
+    "https://api.reporter.nih.gov/v2/projects/search",
+    "https://mic.chem.ucla.edu/hts/"
+  ],
+  "brief": "A shared university facility for high-throughput organic synthesis: automated solid and liquid dispensing, heating/cooling/stirring, high-pressure, electrochemical and photochemical reactions and sample filtration, with the robotic system housed inside a nitrogen-filled glovebox and screening reactions at -20 to 180 C and up to 200 psi. Reaction screens are analysed on an LC-MS with fraction collection.",
+  "build": "turnkey",
+  "reported": {
+    "cost": {
+      "value_usd": 1291573,
+      "original": "NIH S10 award amount US$1,291,573 (FY2023, 1S10OD034287-01) 'to purchase a high throughput experimentation equipment'",
+      "year": 2023,
+      "includes": [
+        "instruments"
+      ],
+      "excludes_note": "Grant award amount, not an invoice: may not equal the purchase price (cost share, installation, glovebox or LC-MS may or may not be inside it). Facility page says two Unchained robots plus an Agilent fraction-collection LC-MS; the abstract only mentions the Unchained Junior system(s) and the glovebox."
+    }
+  },
+  "verified": true,
+  "notes": "No workflow: the Unchained Junior is not in the catalog (Big Kahuna is a different product) and the LC-MS may not be in the grant budget. Opened NIH RePORTER API (3 Oct 2026): project 1S10OD034287-01, UCLA Chemistry, 'High-Throughput Synthesis Equipment', award_amount 1,291,573. Abstract: \"we request funds to purchase a Junior system from Unchained Labs to automate the sample preparation, reaction execution and product processing ... The entire robotic system will be placed in a nitrogen-filled glove box\". Facility page (mic.chem.ucla.edu/hts) lists: Unchained Junior automated chemical experimentation (two robots), Agilent fraction-collection LCMS, S10 acknowledgement. Mapping: Unchained Junior is not Big Kahuna but is the same vendor/family (mapped to unchained_big_kahuna as nearest, a loose match); glovebox -> mbraun_glovebox (brand unknown); Agilent LCMS -> agilent_1290_lcmsd_iq (the LCMS is not confirmed to be in the S10 budget). By count 3 of 3 lines have a nearest catalog id; none are exact-model matches, no per-item prices given, so by-value coverage cannot be computed. Treat the total as an upper-ish estimate of equipment value."
+}

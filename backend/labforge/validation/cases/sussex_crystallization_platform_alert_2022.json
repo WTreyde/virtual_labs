@@ -1,0 +1,24 @@
+{
+  "id": "sussex_crystallization_platform_alert_2022",
+  "name": "University of Sussex crystallization platform (BBSRC ALERT; robot with LCP, large-capacity imager, microfluidic screen builder; 2022)",
+  "domain": "biology",
+  "sources": [
+    "https://gtr.ukri.org/gtr/api/projects/DF6E2C24-F4DB-4D8A-B912-E494768F5FDC"
+  ],
+  "build": "turnkey",
+  "brief": "A university crystallization facility replaces and expands its set-up with an integrated platform: a crystallization robot with lipidic cubic phase capability, an advanced large-capacity automated crystal imaging system, and a next-generation microfluidic liquid handler for building crystallization screens, all under integrated software.",
+  "reported": {
+    "cost": {
+      "value_usd": 885000,
+      "original": "GBP 715,568 (BBSRC award, 2022-2023); converted at ~1.24 USD/GBP",
+      "year": 2022,
+      "includes": [
+        "instruments",
+        "analytics"
+      ],
+      "excludes_note": "Award value of the BBSRC equipment grant on UKRI Gateway to Research. Whether it includes VAT, service contracts, install or housing is not stated. The USD figure is my conversion."
+    }
+  },
+  "verified": true,
+  "notes": "No workflow: the award names no makes or models. Opened the Gateway to Research API 3 Oct 2026: 'Sussex Crystallization Platform for Bioscience discovery' (Univ. Sussex), fund GBP 715,568, 2022-08 to 2023-07. Abstract: \"The platform platform has integrated software and comprises a crystallization robot, an advanced large capacity automated crystal imaging system and a next-generation liquid handler for crystallization screen building.\" WEAK CASE: the abstract names no makes or models, so mapping is a guess (likely Formulatrix NT8/mosquito LCP, Rock Imager, and a Formulatrix Mantis/Tempest-class handler) and is left as catalog_id null except by-function guesses flagged in the names. 0 of 3 confirmed; 3 of 3 plausible. Use only as a function-level prediction target (does our designer produce ~one dispenser + one large imager + one screen-builder at roughly this price?). Capacity of the imager is not stated."
+}
