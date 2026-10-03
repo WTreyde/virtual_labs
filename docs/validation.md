@@ -44,7 +44,24 @@ After the in-sample work above, the cost model was **frozen at commit 02d7678** 
 
 After the test, a 2021 NIH Formulatrix "Rock Imager" purchase ($183,143, model unstated, placeholder confidence) was added to the catalog. It brings both Rock Imager cases inside the band (JHU 1.10x, Baylor 1.33x), but that is after the fact for both and does not count as out-of-sample. Current in-sample result with it: 3 of 7 in band, median 1.51x.
 
-**Slide 6 line:** "On 6 labs we had never seen, collected after freezing the model, our 80% cost band caught 4 of 6 with no systematic bias (median 1.00x). Our confidence score did not generalise, so we report the band, not the score."
+### Uncertainty terms and a second blind round
+
+After round 1, two uncertainty terms were added, both sized from catalog evidence outside the validation cases: **grant award with unknown contents** (spread 0.25, from five award-vs-purchase pairs) and **configurable systems** (spread floor 0.31, from configured-price ranges within product families). 15 instruments were added to the catalog (79 items). The model was then frozen again at **973d0f5** and 6 new cases were collected blind (4 NIH S10 awards, one MRC grant, one French public tender):
+
+| Case | Year | Reported | Multiple | In band |
+|---|---|---|---|---|
+| UTSW Echo 555 | 2019 | $336,900 | 0.89x | yes |
+| CNRS-IGBMC crystal imager (tender) | 2023 | ~$460,000 | 0.78x | yes |
+| Baylor dragonfly + mosquito HV | 2026 | $305,578 | 0.72x | yes |
+| Ohio State mosquito | 2010 | $111,200 | 0.63x | yes |
+| Stony Brook Mantis + PHERAstar | 2020 | $173,354 | 1.25x | yes |
+| Newcastle 2 x Rock Imager 1000 (MRC) | 2023 | ~$988,930 | 0.46x | no |
+
+Round 2 (category-corrected): **5 of 6 in band; median 0.75x (we guessed low); 1 of 6 within ±25%; stated 33% vs observed 17%; Brier 0.171 vs 0.139 baseline.** Raw as collected: 3 of 4 costable cases in band (two listed only "instruments" for an imager, which the catalog files as analytics; the collection prompt had omitted that convention, and the corrected numbers apply one mechanical rule to all six). A bug that returned $0 with full confidence when nothing could be priced is fixed; such cases now report `not_costable`.
+
+**Both blind rounds together (12 cases): 9 of 12 inside the 80% band (75%).** The band holds up. The centre drifts (1.00x, then 0.75x; grants averaged ~16% above purchase prices in the calibration pairs, and that shift is deliberately not applied), and the confidence percentage does not yet beat a constant baseline in either round.
+
+**Slide 6 line:** "Tested blind twice on 12 labs we had never seen, our 80% cost band caught 9 of 12. We show that band, and we say plainly that our single-number confidence score is not yet reliable."
 
 ## 2. Optimisation for vendors
 

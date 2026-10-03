@@ -1,0 +1,56 @@
+{
+  "id": "stonybrook_mantis_pherastar_s10_2020",
+  "name": "Stony Brook University robotic assay platform: Formulatrix Mantis + BMG PHERAstar (NIH S10; 2020)",
+  "domain": "biology",
+  "sources": [
+    "https://api.reporter.nih.gov/v2/projects/search (project_num 1S10OD028478-01)",
+    "https://reporter.nih.gov/project-details/9938120"
+  ],
+  "build": "turnkey",
+  "brief": "A university screening facility wants a small-volume robotic assay platform: a microfluidic reagent dispenser for 6- to 1536-well plates, paired with a multi-mode microplate reader, run from one controller computer.",
+  "reported": {
+    "cost": {
+      "value_usd": 173354,
+      "original": "US$173,354 (NIH S10 award, FY2020)",
+      "year": 2020,
+      "includes": [
+        "analytics",
+        "instruments"
+      ],
+      "excludes_note": "NIH S10 award for the dispenser and reader as one integrated platform; integration is stated to be routine. Staffing and service contracts are not in the award."
+    }
+  },
+  "verified": true,
+  "notes": "Out-of-sample round 2: collected blind after the model was frozen at commit 973d0f5. includes corrected from ['instruments'] to ['analytics', 'instruments'] after scoring, by the rule that a purchase of named equipment covers those items' cost categories (the round-2 collection prompt omitted the category convention). Out-of-sample (oos2 set), found after the cost model was frozen; not used for catalog prices. price_basis=configured (two instruments as an integrated platform). Quote: \"The robotic assay platform consists of a liquid handling robot ... Key features of the Mantis (Formulatrix) liquid handling robot ... Key features of the multi-mode plate reader (PHERAstar)\". Verified 3 Oct 2026 via RePORTER API, award_amount 173354. Mantis exact; PHERAstar named without FSX suffix so proxy to pherastar_fsx.",
+  "workflow": {
+    "id": "stonybrook_mantis_pherastar_s10_2020_wf",
+    "lab_spec_id": "stonybrook_mantis_pherastar_s10_2020",
+    "equipment": [
+      {
+        "instance_id": "formulatrix_mantis_1",
+        "catalog_id": "formulatrix_mantis",
+        "rationale": "Named in the source.",
+        "match": "exact"
+      },
+      {
+        "instance_id": "bmg_pherastar_fsx_2",
+        "catalog_id": "bmg_pherastar_fsx",
+        "rationale": "Closest catalog model to the item named in the source.",
+        "match": "proxy"
+      }
+    ],
+    "steps": [
+      {
+        "id": "use",
+        "name": "Placeholder step (cost comparison only)",
+        "capability": "manual_bench",
+        "candidate_instances": [],
+        "duration_s": 0
+      }
+    ]
+  },
+  "price_basis": "configured",
+  "condition": "new",
+  "split": "out_of_sample",
+  "figure_type": "grant_award"
+}

@@ -1,0 +1,55 @@
+{
+  "id": "baylor_dragonfly_mosquito_hv_s10_2026",
+  "name": "Baylor College of Medicine genomics core: SPT Labtech dragonfly discovery + mosquito HV (NIH S10; 2026)",
+  "domain": "biology",
+  "sources": [
+    "https://api.reporter.nih.gov/v2/projects/search (project_num 1S10OD040178-01)",
+    "https://reporter.nih.gov/project-details/11338158"
+  ],
+  "build": "turnkey",
+  "brief": "A sequencing core miniaturises library preparation with a low-volume reagent dispenser and a nanolitre positive-displacement pipetter operated as a pair.",
+  "reported": {
+    "cost": {
+      "value_usd": 305578,
+      "original": "US$305,578 (NIH S10 award, FY2026)",
+      "year": 2026,
+      "includes": [
+        "instruments"
+      ],
+      "excludes_note": "NIH S10 award for the pair; service contracts unstated."
+    }
+  },
+  "verified": true,
+  "notes": "Out-of-sample round 2: collected blind after the model was frozen at commit 973d0f5. Out-of-sample (oos2 set), found after the cost model was frozen; not used for catalog prices. price_basis=configured (two-instrument system). Quote: \"The requested instruments from SPT Labtech, the Dragonfly Discovery and Mosquito HV\". Verified 3 Oct 2026 via RePORTER API, award_amount 305578. Dragonfly exact; mosquito HV is not a catalog item so proxied to mosquito Xtal3 (weak proxy; HV is a different model).",
+  "workflow": {
+    "id": "baylor_dragonfly_mosquito_hv_s10_2026_wf",
+    "lab_spec_id": "baylor_dragonfly_mosquito_hv_s10_2026",
+    "equipment": [
+      {
+        "instance_id": "sptlabtech_dragonfly_1",
+        "catalog_id": "sptlabtech_dragonfly",
+        "rationale": "Named in the source.",
+        "match": "exact"
+      },
+      {
+        "instance_id": "sptlabtech_mosquito_xtal3_2",
+        "catalog_id": "sptlabtech_mosquito_xtal3",
+        "rationale": "Closest catalog model to the item named in the source.",
+        "match": "proxy"
+      }
+    ],
+    "steps": [
+      {
+        "id": "use",
+        "name": "Placeholder step (cost comparison only)",
+        "capability": "manual_bench",
+        "candidate_instances": [],
+        "duration_s": 0
+      }
+    ]
+  },
+  "price_basis": "configured",
+  "condition": "new",
+  "split": "out_of_sample",
+  "figure_type": "grant_award"
+}

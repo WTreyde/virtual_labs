@@ -196,6 +196,12 @@ def predicted_cost(workflow: dict, includes: list[str], samples: int = 2000, see
         if figure_type == "grant_award":
             hw *= math.exp(rng.gauss(0, GRANT_SIGMA))
         totals.append(hw)
+    if not priced:
+        # Nothing in the requested categories can be priced: say so instead of predicting $0 with full confidence.
+        return {"p10": None, "p50": None, "p90": None, "n_items": len(entries), "price_year_factor": round(year_factor(year), 3),
+                "confidence": {"within_25pct": None, "label": "none", "data_coverage": 0.0,
+                               "unpriced_items": [e["catalog_id"] for e in ev], "drivers": [], "figure_noise": 0.0},
+                "items": ev, "not_costable": "no priced equipment in the reported cost categories"}
     q = statistics.quantiles(totals, n=10, method="inclusive")
     p50 = statistics.median(totals)
     within = sum(p50 / CONFIDENCE_TOLERANCE <= t <= p50 * CONFIDENCE_TOLERANCE for t in totals) / samples

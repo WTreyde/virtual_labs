@@ -1,0 +1,51 @@
+{
+  "id": "cnrs_igbmc_crystal_imager_tender_2023",
+  "name": "CNRS/IGBMC Strasbourg: crystallisation storage and imaging system from Formulatrix Europe (EU tender award; 2023)",
+  "domain": "biology",
+  "sources": [
+    "https://ted.europa.eu/en/notice/736894-2023/xml",
+    "https://ted.europa.eu/en/notice/736894-2023/html"
+  ],
+  "build": "turnkey",
+  "brief": "A structural biology institute procures, installs and commissions a temperature-controlled storage and automatic imaging system for macromolecular crystallisation plates, with training.",
+  "reported": {
+    "cost": {
+      "value_usd": 460000,
+      "original": "EUR 422,208 (TED contract award notice 736894-2023, signed 14.11.2023); USD at about 1.09 USD/EUR (approximate)",
+      "year": 2023,
+      "includes": [
+        "analytics",
+        "instruments",
+        "integration_labour"
+      ],
+      "excludes_note": "Optional preventive-maintenance tranche was not exercised at award. Model not named in the notice."
+    }
+  },
+  "verified": true,
+  "notes": "Out-of-sample round 2: collected blind after the model was frozen at commit 973d0f5. includes corrected from ['instruments', 'integration_labour'] to ['analytics', 'instruments', 'integration_labour'] after scoring, by the rule that a purchase of named equipment covers those items' cost categories (the round-2 collection prompt omitted the category convention). Out-of-sample (oos2 set), found after the cost model was frozen; not used for catalog prices. price_basis=configured (supply, delivery, installation, commissioning, training). Quote (FR): \"Fourniture, livraison, installation, mise en service et formation a l'utilisation d'un systeme de stockage et de prise d'images d'experiences de cristallisation des macromolecules biologiques\"; winner FORMULATRIX EUROPE, 422208.00. Verified 3 Oct 2026 via TED API/XML. Model unstated (Rock Imager family inferred from vendor and 20 C spec) so proxy to Rock Imager 1000; EUR-USD rate approximate.",
+  "workflow": {
+    "id": "cnrs_igbmc_crystal_imager_tender_2023_wf",
+    "lab_spec_id": "cnrs_igbmc_crystal_imager_tender_2023",
+    "equipment": [
+      {
+        "instance_id": "formulatrix_rock_imager_1000_1",
+        "catalog_id": "formulatrix_rock_imager_1000",
+        "rationale": "Closest catalog model to the item named in the source.",
+        "match": "proxy"
+      }
+    ],
+    "steps": [
+      {
+        "id": "use",
+        "name": "Placeholder step (cost comparison only)",
+        "capability": "manual_bench",
+        "candidate_instances": [],
+        "duration_s": 0
+      }
+    ]
+  },
+  "price_basis": "configured",
+  "condition": "new",
+  "split": "out_of_sample",
+  "figure_type": "tender_award"
+}

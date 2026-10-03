@@ -1,0 +1,56 @@
+{
+  "id": "newcastle_rock_imager_1000_x2_mrc_2023",
+  "name": "Newcastle University crystallography platform: two Formulatrix Rock Imager 1000 (MRC infrastructure grant; 2023)",
+  "domain": "biology",
+  "sources": [
+    "https://gtr.ukri.org/gtr/api/projects/78F0EAD4-1E57-4FF6-BEAC-01A6EA286B92",
+    "https://gtr.ukri.org/gtr/api/projects/78F0EAD4-1E57-4FF6-BEAC-01A6EA286B92/funds"
+  ],
+  "build": "turnkey",
+  "brief": "A university structural biology platform buys two automated crystal-hotel imagers (visible and UV optics) to incubate and image crystallisation trays at two temperatures, replacing an obsolete imager.",
+  "reported": {
+    "cost": {
+      "value_usd": 988930,
+      "original": "GBP 797,524 (UKRI/MRC award MC_PC_MR/Y000781/1, 2023-24); USD at about 1.24 USD/GBP (approximate conversion)",
+      "year": 2023,
+      "includes": [
+        "analytics",
+        "instruments"
+      ],
+      "excludes_note": "Grant value may include software, installation or contingency not itemised; a matching university investment for a Shifter is separate."
+    }
+  },
+  "verified": true,
+  "notes": "Out-of-sample round 2: collected blind after the model was frozen at commit 973d0f5. includes corrected from ['instruments'] to ['analytics', 'instruments'] after scoring, by the rule that a purchase of named equipment covers those items' cost categories (the round-2 collection prompt omitted the category convention). Out-of-sample (oos2 set), found after the cost model was frozen; not used for catalog prices. price_basis=configured (two units with visible+UV optics and software). Quote: \"We propose to purchase two Formulatrix Rock Imager 1000 'crystal hotels' ... Each unit is equipped to visualise crystals by visible and UV light\". Verified 3 Oct 2026 via GtR API funds value 797524 GBP. Conversion rate is my estimate, so USD is uncertain by a few percent; the figure may be higher than pure hardware.",
+  "workflow": {
+    "id": "newcastle_rock_imager_1000_x2_mrc_2023_wf",
+    "lab_spec_id": "newcastle_rock_imager_1000_x2_mrc_2023",
+    "equipment": [
+      {
+        "instance_id": "formulatrix_rock_imager_1000_1",
+        "catalog_id": "formulatrix_rock_imager_1000",
+        "rationale": "Named in the source.",
+        "match": "exact"
+      },
+      {
+        "instance_id": "formulatrix_rock_imager_1000_2",
+        "catalog_id": "formulatrix_rock_imager_1000",
+        "rationale": "Named in the source.",
+        "match": "exact"
+      }
+    ],
+    "steps": [
+      {
+        "id": "use",
+        "name": "Placeholder step (cost comparison only)",
+        "capability": "manual_bench",
+        "candidate_instances": [],
+        "duration_s": 0
+      }
+    ]
+  },
+  "price_basis": "configured",
+  "condition": "new",
+  "split": "out_of_sample",
+  "figure_type": "grant_award"
+}
