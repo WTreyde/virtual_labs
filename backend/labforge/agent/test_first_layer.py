@@ -50,7 +50,7 @@ class FirstLayerTests(unittest.TestCase):
         self.assertIn("provenance", item)
 
     def test_offline_fixture_is_explicit(self):
-        with patch.dict(os.environ, {"ANTHROPIC_API_KEY":""}):
+        with patch.dict(os.environ, {"ANTHROPIC_API_KEY":"", "LABFORGE_ENV_FILE":"/missing/test/.env"}):
             out = run_turn([{"role":"user","content":"design chemistry"}])
         self.assertIn("offline demo", out["messages"][0]["content"])
         self.assertIn("timeline", out["sim_result"])
@@ -68,7 +68,7 @@ class FirstLayerTests(unittest.TestCase):
         constructor = Mock(return_value=SimpleNamespace(messages=SimpleNamespace(create=create)))
         sdk = SimpleNamespace(Anthropic=constructor)
         with patch.dict(sys.modules, {"anthropic":sdk}), patch.dict(os.environ, {"ANTHROPIC_API_KEY":"test-only"}), patch.dict("labforge.agent.planner.TOOLS", {"layout_and_simulate":({},fn)}):
-            out = run_turn([{"role":"user","content":"design"}], max_steps=max_steps)
+            out = run_turn([{"role":"user","content":"design"}], max_steps=max_steps, stream_text=False)
         self.assertNotIn('betas', create.call_args.kwargs)
         self.assertNotIn('fallbacks', create.call_args.kwargs)
         workspace_id = os.environ.get('ANTHROPIC_WORKSPACE_ID', '').strip()
@@ -109,12 +109,24 @@ class FirstLayerTests(unittest.TestCase):
                 self.assertEqual(os.environ["ANTHROPIC_API_KEY"], "test-only")
                 self.assertEqual(os.environ["ANTHROPIC_MODEL"], "shell-model")
 
+    def test_env_loading_replaces_empty_shell_settings(self):
+        from labforge.agent.config import load_env
+        from tempfile import TemporaryDirectory
+        from pathlib import Path
+        with TemporaryDirectory() as temp:
+            path = Path(temp) / ".env"
+            path.write_text('ANTHROPIC_API_KEY="from-file"\nANTHROPIC_MODEL=claude-opus-5-5\n')
+            with patch.dict(os.environ, {"ANTHROPIC_API_KEY": "", "ANTHROPIC_MODEL": ""}, clear=True):
+                load_env(path)
+                self.assertEqual(os.environ["ANTHROPIC_API_KEY"], "from-file")
+                self.assertEqual(os.environ["ANTHROPIC_MODEL"], "claude-opus-5-5")
+
     def test_cli_requires_key_for_live_run(self):
         from labforge.agent.cli import main
         from contextlib import redirect_stderr
         from io import StringIO
         err = StringIO()
-        with patch.dict(os.environ, {"ANTHROPIC_API_KEY":""}), redirect_stderr(err):
+        with patch.dict(os.environ, {"ANTHROPIC_API_KEY":"", "LABFORGE_ENV_FILE":"/missing/test/.env"}), redirect_stderr(err):
             code = main(["--brief", "design"])
         self.assertEqual(code, 1)
         self.assertIn("ANTHROPIC_API_KEY is missing", err.getvalue())

@@ -30,7 +30,7 @@ def offline_turn() -> dict:
     }
 
 
-def run_turn(history: list[dict], max_steps: int = 12, on_event=None, stream_text: bool = False) -> dict:
+def run_turn(history: list[dict], max_steps: int = 12, on_event=None, stream_text: bool = True) -> dict:
     emit = on_event or (lambda event: None)
     load_env()
     if not os.environ.get("ANTHROPIC_API_KEY"):

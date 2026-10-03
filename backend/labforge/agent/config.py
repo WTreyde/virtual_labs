@@ -20,7 +20,10 @@ def load_env(path: Path | None = None) -> None:
             continue
         key, sep, raw = line.partition('=')
         key = key.strip()
-        if not sep or key not in ENV_KEYS or key in os.environ:
+        # An explicitly empty shell variable is not a usable override. This is
+        # common in local/demo launch commands that clear inherited secrets;
+        # allow the repo .env to supply the real value in that case.
+        if not sep or key not in ENV_KEYS or os.environ.get(key):
             continue
         parts = shlex.split(raw, comments=True, posix=True)
         if len(parts) > 1:

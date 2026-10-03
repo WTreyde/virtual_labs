@@ -85,7 +85,7 @@ def test_planner_forwards_schedule_and_respects_model_override(monkeypatch, over
     monkeypatch.setenv('ANTHROPIC_API_KEY', 'test-only')
     if override: monkeypatch.setenv('ANTHROPIC_MODEL', override)
     else: monkeypatch.delenv('ANTHROPIC_MODEL', raising=False)
-    output = run_turn([{'role': 'user', 'content': 'What order should these projects run?'}])
+    output = run_turn([{'role': 'user', 'content': 'What order should these projects run?'}], stream_text=False)
     assert output['completed']
     validate(output['project_schedule'], 'project_schedule')
     assert output['project_schedule']['gain_vs_naive'] > .2
