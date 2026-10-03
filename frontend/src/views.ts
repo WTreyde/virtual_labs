@@ -1,4 +1,4 @@
-import type { InstrumentOptimisation, ProjectRequest, ProjectSchedule } from "./types";
+import type { InstrumentOptimisation, Leaderboard, ProjectRequest, ProjectSchedule, ValidationRow } from "./types";
 
 /**
  * Strand A: modal views over the game. Vendor what-if (POST /optimise) and project schedule (POST /prioritise).
@@ -32,12 +32,14 @@ modal.addEventListener("mouseleave", () => tip.classList.add("hidden"));
 
 export function closeModal() { modal.classList.add("hidden"); tip.classList.add("hidden"); }
 
-function openModal(title: string, html: string) {
+function openModal(title: string, html: string, wide = false) {
+  modal.classList.toggle("wide", wide);
   modal.innerHTML = `<button class="close" aria-label="Close">✕</button><h2>${esc(title)}</h2>${html}`;
   modal.classList.remove("hidden");
 }
 
-export function showLoading(title: string) { openModal(title, `<p class="muted">Simulating…</p>`); }
+export function showLoading(title: string, what = "Simulating…") { openModal(title, `<p class="muted">${esc(what)}</p>`); }
+export function showHtml(title: string, html: string) { openModal(title, `<div class="answer">${html}</div>`); }
 export function showError(title: string, msg: string) { openModal(title, `<p class="muted">${esc(msg)}</p>`); }
 
 // ---- vendor what-if ---------------------------------------------------------------------------
@@ -162,4 +164,115 @@ export function showSchedule(s: ProjectSchedule, projects: ProjectRequest[], cac
     <div class="tiles">${tiles}</div>
     <h3>Recommended schedule</h3>${legend}${gantt}${busy}${table}
     ${s.caveat ? `<p class="note">⚠ ${esc(s.caveat)}</p>` : ""}`);
+}
+
+// ---- validation: predicted vs reported lab cost ------------------------------------------------
+
+const usd = (v: number) => (v >= 1e6 ? `$${+(v / 1e6).toFixed(1)}M` : v >= 1e3 ? `$${Math.round(v / 1e3)}k` : `$${Math.round(v)}`);
+const shortName = (n: string) => { const s = n.split(/[(:,]/)[0].trim(); return s.length > 26 ? `${s.slice(0, 24)}…` : s; };
+
+/** Log-log scatter: reported cost (x) against LabForge's P50 with a P10-P90 bar (y), y = x line, hollow = unverified. */
+export function showValidation(rows: ValidationRow[]) {
+  const pts = rows.filter((r) => r.status === "compared" && r.reported_usd && r.predicted);
+  const rest = rows.filter((r) => !pts.includes(r));
+  const inBand = pts.filter((r) => r.within_p10_p90).length;
+  let chart = `<p class="muted">No case has a LabForge design to compare yet.</p>`;
+  if (pts.length) {
+    const vals = pts.flatMap((r) => [r.reported_usd!, r.predicted!.p10, r.predicted!.p90]);
+    const lo = Math.log10(Math.min(...vals) / 1.6), hi = Math.log10(Math.max(...vals) * 1.6);
+    const W = 640, H = 420, L = 64, R = 20, T = 16, B = 46;
+    const X = (v: number) => L + ((Math.log10(v) - lo) / (hi - lo)) * (W - L - R);
+    const Y = (v: number) => H - B - ((Math.log10(v) - lo) / (hi - lo)) * (H - T - B);
+    const ticks: number[] = [];
+    for (let k = Math.floor(lo); k <= Math.ceil(hi); k++) for (const m of [1, 2, 5]) { const v = m * 10 ** k; if (Math.log10(v) >= lo && Math.log10(v) <= hi) ticks.push(v); }
+    const grid = ticks.map((v) => `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" stroke="${C.grid}"/><text x="${L - 6}" y="${Y(v) + 3}" text-anchor="end" class="tick">${usd(v)}</text>
+      <line x1="${X(v)}" x2="${X(v)}" y1="${T}" y2="${H - B}" stroke="${C.grid}"/><text x="${X(v)}" y="${H - B + 14}" text-anchor="middle" class="tick">${usd(v)}</text>`).join("");
+    const a = 10 ** lo, b = 10 ** hi;
+    const diag = `<line x1="${X(a)}" y1="${Y(a)}" x2="${X(b)}" y2="${Y(b)}" stroke="${C.ink2}" stroke-dasharray="5 4"/>
+      <text x="${X(b) - 4}" y="${Y(b) + 14}" text-anchor="end" class="ref">predicted = reported</text>`;
+    // Direct labels: each goes to the first of right/left/above/below that clears earlier labels and the markers.
+    type Box = { x0: number; y0: number; x1: number; y1: number };
+    const hit = (a: Box, b: Box) => a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
+    const taken: Box[] = pts.map((r) => ({ x0: X(r.reported_usd!) - 6, x1: X(r.reported_usd!) + 6, y0: Y(r.predicted!.p90), y1: Y(r.predicted!.p10) }));
+    const marks = [...pts].sort((a, b) => a.reported_usd! - b.reported_usd!).map((r) => {
+      const p = r.predicted!, x = X(r.reported_usd!), y = Y(p.p50), hollow = !r.verified, name = shortName(r.name), w = name.length * 5.6 + 4;
+      const spots = [
+        { x: x + 10, y: y + 4, a: "start", box: { x0: x + 10, x1: x + 10 + w, y0: y - 7, y1: y + 6 } },
+        { x: x - 10, y: y + 4, a: "end", box: { x0: x - 10 - w, x1: x - 10, y0: y - 7, y1: y + 6 } },
+        { x, y: Y(p.p90) - 8, a: "middle", box: { x0: x - w / 2, x1: x + w / 2, y0: Y(p.p90) - 19, y1: Y(p.p90) - 5 } },
+        { x, y: Y(p.p10) + 16, a: "middle", box: { x0: x - w / 2, x1: x + w / 2, y0: Y(p.p10) + 5, y1: Y(p.p10) + 19 } },
+      ];
+      const spot = spots.find((s) => s.box.x0 >= 0 && s.box.x1 <= W && !taken.some((t) => hit(t, s.box))) ?? spots[2];
+      taken.push(spot.box);
+      const tip = `<b>${esc(r.name)}</b><br>Reported ${usd(r.reported_usd!)} · predicted ${usd(p.p50)} (P10–P90 ${usd(p.p10)}–${usd(p.p90)})<br>` +
+        `${r.within_p10_p90 ? "Inside" : "Outside"} the band · log10 error ${r.log10_error ?? "?"}${hollow ? "<br><i>Reported cost not verified</i>" : ""}`;
+      return `<g data-tip="${esc(tip)}">
+        <line x1="${x}" x2="${x}" y1="${Y(p.p10)}" y2="${Y(p.p90)}" stroke="${C.s1}" stroke-width="2"/>
+        <line x1="${x - 5}" x2="${x + 5}" y1="${Y(p.p10)}" y2="${Y(p.p10)}" stroke="${C.s1}" stroke-width="2"/>
+        <line x1="${x - 5}" x2="${x + 5}" y1="${Y(p.p90)}" y2="${Y(p.p90)}" stroke="${C.s1}" stroke-width="2"/>
+        <circle cx="${x}" cy="${y}" r="14" fill="transparent"/>
+        <circle cx="${x}" cy="${y}" r="5" fill="${hollow ? C.surface : C.s1}" stroke="${hollow ? C.s1 : C.surface}" stroke-width="2"/>
+        <text x="${spot.x}" y="${spot.y}" text-anchor="${spot.a}" class="lane">${esc(name)}</text></g>`;
+    }).join("");
+    chart = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Predicted against reported lab cost, log scales">${grid}${diag}${marks}
+      <text x="${(L + W - R) / 2}" y="${H - 8}" text-anchor="middle" class="axis">reported cost (USD, log scale)</text>
+      <text x="14" y="${(T + H - B) / 2}" text-anchor="middle" class="axis" transform="rotate(-90 14 ${(T + H - B) / 2})">LabForge predicted cost, P50 with P10–P90 (USD, log)</text></svg>
+      <div class="legend"><span><i style="background:${C.s1};border-radius:50%"></i>reported cost verified</span><span><i style="background:${C.surface};border:2px solid ${C.s1};border-radius:50%;width:7px;height:7px"></i>reported cost not verified</span></div>`;
+  }
+  const table = `<details${pts.length ? "" : " open"}><summary>Table view: all ${rows.length} cases</summary><table>
+    <tr><th>Case</th><th>Reported</th><th>Predicted P10–P50–P90</th><th>In band</th><th>Source verified</th></tr>
+    ${rows.map((r) => `<tr><td>${esc(r.name)}</td><td>${r.reported_usd ? usd(r.reported_usd) : "–"}</td>
+      <td>${r.predicted ? `${usd(r.predicted.p10)} – ${usd(r.predicted.p50)} – ${usd(r.predicted.p90)}` : esc(r.status.replace(/_/g, " "))}</td>
+      <td>${r.within_p10_p90 == null ? "–" : r.within_p10_p90 ? "yes" : "no"}</td><td>${r.verified ? "yes" : "no"}</td></tr>`).join("")}
+    </table></details>`;
+  openModal("Does LabForge price real labs right?", `
+    <p class="muted">Predicted equipment cost against the cost reported for published labs. <b>${pts.length} of ${rows.length}</b> cases have a LabForge design to compare;
+      <b>${inBand} of ${pts.length}</b> reported costs fall inside our P10–P90 band. Points on the dashed line would be exact.</p>
+    ${chart}
+    ${rest.length ? `<p class="muted">No prediction yet: ${rest.map((r) => esc(shortName(r.name))).join(" · ")}.</p>` : ""}
+    ${table}`, true);
+}
+
+// ---- LabDesignBench leaderboard ------------------------------------------------------------------
+
+/** A failed check that means the agent tampered with inputs or reported numbers the simulator did not produce. */
+const isTamper = (c: { kind: string; passed: boolean | null; note?: string }) =>
+  c.passed === false && (c.kind === "inputs_untampered" || /tamper|reported .* but/i.test(c.note ?? ""));
+
+export function showLeaderboard(board: Leaderboard | null) {
+  if (!board) {
+    openModal("LabDesignBench", `<p class="muted">No results yet. The leaderboard appears once the bench has been run and committed
+      (<code>python -m labforge.bench.runner --out backend/labforge/bench/results/leaderboard.json</code>).</p>`, true);
+    return;
+  }
+  const armName = (a: string) => (a === "platform" ? "LabForge platform" : a === "vanilla" ? "Vanilla Claude (no tools)" : a);
+  const pct = (v: number | null | undefined) => (v == null ? "–" : `${Math.round(v * 100)}%`);
+  const cards = board.arms.map((a, i) => {
+    const caught = a.tasks.flatMap((t) => t.checks).filter(isTamper).length;
+    return `<div class="tile${i === 0 ? " lead" : ""}"><div class="tile-label">${esc(armName(a.arm))}</div>
+      <div class="tile-val"><b>${pct(a.score)}</b> <span class="was">of checks</span></div>
+      <div class="muted">${a.checks_passed}/${a.checks_total} checks · ${a.tasks_answered}/${a.tasks.length} tasks answered · Brier ${a.brier ?? "–"}
+        ${a.claims_refuted != null ? ` · ${a.claims_refuted} claims refuted` : ""}${caught ? ` · <span class="tamper">${caught} tamper attempt${caught > 1 ? "s" : ""} caught</span>` : ""}</div></div>`;
+  }).join("");
+  const byArm = new Map(board.arms.map((a) => [a.arm, new Map(a.tasks.map((t) => [t.task_id, t]))]));
+  const cell = (arm: string, taskId: string) => {
+    const t = byArm.get(arm)?.get(taskId);
+    if (!t) return `<td class="muted">–</td>`;
+    if (t.error) return `<td class="muted" title="${esc(t.error)}">not run</td>`;
+    const tamper = t.checks.some(isTamper);
+    const chips = t.checks.map((c) => {
+      const cls = c.passed === true ? "ok" : c.passed === false ? (isTamper(c) ? "bad tamper" : "bad") : "na";
+      const sym = c.passed === true ? "✓" : c.passed === false ? "✗" : "–";
+      return `<span class="chip ${cls}" data-tip="${esc(`<b>${c.id}</b> (${c.kind.replace(/_/g, " ")}): ${c.passed === true ? "passed" : c.passed === false ? "failed" : "not applicable"}${c.note ? `<br>${esc(c.note)}` : ""}`)}">${sym}</span>`;
+    }).join("");
+    return `<td${tamper ? ' class="tamper-cell"' : ""}><b>${pct(t.score)}</b> ${chips}${tamper ? `<div class="tamper">⚠ tamper attempt caught</div>` : ""}</td>`;
+  };
+  const arms = board.arms.map((a) => a.arm);
+  const table = `<table class="bench"><tr><th>Task</th><th>Trap</th>${arms.map((a) => `<th>${esc(armName(a))}</th>`).join("")}</tr>
+    ${board.tasks.map((t) => `<tr><td>${esc(t.id)}${t.domain ? `<div class="muted">${esc(t.domain)}</div>` : ""}</td><td>${esc((t.trap ?? "none").replace(/_/g, " "))}</td>
+      ${arms.map((a) => cell(a, t.id)).join("")}</tr>`).join("")}</table>`;
+  openModal("LabDesignBench: do design agents know when they're wrong?", `
+    <p class="muted">Each task hides checks, including traps: impossible targets, placeholder specs, a simulator config the agent could edit.
+      ✓ passed · ✗ failed · – not applicable; hover a mark for the verifier's note.${board.generated_at ? ` Run ${esc(new Date(board.generated_at).toLocaleString())}.` : ""}</p>
+    <div class="tiles">${cards}</div>${table}`, true);
 }

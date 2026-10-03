@@ -6682,10 +6682,11 @@
     "process": {
       "capacity": 1,
       "durations_s": {
-        "cold_storage": 1088640
-      }
+        "cold_storage": 300
+      },
+      "hold_time_s": 1088640
     },
-    "storage_slots": 85,
+    "storage_slots": 3,
     "integration": [
       "None (passive vessel)"
     ],
@@ -6743,21 +6744,13 @@
         "confidence": "placeholder",
         "source": "agent_estimate"
       },
-      "process.durations_s.cold_storage": {
-        "value": 1088640,
-        "low": 1088640,
-        "high": 1555200,
-        "confidence": "estimated",
-        "source": "https://www.terrauniversal.com/tw-cx100-cryo-exchange-vapor-shipper-ic-biomedical.html ; 12.6 day working hold time (18 day static)",
-        "note": "seconds the charged shipper stays cold"
-      },
       "storage_slots": {
-        "value": 85,
-        "low": 85,
-        "high": 85,
-        "confidence": "estimated",
-        "source": "https://www.terrauniversal.com/tw-cx100-cryo-exchange-vapor-shipper-ic-biomedical.html",
-        "note": "85 x 1.2/2.0 mL vials (5 per cane); capacity in vials, not pucks"
+        "value": 3,
+        "low": 1,
+        "high": 7,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "Pucks per shipment. The stock canister takes vials (85 x 1.2/2.0 mL); UniPucks need separate puck shipping canes, whose count per CX100 was not found."
       },
       "price_usd_estimate": {
         "value": 1398,
@@ -6766,6 +6759,22 @@
         "confidence": "datasheet",
         "source": "https://www.mitegen.com/product/cryo-express-dry-shipper-cx100/",
         "note": "MiTeGen list $1,398 (2026); puck shipping canes extra."
+      },
+      "process.durations_s.cold_storage": {
+        "value": 300,
+        "low": 60,
+        "high": 900,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "Operator time to load one puck (on a shipping cane) into the charged shipper, close and label it. Not the hold time; no source found."
+      },
+      "process.hold_time_s": {
+        "value": 1088640,
+        "low": 1088640,
+        "high": 1555200,
+        "confidence": "estimated",
+        "source": "https://www.terrauniversal.com/tw-cx100-cryo-exchange-vapor-shipper-ic-biomedical.html ; 12.6 day working hold time (18 day static)",
+        "note": "How long a charged shipper stays at cryogenic temperature (12.6 days working, 18 days static). Not a processing step; do not use as a step duration."
       }
     },
     "safety": {
