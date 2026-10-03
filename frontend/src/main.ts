@@ -1,8 +1,9 @@
 import "@fontsource/press-start-2p";
 import Phaser from "phaser";
-import { chat, exampleDesign, report } from "./api";
+import { chat, exampleDesign, liveCatalog } from "./api";
 import { galleryDesign } from "./fixtures/gallery";
 import { LabScene } from "./LabScene";
+import { openReport } from "./report";
 import { clock } from "./timeline";
 import { renderPanel } from "./panel";
 import type { Design } from "./types";
@@ -26,6 +27,8 @@ const game = new Phaser.Game({
 document.fonts.load('8px "Press Start 2P"').finally(() => game.scene.add("lab", LabScene, true, { design }));
 renderPanel(design);
 dialogue.say(introLines(design));
+// With the backend up, use its catalog so BOM prices match /report; offline, keep examples/catalog.json.
+if (!params.get("demo")) liveCatalog(design).then((catalog) => { design = { ...design, catalog }; renderPanel(design); }).catch(() => {});
 game.events.on("tick", onTick);
 game.events.on("ready-clock", () => setupClock(design));
 game.events.on("select", (sel: { id: string; sprite?: string } | null) => (sel ? showStatCard(design, sel.id, sel.sprite) : hideStatCard()));
@@ -55,8 +58,8 @@ document.querySelector<HTMLFormElement>("#chat-form")!.addEventListener("submit"
   }
 });
 
-document.querySelector("#report-btn")!.addEventListener("click", async () => {
-  const md = await report(design).catch(() => "Backend not reachable.");
-  const w = window.open("", "_blank");
-  w?.document.write(`<pre style="white-space:pre-wrap;font-family:system-ui">${md.replace(/</g, "&lt;")}</pre>`);
+document.querySelector("#report-btn")!.addEventListener("click", () => {
+  const snapshot = () => new Promise<string | undefined>((resolve) =>
+    game.renderer.snapshot((img) => resolve(img instanceof HTMLImageElement ? img.src : undefined)));
+  openReport(design, snapshot);
 });

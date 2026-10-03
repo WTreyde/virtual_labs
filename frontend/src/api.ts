@@ -27,6 +27,14 @@ export async function chat(messages: { role: string; content: string }[], curren
   return { reply: out.messages?.at(-1)?.content ?? "", design };
 }
 
+/** Live catalog entries for the design's items, so the BOM matches the backend report. Throws when offline. */
+export async function liveCatalog(d: Design): Promise<Design["catalog"]> {
+  const live = byId(await (await fetch(`${API}/catalog`, { signal: AbortSignal.timeout(3000) })).json());
+  const ids = d.workflow.equipment.map((e) => e.catalog_id);
+  if (!ids.every((id) => live[id])) throw new Error("live catalog lacks some items");
+  return { ...d.catalog, ...live };
+}
+
 export async function report(d: Design): Promise<string> {
   const body = { lab_spec: d.lab_spec, workflow: d.workflow, layout: d.layout, sim_result: d.sim_result };
   const res = await fetch(`${API}/report`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });

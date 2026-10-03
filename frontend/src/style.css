@@ -50,3 +50,11 @@ button { font: inherit; border: 3px solid #333; background: #fff; cursor: pointe
 #clock-t { margin-left: auto; font-size: 11px; }
 #scrub { width: 100%; margin: 10px 0 6px; accent-color: #e0503c; }
 #clockbar .stats { display: flex; justify-content: space-between; color: #556; font-size: 8px; }
+
+#bom table { font-size: 9px; margin-top: 6px; }
+#bom td { padding: 5px 2px; vertical-align: top; line-height: 1.5; }
+#bom .vendor { color: #778; font-size: 7px; margin-top: 2px; }
+#bom .num { text-align: right; white-space: nowrap; }
+#bom .num .badge { margin-top: 3px; }
+#bom .total td { border-bottom: none; padding-top: 8px; }
+#bom .note { color: #778; font-size: 7px; line-height: 1.6; margin-top: 4px; }
