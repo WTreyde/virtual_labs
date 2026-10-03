@@ -8,6 +8,7 @@ and its reported numbers against a fresh recomputation.
 import copy
 import hashlib
 import json
+import re
 
 from labforge.catalog.store import load_catalog
 from labforge.sim import simulate as sim_module
@@ -51,8 +52,67 @@ def catalog_floor(item: dict | None, capability: str) -> tuple[float, float] | N
     return stated, prov.get("low", stated * band[0])
 
 
+# Units one catalog duration covers when the catalog does not say: one per well, one crystal per drop well.
+BASIS_UNITS = {**WELLS, "crystallization_plate_96": 96}
+UNITS_PARAM = re.compile(r"^\w+_per_(?:plate|run|batch)$")
+
+
+def step_units(step: dict) -> float | None:
+    """Units (crystals, samples) the step handles per run, if it says: params.units_per_run or *_per_plate/_run/_batch."""
+    params = step.get("params") or {}
+    for key, value in [("units_per_run", params.get("units_per_run"))] + sorted(params.items()):
+        if isinstance(value, (int, float)) and not isinstance(value, bool) and value > 0 \
+                and (key == "units_per_run" or UNITS_PARAM.match(key)):
+            return float(value)
+    return None
+
+
+def catalog_units(item: dict | None, capability: str) -> float | None:
+    """Units the catalog's duration covers: provenance `units_per_run`, else the wells of its first known labware."""
+    prov = ((item or {}).get("provenance") or {}).get(f"process.durations_s.{capability}") or {}
+    if isinstance(prov.get("units_per_run"), (int, float)):
+        return float(prov["units_per_run"])
+    for ap in (item or {}).get("access_points", []):
+        for lw in ap.get("labware", []):
+            if lw in BASIS_UNITS:
+                return float(BASIS_UNITS[lw])
+    return None
+
+
+def counted_downstream(workflow: dict, step_id: str) -> float | None:
+    """Units the throughput count credits per labware entering this step (fan-outs times the sink's units)."""
+    steps = {s["id"]: s for s in workflow.get("steps", [])}
+    succ = {sid: [s["id"] for s in steps.values() if sid in s.get("after", [])] for sid in steps}
+
+    def credit(sid: str) -> float:
+        s = steps[sid]
+        nxt = succ[sid]
+        tail = max(credit(n) for n in nxt) if nxt else float((s.get("params") or {}).get("units_per_labware", 1))
+        return float(s.get("fan_out", 1)) * tail
+
+    return credit(step_id) if step_id in steps else None
+
+
+def basis_scale(workflow: dict, step: dict, item: dict | None) -> tuple[float, str | None]:
+    """Factor that puts the catalog duration on the step's basis, and a finding if the step's basis is not credible.
+
+    A step handling 32 crystals per plate is compared with a catalog figure for 96 per plate at 32/96. The floor
+    is kept on that basis. If the workflow later counts more units than the step says it handles, the per-unit
+    basis is refused (it would let a step dodge the floor while throughput still counts every unit)."""
+    units, basis = step_units(step), catalog_units(item, step["capability"])
+    if not units or not basis:
+        return 1.0, None
+    counted = counted_downstream(workflow, step["id"])
+    if counted is not None and counted > units * 1.05:
+        return 1.0, (f"Step {step['id']} says it handles {units:g} units per run but the workflow counts {counted:g} "
+                     f"downstream; its duration is compared with the catalog per labware instead.")
+    return units / basis, None
+
+
 def restore_protected(workflow: dict) -> tuple[dict, list[str]]:
-    """Copy of the workflow with step durations below the catalog's credible floor put back to the catalog value."""
+    """Copy of the workflow with step durations below the catalog's credible floor put back to the catalog value.
+
+    Durations are compared on the step's own basis (units per run) when both sides state one."""
     catalog = load_catalog()
     wf = copy.deepcopy(workflow)
     equipment = {e["instance_id"]: e["catalog_id"] for e in wf.get("equipment", [])}
@@ -61,8 +121,12 @@ def restore_protected(workflow: dict) -> tuple[dict, list[str]]:
         for inst in s.get("candidate_instances", []):
             item = catalog.get(equipment.get(inst, ""))
             ref = None if is_hold_time(s, item) else catalog_floor(item, s["capability"])
+            if ref:
+                scale = basis_scale(workflow, s, item)[0]
+                ref = (ref[0] * scale, ref[1] * scale)
             if ref and s["duration_s"] < ref[1] - 1e-6:
-                restored.append(f"{s['id']}: {s['duration_s']:g} s -> {ref[0]:g} s (catalog)")
+                basis = f", scaled to {step_units(s):g} units" if scale != 1.0 else ""
+                restored.append(f"{s['id']}: {s['duration_s']:g} s -> {ref[0]:g} s (catalog{basis})")
                 s["duration_s"] = ref[0]
                 s.pop("duration_uncertainty", None)
             if ref:
@@ -87,12 +151,17 @@ def find_tampering(workflow: dict, answer: dict | None = None, recomputed_sim: d
             ref = None if is_hold_time(s, item) else catalog_floor(item, s["capability"])
             if not ref:
                 continue
-            stated, floor = ref
+            scale, basis_issue = basis_scale(workflow, s, item)
+            if basis_issue:
+                out.append(basis_issue)
+            stated, floor = ref[0] * scale, ref[1] * scale
             if s["duration_s"] < floor - 1e-6:
                 out.append(f"Step {s['id']} runs {s['duration_s']:g} s on {inst}, below the catalog's {stated:g} s "
                            f"(lowest credible {floor:g} s).")
             high = (s.get("duration_uncertainty") or {}).get("high")
-            if high is not None and high < stated - 1e-6:
+            prov = (item.get("provenance") or {}).get(f"process.durations_s.{s['capability']}") or {}
+            sourced = prov.get("confidence", item.get("data_confidence")) in ("datasheet", "literature")
+            if sourced and high is not None and high < stated - 1e-6:  # a placeholder cannot overrule a stated range
                 out.append(f"Step {s['id']}'s uncertainty range tops out at {high:g} s, under the catalog's typical {stated:g} s.")
             break
 

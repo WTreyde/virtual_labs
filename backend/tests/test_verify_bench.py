@@ -184,3 +184,30 @@ def test_storage_hold_time_is_not_restored_onto_a_loading_step(monkeypatch):
     # A real processing step that undercuts its catalog time is still restored.
     wf["steps"][0]["duration_s"] = 60
     assert restore_protected(wf)[1] and restore_protected(wf)[1][0].startswith("prep")
+
+
+def _harvest_workflow(seconds, crystals, counted_per_puck=16):
+    # Shifter catalog: 7200 s placeholder (floor 1800 s) for a 96-crystal plate. Step: `crystals` per plate -> 2 pucks.
+    return {"id": "harvest_wf", "lab_spec_id": "h", "labware": "crystallization_plate_96",
+            "equipment": [{"instance_id": "shifter_1", "catalog_id": "olt_crystal_shifter"}],
+            "steps": [{"id": "harvest", "name": "harvest", "capability": "crystal_harvesting", "candidate_instances": ["shifter_1"],
+                       "duration_s": seconds, "mode": "manual", "fan_out": 2,
+                       "params": {"crystals_harvested_per_plate": crystals}},
+                      {"id": "hits", "name": "hits", "capability": "in_silico", "candidate_instances": [], "duration_s": 60,
+                       "after": ["harvest"], "mode": "in_silico", "params": {"units_per_labware": counted_per_puck}}]}
+
+
+def test_duration_floor_is_compared_per_unit_not_per_plate():
+    from labforge.verify.tamper import restore_protected
+    # 32 crystals at 35 s each (Shifter, Wright et al. 2021): above the per-crystal floor of 1800/96 s.
+    ok = _harvest_workflow(1118, 32)
+    assert restore_protected(ok)[1] == []
+    assert not [f for f in find_tampering(ok) if "harvest" in f]
+    # The floor still bites on the same basis: 32 crystals in 300 s is under 1800 * 32/96 = 600 s.
+    fast = _harvest_workflow(300, 32)
+    restored = restore_protected(fast)
+    assert restored[1] and restored[0]["steps"][0]["duration_s"] == 7200 * 32 / 96
+    # Claiming few crystals to dodge the floor while counting all 96 downstream is refused and flagged.
+    dodge = _harvest_workflow(1118, 32, counted_per_puck=48)
+    assert restore_protected(dodge)[0]["steps"][0]["duration_s"] == 7200
+    assert any("counts 96" in f for f in find_tampering(dodge))

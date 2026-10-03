@@ -15,13 +15,14 @@
 import copy
 import math
 import random
+import time
 
 from labforge.catalog.store import load_catalog
 from labforge.contracts import validate
 from labforge.layout.geometry import (Grid, aabb, area, arm_bases, human_spot, outside_area, overlap_area,
                                       polyline_length, world_point)
-from labforge.layout.safety import choose_kind, derive_zones, door_box, load_rules, zone_needs
-from labforge.layout.validate import find_violations
+from labforge.layout.safety import choose_kinds, derive_zones, door_box, load_rules, zone_needs
+from labforge.layout.validate import find_violations, walkway_unreachable
 
 BENCH_HEIGHT_M = 0.9
 HUMAN_SPEED_M_S = 1.0
@@ -108,10 +109,11 @@ class Placer:
         self.weights = edge_weights(workflow)
         self.rules = load_rules()
         needs = zone_needs(spec, workflow, self.items, self.rules)
-        self.zone_kind = {i: choose_kind([ok for ok, _ in sets]) for i, sets in needs.items()}
+        self.zone_kinds = {i: choose_kinds([ok for ok, _ in sets]) for i, sets in needs.items()}
         self.zone_groups = {}
-        for i, kind in self.zone_kind.items():
-            self.zone_groups.setdefault(kind, []).append(i)
+        for i, kinds in self.zone_kinds.items():
+            for kind in kinds:
+                self.zone_groups.setdefault(kind, []).append(i)
         self.arms = [i for i, it in self.items.items() if _kind(it) in ("arm", "rail")]
         self.mobiles = [i for i, it in self.items.items() if _kind(it) == "mobile"]
         self.humans = [i for i, it in self.items.items() if _kind(it) == "human"]
@@ -332,7 +334,7 @@ class Placer:
         arm_r = {a: self._cluster_radius(a, members[a]) for a in self.arms}
         arm_xy = {a: state.get(a) or (self.locked[a]["position"]["x"], self.locked[a]["position"]["y"]) for a in self.arms}
         slots = [p for p in self._wall_slots() if all(math.dist(p, arm_xy[a]) > arm_r[a] for a in self.arms)]
-        rest = sorted((i for i in loose if i not in state), key=lambda i: (self.zone_kind.get(i, "~"), loose.index(i)))
+        rest = sorted((i for i in loose if i not in state), key=lambda i: (self.zone_kinds.get(i, ["~"])[0], loose.index(i)))
         for inst in rest:
             state[inst] = slots.pop(0) if slots else (self.rng.uniform(0.5, self.W - 0.5), self.rng.uniform(0.5, self.D - 0.5))
         for inst in self.movable:  # transporters other than arms (mobile robot docks) and anything left
@@ -366,7 +368,108 @@ class Placer:
                 cur, cur_cost = cand, c
                 if c < best_cost:
                     best, best_cost = dict(cand), c
-        return self.repair(best, best_cost)
+        return self.polish_clearance(self.repair_egress(self.repair(best, best_cost)))
+
+    def _walkway_check(self, state: dict) -> tuple[list[str] | None, list, float]:
+        """The validator's walkway test on a candidate state: (cut-off work spots, pinch points, base cost)."""
+        pl = self.placements(state)
+        boxes = [aabb(pl[i], self.items[i]) for i in self.placeable]
+        touched = set(self.hands_on) & set(self.placeable)
+        for a, b in self.weights:
+            if self.serve(a, b, pl)[3] == "walk":
+                touched |= {a, b}
+        arms = arm_bases(pl, self.items)
+        spots = {i: human_spot(pl[i], self.items[i], arms) for i in touched}
+        cut, pinches = walkway_unreachable(self.W, self.D, boxes, spots, self.doors[0], self.walkway)
+        return cut, pinches, self.cost(state)
+
+    def repair_egress(self, state: dict, rounds: int = 150) -> dict:
+        """Open a walkway from the door to every place people work: push equipment away from pinch points.
+
+        Accepts a move only if fewer work spots are cut off (or as many, at no extra cost) and it creates no
+        collision; arm clusters move as a whole so reach is kept."""
+        if not self.movable:
+            return state
+        cut, pinches, cost = self._walkway_check(state)
+        n = len(cut) if cut is not None else len(self.placeable) + 1
+        for _ in range(rounds):
+            if n == 0:
+                break
+            cand = dict(state)
+            pts = pinches or [(self.W / 2, self.D / 2)]
+            near = [i for i in self.movable if min(math.dist(cand[i], p) for p in pts) < 1.5]
+            inst = self.rng.choice(near or self.movable)
+            px, py = min(pts, key=lambda p: math.dist(cand[inst], p))
+            x, y = cand[inst]
+            d = math.dist((x, y), (px, py)) or 1.0
+            step = self.rng.uniform(0.15, 0.45)
+            dx, dy = step * (x - px) / d + self.rng.gauss(0, 0.05), step * (y - py) / d + self.rng.gauss(0, 0.05)
+            group = [inst]
+            for arm in self.arms:
+                base = cand.get(arm)
+                reach = self.items[arm]["transport"].get("reach_m", 1.0) + 0.6
+                if base and (inst == arm or math.dist(cand[inst], base) <= reach):
+                    group = [m for m in self.movable if m == arm or math.dist(cand[m], base) <= reach]
+                    break
+            for m in group:
+                cand[m] = (min(max(cand[m][0] + dx, 0.1), self.W - 0.1), min(max(cand[m][1] + dy, 0.1), self.D - 0.1))
+            c_cut, c_pinches, c_cost = self._walkway_check(cand)
+            c_n = len(c_cut) if c_cut is not None else len(self.placeable) + 1
+            if c_cost >= HARD_S > cost:
+                continue  # never trade a walkway for a collision
+            if c_n < n or (c_n == n and c_cost <= cost):
+                state, n, pinches, cost = cand, c_n, c_pinches, c_cost
+        return state
+
+    def _clearance_pairs(self, state: dict) -> tuple[list[tuple[str, str]], float]:
+        """Neighbours inside each other's service clearance (as the validator counts them) and the total overlap."""
+        pl = self.placements(state)
+        boxes = {i: aabb(pl[i], self.items[i]) for i in self.placeable}
+        pads = {i: aabb(pl[i], self.items[i], clearance=True) for i in self.placeable}
+        ids = [i for i in self.placeable if i not in self.arms and not _kind(self.items[i])]
+        pairs, total = [], 0.0
+        for k, a in enumerate(ids):
+            for b in ids[k + 1:]:
+                if overlap_area(boxes[a], boxes[b]) > 1e-4:
+                    continue
+                area_ab = overlap_area(pads[a], boxes[b]) + overlap_area(boxes[a], pads[b])
+                if area_ab > 0.01:
+                    pairs.append((a, b))
+                    total += area_ab
+        return pairs, total
+
+    def polish_clearance(self, state: dict, rounds: int = 120) -> dict:
+        """Give neighbours their service clearance, without cutting a walkway or causing a collision."""
+        pairs, area_now = self._clearance_pairs(state)
+        if not pairs:
+            return state
+        cut, _, cost = self._walkway_check(state)
+        n_cut = len(cut) if cut is not None else len(self.placeable) + 1
+        for _ in range(rounds):
+            if not pairs:
+                break
+            a, b = self.rng.choice(pairs)
+            inst = self.rng.choice([i for i in (a, b) if i in self.movable] or [None])
+            if inst is None:
+                continue
+            other = b if inst == a else a
+            cand = dict(state)
+            (x, y), (ox, oy) = cand[inst], cand.get(other, cand[inst])
+            if self.rng.random() < 0.3 and not any(math.dist(cand[inst], cand[a_]) <= 1.5 for a_ in self.arms if a_ in cand):
+                cand[inst] = (self.rng.uniform(0.4, self.W - 0.4), self.rng.uniform(0.4, self.D - 0.4))  # escape a crowd
+            else:
+                d = math.dist((x, y), (ox, oy)) or 1.0
+                step = self.rng.uniform(0.1, 0.3)
+                cand[inst] = (min(max(x + step * (x - ox) / d, 0.1), self.W - 0.1),
+                              min(max(y + step * (y - oy) / d, 0.1), self.D - 0.1))
+            c_pairs, c_area = self._clearance_pairs(cand)
+            if len(c_pairs) > len(pairs) or c_area >= area_now - 1e-6:
+                continue
+            c_cut, _, c_cost = self._walkway_check(cand)
+            c_n = len(c_cut) if c_cut is not None else len(self.placeable) + 1
+            if c_n <= n_cut and not (c_cost >= HARD_S > cost):
+                state, pairs, area_now, n_cut, cost = cand, c_pairs, c_area, c_n, c_cost
+        return state
 
     def repair(self, state: dict, cost: float, tries: int = 400) -> dict:
         """Greedy clean-up: nudge items until hard constraints hold (only accepts improvements)."""
@@ -466,7 +569,7 @@ class Placer:
             "placements": [pl[i] for i in self.items],
             "operators": self.operators,
             "transfers": transfers,
-            "zones": derive_zones(pl, self.items, self.zone_kind, self.W, self.D),
+            "zones": derive_zones(pl, self.items, self.zone_kinds, self.W, self.D),
             "score": {"total_weighted_distance_m": round(weighted, 2),
                       "floor_area_used_m2": round(sum(area(b) for b in boxes), 2)},
         }
@@ -487,16 +590,39 @@ def _frange(a: float, b: float, step: float) -> list[float]:
     return [a + k * step for k in range(n)]
 
 
-def generate_layout(spec: dict, workflow: dict, previous: dict | None = None, seed: int = 0,
-                    iterations: int | None = None) -> dict:
-    """Place the workflow's equipment in the spec's room. `previous` keeps its `locked` placements."""
+RETRY_SEEDS = 2  # extra annealing runs when violations remain...
+RETRY_BUDGET_S = 15.0  # ...within this much wall-clock time
+
+
+def _one_layout(spec: dict, workflow: dict, previous: dict | None, seed: int, iterations: int | None) -> dict:
     placer = Placer(spec, workflow, previous, seed)
     state = placer.initial()
     n = len(placer.movable)
     state = placer.anneal(state, iterations if iterations is not None else min(6000, 1500 + 200 * n))
     layout = placer.build(state)
     layout["violations"] = find_violations(layout, placer.items, spec, placer.rules, workflow=workflow)
-    return validate(layout, "layout")
+    return layout
+
+
+def generate_layout(spec: dict, workflow: dict, previous: dict | None = None, seed: int = 0,
+                    iterations: int | None = None) -> dict:
+    """Place the workflow's equipment in the spec's room. `previous` keeps its `locked` placements.
+
+    If violations remain, annealing is retried from other seeds (bounded in time) and the layout with the
+    fewest violations wins, then the shortest weighted transfer distance. Deterministic for a given seed."""
+    start = time.monotonic()
+    # Placement-fixable problems only: "people reach into an arm that has no collaborative rating" is a catalog
+    # question that another seed cannot answer, so it does not trigger retries.
+    fixable = lambda lay: [v for v in lay["violations"] if v["kind"] != "safety"]
+    best = _one_layout(spec, workflow, previous, seed, iterations)
+    for extra in range(1, RETRY_SEEDS + 1):
+        if not fixable(best) or time.monotonic() - start > RETRY_BUDGET_S:
+            break
+        cand = _one_layout(spec, workflow, previous, seed + 1000 * extra, iterations)
+        key = lambda lay: (len(fixable(lay)), len(lay["violations"]), lay["score"]["total_weighted_distance_m"])
+        if key(cand) < key(best):
+            best = cand
+    return validate(best, "layout")
 
 
 def rederive(spec: dict, workflow: dict, layout: dict) -> dict:
