@@ -2,6 +2,9 @@
 
 Run: uvicorn labforge.gateway:app --reload --port 8000
 """
+import json
+from pathlib import Path
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse, StreamingResponse
@@ -94,6 +97,17 @@ def report(req: DesignRequest):
 @app.get("/bench/tasks")
 def bench_tasks():
     return load_tasks()
+
+
+LEADERBOARD = Path(__file__).parent / "bench" / "results" / "leaderboard.json"
+
+
+@app.get("/bench/leaderboard")
+def bench_leaderboard():
+    """The committed LabDesignBench leaderboard (written by labforge.bench.runner --out)."""
+    if not LEADERBOARD.is_file():
+        raise HTTPException(404, "No leaderboard yet: run python -m labforge.bench.runner --out " + str(LEADERBOARD))
+    return json.loads(LEADERBOARD.read_text())
 
 
 @app.post("/optimise")
