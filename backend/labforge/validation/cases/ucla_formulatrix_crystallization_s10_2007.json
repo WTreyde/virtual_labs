@@ -1,0 +1,55 @@
+{
+  "id": "ucla_formulatrix_crystallization_s10_2007",
+  "name": "UCLA automated protein crystallization facility (NIH S10, Formulatrix/Tecan, mosquito, Rock Imager; 2007)",
+  "domain": "biology",
+  "sources": [
+    "https://api.reporter.nih.gov/v2/projects/search (project_num 1S10RR023543-01)",
+    "https://reporter.nih.gov/search/results?query=1S10RR023543"
+  ],
+  "build": "turnkey",
+  "brief": "A new campus macromolecular crystallization facility for structural biology: an automated liquid handler builds crystallization screening reagents, a nanolitre dispensing robot sets up sitting-drop crystallization trials, and an automated imaging microscope stores and images the plates to score crystal growth.",
+  "reported": {
+    "cost": {
+      "value_usd": 375141,
+      "original": "US$375,141 (NIH S10 award, FY2007)",
+      "year": 2007,
+      "includes": [
+        "instruments",
+        "analytics"
+      ],
+      "excludes_note": "Award amount of an NIH Shared Instrumentation grant, i.e. the equipment funds requested/awarded, not a vendor invoice; any institutional co-funding is not stated. Facility room renovation and manager salary are explicitly provided separately by UCLA and are excluded. 2007 dollars."
+    }
+  },
+  "verified": true,
+  "notes": "Three-instrument crystallisation suite. Weak like-for-like: 2007 dollars (no inflation adjustment in the cost model) and the Tecan EVO 150 is costed as the newer Tecan Fluent; mosquito and Rock Imager are older model generations. Verified 3 Oct 2026 via NIH RePORTER API (project 1S10RR023543-01, FY2007, award_amount 375141). Abstract quote: \"The system will consist of (1) a Formulatrix Tecan Evo-150 liquid handling robot for the generation of screening reagents; (2) a Mosquito nanoliter dispensing robot for setting up crystallization trials; and (3) a Formulatrix Rock Imager automated microscope for rapidly imaging the trial results.\" Source gives NO per-item prices, only the total award. Mapping: 3 of 3 items by count; 2/3 exact (mosquito -> sptlabtech_mosquito_xtal3, Rock Imager -> formulatrix_rock_imager_1000), the Tecan Freedom EVO 150 is the predecessor of the catalog's Fluent 780 (closest equivalent, not identical). Catalog prices are current (2020s) whereas this is a 2007 purchase, so expect the prediction to be higher in real terms; adjust for inflation/tech generation before judging. Equipment value share unknown (no item prices).",
+  "workflow": {
+    "id": "ucla_formulatrix_crystallization_s10_2007_wf",
+    "lab_spec_id": "ucla_formulatrix_crystallization_s10_2007",
+    "equipment": [
+      {
+        "instance_id": "tecan_fluent_1",
+        "catalog_id": "tecan_fluent",
+        "rationale": "Named in the source."
+      },
+      {
+        "instance_id": "sptlabtech_mosquito_xtal3_1",
+        "catalog_id": "sptlabtech_mosquito_xtal3",
+        "rationale": "Named in the source."
+      },
+      {
+        "instance_id": "formulatrix_rock_imager_1000_1",
+        "catalog_id": "formulatrix_rock_imager_1000",
+        "rationale": "Named in the source."
+      }
+    ],
+    "steps": [
+      {
+        "id": "use",
+        "name": "Placeholder step (cost comparison only)",
+        "capability": "manual_bench",
+        "candidate_instances": [],
+        "duration_s": 0
+      }
+    ]
+  }
+}

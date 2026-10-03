@@ -1,0 +1,44 @@
+{
+  "id": "kent_ambr250_alert_2018",
+  "name": "University of Kent automated high-density bioreactor facility for recombinant protein production (BBSRC ALERT, ambr250; 2018)",
+  "domain": "biology",
+  "sources": [
+    "https://gtr.ukri.org/projects?ref=BB%2FR013802%2F1",
+    "https://gtr.ukri.org/gtr/api/projects/0E6D3F74-02D4-4FC4-8D53-E382D672A717"
+  ],
+  "build": "turnkey",
+  "brief": "A university protein-production facility installs an automated multi-parallel mini-bioreactor system (100-250 mL vessels, robotic liquid handling for fed-batch growth of bacterial or mammalian cells) in a purpose-designed unit to make recombinant proteins at high cell density, for internal and external users.",
+  "reported": {
+    "cost": {
+      "value_usd": 495600,
+      "original": "GBP 372,664 (BBSRC award, 2018-2019); converted at ~1.33 USD/GBP (2018 average)",
+      "year": 2018,
+      "includes": [
+        "instruments"
+      ],
+      "excludes_note": "Award value of the BBSRC equipment grant on UKRI Gateway to Research (cost of the ambr250 system as requested; whether it includes VAT, install or service contract is not stated). Purpose-designed room not stated as included. USD figure is my currency conversion, not published."
+    }
+  },
+  "verified": true,
+  "notes": "Single-system price check with an exact model match (configuration unstated); independent of the catalog's ambr 250 sources (2024-25 US purchases). Opened the Gateway to Research API 3 Oct 2026: project 'An advanced bioreactor facility for automated, industry-aligned production of high-value proteins' (Univ. Kent), fund amount GBP 372,664, start 2018-05, end 2019-05. Abstract quote: \"we propose to purchase an ambr250 bioreactor system\" (Sartorius). Single-item case: 1 of 1 (100%) maps to sartorius_ambr250 (the abstract does not say 12- vs 24-way configuration; catalog id is the 12-way HT). Grant reference BB/R013802/1 (from the GtR record). Treat value_usd as roughly +-10% because of the GBP conversion.",
+  "workflow": {
+    "id": "kent_ambr250_alert_2018_wf",
+    "lab_spec_id": "kent_ambr250_alert_2018",
+    "equipment": [
+      {
+        "instance_id": "sartorius_ambr250_1",
+        "catalog_id": "sartorius_ambr250",
+        "rationale": "Named in the source."
+      }
+    ],
+    "steps": [
+      {
+        "id": "use",
+        "name": "Placeholder step (cost comparison only)",
+        "capability": "manual_bench",
+        "candidate_instances": [],
+        "duration_s": 0
+      }
+    ]
+  }
+}
