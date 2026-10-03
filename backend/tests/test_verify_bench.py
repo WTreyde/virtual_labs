@@ -143,3 +143,33 @@ def test_calibration_table():
 def test_worked_example_layout_still_validates_after_rederive():
     spec, wf = load_example("lab_spec"), load_example("workflow")
     assert errors(rederive(spec, wf, load_example("layout")), "layout") == []
+
+
+def test_storage_hold_time_is_not_restored_onto_a_loading_step():
+    # A dry shipper's catalog cold_storage duration is its ~12-day hold time; loading pucks takes 2 minutes.
+    from labforge.catalog.store import load_catalog
+    from labforge.verify.tamper import restore_protected
+    cat = load_catalog()
+    shipper = next(i for i, it in cat.items() if it["category"] == "storage"
+                   and (it.get("process") or {}).get("durations_s", {}).get("cold_storage", 0) > 86400)
+    wf = {"id": "ship_wf", "lab_spec_id": "ship", "labware": "puck",
+          "equipment": [{"instance_id": "lh_1", "catalog_id": "opentrons_flex"}, {"instance_id": "shipper_1", "catalog_id": shipper}],
+          "steps": [{"id": "prep", "name": "prep", "capability": "liquid_handling", "candidate_instances": ["lh_1"], "duration_s": 1800},
+                    {"id": "load_shipper", "name": "load", "capability": "cold_storage", "candidate_instances": ["shipper_1"],
+                     "duration_s": 120, "after": ["prep"], "mode": "manual"},
+                    {"id": "ship", "name": "ship", "capability": "external_service", "candidate_instances": [],
+                     "duration_s": 2880, "after": ["load_shipper"], "mode": "external"}]}
+    honest, restored = restore_protected(wf)
+    assert restored == [] and honest["steps"][1]["duration_s"] == 120
+    assert not [f for f in find_tampering(wf) if "load_shipper" in f]
+
+    spec = {"id": "ship", "name": "s", "domain": "biology", "description": "s",
+            "throughput_target": {"value": 40, "unit": "plates_per_day"}, "room": {"width_m": 6, "depth_m": 4},
+            "operators": [{"role": "tech", "count": 1, "shift_hours": 24}]}
+    c = claim("rate", "throughput.p50", ">=", 30, 0.8, "At least 30 pucks/day")
+    out = verify_claims([c], wf, None, None, spec=spec)[0]
+    assert out["status"] == "supported", out  # not collapsed to ~0 by a 12-day "processing" time
+
+    # A real processing step that undercuts its catalog time is still restored.
+    wf["steps"][0]["duration_s"] = 60
+    assert restore_protected(wf)[1] and restore_protected(wf)[1][0].startswith("prep")
