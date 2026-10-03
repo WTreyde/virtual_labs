@@ -33,10 +33,13 @@ export interface SimResult {
   bottlenecks: { kind: string; severity: string; message: string; instances?: string[]; suggestion?: string }[];
   timeline?: TimelineEvent[]; simulated_hours?: number;
 }
+export type ChatMessage = { role: string; content: string | unknown[] };
+
 export interface Design {
   lab_spec: any; workflow: Workflow; layout: Layout; sim_result: SimResult; catalog: Record<string, CatalogItem>;
   /** Client-side note on where the timeline came from, shown under the time controls. */
   timeline_note?: string;
+  report_markdown?: string;
 }
 
 /** Mirrors schemas/instrument_optimisation.schema.json (POST /optimise). */

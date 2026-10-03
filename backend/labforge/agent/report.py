@@ -61,6 +61,13 @@ def render_report(lab_spec: dict, workflow: dict, layout: dict, sim: dict,
         lines += ['', '## Refutation history', '', 'These are historical checks; a later revision may supersede the design or assertion.']
         for workflow_id, c in refutations:
             lines.append(f'- {workflow_id}: {c["statement"]} — refuted; observed {c.get("verified_value", "unknown")}.')
+    observed = sorted({c['verified_value'] for c in claims or []
+                       if c.get('metric') == 'throughput.p50' and 'verified_value' in c})
+    if observed and any(not math.isclose(value, median, rel_tol=0.01, abs_tol=0.01) for value in observed):
+        lines += ['', '## Independent verifier comparison', '',
+                  f'The planning simulation reports P50 {median}; the verifier observed {observed}. '
+                  'These are different model runs/assumptions. Use the verifier notes to identify restored catalog durations; '
+                  'do not present the planning number as independently confirmed.']
     lines += ['', '## Bottlenecks and risks', '']
     lines += [f'- **{b["severity"]}**: {b["message"]} {b.get("suggestion", "")}' for b in sim.get('bottlenecks', [])] or ['- None reported by the model.']
     lines += ['', '## Layout issues', '']

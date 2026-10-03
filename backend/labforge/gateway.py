@@ -2,12 +2,14 @@
 
 Run: uvicorn labforge.gateway:app --reload --port 8000
 """
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import PlainTextResponse, StreamingResponse
 from pydantic import BaseModel
 
 from labforge.agent.planner import run_turn
+from labforge.agent.errors import safe_error
+from labforge.agent.streaming import stream_turn
 from labforge.agent.report import render_report
 from labforge.bench.runner import load_tasks
 from labforge.catalog.store import search
@@ -53,7 +55,16 @@ def catalog(capability: str | None = None, labware: str | None = None, max_price
 
 @app.post("/chat")
 def chat(req: ChatRequest):
-    return run_turn(req.messages)
+    try:
+        return run_turn(req.messages)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=safe_error(exc)) from exc
+
+
+@app.post("/chat/stream")
+def chat_stream(req: ChatRequest):
+    return StreamingResponse(stream_turn(req.messages), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache"})
 
 
 @app.post("/layout")

@@ -8,14 +8,15 @@ import { openReport } from "./report";
 import { showError, showLoading, showSchedule, showWhatIf } from "./views";
 import { clock } from "./timeline";
 import { renderPanel } from "./panel";
-import type { Design } from "./types";
+import type { ChatMessage, Design } from "./types";
 import { dialogue, hideStatCard, introLines, onTick, setupClock, showStatCard } from "./ui";
 
 // `?demo=gallery` shows every sprite kind; the default is the worked example from examples/.
 const params = new URLSearchParams(location.search);
 clock.t = +(params.get("t") ?? 0) || 0; // ?t=<sim seconds> starts mid-run, handy for screenshots
 let design: Design = params.get("demo") === "gallery" ? galleryDesign : exampleDesign();
-const history: { role: string; content: string }[] = [];
+let history: ChatMessage[] = [];
+let chatting = false;
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
@@ -44,19 +45,24 @@ function show(d: Design) {
 const log = document.querySelector<HTMLDivElement>("#log")!;
 document.querySelector<HTMLFormElement>("#chat-form")!.addEventListener("submit", async (e) => {
   e.preventDefault();
+  if (chatting) return;
+  chatting = true;
   const input = document.querySelector<HTMLInputElement>("#chat-input")!;
   history.push({ role: "user", content: input.value });
   log.textContent += `\nYou: ${input.value}`;
   input.value = "";
   try {
     const out = await chat(history, design);
-    history.push({ role: "assistant", content: out.reply });
+    history = out.history;
     log.textContent += `\nAgent: ${out.reply}`;
     show(out.design);
     hideStatCard();
     dialogue.say([out.reply]);
-  } catch {
-    log.textContent += "\n(backend not reachable: start it with `make backend`)";
+  } catch (error) {
+    history.pop(); // the failed request was not committed to the conversation
+    log.textContent += `\n${error instanceof Error ? error.message : "Chat failed"}`;
+  } finally {
+    chatting = false;
   }
 });
 

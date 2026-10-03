@@ -152,6 +152,13 @@ class SessionTests(unittest.TestCase):
         with patch('labforge.agent.session.verify_claims', legacy):
             self.assertEqual(self.session.verify([claim()])['claims'][0]['verified_value'], 20)
 
+    def test_report_discloses_independent_verifier_disagreement(self):
+        self.design()
+        self.session.claims = [{**claim(), 'status':'refuted', 'verified_value':0.3}]
+        text = self.session.report()['report_markdown']
+        self.assertIn('Independent verifier comparison', text)
+        self.assertIn('not present the planning number as independently confirmed', text)
+
     def test_real_simulator_and_verifier_loop(self):
         session = ToolSession(TOOLS, [])
         session.simulate(self.spec, self.workflow)
