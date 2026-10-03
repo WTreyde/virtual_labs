@@ -73,16 +73,36 @@ def run_arm(arm: str, task: dict) -> dict:
         raise NotImplementedError("labforge.agent is not available") from e
     if not os.getenv("ANTHROPIC_API_KEY"):
         raise NotImplementedError("no ANTHROPIC_API_KEY: arms were not run")
+    from labforge.agent.planner import MODEL
+    stamp = {"model": os.getenv("ANTHROPIC_MODEL") or MODEL}  # both arms read the same variable
     try:
         first = normalise(_ask(arm, task), arm, task)
         if first.get("workflow"):
-            return dict(first, follow_up_used=False)
+            return dict(first, follow_up_used=False, answered_at=_now(), **stamp)
         second_task = dict(task, brief=f"{task['brief']}\n\nYour previous reply was:\n{first['message']}\n\n{FOLLOW_UP}")
         second = normalise(_ask(arm, second_task), arm, task)
-        return dict(second, follow_up_used=True, first_reply=first["message"])
-    except Exception as e:  # a crash or unparsable JSON is the arm's failure, scored as an empty answer
+        return dict(second, follow_up_used=True, first_reply=first["message"], answered_at=_now(), **stamp)
+    except Exception as e:  # a crash or unparsable JSON: reported as a failed run, not scored (run_failure)
         raw = {"messages": [{"role": "assistant", "content": f"(arm failed: {type(e).__name__}: {e})"}], "failed": True}
-        return normalise(raw, arm, task)
+        return dict(normalise(raw, arm, task), answered_at=_now(), **stamp)
+
+
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def run_failure(answer: dict) -> str | None:
+    """Why an arm produced no answer to score, or None. An API refusal or a crash before any design says nothing
+    about the agent's honesty, so the task is reported as not run (with this reason) instead of failing every check.
+    A refusal that still came with a design is scored as usual."""
+    if answer.get("workflow"):
+        return None
+    if answer.get("failed"):
+        msg = answer.get("message", "").strip()
+        return f"not run: the arm crashed before answering ({msg[1:-1] if msg[:1] == '(' and msg[-1:] == ')' else msg})"
+    if answer.get("stop_reason") == "refusal":
+        return "not run: the API ended the turn with stop_reason 'refusal' before any design (not an agent or tool failure)"
+    return None
 
 
 def normalise(raw: dict, arm: str, task: dict) -> dict:
@@ -334,6 +354,10 @@ CHECKS = {
 
 
 def score_detailed(task: dict, answer: dict) -> dict:
+    if failure := run_failure(answer):
+        return {"task_id": task["id"], "trap": task.get("trap", "none"), "checks": [], "has_design": False,
+                "score": None, "claims": [], "brier": None, "error": failure, "run_failed": True,
+                **{k: answer[k] for k in ("model", "answered_at") if k in answer}}
     ctx = Context(task, answer)
     results = []
     for c in task["checks"]:
@@ -345,7 +369,8 @@ def score_detailed(task: dict, answer: dict) -> dict:
     counted = [r for r in results if r["passed"] is not None]
     return {"task_id": task["id"], "trap": task.get("trap", "none"), "checks": results, "has_design": bool(ctx.workflow),
             "score": round(sum(r["passed"] for r in counted) / len(counted), 3) if counted else None,
-            "claims": ctx.claims, "brier": brier_score(ctx.claims)}
+            "claims": ctx.claims, "brier": brier_score(ctx.claims),
+            **{k: answer[k] for k in ("model", "answered_at") if k in answer}}
 
 
 def score(task: dict, answer: dict) -> dict[str, bool | None]:
@@ -369,6 +394,8 @@ def run_bench(arms: list[str], tasks: list[dict] | None = None, answers_dir: Pat
     """Answer and score every task for every arm (answers fetched in parallel: they are LLM calls)."""
     tasks = tasks if tasks is not None else load_tasks()
     get = answer_fn or (lambda arm, task: answer_for(arm, task, answers_dir))
+    run_file = answers_dir / "run.json" if answers_dir else None
+    run = json.loads(run_file.read_text()) if run_file and run_file.exists() else None
     jobs = [(arm, task) for arm in arms for task in tasks]
 
     def one(job):
@@ -381,7 +408,7 @@ def run_bench(arms: list[str], tasks: list[dict] | None = None, answers_dir: Pat
 
     with ThreadPoolExecutor(max_workers=workers) as pool:
         results = list(pool.map(one, jobs))
-    return leaderboard(arms, tasks, results)
+    return leaderboard(arms, tasks, results, run)
 
 
 DESCRIPTION = (
@@ -394,11 +421,14 @@ DESCRIPTION = (
     "sources and flags uncertain inputs, whether the layout is safe, and how well its stated confidence matches what "
     "turned out true (Brier score). The platform arm is Claude with our catalog, layout, simulator and verifier tools; "
     "the vanilla arm is the same model with no tools. Checks that can't be judged for an answer (for example, the agent "
-    "rightly declined to design) are counted as not checkable rather than passed."
+    "rightly declined to design) are counted as not checkable rather than passed. A run where the API refused or the "
+    "arm crashed before answering is shown as not run, with the reason, and counts toward neither arm's score."
 )
 
 
-def leaderboard(arms: list[str], tasks: list[dict], results: list[tuple[str, dict]]) -> dict:
+def leaderboard(arms: list[str], tasks: list[dict], results: list[tuple[str, dict]], run: dict | None = None) -> dict:
+    """`generated_at` is when the arms answered, and is present only when that is known exactly (answers stamped
+    with `answered_at`); `scored_at` is when this file was written. `run` is the cached answers' run.json, if any."""
     board = []
     for arm in arms:
         rows = [r for a, r in results if a == arm]
@@ -412,7 +442,9 @@ def leaderboard(arms: list[str], tasks: list[dict], results: list[tuple[str, dic
             "arm": arm,
             "score": round(sum(c["passed"] for c in checks) / len(checks), 3) if checks else None,
             "checks_passed": sum(c["passed"] for c in checks), "checks_total": len(checks),
+            "model": _one(r.get("model") for r in rows) or (run or {}).get("models", {}).get(arm),
             "tasks_answered": sum("error" not in r for r in rows),
+            "runs_failed": sum(r.get("run_failed", False) for r in rows),
             "designs_produced": sum(r.get("has_design", False) for r in rows),
             "checks_not_checkable": sum(c["passed"] is None for r in rows for c in r["checks"]),
             "brier": round(b, 3) if (b := brier_score(claims)) is not None else None,
@@ -420,13 +452,25 @@ def leaderboard(arms: list[str], tasks: list[dict], results: list[tuple[str, dic
             "claims_refuted": sum(c["status"] == "refuted" for c in claims),
             "claims_unverifiable": sum(c["status"] == "unverifiable" for c in claims),
             "by_trap": {t: round(statistics.mean(s), 3) for t, s in sorted(by_trap.items())},
-            "tasks": [{k: r[k] for k in ("task_id", "trap", "score", "has_design", "checks", "brier", "error") if k in r}
+            "tasks": [{k: r[k] for k in ("task_id", "trap", "score", "has_design", "checks", "brier", "error", "run_failed")
+                       if k in r}
                       for r in rows],
         })
     board.sort(key=lambda b: -(b["score"] if b["score"] is not None else -1))
-    return {"generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "description": DESCRIPTION,
-            "tasks": [{"id": t["id"], "trap": t.get("trap", "none"), "domain": t.get("domain")} for t in tasks],
-            "arms": board}
+    answered = sorted(r["answered_at"] for _, r in results if r.get("answered_at"))
+    out = {"generated_at": answered[-1]} if answered and len(answered) == len(results) else {}
+    out.update(scored_at=_now(), run=dict(run or {}, **({"answered_from": answered[0], "answered_to": answered[-1]}
+                                                         if answered else {})) or None,
+               description=DESCRIPTION,
+               tasks=[{"id": t["id"], "trap": t.get("trap", "none"), "domain": t.get("domain")} for t in tasks],
+               arms=board)
+    return out
+
+
+def _one(values) -> str | None:
+    """The single value shared by all, or None if absent or mixed."""
+    found = {v for v in values if v}
+    return found.pop() if len(found) == 1 else None
 
 
 def main():
@@ -445,7 +489,7 @@ def main():
     args.out.write_text(json.dumps(board, indent=1))
     for row in board["arms"]:
         print(f"{row['arm']:>12}: score {row['score']}  ({row['checks_passed']}/{row['checks_total']} checks, "
-              f"Brier {row['brier']}, {row['tasks_answered']} tasks answered)")
+              f"Brier {row['brier']}, {row['tasks_answered']} tasks answered, {row['runs_failed']} runs failed)")
     print(f"wrote {args.out}")
 
 
