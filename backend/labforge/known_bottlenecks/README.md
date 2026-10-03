@@ -9,7 +9,7 @@ Run `cd backend && python -m labforge.known_bottlenecks.run` (local catalog, no 
 | XChem harvesting, manual ~8 crystals/h ([Wright et al., Acta D 2021](https://pmc.ncbi.nlm.nih.gov/articles/PMC7787106/)) | crystal harvesting | harvest bench, 93% busy | 58 vs 64 crystals per 8 h (−9%) |
 | XChem harvesting with Shifter ~103 crystals/h (same paper) | crystal harvesting | harvest bench, 98% busy | 730 vs 824 crystals per 8 h (−11%) |
 
-Figures are from the simulator on `main` at 6fb10aa. On Maxim's rewrite (PR #1) all three still match, with errors of +15%, −9% and −9%.
+Figures are from the simulator on `main` at 8ed4eae. On Maxim's rewrite (PR #1) all three still match, with errors of +15%, −9% and −9%.
 
 What-if on Burger: halving GC time roughly doubles throughput (5.5 → 11.5 batches/day) and GC stays the limit; a second GC gives 11, a third 14, where photolysis starts to bind.
 
