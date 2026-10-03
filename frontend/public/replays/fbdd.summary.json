@@ -1,38 +1,37 @@
 {
   "title": "XChem-style fragment screening",
   "brief": "Plan protein production, crystallisation, fragment soaking and manual harvesting followed by external synchrotron diffraction.",
-  "source": "backend/labforge/agent/demo/scenarios_20261003_harvesting/xchem.json",
+  "source": "backend/labforge/agent/demo/scenarios_20261003_post_pr26/xchem.json",
   "headline_throughput": {
-    "p50": 312.0,
-    "p10": 219.2,
-    "p90": 372.8,
+    "p50": 123.8,
+    "p10": 89.1,
+    "p90": 229.8,
     "unit": "crystals_per_day",
     "basis": "recorded planning simulation",
-    "verified_p50": 112.0,
+    "verified_p50": 172.0,
     "target": 300
   },
   "bottleneck": {
-    "instance_id": "growth_hotel_1",
-    "name": "growth hotel 1",
-    "catalog_id": "thermo_cytomat_2",
-    "model": "Cytomat 2 C-LiN Automated Incubator",
-    "busy_fraction": 0.801,
+    "instance_id": "incubator_1",
+    "name": "incubator 1",
+    "catalog_id": "liconic_stx44",
+    "model": "STX44",
+    "busy_fraction": 0.854,
     "basis": "busiest recorded instrument by calendar-time utilisation; operators excluded"
   },
   "budget_vs_bom": {
     "currency": "USD",
     "budget": 2000000,
-    "bom": 1035400.0,
+    "bom": 1022850.0,
     "claim_status": "supported",
     "basis": "recorded checked equipment cost; excludes installation, service, consumables and building work"
   },
   "gate_passed": false,
   "limits": [
-    "11 recorded layout violations; physical feasibility is qualified.",
-    "Refuted claim: Simulated P50 throughput meets the 300 crystals/day target. (verified value 112.0).",
-    "Planning median 312.0 versus independent verifier 112.0 crystals_per_day; the headline is the planning simulation, not a verified measurement.",
+    "1 recorded layout violations; physical feasibility is qualified.",
+    "Refuted claim: Median simulated throughput meets the 300 crystals/day target (verified value 172.0).",
+    "Planning median 123.8 versus independent verifier 172.0 crystals_per_day; the headline is the planning simulation, not a verified measurement.",
     "Growth-hotel crystallisation-plate compatibility, shipper capacity and transit concurrency need confirmation.",
-    "Timing and yield assumptions are provisional; no physical lab was operated.",
-    "This historical recording predates the per-crystal catalog and batch-aware verifier fixes; its verifier restores 7200 seconds for harvesting."
+    "Timing and yield assumptions are provisional; no physical lab was operated."
   ]
 }
