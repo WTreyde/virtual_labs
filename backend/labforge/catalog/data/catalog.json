@@ -6706,12 +6706,12 @@
         "source": "agent_estimate"
       },
       "process.durations_s.crystal_harvesting": {
-        "value": 7200,
-        "low": 1800,
-        "high": 14400,
-        "confidence": "placeholder",
-        "source": "agent_estimate",
-        "note": "Roughly 2 h per 96-well plate (~1 min/crystal incl. cryo-protectant and puck load); vendor publishes no throughput"
+        "value": 35,
+        "low": 15,
+        "high": 36,
+        "confidence": "literature",
+        "source": "https://doi.org/10.1107/S2059798320014114 (Wright et al., Acta Cryst. D 2021, PMC7787106)",
+        "note": "Seconds per mounted crystal, not per plate (see process.duration_basis). Deployment data: \"a mean mount time of 35 s (103 crystals per hour) and a median of 30 s (120 crystals per hour)\"; range from \"mounting rates of 100-240 crystals per hour\" (15-36 s). Per mount attempt: 86% of mounts were judged a success, so time per successful crystal is higher (~41 s at the mean). A plate's harvest time is this x the crystals harvested from it, which the workflow sets."
       },
       "process.capacity": {
         "value": 1,
@@ -6747,8 +6747,11 @@
     "process": {
       "capacity": 1,
       "durations_s": {
-        "crystal_harvesting": 7200,
+        "crystal_harvesting": 35,
         "cryo_cooling": 600
+      },
+      "duration_basis": {
+        "crystal_harvesting": "crystal"
       }
     },
     "power_w": 300,
