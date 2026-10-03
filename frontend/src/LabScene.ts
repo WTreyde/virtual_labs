@@ -240,11 +240,31 @@ export class LabScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * Capacity bottlenecks get a red aura and a speech bubble (one per instance, at most three, highest severity first,
+   * raised to clear earlier bubbles); long transfers get a red dashed line between the two instances. Every bottleneck
+   * is also read out in the dialogue box, so nothing is lost when a run reports many.
+   */
   private drawBottlenecks() {
-    const where = Object.fromEntries(this.design.layout.placements.map((p) => [p.instance_id, p.position]));
-    for (const b of this.design.sim_result.bottlenecks) {
-      const pos = b.instances?.[0] && where[b.instances[0]];
-      if (!pos) continue;
+    const { layout, sim_result } = this.design;
+    const where: Record<string, { x: number; y: number; z: number }> = Object.fromEntries(layout.placements.map((p) => [p.instance_id, p.position]));
+    for (const op of layout.operators ?? []) where[op.id] ??= { x: op.home.x, y: op.home.y, z: 0 };
+    const rank: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
+    const sorted = [...sim_result.bottlenecks].sort((a, b) => (rank[a.severity] ?? 9) - (rank[b.severity] ?? 9));
+
+    for (const b of sorted.filter((b) => b.kind === "long_transfer" && b.instances?.length === 2)) {
+      const [p, q] = b.instances!.map((id) => where[id]);
+      if (!p || !q) continue;
+      const a = iso(p.x, p.y, 0), c = iso(q.x, q.y, 0), n = Math.max(2, Math.floor(Math.hypot(c.x - a.x, c.y - a.y) / 10));
+      const g = this.add.graphics().lineStyle(2, 0xe0503c, 0.7).setDepth(-500);
+      for (let i = 0; i < n; i += 2) g.lineBetween(a.x + ((c.x - a.x) * i) / n, a.y + ((c.y - a.y) * i) / n, a.x + ((c.x - a.x) * (i + 1)) / n, a.y + ((c.y - a.y) * (i + 1)) / n);
+    }
+
+    const placed: Phaser.Geom.Rectangle[] = [], done = new Set<string>();
+    for (const b of sorted.filter((b) => b.kind !== "long_transfer")) {
+      const id = b.instances?.[0], pos = id && where[id];
+      if (!pos || done.has(id) || placed.length >= 3) continue;
+      done.add(id);
       const f = iso(pos.x, pos.y, 0);
       const aura = this.add.ellipse(f.x, f.y, TILE * 1.6, TILE * 0.8, 0xe0503c, 0.35).setDepth(pos.x + pos.y - 0.01);
       this.tweens.add({ targets: aura, alpha: 0.08, yoyo: true, repeat: -1, duration: 700 });
@@ -252,8 +272,15 @@ export class LabScene extends Phaser.Scene {
       const txt = this.add.text(s.x, s.y - 64, b.message, {
         fontFamily: '"Press Start 2P", monospace', fontSize: "8px", lineSpacing: 5, color: "#222", wordWrap: { width: 210 },
       }).setOrigin(0.5, 1).setDepth(1001);
+      const pad = 9;
+      // Raise this bubble until it clears the ones already placed.
+      for (let tries = 0; tries < 8; tries++) {
+        const r = txt.getBounds(), box = new Phaser.Geom.Rectangle(r.x - pad - 4, r.y - pad - 4, r.width + 2 * pad + 8, r.height + 2 * pad + 8);
+        if (!placed.some((o) => Phaser.Geom.Intersects.RectangleToRectangle(o, box))) { placed.push(box); break; }
+        txt.y -= 24;
+      }
       // Speech bubble in the same frame style as the HTML dialogue box, tail pointing at the instrument.
-      const r = txt.getBounds(), pad = 9, g = this.add.graphics().setDepth(1000);
+      const r = txt.getBounds(), g = this.add.graphics().setDepth(1000);
       g.fillStyle(0x2b2f36).fillRoundedRect(r.x - pad - 3, r.y - pad - 3, r.width + 2 * pad + 6, r.height + 2 * pad + 6, 8);
       g.fillTriangle(s.x - 10, r.bottom + pad, s.x + 10, r.bottom + pad, s.x, r.bottom + pad + 14);
       g.fillStyle(0xfbfbf5).fillRoundedRect(r.x - pad, r.y - pad, r.width + 2 * pad, r.height + 2 * pad, 6);

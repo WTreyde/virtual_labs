@@ -34,7 +34,12 @@ const game = new Phaser.Game({
 // ?view=bench and ?view=validation are full-page views (the demo opens them in their own tab): no game behind them.
 const pageView = ["bench", "validation"].includes(params.get("view") ?? "");
 if (pageView) document.body.classList.add("page-view");
-else document.fonts.load('8px "Press Start 2P"').finally(() => game.scene.add("lab", LabScene, true, { design }));
+else {
+  // The font is bundled, but a sandbox or locked-down network can still block or stall the file. Start anyway after
+  // at most 2 s; Phaser text then uses the monospace fallback. Catching the rejection avoids an unhandled NetworkError.
+  const fontReady = Promise.race([document.fonts.load('8px "Press Start 2P"'), new Promise((r) => setTimeout(r, 2000))]);
+  fontReady.catch(() => undefined).then(() => game.scene.add("lab", LabScene, true, { design }));
+}
 // (reads `design` when the font is ready, so a replay that has already moved on is picked up)
 renderPanel(design);
 if (!replay && !pageView) dialogue.say(introLines(design));
