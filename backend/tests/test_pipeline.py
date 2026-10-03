@@ -98,3 +98,16 @@ def test_demo_serves_built_game_behind_api_routes(tmp_path, monkeypatch):
         monkeypatch.delenv("LABFORGE_STATIC_DIR")
         importlib.reload(gw)
 
+
+def test_replay_only_mode_refuses_live_chat(monkeypatch):
+    """The public demo (LABFORGE_REPLAY_ONLY=1) never runs the agent, so it cannot spend API credits."""
+    import labforge.gateway as gw
+    client = TestClient(gw.app)
+    assert client.get("/health").json()["live_chat"] is True
+    monkeypatch.setattr(gw, "REPLAY_ONLY", True)
+    monkeypatch.setattr(gw, "run_turn", lambda *_: (_ for _ in ()).throw(AssertionError("agent must not run")))
+    assert client.get("/health").json() == {"ok": True, "live_chat": False}
+    for path in ("/chat", "/chat/stream"):
+        response = client.post(path, json={"messages": [{"role": "user", "content": "design a lab"}]})
+        assert response.status_code == 503 and "recorded agent run" in response.json()["detail"]
+
