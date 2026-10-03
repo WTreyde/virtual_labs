@@ -16,3 +16,6 @@ Use Devin for the per-vendor scraping tickets if helpful; keep the cached JSON i
 6. Validation cases in `backend/labforge/validation/cases/` (schema `validation_case`): find 6–10 published autonomous labs with reported costs, read each primary source, record exactly what the figure covers, and set `verified: true` only after checking. Three unverified seeds are there already.
 7. Cost model in `validation/cost.py`: replace the placeholder integration-labour range and confidence-based price bands with sourced ranges; add per-item price `provenance` where vendors publish prices.
 8. Where a case gives enough detail, hand-write its `workflow` from catalog ids so it can be costed without the agent.
+
+## Added: project prioritisation (see docs/prioritisation.md)
+9. Write a 3-project demo queue on one designed lab (chem library screen, enzyme campaign, urgent re-test with a deadline) as JSON for `POST /prioritise`.

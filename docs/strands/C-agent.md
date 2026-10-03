@@ -17,3 +17,6 @@ Already implemented: `planner.run_turn()` runs a Claude Sonnet tool-use loop (`c
 ## Added after judge feedback (see docs/validation.md)
 9. `validation/runner.py::design_from_brief`: run the planner on each validation case's brief (the brief never contains the cost) and return its workflow, so validation tests the whole platform. Coordinate with Max, who owns that file.
 10. When the user asks about an instrument, the agent can call `/optimise` and explain the vendor takeaway (elasticity, headroom, next bottleneck) in plain words.
+
+## Added: project prioritisation (see docs/prioritisation.md)
+11. Nice to have: a `plan_projects` tool calling `labforge.sim.portfolio.prioritise`, so the agent can answer "what order should I run these projects in?" and state the caveat.
