@@ -198,3 +198,13 @@ body.page-view #modal table.bench thead th { top: 46px; }
 #modal td.notrun { color: #8a8880; }
 #modal .bench-legend { margin: 8px 0; }
 #modal .bench-legend .chip { font-size: 11px; }
+
+/* Verifier verdicts, next to the BOM. */
+#verdicts { padding: 8px 10px; border: 3px solid #2b2f36; border-radius: 6px; background: #fbfbf5; }
+#verdicts .v-sum { font: 600 12px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; margin: 2px 0 6px; }
+#verdicts .v-sum.warn { color: #a3271a; } #verdicts .v-sum.ok { color: #1f6b3a; }
+#verdicts .verdict { display: grid; grid-template-columns: auto auto 1fr; gap: 6px; align-items: baseline; padding: 4px 0; border-top: 1px solid #e4e3dd;
+  font: 12px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+#verdicts .v-status { font: 8px "Press Start 2P", monospace; text-transform: uppercase; padding: 3px 5px; border-radius: 3px; color: #fff; background: #8a8880; }
+#verdicts .refuted .v-status { background: #a3271a; } #verdicts .supported .v-status { background: #1f6b3a; }
+#verdicts .v-label { font-weight: 700; }

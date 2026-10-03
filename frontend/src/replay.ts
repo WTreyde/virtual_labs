@@ -16,7 +16,7 @@ export interface RecordedRun {
   output: {
     messages?: { role: string; content: unknown }[];
     lab_spec?: any; workflow?: Design["workflow"]; layout?: Design["layout"]; sim_result?: Design["sim_result"];
-    claims?: unknown[]; report_markdown?: string;
+    claims?: import("./verdicts").CheckedClaim[]; report_markdown?: string;
   };
   events?: { type: string; name?: string; input?: Record<string, unknown>; step?: number; text?: string; error?: string }[];
   gate?: { passed?: boolean; missing_capabilities?: string[] };
