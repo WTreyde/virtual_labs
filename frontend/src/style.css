@@ -167,3 +167,4 @@ body.page-view #app { display: block; overflow-y: auto; }
 #fix p { font: 11px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; margin: 4px 0 6px; }
 #fix .check-row { display: flex; justify-content: space-between; gap: 8px; } #fix .check-row > span:first-child { color: #556; }
 #fix .fix-show { margin-top: 8px; width: 100%; font-size: 8px; }
+.card.own.disabled { background: #e7e5dc; } .card.own.disabled .card-kicker { color: #a3271a; }

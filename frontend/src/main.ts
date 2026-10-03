@@ -1,6 +1,6 @@
 import "@fontsource/press-start-2p";
 import Phaser from "phaser";
-import { chat, exampleDesign, leaderboard, liveCatalog, optimise, prioritise, setOffline, validation } from "./api";
+import { chat, exampleDesign, LIVE_CHAT_MESSAGE, leaderboard, liveCatalog, liveChat, optimise, prioritise, setOffline, validation } from "./api";
 import demoQueue from "../../backend/labforge/catalog/data/demo_prioritise_queue.json";
 import cachedDemoSchedule from "./fixtures/demo_schedule.json";
 import { galleryDesign } from "./fixtures/gallery";
@@ -88,6 +88,7 @@ async function go(r: Route) {
   chatting = false;
   setOffline(false);
   setChatEnabled(r.page === "design");
+  $<HTMLInputElement>("#chat-input").placeholder = "Describe your lab...";
   document.body.classList.toggle("page-view", ["bench", "validation", "schedule"].includes(r.page));
   document.body.classList.toggle("on-landing", r.page === "landing");
   landing.classList.toggle("hidden", r.page !== "landing");
@@ -103,6 +104,14 @@ async function go(r: Route) {
       dialogue.say(["Describe the lab you want in the box on the right. Meanwhile, here is the worked example.", ...introLines(d)]);
       // With the backend up, use its catalog so BOM prices match /report; offline, keep examples/catalog.json.
       liveCatalog(d).then((catalog) => { if (route === r) show({ ...design, catalog }); }).catch(() => {});
+      // Public demo (live_chat: false) or no backend: say so instead of offering a chat box that errors.
+      liveChat().then((state) => {
+        if (route !== r || state === "on") return;
+        setChatEnabled(false);
+        $<HTMLInputElement>("#chat-input").placeholder = state === "off" ? "Live design is off in this demo" : "Backend not reachable";
+        appendLog(LIVE_CHAT_MESSAGE[state]);
+        dialogue.say([LIVE_CHAT_MESSAGE[state], ...introLines(d)]);
+      });
       if (r.whatif) openWhatIf(r.whatif);
       return;
     }
