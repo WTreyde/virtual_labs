@@ -1,3 +1,4 @@
+import { pct, slotsText, storageFacts } from "./capacity";
 import { clock } from "./timeline";
 import type { CatalogItem, Confidence, Design, UncertainNumber } from "./types";
 
@@ -152,8 +153,17 @@ export function showStatCard(d: Design, instanceId: string, sprite?: string) {
   if (item) body += `<button class="whatif" data-id="${esc(instanceId)}">How could this be better?</button>`;
 
   const title = item ? `${esc(item.vendor)} ${esc(item.model)}` : op ? esc(op.role) : esc(instanceId);
+  // Plate storage: busy % and slots up front, and how busy the lab's other storage is (e.g. hotel vs imager).
+  const facts = storageFacts(d), mine = facts.find((f) => f.id === instanceId);
+  let storage = "";
+  if (mine) {
+    const peers = facts.filter((f) => f.id !== instanceId && f.caps.some((c) => mine.caps.includes(c)));
+    storage = `<div class="busy-big">${pct(mine.busy)} busy${mine.slots != null ? ` · ${esc(slotsText(mine.slots))}` : ""}</div>
+      ${peers.map((f) => `<div class="sub">Compare: ${esc(f.model)} (${esc(f.id)}) ${pct(f.busy)} busy${f.slots != null ? `, ${esc(slotsText(f.slots))}` : ""}</div>`).join("")}`;
+  }
   card.innerHTML = `<button class="close" aria-label="Close">✕</button>
     <div class="head">${img}<div><div class="name">${title}</div><div class="id">${esc(instanceId)}${item ? ` · ${badge(item.data_confidence)}` : ""}</div></div></div>
+    ${storage}
     ${body}`;
   card.classList.remove("hidden");
 }

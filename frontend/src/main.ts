@@ -4,6 +4,7 @@ import { chat, exampleDesign, leaderboard, liveCatalog, optimise, prioritise, se
 import demoQueue from "../../backend/labforge/catalog/data/demo_prioritise_queue.json";
 import cachedDemoSchedule from "./fixtures/demo_schedule.json";
 import { galleryDesign } from "./fixtures/gallery";
+import { fixCard } from "./capacity";
 import { renderLanding, summaryBox } from "./landing";
 import { LabScene } from "./LabScene";
 import { renderPanel } from "./panel";
@@ -81,6 +82,7 @@ async function go(r: Route) {
   badge.classList.add("hidden");
   badge.querySelector("button")?.remove();
   $("#checked").classList.add("hidden");
+  $("#fix").classList.add("hidden");
   log.textContent = "";
   history = [];
   chatting = false;
@@ -150,6 +152,8 @@ async function startReplay(name: string) {
           if (t.verified_p50 != null)
             lines.push(`Careful: my planning simulation says ${Math.round(t.p50)}, but an independent check of the same design gives ${Math.round(t.verified_p50)} ${t.unit.replace(/_/g, " ")}. The limits are listed on the right.`);
         }
+        const fix = fixCard(d, summary);
+        if (fix) { $("#fix").innerHTML = fix; $("#fix").classList.remove("hidden"); }
         dialogue.say(lines);
       },
       showAnswer: (title, html) => live() && showHtml(title, html),
@@ -209,6 +213,11 @@ async function openWhatIf(id: string) {
     showError(title, "Needs the backend (make backend); there is no cached sweep for this instrument.");
   }
 }
+// "Show the <instrument>" on the fix card opens that instrument's stat card, as clicking it in the scene would.
+$("#fix").addEventListener("click", (e) => {
+  const id = (e.target as HTMLElement).closest<HTMLElement>(".fix-show")?.dataset.id;
+  if (id) game.events.emit("select-id", id);
+});
 $("#statcard").addEventListener("click", (e) => {
   const id = (e.target as HTMLElement).closest<HTMLElement>(".whatif")?.dataset.id;
   if (id) openWhatIf(id);

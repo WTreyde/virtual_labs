@@ -73,6 +73,9 @@ export class LabScene extends Phaser.Scene {
     this.drawBottlenecks();
     const pre = new URLSearchParams(location.search).get("select"); // e.g. ?select=lh_1, for screenshots
     if (pre && this.sprites[pre]) this.select(pre, this.sprites[pre]);
+    const selectId = (id: string) => this.sprites[id] && this.select(id, this.sprites[id]);
+    this.game.events.on("select-id", selectId);
+    this.events.once("shutdown", () => this.game.events.off("select-id", selectId));
     this.input.on("pointerdown", (_: unknown, hits: unknown[]) => { if (!hits.length) this.game.events.emit("select", null); });
     this.game.events.emit("ready-clock");
     this.scale.once("resize", () => this.scene.restart({ design: this.design }));
