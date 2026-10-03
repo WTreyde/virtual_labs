@@ -6627,8 +6627,7 @@
     "model": "Crystal Shifter",
     "category": "instrument",
     "capabilities": [
-      "crystal_harvesting",
-      "cryo_cooling"
+      "crystal_harvesting"
     ],
     "footprint": {
       "width_m": 0.6,
@@ -6711,7 +6710,7 @@
         "high": 36,
         "confidence": "literature",
         "source": "https://doi.org/10.1107/S2059798320014114 (Wright et al., Acta Cryst. D 2021, PMC7787106)",
-        "note": "Seconds per mounted crystal, not per plate (see process.duration_basis). Deployment data: \"a mean mount time of 35 s (103 crystals per hour) and a median of 30 s (120 crystals per hour)\"; range from \"mounting rates of 100-240 crystals per hour\" (15-36 s). Per mount attempt: 86% of mounts were judged a success, so time per successful crystal is higher (~41 s at the mean). A plate's harvest time is this x the crystals harvested from it, which the workflow sets."
+        "note": "Seconds per mounted crystal, not per plate (see process.duration_basis). Deployment data: \"a mean mount time of 35 s (103 crystals per hour) and a median of 30 s (120 crystals per hour)\"; range from \"mounting rates of 100-240 crystals per hour\" (15-36 s). Per mount attempt: 86% of mounts were judged a success, so time per successful crystal is higher (~41 s at the mean). A plate's harvest time is this x the crystals harvested from it, which the workflow sets. Includes plunge-cooling into a puck in LN2: the paper defines mount duration as drop arrival to the user leaving it, and reports \"the time taken to fill a 16-sample puck\" falling \"to 10 min from 60-80 min\" (37.5 s/crystal). The Shifter itself (an X-Y stage) does not cool; there is no separate cryo_cooling step to add."
       },
       "process.capacity": {
         "value": 1,
@@ -6724,13 +6723,6 @@
         "value": 12,
         "low": 6,
         "high": 24,
-        "confidence": "placeholder",
-        "source": "agent_estimate"
-      },
-      "process.durations_s.cryo_cooling": {
-        "value": 600,
-        "low": 60,
-        "high": 1800,
         "confidence": "placeholder",
         "source": "agent_estimate"
       },
@@ -6747,8 +6739,7 @@
     "process": {
       "capacity": 1,
       "durations_s": {
-        "crystal_harvesting": 35,
-        "cryo_cooling": 600
+        "crystal_harvesting": 35
       },
       "duration_basis": {
         "crystal_harvesting": "crystal"
@@ -6863,7 +6854,8 @@
         "low": 30,
         "high": 600,
         "confidence": "placeholder",
-        "source": "agent_estimate: transfer and immersion of one puck/pin to LN2"
+        "source": "agent_estimate: transfer and immersion of one puck/pin to LN2",
+        "note": "Per filled puck: moving one puck from the harvesting station's LN2 bath into a storage cane/dewar. Per-crystal plunge-cooling is already inside olt_crystal_shifter crystal_harvesting (35 s/crystal), so do not add it again here."
       },
       "storage_slots": {
         "value": 10,
