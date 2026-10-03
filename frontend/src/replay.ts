@@ -1,5 +1,5 @@
 import { marked } from "marked";
-import type { CatalogItem, Design, InstrumentOptimisation } from "./types";
+import type { CaseSummary, CatalogItem, Design, InstrumentOptimisation } from "./types";
 
 /**
  * Strand A: ?replay=<name> plays a recorded agent run from /replays/<name>.json at demo speed with no backend
@@ -48,6 +48,17 @@ export function loadReplay(name: string): Promise<RecordedRun> {
     runs.set(name, p);
   }
   return runs.get(name)!;
+}
+
+/** Optional public/replays/<name>.summary.json: headline, independent check, gate and limits for a recording. */
+export async function loadSummary(name: string): Promise<CaseSummary | undefined> {
+  try {
+    const res = await fetch(`${base()}replays/${encodeURIComponent(name)}.summary.json`);
+    const text = res.ok ? await res.text() : "";
+    return text.trimStart().startsWith("{") ? JSON.parse(text) : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 /**

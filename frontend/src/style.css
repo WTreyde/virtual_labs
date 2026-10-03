@@ -151,3 +151,13 @@ body.page-view #app { display: block; overflow-y: auto; }
 #log { flex: 1 1 auto; min-height: 120px; max-height: none; overflow-y: auto; font-size: 8px; line-height: 1.8;
   padding: 8px 10px; background: #fbfbf5; border: 3px solid #2b2f36; border-radius: 6px; overflow-wrap: anywhere; }
 #log:empty { display: none; }
+
+/* Planned vs independently checked (landing cards and the case-page panel). */
+.card-sub .checked { font-weight: 600; color: #1f5fae; margin: -2px 0 4px; }
+.card-sub .ok, #checked .ok { color: #1f6b3a; } .card-sub .warn, #checked .warn { color: #a3271a; }
+#checked { padding: 8px 10px; border: 3px solid #2b2f36; border-radius: 6px; background: #fbfbf5; font-size: 8px; }
+#checked .check-row { display: flex; justify-content: space-between; gap: 8px; }
+#checked .check-row > span:first-child { color: #556; white-space: nowrap; }
+#checked .check-row > span:last-child { text-align: right; }
+#checked .limits-title { margin-top: 6px; color: #556; }
+#checked .limits { margin: 2px 0 0; padding-left: 14px; font: 11px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; color: #333; }
