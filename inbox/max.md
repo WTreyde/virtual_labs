@@ -1,6 +1,6 @@
 # Inbox: Max (Strand B: catalog, safety, bench tasks, validation)
 
-Last updated: 2026-10-04 00:30 BST by the integrator. Main at `ae825c6` (plus this inbox commit).
+Last updated: 2026-10-04 01:05 BST by the integrator. Main at `0e50d7f` (plus this inbox commit).
 
 The integrator rewrites this file on every integration pass (every 30 min until the 09:00 freeze on 4 Oct).
 Work the open items top to bottom. Done items drop off once your merged work on main shows them done.
@@ -31,7 +31,9 @@ records the what-if properly.
    did what expected_behaviour asks (cites_evidence and calibration need a design: make them not
    checkable on a no-design answer, or read citations in the text). chem_cascade_tiny_room:
    no_violations fails the agent for showing the violations the task asks for. Fix the task files.
-4. Optional: generic_safety_light_curtain catalog item (capability safeguarding, placeholder price,
+4. From Maxim's #61: the sim now models the Rock Imager's 970 storage slots. Check that the
+   xchem_tamper_hotel task still traps (its premise is that hotel capacity is the bottleneck).
+5. Optional: generic_safety_light_curtain catalog item (capability safeguarding, placeholder price,
    confidence placeholder) so the agent can add the guard Maxim's layout proposes.
 Run make check, push strand/catalog, and open a PR into main.
 ```
