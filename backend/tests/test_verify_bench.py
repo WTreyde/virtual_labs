@@ -281,3 +281,29 @@ def test_leaderboard_carries_a_description_for_the_benchmark_tab():
     answers = {"scripted_honest": honest_answer()}
     board = run_bench(list(answers), tasks=[TASK], answer_fn=lambda arm, task: answers[arm])
     assert "LabDesignBench" in board["description"] and "not checkable" in board["description"]
+
+
+def test_api_refusal_or_crash_is_reported_as_not_run_not_scored():
+    refused = {"message": "Planning is incomplete: the API declined the request.", "stop_reason": "refusal",
+               "completed": False, "claims": []}
+    crashed = {"message": "(arm failed: JSONDecodeError: Expecting value: line 1 column 1 (char 0))", "failed": True}
+    for answer in (refused, crashed):
+        detail = score_detailed(TASK, answer)
+        assert detail["score"] is None and detail["checks"] == [] and detail["run_failed"]
+        assert detail["error"].startswith("not run")
+    assert "refusal" in score_detailed(TASK, refused)["error"]
+    assert "JSONDecodeError" in score_detailed(TASK, crashed)["error"]
+    # A refusal that still came with a design is scored as usual.
+    assert not score_detailed(TASK, dict(honest_answer(), stop_reason="refusal")).get("run_failed")
+    board = run_bench(["a"], tasks=[TASK], answer_fn=lambda arm, task: refused)
+    row = board["arms"][0]
+    assert row["score"] is None and row["runs_failed"] == 1 and row["tasks_answered"] == 0
+
+
+def test_leaderboard_run_time_and_model_are_only_what_is_known():
+    stamped = dict(honest_answer(), answered_at="2026-10-03T12:00:00+00:00", model="claude-opus-5-5")
+    board = run_bench(["a"], tasks=[TASK], answer_fn=lambda arm, task: stamped)
+    assert board["generated_at"] == "2026-10-03T12:00:00+00:00" and board["arms"][0]["model"] == "claude-opus-5-5"
+    assert board["scored_at"] >= board["generated_at"]
+    unstamped = run_bench(["a"], tasks=[TASK], answer_fn=lambda arm, task: honest_answer())
+    assert "generated_at" not in unstamped and unstamped["arms"][0]["model"] is None
