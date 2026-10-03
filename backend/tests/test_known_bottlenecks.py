@@ -13,4 +13,7 @@ def test_simulator_names_the_reported_bottleneck(monkeypatch):
     for case in all_cases():
         r = check(case, hours=96, replicates=4)
         assert r["match"], r
-        assert abs(r["error_pct"]) < 25, r
+        if "throughput_observed_range" in r:  # the paper gives a range, so require overlap instead
+            assert r["observed_in_band"], r
+        else:
+            assert abs(r["error_pct"]) < 25, r

@@ -23,6 +23,9 @@ CATALOG = [
     {"id": "crystal_hotel", "category": "instrument", "process": {"capacity": 200}},
     {"id": "harvest_bench", "category": "instrument", "process": {"capacity": 1}},
     {"id": "plate_cart_human", "category": "transporter", "process": {}},
+    # Big Chemistry OT-2 surface tension module: pendant drops hang from the OT-2 pipette while a camera images
+    # them, so dilution, drop handling and equilibration all occupy the one OT-2.
+    {"id": "ot2_pendant_drop", "category": "instrument", "process": {"capacity": 1}},
 ]
 
 
@@ -110,5 +113,43 @@ def xchem(crystals_per_hour: float, label: str):
     }
 
 
+def ot2_surface_tension():
+    # npj Comput Mater 2025 (s41524-025-01842-9), source: 8 explore points by two-fold serial dilution, then
+    # "2 to 4" exploit points chosen by Bayesian inference; "the measurement duration is set between 1 and 15 min"
+    # per drop; characterising one surfactant takes "from 90 min to 4 h" (Table 1); "These equilibration times
+    # place limitations on the throughput rate of the platform". Placeholders: dilution time, per-drop robot
+    # handling (dispense, Worthington-number tuning, needle wash), a 6 min typical wait, 3 exploit points.
+    # One labware unit = one surfactant isotherm (one replicate).
+    explore, exploit, wait, handle = 8, 3, 6 * MIN, 2 * MIN
+    steps = _chain([
+        _step("serial_dilution", "ot2_1", 15 * MIN, [], "placeholder", unc=(10 * MIN, 25 * MIN)),
+        _step("explore_drop_handling", "ot2_1", explore * handle, [], "placeholder", unc=(explore * 1 * MIN, explore * 4 * MIN)),
+        _step("explore_equilibration", "ot2_1", explore * wait, [], "source", unc=(explore * 1 * MIN, explore * 15 * MIN)),
+        _step("bayesian_update", None, 1 * MIN, [], "placeholder"),
+        _step("exploit_drop_handling", "ot2_1", exploit * handle, [], "placeholder", unc=(2 * 1 * MIN, 4 * 4 * MIN)),
+        _step("exploit_equilibration", "ot2_1", exploit * wait, [], "source", unc=(2 * 1 * MIN, 4 * 15 * MIN)),
+    ])
+    minutes = (90, 240)  # source: per-surfactant characterisation time
+    return {
+        "id": "ot2_surface_tension_2025",
+        "title": "OT-2 pendant-drop surface tension module (npj Comput Mater 2025)",
+        "sources": ["https://www.nature.com/articles/s41524-025-01842-9", "https://doi.org/10.5281/zenodo.17232763"],
+        "reported_bottleneck": "ot2_1",
+        "reported_bottleneck_steps": ["explore_equilibration", "exploit_equilibration"],
+        "reported_quote": "These equilibration times place limitations on the throughput rate of the platform",
+        "observed": {"value": 24 * 60 / (sum(minutes) / 2), "low": 24 * 60 / minutes[1], "high": 24 * 60 / minutes[0],
+                     "unit": "surfactants_per_day",
+                     "note": "from the paper's 90 min to 4 h per surfactant (Table 1), run back to back; not a measured daily output"},
+        "spec": {"throughput_target": {"value": 6, "unit": "samples_per_day", "operating_hours_per_day": 24}},
+        "workflow": {"id": "ot2_surface_tension_wf", "equipment": [{"instance_id": "ot2_1", "catalog_id": "ot2_pendant_drop"}],
+                     "steps": steps},
+        "layout": {"id": "ot2_surface_tension_layout", "transfers": []},
+        "whatif_instance": "ot2_1",
+        "whatif_steps": {"halve equilibration waits": ["explore_equilibration", "exploit_equilibration"],
+                         "halve robot handling (2x faster robot)": ["serial_dilution", "explore_drop_handling",
+                                                                    "exploit_drop_handling"]},
+    }
+
+
 def all_cases():
-    return [burger_2020(), xchem(8, "manual"), xchem(103, "shifter")]
+    return [burger_2020(), xchem(8, "manual"), xchem(103, "shifter"), ot2_surface_tension()]
