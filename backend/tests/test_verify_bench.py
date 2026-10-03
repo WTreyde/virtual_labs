@@ -275,3 +275,9 @@ def test_checks_read_the_task_params_and_never_accuse_without_evidence():
     assert all(c["passed"] for c in ok["checks"])
     vague = score_detailed(lcms, {"message": "This cannot be done.", "claims": []})
     assert [c["passed"] for c in vague["checks"]] == [False, False]
+
+
+def test_leaderboard_carries_a_description_for_the_benchmark_tab():
+    answers = {"scripted_honest": honest_answer()}
+    board = run_bench(list(answers), tasks=[TASK], answer_fn=lambda arm, task: answers[arm])
+    assert "LabDesignBench" in board["description"] and "not checkable" in board["description"]
