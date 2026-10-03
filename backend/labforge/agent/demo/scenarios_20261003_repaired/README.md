@@ -1,6 +1,6 @@
 # Repaired live demo gates — 3 October 2026
 
-Recorded against main `a6657fc` (includes PRs #1, #11–#16), with this PR’s planner prompt/brief fixes. Model: `claude-opus-5-5`. Amass was unconfigured; assumptions remain explicit estimates/placeholders.
+Recorded against main `a6657fc` (includes PRs #1, #11–#16), with this PR’s planner prompt/brief fixes. Main `440a9ff` (replay PR #17 and catalog PR #19) was subsequently merged without rerunning the model. The catalog now separates dry-shipper handling duration from `process.hold_time_s`, and marks puck capacity as a placeholder; our recorded workflow uses cryo-handling rather than the changed cold_storage process. Model: `claude-opus-5-5`. Amass was unconfigured; assumptions remain explicit estimates/placeholders.
 
 Both `chemistry.json` and `xchem.json` contain real live-agent outputs, tool events, checked claims, reports and the simulator’s 500-event animation timeline. History and duplicated catalog specs are omitted. `summary.json` records the acceptance checks; no fixture was substituted for a live run.
 

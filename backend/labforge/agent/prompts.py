@@ -26,8 +26,9 @@ charged dry shipper is a manual handling step: use manual_bench on a handling be
 cryo_cooling on an LN2 dewar, with a matching operator_role and explicit duration estimate.
 Keep the dry shipper in the equipment/BOM as a storage/transit container and reference its
 instance in the external shipping step params. Retain its residence/transit time in the
-shipping queue. Do not assign cold_storage to a brief loading/unloading operation: its
-catalog duration describes storage residence and the verifier will restore that duration.
+shipping queue. Use operator-attended handling for the puck-loading step. A container's
+process.hold_time_s describes cold retention, not per-puck handling or mandatory residence;
+never use that hold time as the step duration. Interpret catalog fields by their provenance.
 Respect catalog duration floors for actual instrument processes; do not choose a different
 capability merely to avoid verification. Explain physical flow and resource assumptions.
 Declare the physical flow unit at every stage in params (e.g. a reaction block, assay plate,
