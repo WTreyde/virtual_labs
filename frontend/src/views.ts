@@ -117,7 +117,9 @@ export function showSchedule(s: ProjectSchedule, projects: ProjectRequest[], cac
   const bars = (s.gantt ?? []).filter((g) => g.end_s > g.start_s);
   const lanes = [...new Set(bars.map((g) => g.instance))];
   const endH = Math.max(rec.makespan_h, ...bars.map((g) => g.end_s / 3600));
-  const W = 700, L = 96, R = 14, T = 8, lane = 24, H = T + lanes.length * lane + 34;
+  const deadlines = projects.filter((p) => p.deadline_h != null);
+  // Deadline labels sit above the chart at the top of their line, clear of the x-axis title below.
+  const W = 700, L = 96, R = 14, T = deadlines.length ? 22 : 8, lane = 24, H = T + lanes.length * lane + 34;
   const X = (h: number) => L + (h / endH) * (W - L - R);
   const step = endH > 12 ? 2 : 1, hours = Array.from({ length: Math.floor(endH / step) + 1 }, (_, i) => i * step);
   const gantt = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Gantt chart of the recommended schedule by instrument">
@@ -128,8 +130,11 @@ export function showSchedule(s: ProjectSchedule, projects: ProjectRequest[], cac
       const t = `<b>${esc(g.project)}</b> #${g.unit} · ${esc(g.step)} on ${esc(g.instance)}<br>${num(g.start_s / 3600, 2)}–${num(g.end_s / 3600, 2)} h`;
       return `<rect data-tip="${esc(t)}" x="${x}" y="${y}" width="${w}" height="14" rx="2" fill="${colour[g.project] ?? C.before}"/>`;
     }).join("")}
-    ${projects.filter((p) => p.deadline_h != null).map((p) => `<line x1="${X(p.deadline_h!)}" x2="${X(p.deadline_h!)}" y1="${T - 4}" y2="${T + lanes.length * lane}" stroke="${C.ink}" stroke-width="1.5" stroke-dasharray="5 3"/>
-      <text x="${X(p.deadline_h!) + 4}" y="${T + lanes.length * lane + 28}" class="ref">${esc(p.id)} deadline ${p.deadline_h} h</text>`).join("")}
+    ${deadlines.map((p) => {
+      const x = X(p.deadline_h!), label = `${p.id} deadline ${p.deadline_h} h`, right = x + 4 + label.length * 5.6 <= W - R;
+      return `<line x1="${x}" x2="${x}" y1="${T - 18}" y2="${T + lanes.length * lane}" stroke="${C.ink}" stroke-width="1.5" stroke-dasharray="5 3"/>
+      <text x="${right ? x + 4 : x - 4}" y="${T - 9}" text-anchor="${right ? "start" : "end"}" class="ref">${esc(label)}</text>`;
+    }).join("")}
     <text x="${L}" y="${H - 4}" class="axis">hours from start, recommended order</text></svg>`;
   const legend = `<div class="legend">${given.map((id) => `<span><i style="background:${colour[id]}"></i>${esc(id)}</span>`).join("")}</div>`;
 
