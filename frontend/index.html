@@ -9,6 +9,20 @@
   <body>
     <div id="game">
       <div id="statcard" class="frame hidden"></div>
+      <div id="clockbar" class="frame hidden">
+        <div class="controls">
+          <button id="play" title="Play / pause (P)">❚❚</button>
+          <select id="speed" title="Sim seconds per real second">
+            <option value="1">1×</option><option value="60">60×</option><option value="300" selected>300×</option>
+            <option value="1800">1800×</option><option value="3600">3600×</option>
+          </select>
+          <span id="clock-t">T+00:00:00</span>
+        </div>
+        <input id="scrub" type="range" min="0" max="1000" value="0" aria-label="Sim time" />
+        <div class="stats"><span id="clock-done"></span><span id="clock-src"></span></div>
+      </div>
+      <div id="modal" class="frame hidden" role="dialog" aria-modal="true"></div>
+      <div id="viz-tip" class="hidden"></div>
       <div id="dialogue" class="frame hidden"><div class="speaker">LABFORGE</div><div class="text"></div><span class="caret">▼</span></div>
     </div>
     <aside id="panel">
@@ -20,6 +34,7 @@
         <form id="chat-form"><input id="chat-input" placeholder="Describe your lab..." /><button>Send</button></form>
       </section>
       <button id="report-btn">Report for your boss</button>
+      <button id="plan-btn">Plan projects</button>
     </aside>
     <script type="module" src="/src/main.ts"></script>
   </body>

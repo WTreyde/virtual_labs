@@ -1,3 +1,4 @@
+import { clock } from "./timeline";
 import type { CatalogItem, Confidence, Design, UncertainNumber } from "./types";
 
 /** Strand A: Pokémon-style HTML overlay over the game: agent dialogue box and instrument stat card. Owner: Roshan. */
@@ -146,10 +147,37 @@ export function showStatCard(d: Design, instanceId: string, sprite?: string) {
   }
   for (const b of flagged) body += `<div class="warn">⚠ ${esc(b.message)}</div>`;
   if (eq?.rationale) body += `<div class="why">“${esc(eq.rationale)}”</div>`;
+  if (item) body += `<button class="whatif" data-id="${esc(instanceId)}">How could this be better?</button>`;
 
   const title = item ? `${esc(item.vendor)} ${esc(item.model)}` : op ? esc(op.role) : esc(instanceId);
   card.innerHTML = `<button class="close" aria-label="Close">✕</button>
     <div class="head">${img}<div><div class="name">${title}</div><div class="id">${esc(instanceId)}${item ? ` · ${badge(item.data_confidence)}` : ""}</div></div></div>
     ${body}`;
   card.classList.remove("hidden");
+}
+
+// ---- time controls ----------------------------------------------------------------------------
+
+const bar = document.querySelector<HTMLDivElement>("#clockbar")!;
+const play = bar.querySelector<HTMLButtonElement>("#play")!, scrub = bar.querySelector<HTMLInputElement>("#scrub")!;
+const hms = (s: number) => [s / 3600, (s / 60) % 60, s % 60].map((n) => String(Math.floor(n)).padStart(2, "0")).join(":");
+let scrubbing = false;
+
+function setPlaying(on: boolean) { clock.playing = on; play.textContent = on ? "❚❚" : "▶"; }
+play.addEventListener("click", () => setPlaying(!clock.playing));
+window.addEventListener("keydown", (e) => { if (e.key === "p" && document.activeElement?.tagName !== "INPUT") setPlaying(!clock.playing); });
+bar.querySelector<HTMLSelectElement>("#speed")!.addEventListener("change", (e) => { clock.speed = +(e.target as HTMLSelectElement).value; });
+scrub.addEventListener("input", () => { scrubbing = true; clock.t = (+scrub.value / 1000) * clock.end; });
+scrub.addEventListener("change", () => { scrubbing = false; });
+
+/** Show the controls only when there is a timeline to play; note where it came from. */
+export function setupClock(d: Design) {
+  bar.classList.toggle("hidden", clock.end <= 0);
+  bar.querySelector("#clock-src")!.textContent = d.timeline_note ?? "simulator";
+}
+
+export function onTick(e: { t: number; end: number; done: number; moving: number }) {
+  bar.querySelector("#clock-t")!.textContent = `T+${hms(e.t)}`;
+  bar.querySelector("#clock-done")!.textContent = `${e.done} plates done · ${e.moving} moving`;
+  if (!scrubbing) scrub.value = String(Math.round((1000 * e.t) / Math.max(1, e.end)));
 }
