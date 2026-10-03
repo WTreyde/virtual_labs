@@ -1,12 +1,14 @@
 """Strand B: one-off vendor scrape into data/catalog.json. Owner: Max.
 
-Plan (run once, then commit the cached JSON so nobody depends on the network at demo time):
+Plan (once, then commit the cached JSON so nobody depends on the network at demo time):
 1. VENDOR_PAGES lists product pages for every instrument in docs/pipelines.md.
 2. A Modal function fetches each page in parallel and asks Claude to fill a CatalogItem,
    recording every number's source and confidence under `provenance`.
 3. Results are validated with labforge.contracts.validate(item, "catalog_item") and merged.
 
-Run:  modal run labforge/catalog/scrape.py   (needs `pip install -e .[modal]` and ANTHROPIC_API_KEY)
+Run:  cd backend && modal run labforge/catalog/scrape_modal.py   (needs `pip install -e .[modal]`,
+      `modal token new`, and ANTHROPIC_API_KEY in the repo-root .env). This file has no Modal import so the
+      rest of the backend works without it.
 
 Prices: vendors almost never publish them, so PRICE_REFERENCES records where each price came from
 (researched 3 Oct 2026). Each entry is a common.schema.json `uncertain_number` plus a `note`, ready to
@@ -632,7 +634,72 @@ PRICE_REFERENCES: dict[str, dict] = {
     },
 }
 
-assert VENDOR_PAGES.keys() == PRICE_REFERENCES.keys()
+# Category and capabilities each item must provide, so scraped items line up with the workflow
+# templates in docs/pipelines.md. Claude may add capabilities, never drop these.
+CAPABILITY_HINTS: dict[str, tuple[str, list[str]]] = {
+    "opentrons_flex": ("instrument", ["liquid_handling"]),
+    "opentrons_ot2": ("instrument", ["liquid_handling"]),
+    "hamilton_microlab_star": ("instrument", ["liquid_handling"]),
+    "tecan_fluent": ("instrument", ["liquid_handling"]),
+    "beckman_biomek_i7": ("instrument", ["liquid_handling"]),
+    "thermo_multidrop_combi": ("instrument", ["reagent_dispensing"]),
+    "beckman_echo_650": ("instrument", ["acoustic_dispensing"]),
+    "beckman_echo_525": ("instrument", ["acoustic_dispensing", "crystal_soaking"]),
+    "agilent_plateloc": ("instrument", ["plate_sealing"]),
+    "azenta_xpeel": ("instrument", ["plate_peeling"]),
+    "bionex_hig4": ("instrument", ["centrifugation"]),
+    "ika_rct_digital": ("instrument", ["heating_stirring"]),
+    "mettler_quantos": ("instrument", ["powder_dosing"]),
+    "chemspeed_swing_xl": ("instrument", ["powder_dosing", "liquid_dosing", "reaction", "inert_atmosphere"]),
+    "chemspeed_isynth": ("instrument", ["reaction", "heating_stirring", "liquid_dosing"]),
+    "unchained_big_kahuna": ("instrument", ["powder_dosing", "liquid_dosing", "reaction"]),
+    "biotage_pressure_plus_96": ("instrument", ["solid_phase_extraction", "filtration"]),
+    "genevac_ez2": ("instrument", ["evaporation"]),
+    "genevac_ht6": ("instrument", ["evaporation"]),
+    "waters_acquity_uplc_qda": ("instrument", ["lcms", "hplc"]),
+    "agilent_1290_lcmsd_iq": ("instrument", ["lcms", "hplc"]),
+    "mbraun_glovebox": ("furniture", ["inert_atmosphere"]),
+    "labconco_fume_hood": ("furniture", ["ventilated_enclosure"]),
+    "justrite_flammable_cabinet": ("storage", ["waste"]),
+    "bmg_pherastar_fsx": ("instrument", ["fluorescence_read", "luminescence_read", "absorbance_read"]),
+    "bmg_clariostar": ("instrument", ["absorbance_read", "fluorescence_read", "luminescence_read"]),
+    "liconic_stx44": ("instrument", ["incubation", "plate_storage"]),
+    "thermo_cytomat_2": ("instrument", ["incubation", "plate_storage"]),
+    "generic_plate_hotel": ("storage", ["plate_storage"]),
+    "compound_store": ("storage", ["compound_storage", "cold_storage"]),
+    "thermo_tsx_minus80": ("storage", ["cold_storage"]),
+    "thermo_lab_fridge": ("storage", ["cold_storage"]),
+    "walk_in_cold_room": ("furniture", ["cold_storage"]),
+    "thermo_1300_bsc": ("furniture", ["manual_bench"]),
+    "lab_bench": ("furniture", ["manual_bench"]),
+    "tmc_vibration_table": ("furniture", ["manual_bench"]),
+    "infors_multitron_pro": ("instrument", ["cell_culture", "shaking", "incubation"]),
+    "sartorius_ambr250": ("instrument", ["bioreactor", "cell_culture"]),
+    "beckman_avanti_jxn26": ("instrument", ["centrifugation"]),
+    "eppendorf_5810r": ("instrument", ["centrifugation"]),
+    "avestin_emulsiflex_c3": ("instrument", ["cell_lysis"]),
+    "qsonica_q700": ("instrument", ["cell_lysis"]),
+    "cytiva_akta_pure_25": ("instrument", ["protein_purification"]),
+    "cytiva_akta_avant_150": ("instrument", ["protein_purification"]),
+    "revvity_labchip_gx_touch": ("instrument", ["protein_qc"]),
+    "thermo_nanodrop_one": ("instrument", ["concentration_measurement"]),
+    "unchained_lunatic": ("instrument", ["concentration_measurement"]),
+    "biorad_mini_protean_tetra": ("instrument", ["protein_qc"]),
+    "sptlabtech_mosquito_xtal3": ("instrument", ["crystallization_setup"]),
+    "formulatrix_nt8": ("instrument", ["crystallization_setup"]),
+    "formulatrix_rock_imager_1000": ("instrument", ["crystal_imaging", "plate_storage"]),
+    "olt_crystal_shifter": ("instrument", ["crystal_harvesting"]),
+    "ln2_storage_dewar": ("storage", ["cryo_cooling", "cold_storage"]),
+    "taylor_wharton_cx100": ("storage", ["cold_storage"]),
+    "diamond_i04_1": ("instrument", ["external_service", "xray_diffraction"]),
+    "ur5e": ("transporter", ["plate_transport_arm"]),
+    "precise_pf400": ("transporter", ["plate_transport_arm"]),
+    "lab_linear_rail": ("transporter", ["plate_transport_rail"]),
+    "kuka_kmr_iiwa": ("transporter", ["plate_transport_mobile"]),
+    "omron_ld250": ("transporter", ["plate_transport_mobile"]),
+}
+
+assert VENDOR_PAGES.keys() == PRICE_REFERENCES.keys() == CAPABILITY_HINTS.keys()
 
 
 def apply_price_reference(item: dict) -> dict:
@@ -647,12 +714,3 @@ def apply_price_reference(item: dict) -> dict:
                 item["source_urls"].append(url)
     return item
 
-
-def extract_item(item_id: str, url: str) -> dict:
-    """TODO(Max): fetch `url`, prompt Claude with catalog_item.schema.json, return a CatalogItem
-    passed through apply_price_reference()."""
-    raise NotImplementedError
-
-
-if __name__ == "__main__":
-    raise SystemExit("Not implemented yet: see module docstring.")
