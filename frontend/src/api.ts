@@ -4,7 +4,6 @@ import layout from "../../examples/layout.json";
 import simResult from "../../examples/sim_result.json";
 import workflow from "../../examples/workflow.json";
 import cachedOptimise from "./fixtures/example_optimise.json";
-import cachedSchedule from "./fixtures/example_schedule.json";
 import cachedTimeline from "./fixtures/example_timeline.json";
 import type { CatalogItem, ChatMessage, Design, InstrumentOptimisation, Leaderboard, ProjectRequest, ProjectSchedule, ValidationRow } from "./types";
 
@@ -58,23 +57,24 @@ const post = async <T>(path: string, body: unknown): Promise<T> => {
   return res.json();
 };
 
-/** Vendor what-if for one instance. Offline, falls back to a cached run for the bundled example only. */
+/** Vendor what-if for one instance. Offline, falls back to cached sweeps: the design's own, or the bundled example's. */
 export async function optimise(d: Design, instance_id: string): Promise<{ result: InstrumentOptimisation; cached: boolean }> {
   try {
     return { result: await post<InstrumentOptimisation>("/optimise", { lab_spec: d.lab_spec, workflow: d.workflow, layout: d.layout, instance_id }), cached: false };
   } catch (e) {
-    const hit = d.layout.id === layout.id ? (cachedOptimise.by_instance as Record<string, InstrumentOptimisation>)[instance_id] : undefined;
+    const hit = d.whatif_cache?.[instance_id]
+      ?? (d.layout.id === layout.id ? (cachedOptimise.by_instance as Record<string, InstrumentOptimisation>)[instance_id] : undefined);
     if (!hit) throw e;
     return { result: hit, cached: true };
   }
 }
 
-/** Best order or mix for several projects. Offline, falls back to a cached run of the bundled fixture projects. */
-export async function prioritise(projects: ProjectRequest[], lab_id: string): Promise<{ result: ProjectSchedule; cached: boolean }> {
+/** Best order or mix for several projects. Offline, falls back to `cached` (a saved run of the same projects). */
+export async function prioritise(projects: ProjectRequest[], lab_id: string, cached: ProjectSchedule): Promise<{ result: ProjectSchedule; cached: boolean }> {
   try {
     return { result: await post<ProjectSchedule>("/prioritise", { projects, lab_id }), cached: false };
   } catch {
-    return { result: cachedSchedule.schedule as ProjectSchedule, cached: true };
+    return { result: cached, cached: true };
   }
 }
 

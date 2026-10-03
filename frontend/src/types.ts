@@ -41,6 +41,8 @@ export interface Design {
   timeline_note?: string;
   /** Report Markdown from the agent (chat or a recorded run), used instead of POST /report. */
   report_markdown?: string;
+  /** Cached what-if sweeps by instance, for recorded cases when the backend is unavailable. */
+  whatif_cache?: Record<string, InstrumentOptimisation>;
 }
 
 /** Mirrors schemas/instrument_optimisation.schema.json (POST /optimise). */

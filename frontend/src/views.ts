@@ -195,14 +195,19 @@ export function showValidation(rows: ValidationRow[]) {
     const hit = (a: Box, b: Box) => a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
     const taken: Box[] = pts.map((r) => ({ x0: X(r.reported_usd!) - 6, x1: X(r.reported_usd!) + 6, y0: Y(r.predicted!.p90), y1: Y(r.predicted!.p10) }));
     const marks = [...pts].sort((a, b) => a.reported_usd! - b.reported_usd!).map((r) => {
-      const p = r.predicted!, x = X(r.reported_usd!), y = Y(p.p50), hollow = !r.verified, name = shortName(r.name), w = name.length * 5.6 + 4;
-      const spots = [
-        { x: x + 10, y: y + 4, a: "start", box: { x0: x + 10, x1: x + 10 + w, y0: y - 7, y1: y + 6 } },
-        { x: x - 10, y: y + 4, a: "end", box: { x0: x - 10 - w, x1: x - 10, y0: y - 7, y1: y + 6 } },
-        { x, y: Y(p.p90) - 8, a: "middle", box: { x0: x - w / 2, x1: x + w / 2, y0: Y(p.p90) - 19, y1: Y(p.p90) - 5 } },
-        { x, y: Y(p.p10) + 16, a: "middle", box: { x0: x - w / 2, x1: x + w / 2, y0: Y(p.p10) + 5, y1: Y(p.p10) + 19 } },
-      ];
-      const spot = spots.find((s) => s.box.x0 >= 0 && s.box.x1 <= W && !taken.some((t) => hit(t, s.box))) ?? spots[2];
+      const p = r.predicted!, x = X(r.reported_usd!), y = Y(p.p50), hollow = !r.verified, name = shortName(r.name), w = name.length * 5.9 + 6;
+      // Right or left of the point, then stepped up and down (with a leader line), then above/below the bar.
+      const spots: { x: number; y: number; a: string; box: Box; lead?: boolean }[] = [];
+      for (const dy of [0, -14, 14, -28, 28, -42, 42, -56, 56, -70, 70]) {
+        const ly = y + dy;
+        spots.push({ x: x + 10, y: ly + 4, a: "start", box: { x0: x + 10, x1: x + 10 + w, y0: ly - 7, y1: ly + 6 }, lead: dy !== 0 });
+        spots.push({ x: x - 10, y: ly + 4, a: "end", box: { x0: x - 10 - w, x1: x - 10, y0: ly - 7, y1: ly + 6 }, lead: dy !== 0 });
+      }
+      spots.push({ x, y: Y(p.p90) - 8, a: "middle", box: { x0: x - w / 2, x1: x + w / 2, y0: Y(p.p90) - 19, y1: Y(p.p90) - 5 } });
+      spots.push({ x, y: Y(p.p10) + 16, a: "middle", box: { x0: x - w / 2, x1: x + w / 2, y0: Y(p.p10) + 5, y1: Y(p.p10) + 19 } });
+      const inside = (b: Box) => b.x0 >= L && b.x1 <= W - 2 && b.y0 >= T && b.y1 <= H - B;
+      const spot = spots.find((s) => inside(s.box) && !taken.some((t) => hit(t, s.box))) ?? spots[0];
+      const leader = spot.lead ? `<line x1="${x + (spot.a === "start" ? 6 : -6)}" y1="${y}" x2="${spot.a === "start" ? spot.box.x0 - 2 : spot.box.x1 + 2}" y2="${spot.y - 4}" stroke="${C.ink2}" stroke-width="1"/>` : "";
       taken.push(spot.box);
       const tip = `<b>${esc(r.name)}</b><br>Reported ${usd(r.reported_usd!)} · predicted ${usd(p.p50)} (P10–P90 ${usd(p.p10)}–${usd(p.p90)})<br>` +
         `${r.within_p10_p90 ? "Inside" : "Outside"} the band · log10 error ${r.log10_error ?? "?"}${hollow ? "<br><i>Reported cost not verified</i>" : ""}`;
@@ -212,7 +217,7 @@ export function showValidation(rows: ValidationRow[]) {
         <line x1="${x - 5}" x2="${x + 5}" y1="${Y(p.p90)}" y2="${Y(p.p90)}" stroke="${C.s1}" stroke-width="2"/>
         <circle cx="${x}" cy="${y}" r="14" fill="transparent"/>
         <circle cx="${x}" cy="${y}" r="5" fill="${hollow ? C.surface : C.s1}" stroke="${hollow ? C.s1 : C.surface}" stroke-width="2"/>
-        <text x="${spot.x}" y="${spot.y}" text-anchor="${spot.a}" class="lane">${esc(name)}</text></g>`;
+        ${leader}<text x="${spot.x}" y="${spot.y}" text-anchor="${spot.a}" class="lane">${esc(name)}</text></g>`;
     }).join("");
     chart = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Predicted against reported lab cost, log scales">${grid}${diag}${marks}
       <text x="${(L + W - R) / 2}" y="${H - 8}" text-anchor="middle" class="axis">reported cost (USD, log scale)</text>

@@ -8,6 +8,17 @@
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
+    <nav id="topnav" aria-label="Main">
+      <a href="#/" class="brand" data-route="landing">LabForge</a>
+      <a href="#/case/chem" data-route="case/chem">Chemistry case</a>
+      <a href="#/case/fbdd" data-route="case/fbdd">XChem case</a>
+      <a href="#/design" data-route="design">Design your own</a>
+      <a href="#/bench" data-route="bench">Bench</a>
+      <a href="#/validation" data-route="validation">Validation</a>
+      <a href="#/schedule" data-route="schedule">Schedule</a>
+    </nav>
+    <section id="landing" class="hidden" aria-label="Start"></section>
+    <main id="app">
     <div id="game">
       <div id="statcard" class="frame hidden"></div>
       <div id="clockbar" class="frame hidden">
@@ -22,23 +33,22 @@
         <input id="scrub" type="range" min="0" max="1000" value="0" aria-label="Sim time" />
         <div class="stats"><span id="clock-done"></span><span id="clock-src"></span></div>
       </div>
-      <div id="replay-badge" class="hidden" title="This is a recording of an earlier agent run, played back without calling the backend."><span class="dot"></span><span class="text">Replay of a recorded run</span><button id="replay-skip">Skip ▸▸</button></div>
+      <div id="replay-badge" class="hidden" title="This is a recording of an earlier agent run, played back without calling the backend."><span class="dot"></span><span class="text">Replay of a recorded run</span></div>
       <div id="modal" class="frame hidden" role="dialog" aria-modal="true"></div>
       <div id="viz-tip" class="hidden"></div>
       <div id="dialogue" class="frame hidden"><div class="speaker">LABFORGE</div><div class="text"></div><span class="caret">▼</span></div>
     </div>
     <aside id="panel">
-      <h1>LabForge</h1>
       <section id="metrics"></section>
       <section id="bom"></section>
       <section id="chat">
         <div id="log"></div>
         <form id="chat-form"><input id="chat-input" placeholder="Describe your lab..." /><button>Send</button></form>
       </section>
+      <button id="whatif-btn" class="hidden"></button>
       <button id="report-btn">Report for your boss</button>
-      <button id="plan-btn">Plan projects</button>
-      <div id="panel-views"><button id="validation-btn">Validation</button><button id="bench-btn">Leaderboard</button></div>
     </aside>
+    </main>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
