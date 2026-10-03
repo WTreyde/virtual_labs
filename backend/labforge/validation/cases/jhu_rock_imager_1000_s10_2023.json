@@ -1,0 +1,43 @@
+{
+  "id": "jhu_rock_imager_1000_s10_2023",
+  "name": "Johns Hopkins macromolecular crystallography core: Formulatrix Rock Imager 1000 (NIH S10; 2023)",
+  "domain": "biology",
+  "sources": [
+    "https://api.reporter.nih.gov/v2/projects/search (project_num 1S10OD034322-01)"
+  ],
+  "build": "turnkey",
+  "brief": "A macromolecular crystallography core that already has a lipidic-cubic-phase nanolitre liquid handler adds a 500-tray automated crystal tray imager with visible, UV and multi-fluorescence imaging, to monitor crystallization trays and log them in high throughput.",
+  "reported": {
+    "cost": {
+      "value_usd": 187457,
+      "original": "US$187,457 (NIH S10 award, FY2023)",
+      "year": 2023,
+      "includes": [
+        "analytics"
+      ],
+      "excludes_note": "NIH S10 award for the imager alone (equipment funds, possibly with institutional match not stated); the existing Mosquito LCP at the core is not part of the award."
+    }
+  },
+  "verified": true,
+  "notes": "Single-instrument price check with an exact model match; independent of the catalog's Rock Imager price source (NIH 2014 PO). Verified 3 Oct 2026 via NIH RePORTER API (1S10OD034322-01, award_amount 187457). Quote: \"This proposal requests funds to purchase a Formulatrix Rock Imager 1000 automated crystal tray imager with 500-tray capacity and dual light path capable of both visible light, ultraviolet (UV) and multi-fluorescence imaging.\" Single-instrument case: 1 of 1 items (100% by count and value) maps to formulatrix_rock_imager_1000. Useful as a clean price check of one catalog id, with the caveat that the S10 award may differ from the actual invoice (UV/fluorescence options, install, service).",
+  "workflow": {
+    "id": "jhu_rock_imager_1000_s10_2023_wf",
+    "lab_spec_id": "jhu_rock_imager_1000_s10_2023",
+    "equipment": [
+      {
+        "instance_id": "formulatrix_rock_imager_1000_1",
+        "catalog_id": "formulatrix_rock_imager_1000",
+        "rationale": "Named in the source."
+      }
+    ],
+    "steps": [
+      {
+        "id": "use",
+        "name": "Placeholder step (cost comparison only)",
+        "capability": "manual_bench",
+        "candidate_instances": [],
+        "duration_s": 0
+      }
+    ]
+  }
+}

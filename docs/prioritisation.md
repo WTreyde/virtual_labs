@@ -8,6 +8,26 @@
 
 **Honest limits:** mean durations, no transfer times, no operator shifts. The recommendation should be confirmed with the Monte Carlo simulator before we quote it, which is the first follow-up task.
 
+## Demo queue (Strand B)
+
+`backend/labforge/catalog/data/demo_prioritise_queue.json` is a ready `POST /prioritise` body: three projects share one screening cell (UPLC-MS, Opentrons Flex, Echo 650, Multidrop, PlateLoc, LiCONiC incubator, PHERAstar, UR5e), given in the order they were queued:
+
+| Project | Plates | Heaviest instrument | Deadline |
+|---|---|---|---|
+| Enzyme campaign | 72 | liquid handler (30 min/plate) | none |
+| Chemistry library screen (768 compounds) | 8 | LC-MS QC (~4 h/plate) | none |
+| Urgent re-test of hits (LC-MS re-check, dose-response) | 2 | LC-MS (1 h/plate) | 8 h, weight 5 |
+
+Result from `POST /prioritise` (3 Oct, current catalog):
+
+| | Given order | Recommended (re-test > library > enzyme) |
+|---|---|---|
+| Urgent re-test finishes | 46.7 h (38.7 h late) | **3.2 h (on time)** |
+| All projects finish | 46.7 h | **39.2 h (16% sooner)** |
+| Mean instrument utilisation | 21% | 25% |
+
+Why: the re-test needs the LC-MS, which the library would otherwise hold for ~32 h, and the enzyme campaign loads the liquid handler instead, so running the library early overlaps the two bottlenecks. Step durations are planning estimates from `docs/pipelines.md` (each step's `params.duration_source`). The queue sizes were chosen so the demo shows the effect: with fewer than ~50 plates queued, every project fits into the lab at once and the order barely matters.
+
 ## Owners and cut line for the 09:00 freeze
 | Work | Owner | Must-have by freeze? |
 |---|---|---|

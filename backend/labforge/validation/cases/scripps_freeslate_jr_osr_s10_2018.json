@@ -1,0 +1,24 @@
+{
+  "id": "scripps_freeslate_jr_osr_s10_2018",
+  "name": "Scripps parallel pressure reactor, Freeslate Jr + OSR module (NIH S10 OD025208, 2018)",
+  "domain": "chemistry",
+  "sources": [
+    "https://reporter.nih.gov/project-details/S10OD025208",
+    "https://api.reporter.nih.gov/v2/projects/search"
+  ],
+  "brief": "A shared catalysis and medicinal-chemistry instrument: a robotic platform that runs eight parallel reactions with independent temperature and pressure control under air, hydrogen, CO, CO2 or SO2, and can take reaction aliquots during a run without depressurising, for fast reaction optimisation and kinetics studies.",
+  "build": "turnkey",
+  "reported": {
+    "cost": {
+      "value_usd": 590735,
+      "original": "NIH S10 award amount US$590,735 (FY2018, 1S10OD025208-01)",
+      "year": 2018,
+      "includes": [
+        "instruments"
+      ],
+      "excludes_note": "Grant award amount, not an invoice; may not include installation, service contract or cost share."
+    }
+  },
+  "verified": true,
+  "notes": "No workflow: the Freeslate Jr. is not in the catalog (Big Kahuna is a different product). Opened RePORTER API (3 Oct 2026): 1S10OD025208-01, Scripps Research Institute, 'Parallel Pressure Reactor with Sampling Capabilities', award_amount 590,735. Abstract: \"The Freeslate Jr. robotic platform configured with an OSR module (Unchained Labs) ... allows eight parallel reactions to be run with independent temperature and pressure control\". Single instrument; the nearest catalog id is unchained_big_kahuna (same vendor, different product, loose match), so treat as a weak/loose check of Unchained pricing. Mapped fraction: 1 of 1 item loosely; 0 exact."
+}

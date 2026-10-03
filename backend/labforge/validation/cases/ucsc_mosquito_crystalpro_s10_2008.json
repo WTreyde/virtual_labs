@@ -1,0 +1,24 @@
+{
+  "id": "ucsc_mosquito_crystalpro_s10_2008",
+  "name": "UC Santa Cruz high-throughput crystallization screening system (NIH S10; mosquito + CrystalPro imager; 2008)",
+  "domain": "biology",
+  "sources": [
+    "https://api.reporter.nih.gov/v2/projects/search (project_num 1S10RR024611-01)"
+  ],
+  "build": "turnkey",
+  "brief": "A shared macromolecular X-ray crystallography group adds nanolitre crystallization set-up and plate imaging: a nanolitre drop-setting robot for crystallization screens and a digital microscope imaging system to score the trials.",
+  "reported": {
+    "cost": {
+      "value_usd": 250093,
+      "original": "US$250,093 (NIH S10 award, FY2008)",
+      "year": 2008,
+      "includes": [
+        "instruments",
+        "analytics"
+      ],
+      "excludes_note": "NIH S10 award amount (equipment funds), not an invoice. Facility manager salary and space are institutional and excluded. 2008 dollars."
+    }
+  },
+  "verified": true,
+  "notes": "No workflow: the CrystalPro imager is not in the catalog, so only half the hardware can be costed. Verified 3 Oct 2026 via NIH RePORTER API (1S10RR024611-01, award_amount 250093). Quote: \"we are requesting funds to purchase a TTP Labtech mosquito crystallization robot and CrystalPro HT-80D microscope imaging system.\" No per-item prices. Mapping: 1 of 2 items (mosquito -> sptlabtech_mosquito_xtal3). The CrystalPro HT-80D imager is a microscope-based imager (Rigaku/ CrystalPro) that is NOT the Rock Imager (no incubated plate storage); an imperfect proxy could be formulatrix_rock_imager_1000, left null here. Value share unknown; mosquito is the larger item by catalog price. 2008 purchase, so inflation/technology-generation caveat applies."
+}
