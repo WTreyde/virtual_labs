@@ -3,6 +3,139 @@
   "_comment": "Demo input for POST /prioritise (docs/prioritisation.md). Three projects share one screening cell: the LC-MS-bound chemistry library screen, a liquid-handler-bound enzyme campaign, and an urgent hit re-test with a deadline. Step durations are planning estimates (see each step's params.duration_source), not measurements.",
   "projects": [
     {
+      "id": "enzyme_campaign",
+      "workflow": {
+        "id": "enzyme_campaign_wf",
+        "lab_spec_id": "screening_cell",
+        "labware": "sbs_96",
+        "equipment": [
+          {
+            "instance_id": "arm_1",
+            "catalog_id": "ur5e",
+            "rationale": "Central arm."
+          },
+          {
+            "instance_id": "hotel_1",
+            "catalog_id": "generic_plate_hotel",
+            "rationale": "Input/output stack for plates."
+          },
+          {
+            "instance_id": "inc_1",
+            "catalog_id": "liconic_stx44",
+            "rationale": "Incubator, 44 plate slots."
+          },
+          {
+            "instance_id": "lh_1",
+            "catalog_id": "opentrons_flex",
+            "rationale": "Liquid handler: normalisation and enzyme assay dispensing."
+          },
+          {
+            "instance_id": "reader_1",
+            "catalog_id": "bmg_pherastar_fsx",
+            "rationale": "TR-FRET / FP / absorbance reader shared by all projects."
+          },
+          {
+            "instance_id": "sealer_1",
+            "catalog_id": "agilent_plateloc",
+            "rationale": "Seals plates before incubation."
+          }
+        ],
+        "steps": [
+          {
+            "id": "load",
+            "name": "Pick empty plate",
+            "capability": "plate_storage",
+            "candidate_instances": [
+              "hotel_1"
+            ],
+            "duration_s": 0,
+            "after": [],
+            "params": {
+              "duration_source": "docs/pipelines.md (rough planning estimate)"
+            }
+          },
+          {
+            "id": "dispense",
+            "name": "Dispense enzyme variants and substrate",
+            "capability": "liquid_handling",
+            "candidate_instances": [
+              "lh_1"
+            ],
+            "duration_s": 1800,
+            "after": [
+              "load"
+            ],
+            "params": {
+              "duration_source": "30 min per plate, examples/workflow.json enzyme screen (estimate)"
+            }
+          },
+          {
+            "id": "seal",
+            "name": "Seal",
+            "capability": "plate_sealing",
+            "candidate_instances": [
+              "sealer_1"
+            ],
+            "duration_s": 10,
+            "after": [
+              "dispense"
+            ],
+            "params": {
+              "duration_source": "placeholder: a few seconds per plate"
+            }
+          },
+          {
+            "id": "incubate",
+            "name": "Incubate",
+            "capability": "incubation",
+            "candidate_instances": [
+              "inc_1"
+            ],
+            "duration_s": 3600,
+            "after": [
+              "seal"
+            ],
+            "params": {
+              "duration_source": "1 h, examples/workflow.json enzyme screen"
+            }
+          },
+          {
+            "id": "read",
+            "name": "Absorbance kinetic read",
+            "capability": "absorbance_read",
+            "candidate_instances": [
+              "reader_1"
+            ],
+            "duration_s": 180,
+            "after": [
+              "incubate"
+            ],
+            "params": {
+              "duration_source": "~3 min per plate (estimate)"
+            }
+          },
+          {
+            "id": "unload",
+            "name": "Return plate",
+            "capability": "plate_storage",
+            "candidate_instances": [
+              "hotel_1"
+            ],
+            "duration_s": 0,
+            "after": [
+              "read"
+            ],
+            "params": {
+              "duration_source": "docs/pipelines.md (rough planning estimate)"
+            }
+          }
+        ]
+      },
+      "units": 72,
+      "weight": 1,
+      "_note": "72 plates of enzyme variants, queued first; liquid handler dominates (30 min/plate)."
+    },
+    {
       "id": "chem_library_screen",
       "workflow": {
         "id": "chem_library_screen_wf",
@@ -174,139 +307,6 @@
       "units": 8,
       "weight": 1,
       "_note": "768-member library = 8 x 96-well plates; LC-MS QC (~4 h/plate) dominates."
-    },
-    {
-      "id": "enzyme_campaign",
-      "workflow": {
-        "id": "enzyme_campaign_wf",
-        "lab_spec_id": "screening_cell",
-        "labware": "sbs_96",
-        "equipment": [
-          {
-            "instance_id": "arm_1",
-            "catalog_id": "ur5e",
-            "rationale": "Central arm."
-          },
-          {
-            "instance_id": "hotel_1",
-            "catalog_id": "generic_plate_hotel",
-            "rationale": "Input/output stack for plates."
-          },
-          {
-            "instance_id": "inc_1",
-            "catalog_id": "liconic_stx44",
-            "rationale": "Incubator, 44 plate slots."
-          },
-          {
-            "instance_id": "lh_1",
-            "catalog_id": "opentrons_flex",
-            "rationale": "Liquid handler: normalisation and enzyme assay dispensing."
-          },
-          {
-            "instance_id": "reader_1",
-            "catalog_id": "bmg_pherastar_fsx",
-            "rationale": "TR-FRET / FP / absorbance reader shared by all projects."
-          },
-          {
-            "instance_id": "sealer_1",
-            "catalog_id": "agilent_plateloc",
-            "rationale": "Seals plates before incubation."
-          }
-        ],
-        "steps": [
-          {
-            "id": "load",
-            "name": "Pick empty plate",
-            "capability": "plate_storage",
-            "candidate_instances": [
-              "hotel_1"
-            ],
-            "duration_s": 0,
-            "after": [],
-            "params": {
-              "duration_source": "docs/pipelines.md (rough planning estimate)"
-            }
-          },
-          {
-            "id": "dispense",
-            "name": "Dispense enzyme variants and substrate",
-            "capability": "liquid_handling",
-            "candidate_instances": [
-              "lh_1"
-            ],
-            "duration_s": 1800,
-            "after": [
-              "load"
-            ],
-            "params": {
-              "duration_source": "30 min per plate, examples/workflow.json enzyme screen (estimate)"
-            }
-          },
-          {
-            "id": "seal",
-            "name": "Seal",
-            "capability": "plate_sealing",
-            "candidate_instances": [
-              "sealer_1"
-            ],
-            "duration_s": 10,
-            "after": [
-              "dispense"
-            ],
-            "params": {
-              "duration_source": "placeholder: a few seconds per plate"
-            }
-          },
-          {
-            "id": "incubate",
-            "name": "Incubate",
-            "capability": "incubation",
-            "candidate_instances": [
-              "inc_1"
-            ],
-            "duration_s": 3600,
-            "after": [
-              "seal"
-            ],
-            "params": {
-              "duration_source": "1 h, examples/workflow.json enzyme screen"
-            }
-          },
-          {
-            "id": "read",
-            "name": "Absorbance kinetic read",
-            "capability": "absorbance_read",
-            "candidate_instances": [
-              "reader_1"
-            ],
-            "duration_s": 180,
-            "after": [
-              "incubate"
-            ],
-            "params": {
-              "duration_source": "~3 min per plate (estimate)"
-            }
-          },
-          {
-            "id": "unload",
-            "name": "Return plate",
-            "capability": "plate_storage",
-            "candidate_instances": [
-              "hotel_1"
-            ],
-            "duration_s": 0,
-            "after": [
-              "read"
-            ],
-            "params": {
-              "duration_source": "docs/pipelines.md (rough planning estimate)"
-            }
-          }
-        ]
-      },
-      "units": 24,
-      "weight": 1,
-      "_note": "24 plates of enzyme variants; liquid handler dominates (30 min/plate)."
     },
     {
       "id": "urgent_retest",
