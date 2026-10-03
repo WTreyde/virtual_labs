@@ -97,12 +97,48 @@ def check_scenario(name, output, coverage):
     return {'passed': all(checks.values()), 'checks': checks, 'missing_stages': missing_stages, **coverage}
 
 
+def hotel_whatif_request(output):
+    """Offer a separate physical proposal only when a growth hotel is busiest.
+
+    Rank instruments on the same calendar-time denominator, excluding operators.
+    Identify residence resources by their workflow use, not a model's unit name.
+    """
+    if not output.get('completed') or not output.get('verification_complete'):
+        return None
+    workflow = output.get('workflow', {})
+    equipment = {e['instance_id'] for e in workflow.get('equipment', [])}
+    utilisation = [u for u in output.get('sim_result', {}).get('utilisation', [])
+                   if u['instance_id'] in equipment]
+    if not utilisation:
+        return None
+    busiest = max(utilisation, key=lambda u: u['busy_fraction'])['instance_id']
+    residence = {i for s in workflow.get('steps', []) if s['capability'] == 'incubation'
+                 for i in s.get('candidate_instances', [])}
+    if busiest not in residence:
+        return None
+    return (f'The completed baseline reports {busiest} as the busiest instrument. '
+            'Keep that baseline as the recorded observation. Propose a separate what-if: '
+            'a second identical growth hotel or a larger catalog-supported hotel. '
+            'Search the catalog and choose a justified option, add its actual equipment '
+            'and cost, then call layout_and_simulate, verify throughput/budget/layout '
+            'claims and create_report. Preserve all timing, yield, inspection, manual '
+            'operator-shift and external-queue assumptions; change only hotel equipment '
+            'and its necessary resource assignments/layout. Do not shorten crystal '
+            'growth or override catalog capacity. Report before/after throughput, '
+            'cost, layout issues and whichever unit now binds, including no improvement '
+            'if that is the result. This is a hypothetical proposal, not a validated '
+            'physical upgrade. Stop after the first checked comparison; do not tune '
+            'toward a target or a scripted bottleneck.')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--env-file', type=Path)
     parser.add_argument('--out', required=True, type=Path)
     parser.add_argument('--scenario', choices=tuple(SCENARIOS), help='Run just one scenario; default is both.')
     parser.add_argument('--live', action='store_true', help='Make chargeable planner calls for both scenarios.')
+    parser.add_argument('--hotel-whatif', action='store_true',
+                        help='After a completed XChem baseline, ask the agent for a separate hotel remedy if a residence resource is busiest.')
     args = parser.parse_args()
     if args.env_file:
         if not args.env_file.is_file(): parser.error('Environment file does not exist')
@@ -122,10 +158,11 @@ def main():
             continue
         print('Starting ' + name, flush=True)
         events = []
+        event_name = name
         def emit(event):
             if event['type'] in ('model_call', 'tool_start', 'tool_end', 'tool_error'):
                 events.append(event)
-                (args.out / f'{name}-events.json').write_text(redacted_json(events))
+                (args.out / f'{event_name}-events.json').write_text(redacted_json(events))
                 if event['type'] != 'tool_end':
                     print(name, event['type'], event.get('name', event.get('step')), redacted_json(event.get('error', '')), flush=True)
         try:
@@ -134,8 +171,26 @@ def main():
         except Exception as exc:
             output = {'error': safe_error(exc)}
             summary[name] = {'passed': False, 'error': safe_error(exc), **gaps[name]}
-        output.pop('history', None)
+        history = output.pop('history', None)
         (args.out / f'{name}.json').write_text(redacted_json({'brief': case['brief'], 'model': os.getenv('ANTHROPIC_MODEL') or MODEL, 'output': output, 'events': events, 'gate': summary[name]}))
+        request = hotel_whatif_request(output) if args.hotel_whatif and name == 'xchem' else None
+        if request and history:
+            # Persist the baseline first. A failed remedy must never replace it.
+            events = []
+            event_name = 'xchem-whatif'
+            try:
+                remedy = run_turn(history + [{'role': 'user', 'content': request}],
+                                  on_event=emit, stream_text=True)
+                remedy.pop('history', None)
+                gate = check_scenario(name, remedy, gaps[name])
+            except Exception as exc:
+                remedy = {'error': safe_error(exc)}
+                gate = {'passed': False, 'error': safe_error(exc)}
+            summary['xchem_whatif'] = gate
+            (args.out / 'xchem-whatif.json').write_text(redacted_json({
+                'brief': request, 'baseline_source': 'xchem.json',
+                'model': os.getenv('ANTHROPIC_MODEL') or MODEL,
+                'output': remedy, 'events': events, 'gate': gate}))
     (args.out / 'summary.json').write_text(redacted_json(summary))
     print(json.dumps(summary, indent=2), flush=True)
     return 0 if all(r['passed'] for r in summary.values()) else 2

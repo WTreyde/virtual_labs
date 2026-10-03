@@ -297,3 +297,28 @@ P50 362.7 and independent 376 crystals/day differ by 3.5%, with no catalog durat
 Both recordings retain refuted feasibility claims and layout issues; passing gates means
 complete orchestration, not a procurement-ready design. See the recordings’ README for Roshan’s
 replay-copy command, metrics, diagnostic limits and owning-strand follow-ups.
+
+## Conditional growth-hotel remedy
+
+After the catalog per-crystal harvesting duration/batch basis and the verifier's matching
+conversion have both merged, fetch main and record a fresh baseline and optional remedy:
+
+```bash
+ANTHROPIC_MODEL=claude-opus-5-5 PYTHONPATH=backend .venv/bin/python \
+  -m labforge.agent.demo_scenarios --env-file /absolute/path/to/.env \
+  --scenario xchem --live --hotel-whatif --out /tmp/labforge-xchem-new-main
+```
+
+`xchem.json` always preserves the first baseline. If a resource used for incubation is the
+busiest instrument (operators excluded from this calendar-time ranking), a second agent
+turn proposes an additional or larger catalog hotel, recomputes layout/simulation, checks
+claims and reports. `xchem-whatif.json` and its event checkpoint are separate: a failed
+remedy cannot overwrite the baseline. This compares a physical equipment proposal, including
+BOM and layout, rather than silently overriding capacity or shortening growth. Timing,
+yield, inspections, shifts and external queues must remain unchanged. Audit the actual
+proposal for those invariants before publishing; report any new bottleneck or no gain.
+
+Copy the baseline with `frontend/scripts/copy_replays.py <committed-record-directory> fbdd`.
+Keep the what-if beside it for review; it is not substituted for the observed baseline.
+Do not spend another live run against the old 7200-second harvesting placeholder: the
+required catalog/verifier fixes were not yet on main `8dbabe9` when this was prepared.
