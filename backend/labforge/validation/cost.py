@@ -217,7 +217,10 @@ def predicted_cost(workflow: dict, includes: list[str], samples: int = 2000, see
             "price_year_factor": round(year_factor(year), 3),
             "confidence": {"within_25pct": round(within, 2), "label": label, "data_coverage": round(coverage, 2),
                            "unpriced_items": unpriced, "drivers": drivers,
-                           "figure_noise": GRANT_SIGMA if figure_type == "grant_award" else 0.0},
+                           "figure_noise": GRANT_SIGMA if figure_type == "grant_award" else 0.0,
+                           "experimental": True,
+                           "note": "Show the P10-P90 band. within_25pct did not beat a constant baseline in two blind "
+                                   "validation rounds (docs/validation.md), so treat it as experimental."},
             "items": ev}
 
 
