@@ -1,0 +1,47 @@
+{
+  "id": "tju_nt8_lcp_s10_2019",
+  "name": "Thomas Jefferson University crystallography core: Formulatrix NT8 with LCP components (NIH S10; 2019)",
+  "domain": "biology",
+  "sources": [
+    "https://api.reporter.nih.gov/v2/projects/search (project_num 1S10OD023479-01A1)"
+  ],
+  "build": "turnkey",
+  "brief": "A cancer-centre X-ray crystallography core replaces two failing crystallization robots with a nanolitre-volume drop-setting liquid handler equipped to pipette viscous lipidic-cubic-phase solutions for membrane-protein work.",
+  "reported": {
+    "cost": {
+      "value_usd": 93950,
+      "original": "US$93,950 (NIH S10 award, FY2019)",
+      "year": 2019,
+      "includes": [
+        "instruments"
+      ],
+      "excludes_note": "NIH S10 award for one drop setter with LCP components; the ~$11,500/year service contract is funded separately by the university and excluded."
+    }
+  },
+  "verified": true,
+  "notes": "Out-of-sample: found after the cost model was frozen at commit 02d7678 and scored blind against it (results in docs/validation.md). Later model or catalog changes do not count as out-of-sample for this case. price_basis=configured, from the wording \"a new NT8 crystallization robot equipped with components dedicated to pipetting viscous solutions in Lipidic Cubic Phase (LCP)\" (options included). Verified 3 Oct 2026 via NIH RePORTER API (1S10OD023479-01A1, award_amount 93950; https://reporter.nih.gov/project-details/9699865). Quote: \"we request funds to acquire a new NT8 crystallization robot equipped with components dedicated to pipetting viscous solutions in Lipidic Cubic Phase (LCP).\" 1 of 1 items maps to formulatrix_nt8 (exact). Independent of the catalog NT8 source (NIH NHLBI 2018 PO).",
+  "workflow": {
+    "id": "tju_nt8_lcp_s10_2019_wf",
+    "lab_spec_id": "tju_nt8_lcp_s10_2019",
+    "equipment": [
+      {
+        "instance_id": "formulatrix_nt8_1",
+        "catalog_id": "formulatrix_nt8",
+        "rationale": "Named in the source.",
+        "match": "exact"
+      }
+    ],
+    "steps": [
+      {
+        "id": "use",
+        "name": "Placeholder step (cost comparison only)",
+        "capability": "manual_bench",
+        "candidate_instances": [],
+        "duration_s": 0
+      }
+    ]
+  },
+  "price_basis": "configured",
+  "condition": "new",
+  "split": "out_of_sample"
+}

@@ -6724,6 +6724,15 @@
         "source": "https://www.usaspending.gov/award/CONT_AWD_HHSN275201400443P_7529_-NONE-_-NONE-",
         "note": "configured price: NIH Sep 2014 PO: Rock Imager 1000 4C (cat RI4OC) $385,105. Smaller models: RI 182 w/ software $240,144 (NIH 2022), RI 54 w/ software $238,605 (DoD 2020). Note: RI1000 award is 2014 USD, not inflation adjusted. Current value 350000 is an agent figure within this range.",
         "year": 2014
+      },
+      "price_usd_estimate.configured.2021": {
+        "value": 183143,
+        "low": 183143,
+        "high": 183143,
+        "confidence": "placeholder",
+        "year": 2021,
+        "source": "https://www.usaspending.gov/award/CONT_AWD_75N96021P00363_7529_-NONE-_-NONE-",
+        "note": "configured price: NIH Sep 2021 purchase from Formulatrix LLC, 'FORMULATRIX - ROCK IMAGER LAB EQUIPMENT', $183,143. Model, optics and quantity not stated (could be a smaller Rock Imager), so placeholder confidence and its wide band apply. Added after the out-of-sample test; independent of the JHU and Baylor cases."
       }
     },
     "scraped_at": "2026-10-03T13:31:44+00:00",
