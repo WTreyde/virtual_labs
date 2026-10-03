@@ -18,6 +18,9 @@ Model (SimPy, one process per workflow step):
   turnaround. Labware that leaves for an external service is not transferred back in the room.
 - `in_silico` steps (or steps without instruments): a pure delay; labware stays where it was.
 
+Downtime (optional, `simulate(..., downtime=...)`): per-instance random failures (MTBF/MTTR) or a
+charging duty cycle; work pauses while the unit is down. Off by default.
+
 Uncertainty: each Monte Carlo replicate draws one "true" mean duration per step from its range
 (epistemic: we do not know the LC-MS run time exactly), then every run jitters ±5% around it
 (aleatoric). Ranges come from `duration_uncertainty`, else the catalog's provenance for that
@@ -27,6 +30,7 @@ measured after a warm-up that covers the pipeline's fill time.
 Sensitivity: the busiest wide-range inputs are pinned low and high (same seeds); see sensitivity_analysis.
 Parallel runs: sim/parallel.py (local processes or Modal).
 """
+import bisect
 import math
 import random
 import statistics
@@ -153,7 +157,8 @@ class Buffer:
 
 class Model:
     def __init__(self, spec: dict, workflow: dict, layout: dict, t0: float, t1: float, rng: random.Random,
-                 pins: dict[str, str] | None = None, record: bool = False, capacity_overrides: dict[str, int] | None = None):
+                 pins: dict[str, str] | None = None, record: bool = False, capacity_overrides: dict[str, int] | None = None,
+                 downtime: dict[str, dict] | None = None):
         self.env, self.rng, self.t0, self.t1, self.record = simpy.Environment(), rng, t0, t1, record
         self.steps = topo_order(workflow["steps"])
         self.by_id = {s["id"]: s for s in self.steps}
@@ -208,6 +213,7 @@ class Model:
             self.queue[s["id"]] = self._draw(_uncertain((s.get("params") or {}).get("queue_time_s")),
                                              pins.get(f"{s['id']}.queue"))
         self.walk = self._draw((HUMAN_WALK_BAND[0], 1.0, HUMAN_WALK_BAND[1]), pins.get("operator_walking"))
+        self.down = self._down_intervals(downtime or {}, t0 + MAX_WINDOW_H * 3600)
 
         # Buffers between steps, sized so a step's own parallel runs are never throttled by reservation.
         self.buffers, self.acc = {}, defaultdict(float)
@@ -233,6 +239,59 @@ class Model:
         if pin == "high":
             return high
         return self.rng.triangular(low, high, mode) if high > low else mode
+
+    def _down_intervals(self, downtime: dict[str, dict], horizon: float) -> dict[str, tuple[list, list]]:
+        """Pre-drawn (starts, ends) of down periods per instance for this replicate.
+
+        Spec per instance: {"mtbf_h", "mttr_h"} random failures (exponential), {"up_h", "down_h"} a periodic
+        duty cycle such as charging (random phase), or {"availability", "cycle_h"} as shorthand for one."""
+        out = {}
+        for inst, d in downtime.items():
+            if inst not in self.res:
+                raise ValueError(f"downtime given for {inst}, which is not in workflow.equipment")
+            rng = random.Random(self.rng.randrange(2**31))
+            if "availability" in d:
+                a, cycle = float(d["availability"]), float(d.get("cycle_h", 8))
+                if not 0 < a <= 1:
+                    raise ValueError(f"availability for {inst} must be in (0, 1]")
+                d = {"up_h": a * cycle, "down_h": (1 - a) * cycle}
+            starts, ends = [], []
+            if "mtbf_h" in d:
+                t = rng.expovariate(1 / (d["mtbf_h"] * 3600))
+                while t < horizon:
+                    rep_s = rng.expovariate(1 / (d["mttr_h"] * 3600))
+                    starts.append(t)
+                    ends.append(t + rep_s)
+                    t += rep_s + rng.expovariate(1 / (d["mtbf_h"] * 3600))
+            elif d.get("down_h", 0) > 0:
+                up, dn = d["up_h"] * 3600, d["down_h"] * 3600
+                t = -rng.uniform(0, up + dn)  # random phase
+                while t < horizon:
+                    if t + up + dn > 0:
+                        starts.append(max(0.0, t + up))
+                        ends.append(t + up + dn)
+                    t += up + dn
+            else:
+                raise ValueError(f"downtime for {inst} needs mtbf_h+mttr_h, up_h+down_h or availability")
+            out[inst] = (starts, ends)
+        return out
+
+    def machine_work(self, inst: str, seconds: float, slots: int = 1):
+        """Run an instrument or robot for `seconds` of working time, pausing while it is down (failed, charging)."""
+        starts, ends = self.down[inst]
+        remaining = seconds
+        while remaining > 1e-9:
+            now = self.env.now
+            k = bisect.bisect_right(starts, now) - 1
+            if k >= 0 and now < ends[k] - 1e-9:  # down right now: wait for it to come back
+                yield self.env.timeout(ends[k] - now)
+                continue
+            nxt = starts[k + 1] if k + 1 < len(starts) else float("inf")
+            chunk = min(remaining, nxt - now)
+            h = self._start_busy(inst, slots)
+            yield self.env.timeout(chunk)
+            self._end_busy(h)
+            remaining -= chunk
 
     def _eligible_ops(self, step: dict) -> set[str]:
         role = step.get("operator_role")
@@ -340,9 +399,12 @@ class Model:
                 for t in group:
                     yield self.res[via].get(1)
                     self._log(t.id, "transfer_start", via)
-                    h = self._start_busy(via)
-                    yield self.env.timeout(self._jitter(base))
-                    self._end_busy(h)
+                    if via in self.down:
+                        yield from self.machine_work(via, self._jitter(base))
+                    else:
+                        h = self._start_busy(via)
+                        yield self.env.timeout(self._jitter(base))
+                        self._end_busy(h)
                     yield self.res[via].put(1)
                     self._log(t.id, "transfer_end", via)
             else:
@@ -435,7 +497,8 @@ class Model:
             started.succeed()
         for t in tokens:
             self._log(t.id, "step_start", inst, sid)
-        h = self._start_busy(inst, self.slots[sid]) if inst and mode != "manual" else None
+        timed = inst in self.down  # downtime-aware instruments account their own busy time
+        h = self._start_busy(inst, self.slots[sid]) if inst and mode != "manual" and not timed else None
         if mode == "manual":
             yield from self.operator_work(op, dur, inst, self.slots[sid])
             yield self.op_pool.put(op)
@@ -443,11 +506,17 @@ class Model:
             handling = float((step.get("params") or {}).get("operator_s", SEMI_AUTO_OPERATOR_S))
             yield from self.operator_work(op, min(handling, dur) if dur else handling)
             yield self.op_pool.put(op)
-            yield self.env.timeout(max(dur - handling, 0))
+            if timed:
+                yield from self.machine_work(inst, max(dur - handling, 0), self.slots[sid])
+            else:
+                yield self.env.timeout(max(dur - handling, 0))
         else:
             if mode == "external":
                 yield self.env.timeout(self._jitter(self.queue[sid]))
-            yield self.env.timeout(dur)
+            if timed:
+                yield from self.machine_work(inst, dur, self.slots[sid])
+            else:
+                yield self.env.timeout(dur)
         if h:
             self._end_busy(h)
         if inst:
@@ -513,26 +582,30 @@ def warmup_hours(spec: dict, workflow: dict) -> float:
 
 
 def run_replicate(spec: dict, workflow: dict, layout: dict, hours: float, seed: int, pins: dict[str, str] | None = None,
-                  record: bool = False, capacity_overrides: dict[str, int] | None = None) -> dict:
+                  record: bool = False, capacity_overrides: dict[str, int] | None = None,
+                  downtime: dict[str, dict] | None = None) -> dict:
     """One Monte Carlo replicate; JSON in, JSON out so it can run remotely (Modal)."""
     warm = warmup_hours(spec, workflow)
     model = Model(spec, workflow, layout, warm * 3600, (warm + hours) * 3600, random.Random(seed), pins, record,
-                  capacity_overrides)
+                  capacity_overrides, downtime)
     out = model.run_until_end()
     out["per_day"] = out["units"] / out["window_h"] * spec["throughput_target"].get("operating_hours_per_day", 24)
     return out
 
 
 def simulate(spec: dict, workflow: dict, layout: dict, hours: float = 72, replicates: int = 20, seed: int = 0,
-             sensitivity: bool = True, backend: str | None = None, capacity_overrides: dict[str, int] | None = None) -> dict:
+             sensitivity: bool = True, backend: str | None = None, capacity_overrides: dict[str, int] | None = None,
+             downtime: dict[str, dict] | None = None) -> dict:
     """Monte Carlo over duration uncertainty. `hours` is the minimum measurement window after warm-up.
 
     `backend` picks where replicates run: "serial", "process" (local cores) or "modal"; default from
     LABFORGE_SIM_BACKEND, else serial. Sensitivity re-runs the top uncertain inputs pinned low and high.
-    `capacity_overrides` ({instance: slots}) is for what-if sweeps."""
+    `capacity_overrides` ({instance: slots}) is for what-if sweeps. `downtime` ({instance: spec}, default off)
+    makes instruments or robots unavailable for failures or charging; see Model._down_intervals."""
     rng = random.Random(seed)
     seeds = [rng.randrange(2**31) for _ in range(replicates)]
-    base = dict(spec=spec, workflow=workflow, layout=layout, hours=hours, capacity_overrides=capacity_overrides)
+    base = dict(spec=spec, workflow=workflow, layout=layout, hours=hours, capacity_overrides=capacity_overrides,
+                downtime=downtime)
     runs = map_replicates([dict(base, seed=s, record=(k == 0)) for k, s in enumerate(seeds)], backend)
     result = summarise(spec, workflow, layout, hours, runs)
     if sensitivity:
