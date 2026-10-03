@@ -118,10 +118,20 @@ def test_missing_design_fails_design_checks_without_crashing():
     assert by_kind["admits_infeasible"]["passed"] is False
 
 
-def test_unanswered_arm_is_reported_not_scored():
-    board = run_bench(["platform"], tasks=[TASK])  # strand C's answer_task is not wired yet in this branch
+def test_unanswered_arm_is_reported_not_scored(monkeypatch):
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.setattr("labforge.agent.config.load_env", lambda *a, **k: None)
+    board = run_bench(["platform"], tasks=[TASK])
     row = board["arms"][0]
-    assert row["score"] is None and row["tasks_answered"] in (0, 1)
+    assert row["score"] is None and row["tasks_answered"] == 0 and "ANTHROPIC_API_KEY" in row["tasks"][0]["error"]
+
+
+def test_strand_c_answer_shape_is_normalised():
+    from labforge.bench.runner import normalise
+    raw = {"messages": [{"role": "user", "content": "brief"}, {"role": "assistant", "content": "This cannot be met."}],
+           "lab_spec": SPEC, "workflow": WORKFLOW, "claims": []}
+    ans = normalise(raw, "vanilla", TASK)
+    assert ans["message"] == "This cannot be met." and ans["arm"] == "vanilla" and ans["task_id"] == "reader_trap"
 
 
 def test_calibration_table():

@@ -3,7 +3,7 @@
 Two arms answer every task:
 - "vanilla": Claude with no tools, asked to return a design and claims as JSON.
 - "platform": our planner agent with catalog, layout, simulation and verifier.
-Answers come from `labforge.agent.bench.answer_task(task, arm)` (strand C) or from cached files
+Answers come from `labforge.agent.benchmark.run_arm(arm, task)` (strand C) or from cached files
 `<answers_dir>/<arm>/<task_id>.json`. Each answer is scored by the task's hidden checks against a
 design the verifier recomputes itself; results go into a leaderboard JSON for the UI.
 
@@ -43,11 +43,30 @@ def load_tasks() -> list[dict]:
 
 
 def run_arm(arm: str, task: dict) -> dict:
+    """Ask strand C's arm for an answer. No credentials means "not run", never a made-up score."""
+    import os
     try:
-        from labforge.agent.bench import answer_task  # strand C provides this
+        from labforge.agent import benchmark
+        from labforge.agent.config import load_env
+        load_env()
     except ImportError as e:
-        raise NotImplementedError("labforge.agent.bench.answer_task(task, arm) is not available yet") from e
-    return answer_task(task, arm)
+        raise NotImplementedError("labforge.agent.benchmark.run_arm is not available") from e
+    if not os.getenv("ANTHROPIC_API_KEY"):
+        raise NotImplementedError("no ANTHROPIC_API_KEY: arms were not run")
+    try:
+        raw = benchmark.run_arm(arm, task)
+    except Exception as e:  # a crash or unparsable JSON is the arm's failure, scored as an empty answer
+        raw = {"messages": [{"role": "assistant", "content": f"(arm failed: {type(e).__name__}: {e})"}], "failed": True}
+    return normalise(raw, arm, task)
+
+
+def normalise(raw: dict, arm: str, task: dict) -> dict:
+    """Strand C answers carry `messages`; checks read one `message` string. Other fields pass through."""
+    answer = dict(raw, task_id=task["id"], arm=arm)
+    if "message" not in answer:
+        texts = [m.get("content") for m in raw.get("messages", []) if m.get("role") == "assistant"]
+        answer["message"] = "\n".join(t if isinstance(t, str) else json.dumps(t) for t in texts if t)
+    return answer
 
 
 # ---------- context: everything the checks need, recomputed once per answer ----------
@@ -224,7 +243,7 @@ def score(task: dict, answer: dict) -> dict[str, bool | None]:
 def answer_for(arm: str, task: dict, answers_dir: Path | None) -> dict:
     cached = answers_dir / arm / f"{task['id']}.json" if answers_dir else None
     if cached and cached.exists():
-        return json.loads(cached.read_text())
+        return normalise(json.loads(cached.read_text()), arm, task)
     answer = run_arm(arm, task)
     if answers_dir:
         cached.parent.mkdir(parents=True, exist_ok=True)
