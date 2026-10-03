@@ -7812,5 +7812,502 @@
     },
     "scraped_at": "2026-10-03T00:00:00Z",
     "price_usd_estimate": 57191
+  },
+  {
+    "id": "operator_chemist",
+    "vendor": "Human operator",
+    "model": "Synthesis chemist (role: chemist)",
+    "category": "transporter",
+    "capabilities": [
+      "manual_bench",
+      "powder_dosing",
+      "liquid_dosing",
+      "filtration",
+      "solid_phase_extraction",
+      "heating_stirring",
+      "waste"
+    ],
+    "footprint": {
+      "width_m": 0.6,
+      "depth_m": 0.6,
+      "height_m": 1.75,
+      "clearance_m": 0.0,
+      "mount": "floor"
+    },
+    "access_points": [
+      {
+        "id": "hands",
+        "position": {
+          "x": 0.0,
+          "y": 0.3,
+          "z": 1.0
+        },
+        "labware": [
+          "sbs_96",
+          "sbs_384",
+          "deep_well_96",
+          "reaction_block_96",
+          "filter_plate_96",
+          "crystallization_plate_96",
+          "vial_rack",
+          "tube_rack",
+          "shake_flask",
+          "bottle",
+          "puck",
+          "column"
+        ]
+      }
+    ],
+    "transport": {
+      "kind": "human",
+      "speed_m_s": 1.0,
+      "pick_place_s": 5,
+      "payload_kg": 23
+    },
+    "integration": [
+      "manual (no control interface)"
+    ],
+    "visual": {
+      "color": "#e0a458"
+    },
+    "data_confidence": "estimated",
+    "provenance": {
+      "transport.speed_m_s": {
+        "value": 1.0,
+        "low": 0.82,
+        "high": 1.31,
+        "confidence": "estimated",
+        "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7806575/ ; https://pubmed.ncbi.nlm.nih.gov/9078050/",
+        "note": "Usual walking pace 1.31 m/s (meta-analysis, outdoor); comfortable indoor gait 1.27-1.46 m/s (Bohannon 1997). Lowered to 1.0 m/s for walking while carrying labware in a lab, which no source measures."
+      },
+      "transport.pick_place_s": {
+        "value": 5,
+        "low": 3,
+        "high": 10,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "Time to pick up or put down a plate by hand; no published measurement found."
+      },
+      "transport.payload_kg": {
+        "value": 23,
+        "low": 23,
+        "high": 23,
+        "confidence": "datasheet",
+        "source": "https://stacks.cdc.gov/view/cdc/205542/cdc_205542_DS1.pdf",
+        "note": "NIOSH lifting equation load constant: 'the maximum recommended weight for lifting at the standard lifting location under optimal conditions' (Waters et al. 1993). Real limits are lower."
+      },
+      "footprint.width_m": {
+        "value": 0.6,
+        "low": 0.5,
+        "high": 0.8,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "Working space of one standing person; operators are not placed as equipment by the layout engine."
+      },
+      "footprint.depth_m": {
+        "value": 0.6,
+        "low": 0.5,
+        "high": 0.8,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "Working space of one standing person; operators are not placed as equipment by the layout engine."
+      },
+      "footprint.height_m": {
+        "value": 1.75,
+        "low": 1.5,
+        "high": 1.95,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "Standing person, for drawing only."
+      },
+      "staff_cost_usd_per_year": {
+        "value": 91240,
+        "low": 58460,
+        "high": 160830,
+        "confidence": "datasheet",
+        "year": 2025,
+        "source": "https://api.bls.gov/publicAPI/v2/timeseries/data/ (OEWS May 2025, national); https://www.bls.gov/oes/current/oes192031.htm",
+        "note": "BLS OEWS May 2025, Chemists (19-2031): median, 10th and 90th percentile annual wage. Wage only, not fully loaded cost. Not capex: the cost model files operators under 'staff'."
+      }
+    },
+    "safety": {
+      "notes": "Weighs and dissolves solids, sets up and works up reactions, replenishes solvents, handles waste (docs/pipelines.md chemistry)."
+    }
+  },
+  {
+    "id": "operator_protein_scientist",
+    "vendor": "Human operator",
+    "model": "Protein scientist (role: protein_scientist)",
+    "category": "transporter",
+    "capabilities": [
+      "manual_bench",
+      "cell_culture",
+      "shaking",
+      "centrifugation",
+      "cell_lysis",
+      "protein_purification",
+      "protein_qc",
+      "concentration_measurement"
+    ],
+    "footprint": {
+      "width_m": 0.6,
+      "depth_m": 0.6,
+      "height_m": 1.75,
+      "clearance_m": 0.0,
+      "mount": "floor"
+    },
+    "access_points": [
+      {
+        "id": "hands",
+        "position": {
+          "x": 0.0,
+          "y": 0.3,
+          "z": 1.0
+        },
+        "labware": [
+          "sbs_96",
+          "sbs_384",
+          "deep_well_96",
+          "reaction_block_96",
+          "filter_plate_96",
+          "crystallization_plate_96",
+          "vial_rack",
+          "tube_rack",
+          "shake_flask",
+          "bottle",
+          "puck",
+          "column"
+        ]
+      }
+    ],
+    "transport": {
+      "kind": "human",
+      "speed_m_s": 1.0,
+      "pick_place_s": 5,
+      "payload_kg": 23
+    },
+    "integration": [
+      "manual (no control interface)"
+    ],
+    "visual": {
+      "color": "#e0a458"
+    },
+    "data_confidence": "estimated",
+    "provenance": {
+      "transport.speed_m_s": {
+        "value": 1.0,
+        "low": 0.82,
+        "high": 1.31,
+        "confidence": "estimated",
+        "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7806575/ ; https://pubmed.ncbi.nlm.nih.gov/9078050/",
+        "note": "Usual walking pace 1.31 m/s (meta-analysis, outdoor); comfortable indoor gait 1.27-1.46 m/s (Bohannon 1997). Lowered to 1.0 m/s for walking while carrying labware in a lab, which no source measures."
+      },
+      "transport.pick_place_s": {
+        "value": 5,
+        "low": 3,
+        "high": 10,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "Time to pick up or put down a plate by hand; no published measurement found."
+      },
+      "transport.payload_kg": {
+        "value": 23,
+        "low": 23,
+        "high": 23,
+        "confidence": "datasheet",
+        "source": "https://stacks.cdc.gov/view/cdc/205542/cdc_205542_DS1.pdf",
+        "note": "NIOSH lifting equation load constant: 'the maximum recommended weight for lifting at the standard lifting location under optimal conditions' (Waters et al. 1993). Real limits are lower."
+      },
+      "footprint.width_m": {
+        "value": 0.6,
+        "low": 0.5,
+        "high": 0.8,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "Working space of one standing person; operators are not placed as equipment by the layout engine."
+      },
+      "footprint.depth_m": {
+        "value": 0.6,
+        "low": 0.5,
+        "high": 0.8,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "Working space of one standing person; operators are not placed as equipment by the layout engine."
+      },
+      "footprint.height_m": {
+        "value": 1.75,
+        "low": 1.5,
+        "high": 1.95,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "Standing person, for drawing only."
+      },
+      "staff_cost_usd_per_year": {
+        "value": 127410,
+        "low": 74290,
+        "high": 201110,
+        "confidence": "datasheet",
+        "year": 2025,
+        "source": "https://api.bls.gov/publicAPI/v2/timeseries/data/ (OEWS May 2025, national); https://www.bls.gov/oes/current/oes191021.htm",
+        "note": "BLS OEWS May 2025, Biochemists and biophysicists (19-1021): median, 10th and 90th percentile annual wage. Wage only, not fully loaded cost. Not capex: the cost model files operators under 'staff'."
+      }
+    },
+    "safety": {
+      "notes": "Runs expression, harvest, lysis, purification and protein QC (docs/pipelines.md XChem steps 1-6). Also matches demo roles 'scientist' and 'xchem_scientist'."
+    }
+  },
+  {
+    "id": "operator_crystallographer",
+    "vendor": "Human operator",
+    "model": "Crystallographer (role: crystallographer)",
+    "category": "transporter",
+    "capabilities": [
+      "manual_bench",
+      "crystal_harvesting",
+      "cryo_cooling",
+      "crystal_soaking"
+    ],
+    "footprint": {
+      "width_m": 0.6,
+      "depth_m": 0.6,
+      "height_m": 1.75,
+      "clearance_m": 0.0,
+      "mount": "floor"
+    },
+    "access_points": [
+      {
+        "id": "hands",
+        "position": {
+          "x": 0.0,
+          "y": 0.3,
+          "z": 1.0
+        },
+        "labware": [
+          "sbs_96",
+          "sbs_384",
+          "deep_well_96",
+          "reaction_block_96",
+          "filter_plate_96",
+          "crystallization_plate_96",
+          "vial_rack",
+          "tube_rack",
+          "shake_flask",
+          "bottle",
+          "puck",
+          "column"
+        ]
+      }
+    ],
+    "transport": {
+      "kind": "human",
+      "speed_m_s": 1.0,
+      "pick_place_s": 5,
+      "payload_kg": 23
+    },
+    "integration": [
+      "manual (no control interface)"
+    ],
+    "visual": {
+      "color": "#e0a458"
+    },
+    "data_confidence": "estimated",
+    "provenance": {
+      "transport.speed_m_s": {
+        "value": 1.0,
+        "low": 0.82,
+        "high": 1.31,
+        "confidence": "estimated",
+        "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7806575/ ; https://pubmed.ncbi.nlm.nih.gov/9078050/",
+        "note": "Usual walking pace 1.31 m/s (meta-analysis, outdoor); comfortable indoor gait 1.27-1.46 m/s (Bohannon 1997). Lowered to 1.0 m/s for walking while carrying labware in a lab, which no source measures."
+      },
+      "transport.pick_place_s": {
+        "value": 5,
+        "low": 3,
+        "high": 10,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "Time to pick up or put down a plate by hand; no published measurement found."
+      },
+      "transport.payload_kg": {
+        "value": 23,
+        "low": 23,
+        "high": 23,
+        "confidence": "datasheet",
+        "source": "https://stacks.cdc.gov/view/cdc/205542/cdc_205542_DS1.pdf",
+        "note": "NIOSH lifting equation load constant: 'the maximum recommended weight for lifting at the standard lifting location under optimal conditions' (Waters et al. 1993). Real limits are lower."
+      },
+      "footprint.width_m": {
+        "value": 0.6,
+        "low": 0.5,
+        "high": 0.8,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "Working space of one standing person; operators are not placed as equipment by the layout engine."
+      },
+      "footprint.depth_m": {
+        "value": 0.6,
+        "low": 0.5,
+        "high": 0.8,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "Working space of one standing person; operators are not placed as equipment by the layout engine."
+      },
+      "footprint.height_m": {
+        "value": 1.75,
+        "low": 1.5,
+        "high": 1.95,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "Standing person, for drawing only."
+      },
+      "staff_cost_usd_per_year": {
+        "value": 127410,
+        "low": 74290,
+        "high": 201110,
+        "confidence": "datasheet",
+        "year": 2025,
+        "source": "https://api.bls.gov/publicAPI/v2/timeseries/data/ (OEWS May 2025, national); https://www.bls.gov/oes/current/oes191021.htm",
+        "note": "BLS OEWS May 2025, Biochemists and biophysicists (19-1021): median, 10th and 90th percentile annual wage. Wage only, not fully loaded cost. Not capex: the cost model files operators under 'staff'."
+      },
+      "process.durations_s.crystal_harvesting": {
+        "value": 35,
+        "low": 15,
+        "high": 36,
+        "confidence": "literature",
+        "source": "https://doi.org/10.1107/S2059798320014114 (Wright et al., Acta Cryst. D 2021)",
+        "note": "Per crystal with a Shifter, including the plunge into the LN2 puck (same source as olt_crystal_shifter). Without a Shifter the paper's manual baseline is 7.5 min per crystal."
+      }
+    },
+    "safety": {
+      "notes": "Harvests crystals with the Shifter, plunges them into pucks in LN2, loads pucks and shippers (docs/pipelines.md XChem steps 11-12). Also matches demo role 'protein_crystallographer'."
+    },
+    "process": {
+      "capacity": 1,
+      "durations_s": {
+        "crystal_harvesting": 35
+      },
+      "duration_basis": {
+        "crystal_harvesting": "crystal"
+      }
+    }
+  },
+  {
+    "id": "operator_lab_technician",
+    "vendor": "Human operator",
+    "model": "Laboratory technician (role: lab_technician)",
+    "category": "transporter",
+    "capabilities": [
+      "manual_bench",
+      "reagent_dispensing",
+      "plate_storage",
+      "compound_storage",
+      "waste"
+    ],
+    "footprint": {
+      "width_m": 0.6,
+      "depth_m": 0.6,
+      "height_m": 1.75,
+      "clearance_m": 0.0,
+      "mount": "floor"
+    },
+    "access_points": [
+      {
+        "id": "hands",
+        "position": {
+          "x": 0.0,
+          "y": 0.3,
+          "z": 1.0
+        },
+        "labware": [
+          "sbs_96",
+          "sbs_384",
+          "deep_well_96",
+          "reaction_block_96",
+          "filter_plate_96",
+          "crystallization_plate_96",
+          "vial_rack",
+          "tube_rack",
+          "shake_flask",
+          "bottle",
+          "puck",
+          "column"
+        ]
+      }
+    ],
+    "transport": {
+      "kind": "human",
+      "speed_m_s": 1.0,
+      "pick_place_s": 5,
+      "payload_kg": 23
+    },
+    "integration": [
+      "manual (no control interface)"
+    ],
+    "visual": {
+      "color": "#e0a458"
+    },
+    "data_confidence": "estimated",
+    "provenance": {
+      "transport.speed_m_s": {
+        "value": 1.0,
+        "low": 0.82,
+        "high": 1.31,
+        "confidence": "estimated",
+        "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7806575/ ; https://pubmed.ncbi.nlm.nih.gov/9078050/",
+        "note": "Usual walking pace 1.31 m/s (meta-analysis, outdoor); comfortable indoor gait 1.27-1.46 m/s (Bohannon 1997). Lowered to 1.0 m/s for walking while carrying labware in a lab, which no source measures."
+      },
+      "transport.pick_place_s": {
+        "value": 5,
+        "low": 3,
+        "high": 10,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "Time to pick up or put down a plate by hand; no published measurement found."
+      },
+      "transport.payload_kg": {
+        "value": 23,
+        "low": 23,
+        "high": 23,
+        "confidence": "datasheet",
+        "source": "https://stacks.cdc.gov/view/cdc/205542/cdc_205542_DS1.pdf",
+        "note": "NIOSH lifting equation load constant: 'the maximum recommended weight for lifting at the standard lifting location under optimal conditions' (Waters et al. 1993). Real limits are lower."
+      },
+      "footprint.width_m": {
+        "value": 0.6,
+        "low": 0.5,
+        "high": 0.8,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "Working space of one standing person; operators are not placed as equipment by the layout engine."
+      },
+      "footprint.depth_m": {
+        "value": 0.6,
+        "low": 0.5,
+        "high": 0.8,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "Working space of one standing person; operators are not placed as equipment by the layout engine."
+      },
+      "footprint.height_m": {
+        "value": 1.75,
+        "low": 1.5,
+        "high": 1.95,
+        "confidence": "placeholder",
+        "source": "agent_estimate",
+        "note": "Standing person, for drawing only."
+      },
+      "staff_cost_usd_per_year": {
+        "value": 57510,
+        "low": 40330,
+        "high": 84940,
+        "confidence": "datasheet",
+        "year": 2025,
+        "source": "https://api.bls.gov/publicAPI/v2/timeseries/data/ (OEWS May 2025, national); https://www.bls.gov/oes/current/oes194021.htm",
+        "note": "BLS OEWS May 2025, Biological technicians (19-4021): median, 10th and 90th percentile annual wage. Wage only, not fully loaded cost. Not capex: the cost model files operators under 'staff'."
+      }
+    },
+    "safety": {
+      "notes": "Prepares reagents and protein at shift start, restocks plates and tips, moves plates between cells, handles waste."
+    }
   }
 ]
