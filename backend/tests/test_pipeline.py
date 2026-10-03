@@ -67,3 +67,14 @@ def test_validation_cost_band(monkeypatch):
     assert pred["p10"] < pred["p50"] < pred["p90"]
     assert compare(pred["p50"], pred)["within_p10_p90"]
     assert all(run_case(c)["status"] in ("compared", "no_design_yet") for c in load_cases())
+
+
+def test_bench_leaderboard_route(tmp_path, monkeypatch):
+    import labforge.gateway as gw
+    client = TestClient(app)
+    monkeypatch.setattr(gw, "LEADERBOARD", tmp_path / "missing.json")
+    assert client.get("/bench/leaderboard").status_code == 404
+    board = tmp_path / "leaderboard.json"
+    board.write_text('{"arms": []}')
+    monkeypatch.setattr(gw, "LEADERBOARD", board)
+    assert client.get("/bench/leaderboard").json() == {"arms": []}
