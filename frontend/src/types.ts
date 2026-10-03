@@ -3,8 +3,9 @@
 export type Vec3 = { x: number; y: number; z: number };
 export interface CatalogItem {
   id: string; vendor: string; model: string; category: string; capabilities: string[];
-  footprint: { width_m: number; depth_m: number; height_m: number };
+  footprint: { width_m: number; depth_m: number; height_m: number; mount?: string };
   price_usd_estimate?: number; data_confidence?: string; visual?: { color?: string };
+  transport?: { kind?: "arm" | "rail" | "mobile" | "human" };
 }
 export interface Workflow { id: string; equipment: { instance_id: string; catalog_id: string; rationale?: string }[] }
 export interface Layout {

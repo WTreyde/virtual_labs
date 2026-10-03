@@ -1,30 +1,35 @@
 import Phaser from "phaser";
-import { footprintCorners, iso, ORIGIN, shade } from "./iso";
+import { fitRoom, iso, PIX, TILE, Z_SQUASH } from "./iso";
+import { bakeRoom, bakeVoxels, model, spriteKind } from "./sprites";
 import type { Design } from "./types";
 
 /**
  * Strand A: the isometric lab. Owner: Roshan.
- * v0 draws the room, zones, instruments as shaded iso boxes, transfer paths with moving plates,
- * operators and bottleneck speech bubbles. TODO(Roshan): pixel-art sprites per instrument category,
- * walking operator/robot animations from SimResult.timeline, stat card on click, Pokemon-style UI frame.
+ * Draws the room, zones and instruments as procedural pixel-art sprites sized from catalog footprints,
+ * transfer paths with moving plates, operators and bottleneck speech bubbles.
+ * TODO(Roshan): animate from SimResult.timeline, stat card on click, Pokemon-style UI frame.
  */
 export class LabScene extends Phaser.Scene {
   private design!: Design;
-  private movers: { dot: Phaser.GameObjects.Arc; pts: { x: number; y: number }[]; t: number; speed: number }[] = [];
+  private movers: { plate: Phaser.GameObjects.Image; pts: { x: number; y: number }[]; t: number; speed: number }[] = [];
 
   constructor() { super("lab"); }
 
-  init(data: { design: Design }) { this.design = data.design; }
+  init(data: { design: Design }) {
+    this.design = data.design;
+    this.movers = [];
+  }
 
   create() {
     const { layout } = this.design;
-    ORIGIN.x = this.scale.width / 2 - ((layout.room.width_m - layout.room.depth_m) * 64 * 0.866) / 2;
-    this.drawFloor();
-    this.drawZones();
+    fitRoom(layout.room.width_m, layout.room.depth_m, this.scale.width, this.scale.height);
+    for (const k of this.textures.getTextureKeys()) if (k.startsWith("lf:")) this.textures.remove(k);
+    this.drawRoom();
     this.drawEquipment();
     this.drawTransfers();
     this.drawOperators();
     this.drawBottlenecks();
+    this.scale.once("resize", () => this.scene.restart({ design: this.design }));
   }
 
   update(_: number, dtMs: number) {
@@ -32,76 +37,65 @@ export class LabScene extends Phaser.Scene {
       m.t = (m.t + (dtMs / 1000) * m.speed) % 1;
       const seg = m.t * (m.pts.length - 1), i = Math.floor(seg), f = seg - i;
       const a = m.pts[i], b = m.pts[Math.min(i + 1, m.pts.length - 1)];
-      m.dot.setPosition(a.x + (b.x - a.x) * f, a.y + (b.y - a.y) * f);
+      m.plate.setPosition(a.x + (b.x - a.x) * f, a.y + (b.y - a.y) * f);
     }
   }
 
-  private poly(points: { x: number; y: number }[], fill: number, alpha = 1, line = 0x333333) {
-    const g = this.add.graphics();
-    g.fillStyle(fill, alpha).lineStyle(2, line, 1);
-    g.beginPath(); g.moveTo(points[0].x, points[0].y);
-    points.slice(1).forEach((p) => g.lineTo(p.x, p.y));
-    g.closePath(); g.fillPath(); g.strokePath();
-    return g;
+  /** Place a baked texture so its local origin lands on floor point (x, y). Depth sorts by x + y. */
+  private place(tex: { key: string; ox: number; oy: number }, x: number, y: number) {
+    const s = iso(x, y, 0), img = this.add.image(s.x, s.y, tex.key).setScale(PIX);
+    const src = this.textures.get(tex.key).getSourceImage();
+    return img.setOrigin(tex.ox / src.width, tex.oy / src.height).setDepth(x + y);
   }
 
-  private drawFloor() {
-    const { width_m: W, depth_m: D } = this.design.layout.room;
-    for (let x = 0; x < W; x += 0.5)
-      for (let y = 0; y < D; y += 0.5) {
-        const even = (Math.round(x * 2) + Math.round(y * 2)) % 2 === 0;
-        this.poly([iso(x, y), iso(x + 0.5, y), iso(x + 0.5, y + 0.5), iso(x, y + 0.5)], even ? 0xd8d0b8 : 0xcfc6ab, 1, 0xbdb398);
-      }
+  private label(img: Phaser.GameObjects.Image, text: string) {
+    const top = img.getTopCenter();
+    return this.add.text(top.x, top.y - 2, text, {
+      fontFamily: '"Press Start 2P", monospace', fontSize: "8px", color: "#f4efe1", backgroundColor: "#1d2b2fcc", padding: { x: 3, y: 3 },
+    }).setOrigin(0.5, 1).setDepth(900);
   }
 
-  private drawZones() {
-    const colours: Record<string, number> = { fume_hood: 0xf2c94c, bsl2: 0xeb5757, cold_room: 0x56ccf2, cryogen: 0x9b51e0 };
-    for (const z of this.design.layout.zones ?? []) {
-      this.poly([iso(z.min.x, z.min.y), iso(z.max.x, z.min.y), iso(z.max.x, z.max.y), iso(z.min.x, z.max.y)], colours[z.kind] ?? 0xaaaaaa, 0.35);
-    }
+  private drawRoom() {
+    const tex = bakeRoom(this, "lf:room", this.design.layout);
+    this.place(tex, 0, 0).setDepth(-1000);
   }
 
   private drawEquipment() {
     const { layout, workflow, catalog } = this.design;
     const itemOf = Object.fromEntries(workflow.equipment.map((e) => [e.instance_id, catalog[e.catalog_id]]));
-    const sorted = [...layout.placements].sort((a, b) => a.position.x + a.position.y - (b.position.x + b.position.y));
-    for (const p of sorted) {
+    for (const p of layout.placements) {
       const item = itemOf[p.instance_id];
       if (!item) continue;
       const { width_m: w, depth_m: d, height_m: h } = item.footprint;
-      const base = p.position.z * 0.3; // squash bench height so boxes sit visibly on the floor
-      const c = footprintCorners(p.position.x, p.position.y, w, d, p.rotation_deg);
-      const colour = item.visual?.color ?? "#8899aa";
-      // Side faces whose outward normal points toward the viewer (+x+y), then the top.
-      for (let i = 0; i < 4; i++) {
-        const a = c[i], b = c[(i + 1) % 4];
-        const nx = b.y - a.y, ny = -(b.x - a.x);
-        if (nx + ny <= 0) continue;
-        const f = nx > ny ? 0.75 : 0.9;
-        this.poly([iso(a.x, a.y, base), iso(b.x, b.y, base), iso(b.x, b.y, base + h), iso(a.x, a.y, base + h)], shade(colour, f));
-      }
-      this.poly(c.map((q) => iso(q.x, q.y, base + h)), shade(colour, 1.1));
-      const top = iso(p.position.x, p.position.y, base + h);
-      this.add.text(top.x, top.y - 14, p.instance_id, { fontSize: "10px", color: "#111", backgroundColor: "#fffde8" }).setOrigin(0.5);
+      const colour = item.visual?.color ? parseInt(item.visual.color.replace("#", ""), 16) : undefined;
+      const vox = model(spriteKind(item), w, d, h, p.position.z * Z_SQUASH, colour);
+      const img = this.place(bakeVoxels(this, `lf:${p.instance_id}`, vox, p.rotation_deg, { w, d }), p.position.x, p.position.y);
+      const lbl = this.label(img, item.model).setVisible(false);
+      img.setInteractive({ pixelPerfect: true, useHandCursor: true })
+        .on("pointerover", () => { lbl.setVisible(true); img.setTint(0xfff3c4); })
+        .on("pointerout", () => { lbl.setVisible(false); img.clearTint(); });
     }
   }
 
   private drawTransfers() {
+    const plate = bakeVoxels(this, "lf:plate", model("generic", 0.13, 0.09, 0.025, 0, 0xf4f4f4));
     for (const t of this.design.layout.transfers) {
       if (!t.path?.length) continue;
-      const pts = t.path.map((q) => iso(q.x, q.y, q.z * 0.3));
-      const g = this.add.graphics().lineStyle(2, t.transporter_instance.startsWith("arm") ? 0x2d6cdf : 0xe08a2d, 0.8);
+      const pts = t.path.map((q) => iso(q.x, q.y, q.z * Z_SQUASH));
+      const g = this.add.graphics().lineStyle(2, t.transporter_instance.startsWith("arm") ? 0x2d6cdf : 0xe08a2d, 0.45).setDepth(800);
       g.beginPath(); g.moveTo(pts[0].x, pts[0].y); pts.slice(1).forEach((q) => g.lineTo(q.x, q.y)); g.strokePath();
-      const dot = this.add.circle(pts[0].x, pts[0].y, 4, 0xffffff).setStrokeStyle(2, 0x333333);
-      this.movers.push({ dot, pts, t: Math.random(), speed: 0.25 });
+      const img = this.add.image(pts[0].x, pts[0].y, plate.key).setScale(PIX).setDepth(850);
+      const src = this.textures.get(plate.key).getSourceImage();
+      img.setOrigin(plate.ox / src.width, plate.oy / src.height);
+      this.movers.push({ plate: img, pts, t: Math.random(), speed: 0.25 });
     }
   }
 
   private drawOperators() {
     for (const op of this.design.layout.operators ?? []) {
-      const s = iso(op.home.x, op.home.y);
-      this.add.circle(s.x, s.y - 10, 7, 0xf2994a).setStrokeStyle(2, 0x333333);
-      this.add.text(s.x, s.y + 2, op.role, { fontSize: "9px", color: "#111" }).setOrigin(0.5, 0);
+      const img = this.place(bakeVoxels(this, `lf:op:${op.id}`, model("operator", 0.4, 0.25, 1.7, 0), 0, { w: 0.4, d: 0.25 }), op.home.x, op.home.y);
+      this.tweens.add({ targets: img, y: img.y - PIX, yoyo: true, repeat: -1, duration: 500 + Math.random() * 300, ease: "Stepped" });
+      this.label(img, op.role).setAlpha(0.85);
     }
   }
 
@@ -110,12 +104,14 @@ export class LabScene extends Phaser.Scene {
     for (const b of this.design.sim_result.bottlenecks) {
       const pos = b.instances?.[0] && where[b.instances[0]];
       if (!pos) continue;
-      const s = iso(pos.x, pos.y, 1.2);
-      const aura = this.add.circle(s.x, s.y + 40, 36, 0xe0503c, 0.25);
-      this.tweens.add({ targets: aura, alpha: 0.05, yoyo: true, repeat: -1, duration: 700 });
-      this.add.text(s.x, s.y - 30, b.message, {
-        fontSize: "10px", color: "#111", backgroundColor: "#ffffff", padding: { x: 6, y: 4 }, wordWrap: { width: 180 },
-      }).setOrigin(0.5, 1);
+      const f = iso(pos.x, pos.y, 0);
+      const aura = this.add.ellipse(f.x, f.y, TILE * 1.6, TILE * 0.8, 0xe0503c, 0.35).setDepth(pos.x + pos.y - 0.01);
+      this.tweens.add({ targets: aura, alpha: 0.08, yoyo: true, repeat: -1, duration: 700 });
+      const s = iso(pos.x, pos.y, 1.4);
+      this.add.text(s.x, s.y, b.message, {
+        fontFamily: '"Press Start 2P", monospace', fontSize: "8px", lineSpacing: 4, color: "#111", backgroundColor: "#ffffff",
+        padding: { x: 6, y: 6 }, wordWrap: { width: 200 },
+      }).setOrigin(0.5, 1).setDepth(1000);
     }
   }
 }
