@@ -44,9 +44,14 @@ class DesignRequest(BaseModel):
     instance_id: str | None = None
 
 
+# LABFORGE_REPLAY_ONLY=1 (the public Hugging Face Space) turns off live agent runs, so no one spends our API credits.
+REPLAY_ONLY = os.getenv("LABFORGE_REPLAY_ONLY", "").strip().lower() in {"1", "true", "yes"}
+REPLAY_ONLY_MESSAGE = "Live design is off on this public demo. Open the chemistry or XChem case study to watch a recorded agent run."
+
+
 @app.get("/health")
 def health():
-    return {"ok": True}
+    return {"ok": True, "live_chat": not REPLAY_ONLY}
 
 
 @app.get("/example/{name}")
@@ -61,6 +66,8 @@ def catalog(capability: str | None = None, labware: str | None = None, max_price
 
 @app.post("/chat")
 def chat(req: ChatRequest):
+    if REPLAY_ONLY:
+        raise HTTPException(status_code=503, detail=REPLAY_ONLY_MESSAGE)
     try:
         return run_turn(req.messages)
     except Exception as exc:
@@ -69,6 +76,8 @@ def chat(req: ChatRequest):
 
 @app.post("/chat/stream")
 def chat_stream(req: ChatRequest):
+    if REPLAY_ONLY:
+        raise HTTPException(status_code=503, detail=REPLAY_ONLY_MESSAGE)
     return StreamingResponse(stream_turn(req.messages), media_type="text/event-stream",
                              headers={"Cache-Control": "no-cache"})
 
