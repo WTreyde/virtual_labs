@@ -8,6 +8,10 @@ Model (SimPy, one process per workflow step):
   one `duration_s` on one instrument, using `batch_size` of its capacity slots (an evaporator with
   6 slots and batch 6 runs one batch at a time; an incubator with 44 slots and batch 1 runs 44).
   `params.batch_timeout_s` lets a partial batch go after waiting that long.
+- Storage hotels: a residence step (incubation, plate/cold/compound storage that the catalog does not time as an
+  operation) on an instrument with `storage_slots` above its process capacity holds labware in a separate pool of
+  that many slots (`<instance>__storage` in utilisation). The Rock Imager 1000 grows 970 plates but images one at a
+  time; a timed storage operation (the compound store's 120 s pick) keeps the process capacity.
 - `fan_out`: outputs per input (8 = split into 8 plates, 0.25 = four 96-well into one 384-well).
 - Operators (layout.operators, shift hours from spec.operators) run `manual` steps for their
   whole duration and load `semi_automated` ones (`params.operator_s`, default 300 s, estimated);
@@ -47,6 +51,7 @@ from labforge.sim.parallel import map_replicates
 BANDS = {"datasheet": (0.95, 1.10), "literature": (0.85, 1.25), "estimated": (0.8, 1.4), "placeholder": (0.5, 2.0)}
 JITTER = 0.05  # run-to-run variation around a replicate's mean duration
 SEMI_AUTO_OPERATOR_S = 300.0  # estimated: operator time to load and start a semi-automated instrument
+RESIDENCE_CAPABILITIES = {"incubation", "plate_storage", "cold_storage", "compound_storage"}  # may use storage_slots
 HUMAN_WALK_BAND = (0.8, 1.5)  # estimated: real walking/handling vs the layout's straight-line estimate
 UNASSIGNED_CARRY_S = 120.0  # placeholder: someone carries labware no transporter can reach
 DEFAULT_TRANSFER_S = 30.0
@@ -180,9 +185,21 @@ class Model:
             stated = ((item or {}).get("process") or {}).get("capacity")
             batches = [s.get("batch_size", 1) for s in self.steps if inst in s["candidate_instances"]]
             caps[inst] = stated or max(batches + [1])
+        # Storage hotels: a residence step (storage or incubation the catalog does not time as an operation) holds
+        # labware in the instrument's storage_slots, a pool separate from its process capacity. The Rock Imager 1000
+        # grows 970 plates but images one at a time. Pool key "<instance>__storage".
+        self.pool = {}
+        for s in self.steps:
+            for c in s["candidate_instances"]:
+                item = self.items.get(c) or {}
+                slots = int(item.get("storage_slots") or 0)
+                timed = s["capability"] in ((item.get("process") or {}).get("durations_s") or {})
+                if s["capability"] in RESIDENCE_CAPABILITIES and not timed and slots > caps[c]:
+                    caps[f"{c}__storage"] = slots
+                    self.pool[(s["id"], c)] = f"{c}__storage"
         caps.update({i: int(c) for i, c in (capacity_overrides or {}).items() if i in caps})  # what-if: more slots
         self.caps = caps
-        self.slots = {s["id"]: max(1, min([s.get("batch_size", 1)] + [caps[c] for c in s["candidate_instances"]]))
+        self.slots = {s["id"]: max(1, min([s.get("batch_size", 1)] + [caps[self.key(s["id"], c)] for c in s["candidate_instances"]]))
                       for s in self.steps}
         self.res = {i: simpy.Container(self.env, capacity=c, init=c) for i, c in caps.items()}
         self.ext = {s["id"]: simpy.Container(self.env, capacity=int(s["params"]["max_concurrent"]),
@@ -317,7 +334,7 @@ class Model:
             # Fed at a finite rate from upstream, so no need to throttle; a source of this kind gets a small buffer.
             return UNBOUNDED if step.get("after") else 64 + downstream
         if step["candidate_instances"]:
-            parallel = sum(self.caps[c] // self.slots[step["id"]] for c in step["candidate_instances"]) or 1
+            parallel = sum(self.caps[self.key(step["id"], c)] // self.slots[step["id"]] for c in step["candidate_instances"]) or 1
         else:
             parallel = max(1, len(self.eligible.get(step["id"], ())))
         out_max = math.ceil(self.slots[step["id"]] * step.get("fan_out", 1)) + 1
@@ -439,21 +456,26 @@ class Model:
             taken.append(got)
         return [t for group in taken for t in group], (len(taken[0]) if taken else n)
 
+    def key(self, sid: str, inst: str) -> str:
+        """The slot pool a step uses on an instance: its storage pool for residence, else the instance itself."""
+        return self.pool.get((sid, inst), inst)
+
     def acquire_instance(self, step: dict):
-        cands, need = step["candidate_instances"], self.slots[step["id"]]
-        free = [c for c in cands if self.res[c].level >= need]
+        sid, cands, need = step["id"], step["candidate_instances"], self.slots[step["id"]]
+        res = {c: self.res[self.key(sid, c)] for c in cands}
+        free = [c for c in cands if res[c].level >= need]
         if free:
-            pick = max(free, key=lambda c: self.res[c].level / self.caps[c])
-            yield self.res[pick].get(need)
+            pick = max(free, key=lambda c: res[c].level / self.caps[self.key(sid, c)])
+            yield res[pick].get(need)
             return pick
-        gets = {c: self.res[c].get(need) for c in cands}
+        gets = {c: res[c].get(need) for c in cands}
         yield simpy.AnyOf(self.env, list(gets.values()))
         pick = next(c for c, g in gets.items() if g.triggered)
         for c, g in gets.items():
             if c == pick:
                 continue
             if g.triggered:
-                yield self.res[c].put(need)
+                yield res[c].put(need)
             else:
                 g.cancel()
         return pick
@@ -498,7 +520,8 @@ class Model:
         for t in tokens:
             self._log(t.id, "step_start", inst, sid)
         timed = inst in self.down  # downtime-aware instruments account their own busy time
-        h = self._start_busy(inst, self.slots[sid]) if inst and mode != "manual" and not timed else None
+        pool = self.key(sid, inst) if inst else None
+        h = self._start_busy(pool, self.slots[sid]) if inst and mode != "manual" and not timed else None
         if mode == "manual":
             yield from self.operator_work(op, dur, inst, self.slots[sid])
             yield self.op_pool.put(op)
@@ -520,7 +543,7 @@ class Model:
         if h:
             self._end_busy(h)
         if inst:
-            yield self.res[inst].put(self.slots[sid])
+            yield self.res[pool].put(self.slots[sid])
         elif sid in self.ext:
             yield self.ext[sid].put(1)
         for t in tokens:

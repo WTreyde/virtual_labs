@@ -576,12 +576,20 @@ def main():
     ap.add_argument("--answers", type=Path, default=None, help="cache answers here as <arm>/<task_id>.json")
     ap.add_argument("--out", type=Path, default=Path("bench_results/leaderboard.json"))
     ap.add_argument("--list", action="store_true", help="only list tasks and their checks")
+    ap.add_argument("--tasks", nargs="+", default=None, help="only these task ids (e.g. a smoke test)")
+    ap.add_argument("--workers", type=int, default=4, help="answers fetched in parallel")
     args = ap.parse_args()
     if args.list:
         for task in load_tasks():
             print(task["id"], task.get("trap"), [c["kind"] for c in task["checks"]])
         return
-    board = run_bench(args.arms, answers_dir=args.answers)
+    tasks = load_tasks()
+    if args.tasks:
+        unknown = set(args.tasks) - {t["id"] for t in tasks}
+        if unknown:
+            ap.error(f"unknown task ids: {sorted(unknown)}")
+        tasks = [t for t in tasks if t["id"] in args.tasks]
+    board = run_bench(args.arms, tasks=tasks, answers_dir=args.answers, workers=args.workers)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(board, indent=1))
     for row in board["arms"]:
