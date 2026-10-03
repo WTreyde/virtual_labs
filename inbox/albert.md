@@ -1,6 +1,6 @@
 # Inbox: Albert (Strand C: agent and Amass)
 
-Last updated: 2026-10-03 18:05 BST by the integrator. Main at `37035bf`.
+Last updated: 2026-10-03 18:45 BST by the integrator. Main at `1fef7ae` (plus this inbox commit).
 
 The integrator rewrites this file on every integration pass (every 30 min until the 09:00 freeze on 4 Oct).
 Work the open items top to bottom. Done items drop off once your merged work on main shows them done.
@@ -9,16 +9,23 @@ Don't edit this file; report progress in your PR description.
 ## Open items
 
 ```
-Your #23 is merged: the new XChem replay (hotel-limited, 124/day planned vs 172 verified) and the
-separate hotel remedy (+1 STX44: 193 planned / 248 verified). Thanks; that closes the XChem re-record.
-1. Chemistry story check (still open): the chem card's bottleneck is SWING XL powder dosing (100% busy),
-   but the demo script says LC-MS. Don't change the run to fit the script. Confirm which unit binds in a
-   fresh chemistry run on current main, and say so in your PR so the pitch can change if needed.
-   If you re-record, replace chem.json and chem.summary.json and regenerate the chem orchestrator sample.
-2. Planner vs verifier: XChem now disagrees the other way (planner 124 < verifier 172, gate red at
-   the 20% tolerance). Work with Maxim (his inbox has the same item) to find which modelling difference
-   causes it (seeds and replicates, operator shifts, or residence handling). Report the cause; don't
-   widen the tolerance to pass.
+Your #41 is merged: the chemistry bottleneck is the two SWING XL reaction units (99.8% busy), with
+312/day planned and 320/day verified. That closes the chemistry story check.
+User decision (3 Oct 18:33): the XChem pitch now says the twin caught the planner leaving the 1,000-slot
+Rock Imager at 4% busy while the 44-slot hotel sits at 85%, and that the real fix is growing plates in
+the imager at $0. The second-hotel what-if is no longer the pitch's fix.
+1. Back that claim with a run: record a what-if on current main where crystallisation plates grow and
+   soak in the Rock Imager (its catalog capacity and temperature) instead of the STX44, with nothing
+   else changed. Report the new throughput (planned and verified) and the new bottleneck honestly,
+   whatever they are. Save it next to xchem-whatif.json and add its numbers to fbdd.summary.json under
+   a clearly named key (e.g. "imager_growth_whatif"). If the imager can't hold growth plates
+   realistically (Max is confirming), say so and don't record it.
+2. From Maxim's #38 (planner vs verifier gap = Monte Carlo noise, not a model difference):
+   - agent/tools.py: run the reported design's simulation with at least 50 replicates (7 s each).
+   - agent/demo_scenarios.py: make the planner-vs-verifier gate noise-aware (e.g. is the planner's P50
+     inside the verifier's bootstrap interval for the median), not a fixed 20% on two noisy medians. Keep
+     the seeds different on each side.
+   - agent/benchmark.py: record response.stop_reason in the vanilla arm before json.loads.
 3. Nice to have: an optional BOM column "Control" from the orchestrator manifest devices[].control.status.
 Run make check, push, and open a PR into main.
 ```
