@@ -291,6 +291,23 @@ class PlannerIntegrationTests(unittest.TestCase):
         self.assertIn('timeline', out['sim_result'])
         self.assertTrue(any(e.get('name') == 'verify_claims' for e in events))
 
+        starts = {e['event_id']: e for e in events if e['type'] in ('model_call', 'tool_start')}
+        ends = {e['event_id']: e for e in events if e['type'] in ('model_result', 'tool_end')}
+        self.assertEqual(starts.keys(), ends.keys())
+        self.assertEqual({e['status'] for e in starts.values()}, {'running'})
+        self.assertEqual({e['status'] for e in ends.values()}, {'succeeded'})
+        for event_id, event in ends.items():
+            self.assertEqual(event['started_at'], starts[event_id]['started_at'])
+            self.assertRegex(event['started_at'], r'^\d{4}-\d\d-\d\dT.*Z$')
+            self.assertRegex(event['ended_at'], r'^\d{4}-\d\d-\d\dT.*Z$')
+            self.assertGreaterEqual(event['duration_ms'], 0)
+            self.assertIsInstance(event['step'], int)
+            self.assertTrue(event['name'])
+            self.assertTrue(event['summary'])
+        verify_event = next(e for e in events if e['type'] == 'tool_end' and e['name'] == 'verify_claims')
+        self.assertIn('3 claims', verify_event['summary'])
+        self.assertLess(len(verify_event['summary']), 160)
+
     def test_sdk_text_stream_emits_deltas(self):
         from labforge.agent.planner import run_turn
         text = {'type': 'text', 'text': 'Hello'}
@@ -304,6 +321,19 @@ class PlannerIntegrationTests(unittest.TestCase):
             out = run_turn([{'role': 'user', 'content': 'hello'}], on_event=events.append)
         self.assertEqual(out['messages'][0]['content'], 'Hello')
         self.assertEqual(''.join(e['text'] for e in events if e['type'] == 'text_delta'), 'Hello')
+
+    def test_failed_model_call_emits_terminal_event(self):
+        from labforge.agent.planner import run_turn
+        sdk = SimpleNamespace(Anthropic=lambda **kw: SimpleNamespace(
+            messages=SimpleNamespace(create=Mock(side_effect=RuntimeError('provider unavailable')))))
+        events = []
+        with patch.dict(sys.modules, {'anthropic': sdk}), patch.dict(os.environ, {'ANTHROPIC_API_KEY': 'test-only'}):
+            with self.assertRaisesRegex(RuntimeError, 'provider unavailable'):
+                run_turn([{'role': 'user', 'content': 'hello'}], on_event=events.append, stream_text=False)
+        self.assertEqual([e['type'] for e in events], ['model_call', 'model_result'])
+        self.assertEqual(events[1]['status'], 'failed')
+        self.assertEqual(events[0]['event_id'], events[1]['event_id'])
+        self.assertNotIn('provider unavailable', events[1]['summary'])
 
 
 class StreamingTests(unittest.IsolatedAsyncioTestCase):
