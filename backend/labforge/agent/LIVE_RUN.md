@@ -126,7 +126,8 @@ The UI includes redacted API error details. Never include keys in screenshots or
 | layout_and_simulate | Contract/semantic checks, layout and 10 simulation replicates |
 | search_evidence | Amass BiomedCore literature candidates with a 24-hour, credential-scoped cache |
 | verify_claims | Backend-held throughput, layout and BOM consistency checks |
-| create_report | Deterministic summary, BOM, checked claims, assumptions, evidence and unknowns |
+| create_report | Deterministic summary, BOM, checked claims, refutation history, assumptions and unknowns |
+| optimise_instrument | Hypothetical cycle-time/capacity sweeps, elasticity, headroom and next bottleneck |
 
 Amass is optional: set `AMASS_API_KEY` for read-only search. Endpoint and Bearer authentication
 follow [Amass API docs](https://api.amass.tech/api/doc). No full texts are requested.
@@ -138,7 +139,10 @@ the model must still justify relevance. Unsupported durations remain estimates.
 
 Verification accepts claims only. It uses the last backend-held design/results, ignoring
 model-supplied statuses and observed values. For a previous turn, the proposal is recomputed
-rather than trusting serialized simulator results. A revised design clears old checked claims.
+rather than trusting serialized simulator results. A revised design clears current checked claims; the audit retains historical checks. Additional
+verification batches for one design preserve earlier claims and refutations. Per-step capacity
+checks supply deterministic processing-time bounds and minimum parallel slots, rather than
+relying on mental arithmetic. These bounds are optimistic and do not prove throughput.
 Unknown equipment costs make BOM assertions unverifiable. Brier scores demonstrate model-based
 consistency scoring; this small demo cannot establish calibration in actual laboratories.
 
@@ -186,10 +190,42 @@ env ANTHROPIC_API_KEY= AMASS_API_KEY= PYTHONPATH=backend \
 
 Tests cover model/tool orchestration, refutation and revision, history replay, secret redaction,
 Amass envelopes and cache, the no-tools benchmark arm, streaming, unknown prices, and a real
-simulator-to-verifier run. Live API authentication was confirmed locally by the user, but the
-new full live evidence/verification/report loop still needs a local demo smoke test.
+simulator-to-verifier run. The live multi-turn gate passed on 2026-10-03; a condensed transcript is saved in
+`demo/live_gate_20261003.json`. It demonstrates orchestration, not physical validation.
 
 Team dependencies: chemistry/FBDD catalog coverage, simulator batch/fan-out/shift/external-step
 semantics, gateway/frontend history and SSE wiring, and benchmark hidden checks/scoring.
 A layout screenshot/PDF remains the frontend's responsibility. Review simulator limitations
 before interpreting any complex workflow. Model-based checks do not validate a physical lab.
+
+## Repeatable live gate
+
+```bash
+PYTHONPATH=backend .venv/bin/python -m labforge.agent.live_gate \
+  --env-file /absolute/path/to/.env --out /tmp/labforge-live-gate
+```
+
+This makes chargeable Claude calls for a fixed baseline, an inflated target, one equipment
+revision, and vendor sensitivity comparison. It writes each transcript/result before advancing,
+then checks completion, refutation, unchanged assumptions and throughput improvement.
+Use `--resume-baseline /path/to/baseline.json` to reuse an already completed baseline.
+A passing gate demonstrates live orchestration under the model, not a buildable physical lab.
+Layout violations must remain visible even when numerical throughput improves.
+
+Max's validation runner now delegates to `labforge.agent.validation_cases.design_from_brief`.
+Only case.brief is sent to Claude; reported costs, notes and sources are withheld. Missing
+credentials, follow-up questions, unsupported catalogs or incomplete planning return no design,
+not a fixture or invented estimate. The current seed briefs omit essential requirements and
+still require catalog expansion and source verification before headline cost validation.
+
+The workbench and game gateway load code once at startup. Restart both after updating the
+branch. For a separate gateway port, use frontend environment `VITE_API=http://127.0.0.1:8001`.
+
+The saved gate produced 47.0 plates/day at baseline and refuted the unchanged design's
+100-plate target. Adding a second handler improved P50 to 93.3 but still missed the target
+and introduced a layout overlap. Both vendor sweeps ran without changing the design.
+Cycle-time sweeps scale entire workflow steps, including all parallel candidates; capacity
+sweeps change only the selected instance. Tool metadata and prompts disclose this distinction.
+The saved vendor response predates that disclosure; interpret its handler gains as step-wide.
+The sensitivity baseline uses 48 hours and 8 replicates, so it differs from the main simulation.
+Amass was unconfigured in this run; all duration estimates remain explicitly unvalidated.
