@@ -24,6 +24,11 @@ def summarise(name, run):
     utilisation = [u for u in sim['utilisation'] if u['instance_id'] in equipment]
     busiest = max(utilisation, key=lambda u: u['busy_fraction'])
     claims = {c['metric']: c for c in output['claims']}
+    required_metrics = {'throughput.p50', 'bom.total_usd', 'layout.violations'}
+    required_claims_pass = not any(
+        claim.get('status') == 'refuted' and claim.get('metric') in required_metrics
+        for claim in output['claims']
+    )
     verified = claims.get('throughput.p50', {}).get('verified_value')
     limits = [f"{len(output['layout'].get('violations', []))} recorded layout violations; physical feasibility is qualified."]
     for metric in ('throughput.p50', 'bom.total_usd'):
@@ -52,7 +57,11 @@ def summarise(name, run):
                           'bom': claims.get('bom.total_usd', {}).get('verified_value'),
                           'claim_status': claims.get('bom.total_usd', {}).get('status'),
                           'basis': 'recorded checked equipment cost; excludes installation, service, consumables and building work'},
-        'gate_passed': run['gate']['passed'], 'limits': limits,
+        # The scenario gate proves orchestration completed. The landing-page gate also
+        # requires the checked throughput, budget and layout assertions to survive the
+        # verifier, so "passed" never sits beside a refuted feasibility claim.
+        'gate_passed': bool(run['gate']['passed'] and required_claims_pass),
+        'limits': limits,
     }
 
 

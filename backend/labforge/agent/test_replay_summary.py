@@ -18,6 +18,9 @@ def test_landing_summary_preserves_recorded_results_and_refutations(name):
         assert summary['headline_throughput'][key] == o['sim_result']['throughput'][key]
     assert summary['headline_throughput']['verified_p50'] == next(c['verified_value'] for c in o['claims'] if c['metric'] == 'throughput.p50')
     assert summary['bottleneck']['instance_id'] in {e['instance_id'] for e in o['workflow']['equipment']}
+    required = {'throughput.p50', 'bom.total_usd', 'layout.violations'}
+    refuted = any(c['metric'] in required and c['status'] == 'refuted' for c in o['claims'])
+    assert summary['gate_passed'] == (record['gate']['passed'] and not refuted)
     for c in o['claims']:
         if c['status'] == 'refuted' and c['metric'] != 'layout.violations':
             assert any(c['statement'] in limit for limit in summary['limits'])
