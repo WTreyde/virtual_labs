@@ -14,3 +14,6 @@ Already working: ring placement around one arm with operator fallback; overlap/o
 
 ## Added after judge feedback (see docs/validation.md)
 7. Vendor what-ifs in `sim/whatif.py` (baseline works: cycle-time and capacity sweeps with elasticity and next bottleneck). Add `transfer_time` and `uptime` sweeps, run sweep points in parallel on Modal, and make the elasticity estimate robust to Monte Carlo noise.
+
+## Added: project prioritisation (see docs/prioritisation.md)
+8. `sim/portfolio.py` baseline works (policies, recommendation, Gantt). Before the freeze: run the recommended and the naive schedule through your Monte Carlo simulator and report both makespans with P10–P90. After: transfer times, operator shifts, search beyond 6 projects.

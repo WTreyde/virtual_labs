@@ -13,6 +13,7 @@ from labforge.bench.runner import load_tasks
 from labforge.catalog.store import search
 from labforge.contracts import load_example
 from labforge.layout.placer import generate_layout
+from labforge.sim.portfolio import prioritise
 from labforge.sim.simulate import simulate
 from labforge.sim.whatif import optimise_instrument
 from labforge.validation.runner import load_cases, run_case
@@ -93,3 +94,13 @@ def optimise(req: DesignRequest):
 @app.get("/validation")
 def validation():
     return [run_case(c) for c in load_cases()]
+
+
+class PortfolioRequest(BaseModel):
+    projects: list[dict]  # [{id, workflow, units, weight?, deadline_h?}]
+    lab_id: str = "lab"
+
+
+@app.post("/prioritise")
+def prioritise_projects(req: PortfolioRequest):
+    return prioritise(req.projects, req.lab_id)

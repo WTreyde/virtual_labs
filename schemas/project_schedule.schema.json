@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "project_schedule.schema.json",
+  "title": "ProjectSchedule",
+  "description": "Which order (or interleaving) to run several projects through one lab so it stays busy and deadlines are met.",
+  "type": "object",
+  "required": ["lab_id", "objective", "candidates", "recommended"],
+  "properties": {
+    "lab_id": { "type": "string" },
+    "objective": { "type": "string", "enum": ["makespan", "weighted_tardiness"] },
+    "candidates": {
+      "description": "Every release policy that was evaluated, best first.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["policy", "makespan_h", "mean_utilisation"],
+        "properties": {
+          "policy": { "type": "string", "description": "sequential, interleave or bottleneck_mix." },
+          "order": { "type": "array", "items": { "type": "string" }, "description": "Project order for sequential policies." },
+          "makespan_h": { "type": "number" },
+          "mean_utilisation": { "type": "number", "description": "Mean busy fraction of the instruments the projects use, over the makespan." },
+          "utilisation": { "type": "object", "additionalProperties": { "type": "number" } },
+          "project_finish_h": { "type": "object", "additionalProperties": { "type": "number" } },
+          "weighted_tardiness_h": { "type": "number" },
+          "deadline_misses": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "recommended": { "type": "string", "description": "Policy label of the best candidate." },
+    "gain_vs_naive": { "type": "number", "description": "Fractional makespan saving of the recommendation over running projects in the order given." },
+    "gantt": {
+      "description": "Recommended schedule, for the UI (capped length).",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["project", "unit", "step", "instance", "start_s", "end_s"],
+        "properties": {
+          "project": { "type": "string" }, "unit": { "type": "integer" }, "step": { "type": "string" },
+          "instance": { "type": "string" }, "start_s": { "type": "number" }, "end_s": { "type": "number" }
+        }
+      }
+    },
+    "caveat": { "type": "string", "description": "What this schedule ignores (e.g. uses mean durations; confirm with the Monte Carlo simulator)." }
+  }
+}
