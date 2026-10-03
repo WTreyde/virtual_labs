@@ -1,12 +1,12 @@
 {
  "task_id": "enzyme_infeasible",
  "arm": "platform",
- "message": "**This can't be done as specified.** No catalog design reaches 500 plates/day within $50k and a 3 \u00d7 2 m room. The best design I could fit within budget simulates at about **17 plates/day**, and its layout still has a safety violation.\n\n## Assumptions (you didn't specify these)\n- **Hours:** 24 h/day, with 3 technicians on 8 h shifts. Their labour cost isn't in the equipment cost.\n- **Hazards:** biosafety level 1 (lowest), no other hazards.\n- **Steps:** plate in \u2192 30 min liquid handling per plate \u2192 1 h incubation per plate \u2192 plate out. No reader, sealing or analysis, since you didn't ask for them.\n- **Plate moves are by hand.** The cheapest robot arm (UR5e, about $39k) doesn't fit in the budget alongside a liquid handler and an incubator.\n\n## Why 500 plates/day is impossible\n- **Liquid handling:** 500 plates \u00d7 1,800 s = 900,000 s of handler time per day. One handler running 24 h gives 86,400 s. So you'd need at least **11 liquid handlers**, and one alone tops out at about **48 plates/day**.\n- **Incubation:** needs at least 21 plates in the incubator at once. That's easy with one incubator.\n- **Cost:** 11 of the cheapest handler (OT-2) cost about $175k before any incubator.\n- **Space:** 11 handlers wouldn't fit in 6 m\u00b2.\n\nOnly a much shorter liquid-handling step would change this.\n\n## Best design within budget (`enzyme_screen_small_wf_v1`)\n\n| Item | Catalog ID | Est. price |\n|---|---|---|\n| Plate hotel, 20 slots | `generic_plate_hotel` | $1,486 (placeholder price) |\n| Liquid handler | `opentrons_ot2` | $15,950 (base price; pipettes and modules cost extra) |\n| Incubator, 12 plate positions | `infors_multitron_pro` | $25,000 (estimate) |\n| **Total** | | **$42,436** (checked as within the $50k budget) |\n\nThe OT-2 plus the Multitron is the only handler-and-incubator pair in the catalog under $50k. Two OT-2s, or any automated plate incubator (about $40k\u201345k), would go over budget.\n\nThe 30-minute step is longer than the catalog's estimate for the OT-2 (20 minutes), so I used your 30 minutes.\n\n## Results (simulation only, not measured)\n- **Throughput:** P10 15.9, P50 16.8, P90 17.0 plates/day. The chance of reaching 500 plates/day is 0.\n- **Independent check:** it gave a P50 of **11.2 plates/day**, lower than the simulation. It reset the Multitron to its catalog incubation time of 12 h instead of your 1 h. The 16.8 figure is therefore not independently confirmed; the real answer under these models is about 11\u201317 plates/day.\n- **Why it's below the 48 plates/day limit:** the handler was busy only 34% of the time and plates waited in queues. My guess is that manual transfers and staff hours hold it back, but the simulation didn't confirm the cause.\n- **Layout:** I initially claimed the layout had no violations. The check refuted that, and I withdraw it. The Multitron (1.07 \u00d7 0.86 m plus clearance) leaves no 1 m walkway from the door to where someone works at the incubator. Because of this, I can't say the design is feasible even at about 17 plates/day.\n\n## Why I stopped without another revision\nThe layout problem can't be fixed within budget. The only cheaper incubator is the same Multitron that blocks the walkway, and the compact incubators cost $40k\u201345k. Removing incubation would break your protocol.\n\n## To make this work, change one of these:\n1. **Bigger budget and room:** about 11 handlers plus an incubator, an arm and storage, roughly $300k\u2013$500k+ and a much larger room.\n2. **Shorter liquid-handling step:** for example, a 96-channel handler doing a plate in a few minutes. The Hamilton STAR's catalog estimate is 5 min per plate, but it costs about $247k. Both the time and the price are estimates, and the time needs checking for your assay.\n3. **Lower target:** about 10\u201317 plates/day on this setup once the walkway is fixed, or at most about 48 with an arm and full-time running.\n\nThe report shows all of the above, including both throughput figures, the withdrawn layout claim and every assumption. No literature evidence was used, and all durations are your values or estimates. Nothing here is measured performance or a safety certification.",
+ "message": "# Enzyme screening lab: 500 plates/day in 3 \u00d7 2 m on USD 50,000 can't be done\n\n**This can't be done with the catalog equipment.** The best design that stays within budget reaches about **17 plates/day** in the simulation, against a target of 500. That's roughly 3% of the target, and there's no supported change that closes the gap.\n\n## Assumptions I had to make (you didn't specify these)\n- **Hours:** runs 24 hours a day.\n- **Safety:** biosafety level 1, no hazards declared.\n- **Steps:** only the two steps you gave are modelled: a 30-minute liquid-handling step per plate, then 1 hour of incubation per plate. Each plate starts and ends in a plate hotel. No reading, sealing or other steps.\n- **Staff:** 3 technicians on 8-hour shifts move plates by hand, because no robot arm fits the budget. This is generous to the design; fewer staff would make it worse.\n- **Room:** door at the middle of the 3 m wall (x = 0, y = 1 m), no areas off-limits.\n\n## Why the budget rules out a normal automated setup\n- The cheapest liquid handler in the catalog is the **Opentrons OT-2, about $15,950**. The cheapest robot-accessible plate incubator is the **LiCONiC STX44, about $40,000**. Together that's about $55,950, over budget before adding any robot arm. The cheapest arm is the PF400 at about $30,000, and that figure is an estimate.\n- So the only design under $50,000 is:\n\n| Item | Est. price |\n|---|---|\n| Generic 20-slot plate hotel (price is a placeholder) | $1,486 |\n| Opentrons OT-2 (base price) | $15,950 |\n| Infors Multitron Pro (shaking incubator) | $25,000 |\n| **Total (confirmed by the checking tool)** | **$42,436** |\n\n- The Multitron isn't designed for robot plate handling and has to be loaded by hand. Its 12 plate positions are an estimate.\n- Your 1-hour incubation replaces the catalog's 12-hour figure. That figure is an estimate for overnight cell culture, not a minimum the instrument requires.\n\n## Simulation results\n- **Planning simulation:** median (P50) 17.0 plates/day; P10 15.8; P90 18.0. In none of the simulated runs did the design reach 500.\n- **Independent check:** median 15 plates/day. The two numbers come from separate model runs. The 17 hasn't been confirmed independently.\n- **Upper limit from liquid handling:** even with one OT-2 running nonstop, the most it could do is **48 plates/day**. Reaching 500 would need at least **11 liquid handlers** in parallel.\n- **Why it falls short of even 48:** the OT-2 is busy only about 34% of the time, and plates wait about 4,700 s on average to reach it. The model didn't name a single cause. My reading is that moving plates by hand between instruments slows the flow, but that's an interpretation, not a model result.\n- **Incubation:** 500 plates a day for 1 hour each needs about 21 incubator positions. The Multitron has 12.\n- **Layout problem:** there's no 1 m walkway from the door to the incubator. The layout as placed fails a basic access check in a 6 m\u00b2 room.\n\n## Checked claims\n- \"The median meets 500 plates/day\": **wrong**; the check found 15.\n- \"Cost is within $50,000\": **correct**, at $42,436.\n- \"No layout problems\": **wrong**; there is 1 problem.\n\nSo the design fails on throughput and has a layout problem.\n\n## Why I didn't try a revised design\nA second OT-2 would bring the total to about $58,400, over budget. Every other liquid handler in the catalog costs $250,000 or more. A design that could meet the target would need about 11 liquid handlers, an incubator holding at least 21 plates, and plate transport. That's several hundred thousand dollars at least, and far more floor space than 6 m\u00b2.\n\n## What would make it feasible (any one alone isn't enough)\n- **Lower target:** within these limits, plan on about **15\u201317 plates/day** (simulated, not measured).\n- **Shorter liquid-handling time:** the 30 minutes per plate is the main limit. A much faster bulk dispenser would change the picture, but only if your assay allows it.\n- **More budget and a bigger room:** both would need to grow roughly tenfold, and I'd need to redesign and re-simulate.\n\nAll figures are model predictions using estimated catalog prices and durations, not measured lab performance. Nothing here is a safety certification. A report covering costs, assumptions and the checked claims has been generated, and it matches the figures above.",
  "lab_spec": {
-  "id": "enzyme_screen_small",
-  "name": "Enzyme screening, 500 plates/day brief (budget-constrained best effort)",
+  "id": "enzyme_screen_500",
+  "name": "Enzyme screening 500 plates/day",
   "domain": "biology",
-  "description": "Enzyme screening lab doing 500 x 96-well plates per day in a 3 x 2 m room with a USD 50,000 budget. Each plate needs a 30-minute liquid-handling step and 1 h incubation.",
+  "description": "Enzyme screening lab: 500 x 96-well plates per day, 3 x 2 m room, USD 50,000 budget. Each plate needs a 30-minute liquid-handling step and 1 h incubation.",
   "throughput_target": {
    "value": 500,
    "unit": "plates_per_day",
@@ -38,7 +38,7 @@
   },
   "operators": [
    {
-    "role": "lab_technician",
+    "role": "lab_tech",
     "count": 3,
     "shift_hours": 8,
     "skills": [
@@ -48,31 +48,32 @@
    }
   ],
   "notes": [
-   "ASSUMPTION: 24 h/day operation covered by 3 technicians on 8 h shifts (user gave no hours); labour cost not in BOM.",
-   "ASSUMPTION: BSL-1, no hazards declared by user.",
-   "ASSUMPTION: no readout, sealing or reader requested; not included.",
-   "No robot arm: UR5e (~$39k) cannot fit the budget alongside a liquid handler and incubator, so plate moves are manual by operators."
+   "ASSUMPTION: 24 h/day operation (not provided by user).",
+   "ASSUMPTION: BSL-1, no declared hazards (not provided).",
+   "ASSUMPTION: only liquid handling + incubation modelled; no readout/sealing requested.",
+   "ASSUMPTION: 3 operators x 8 h shifts cover 24 h and move plates by hand (no arm affordable). Optimistic.",
+   "ASSUMPTION: door at x=0, y=1; no keep-out zones."
   ]
  },
  "workflow": {
-  "id": "enzyme_screen_small_wf_v1",
-  "lab_spec_id": "enzyme_screen_small",
+  "id": "enzyme_screen_500_wf_v1",
+  "lab_spec_id": "enzyme_screen_500",
   "labware": "sbs_96",
   "equipment": [
    {
     "instance_id": "hotel_1",
     "catalog_id": "generic_plate_hotel",
-    "rationale": "Cheapest input/output plate storage (20 slots)."
+    "rationale": "Input/output stack for plates; cheapest storage."
    },
    {
     "instance_id": "lh_1",
     "catalog_id": "opentrons_ot2",
-    "rationale": "Cheapest catalog liquid handler ($15,950 base); only one fits the budget with an incubator."
+    "rationale": "Cheapest catalog liquid handler (~$15,950 base); only one fits the budget alongside an incubator."
    },
    {
     "instance_id": "incubator_1",
     "catalog_id": "infors_multitron_pro",
-    "rationale": "Cheapest catalog incubation option (~$25k) that accepts sbs_96; 12 positions is enough for 1 h residence at the achievable rate."
+    "rationale": "Only catalog incubator that fits the remaining budget (~$25,000); 12 plate-position sim capacity (estimate). Not a robot-accessible plate incubator; manual loading."
    }
   ],
   "steps": [
@@ -90,8 +91,8 @@
     }
    },
    {
-    "id": "dispense",
-    "name": "Liquid handling (per plate)",
+    "id": "liquid_handling",
+    "name": "Liquid handling (30 min per plate)",
     "capability": "liquid_handling",
     "candidate_instances": [
      "lh_1"
@@ -100,34 +101,39 @@
     "after": [
      "load"
     ],
-    "duration_uncertainty": {
-     "value": 1800,
-     "low": 1620,
-     "high": 2160,
-     "confidence": "estimated",
-     "source": "agent_estimate"
-    },
     "params": {
      "flow_unit": "sbs_96 plate",
-     "duration_per": "plate",
-     "duration_basis": "User-specified 30 min per plate; exceeds the OT-2 catalog estimate of 1200 s so the catalog floor is respected. Range -10%/+20% is a modelling assumption."
+     "duration_basis": "User-specified 30 min per plate; replaces OT-2 catalog estimate of 1200 s (itself an agent estimate, 600-3600 s)."
+    },
+    "duration_uncertainty": {
+     "value": 1800,
+     "low": 1500,
+     "high": 2400,
+     "confidence": "estimated",
+     "source": "agent_estimate"
     }
    },
    {
     "id": "incubate",
-    "name": "Incubate 1 h (per plate residence)",
+    "name": "Incubate 1 h",
     "capability": "incubation",
     "candidate_instances": [
      "incubator_1"
     ],
     "duration_s": 3600,
     "after": [
-     "dispense"
+     "liquid_handling"
     ],
     "params": {
      "flow_unit": "sbs_96 plate",
-     "duration_per": "plate residence",
-     "duration_basis": "User-specified 1 h incubation."
+     "duration_basis": "User-specified 1 h per plate residence; catalog 43200 s value is an overnight-culture agent estimate, not an instrument floor."
+    },
+    "duration_uncertainty": {
+     "value": 3600,
+     "low": 3600,
+     "high": 3900,
+     "confidence": "estimated",
+     "source": "agent_estimate"
     }
    },
    {
@@ -150,8 +156,8 @@
   ]
  },
  "layout": {
-  "id": "enzyme_screen_small_wf_v1_layout",
-  "workflow_id": "enzyme_screen_small_wf_v1",
+  "id": "enzyme_screen_500_wf_v1_layout",
+  "workflow_id": "enzyme_screen_500_wf_v1",
   "room": {
    "width_m": 3,
    "depth_m": 2,
@@ -188,24 +194,24 @@
   ],
   "operators": [
    {
-    "id": "lab_technician_1",
-    "role": "lab_technician",
+    "id": "lab_tech_1",
+    "role": "lab_tech",
     "home": {
      "x": 0,
      "y": 1
     }
    },
    {
-    "id": "lab_technician_2",
-    "role": "lab_technician",
+    "id": "lab_tech_2",
+    "role": "lab_tech",
     "home": {
      "x": 0,
      "y": 1
     }
    },
    {
-    "id": "lab_technician_3",
-    "role": "lab_technician",
+    "id": "lab_tech_3",
+    "role": "lab_tech",
     "home": {
      "x": 0,
      "y": 1
@@ -216,7 +222,7 @@
    {
     "from_instance": "hotel_1",
     "to_instance": "lh_1",
-    "transporter_instance": "lab_technician_1",
+    "transporter_instance": "lab_tech_1",
     "distance_m": 1.66,
     "path": [
      {
@@ -255,7 +261,7 @@
    {
     "from_instance": "lh_1",
     "to_instance": "incubator_1",
-    "transporter_instance": "lab_technician_1",
+    "transporter_instance": "lab_tech_1",
     "distance_m": 1.25,
     "path": [
      {
@@ -284,7 +290,7 @@
    {
     "from_instance": "incubator_1",
     "to_instance": "hotel_1",
-    "transporter_instance": "lab_technician_1",
+    "transporter_instance": "lab_tech_1",
     "distance_m": 2.59,
     "path": [
      {
@@ -340,49 +346,49 @@
   ]
  },
  "sim_result": {
-  "id": "enzyme_screen_small_wf_v1_layout_sim",
-  "layout_id": "enzyme_screen_small_wf_v1_layout",
+  "id": "enzyme_screen_500_wf_v1_layout_sim",
+  "layout_id": "enzyme_screen_500_wf_v1_layout",
   "simulated_hours": 99.0,
   "replicates": 10,
   "throughput": {
-   "value": 16.8,
+   "value": 17.0,
    "unit": "plates_per_day",
    "target": 500,
    "meets_target": false,
-   "p10": 15.9,
-   "p50": 16.8,
-   "p90": 17.0,
+   "p10": 15.8,
+   "p50": 17.0,
+   "p90": 18.0,
    "prob_meets_target": 0.0
   },
-  "cycle_time_s": 64447.3,
+  "cycle_time_s": 54511.6,
   "utilisation": [
    {
     "instance_id": "hotel_1",
     "busy_fraction": 0.0,
-    "mean_queue_wait_s": 2597.9
+    "mean_queue_wait_s": 1425.0
    },
    {
     "instance_id": "lh_1",
-    "busy_fraction": 0.342,
-    "mean_queue_wait_s": 4815.6
+    "busy_fraction": 0.34,
+    "mean_queue_wait_s": 4747.6
    },
    {
     "instance_id": "incubator_1",
-    "busy_fraction": 0.122,
+    "busy_fraction": 0.06,
     "mean_queue_wait_s": 0.0
    },
    {
-    "instance_id": "lab_technician_1",
+    "instance_id": "lab_tech_1",
+    "busy_fraction": 0.011,
+    "mean_queue_wait_s": 0.0
+   },
+   {
+    "instance_id": "lab_tech_2",
     "busy_fraction": 0.01,
     "mean_queue_wait_s": 0.0
    },
    {
-    "instance_id": "lab_technician_2",
-    "busy_fraction": 0.01,
-    "mean_queue_wait_s": 0.0
-   },
-   {
-    "instance_id": "lab_technician_3",
+    "instance_id": "lab_tech_3",
     "busy_fraction": 0.01,
     "mean_queue_wait_s": 0.0
    }
@@ -390,40 +396,3330 @@
   "bottlenecks": [],
   "sensitivity": [
    {
-    "parameter": "dispense.duration_s",
-    "effect": -4.0
+    "parameter": "liquid_handling.duration_s",
+    "effect": -7.3
+   }
+  ],
+  "timeline": [
+   {
+    "t_s": 0,
+    "labware_id": "plate_00001",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
    },
    {
-    "parameter": "incubate.duration_s",
-    "effect": 0.0
+    "t_s": 1.0,
+    "labware_id": "plate_00001",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 1.0,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 1.0,
+    "labware_id": "plate_00001",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 2.0,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 2.0,
+    "labware_id": "plate_00003",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 3.0,
+    "labware_id": "plate_00003",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 3.0,
+    "labware_id": "plate_00004",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 4.0,
+    "labware_id": "plate_00004",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 4.0,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 5.0,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 5.0,
+    "labware_id": "plate_00006",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 6.0,
+    "labware_id": "plate_00006",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 6.0,
+    "labware_id": "plate_00007",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 7.0,
+    "labware_id": "plate_00007",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 7.0,
+    "labware_id": "plate_00008",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 8.0,
+    "labware_id": "plate_00008",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 18.5,
+    "labware_id": "plate_00001",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 18.5,
+    "labware_id": "plate_00001",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 1771.1,
+    "labware_id": "plate_00001",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 1771.1,
+    "labware_id": "plate_00002",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 1771.1,
+    "labware_id": "plate_00009",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 1771.1,
+    "labware_id": "plate_00001",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 1772.1,
+    "labware_id": "plate_00009",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 1788.4,
+    "labware_id": "plate_00002",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 1788.4,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 1789.0,
+    "labware_id": "plate_00001",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 1789.0,
+    "labware_id": "plate_00001",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 3480.4,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 3480.4,
+    "labware_id": "plate_00003",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 3480.4,
+    "labware_id": "plate_00010",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 3480.4,
+    "labware_id": "plate_00002",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 3481.4,
+    "labware_id": "plate_00010",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 3498.2,
+    "labware_id": "plate_00002",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 3498.2,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 3499.0,
+    "labware_id": "plate_00003",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 3499.0,
+    "labware_id": "plate_00003",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 5305.1,
+    "labware_id": "plate_00003",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 5305.1,
+    "labware_id": "plate_00004",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 5305.1,
+    "labware_id": "plate_00011",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 5305.1,
+    "labware_id": "plate_00003",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 5306.1,
+    "labware_id": "plate_00011",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 5322.1,
+    "labware_id": "plate_00003",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 5322.1,
+    "labware_id": "plate_00003",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 5323.7,
+    "labware_id": "plate_00004",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 5323.7,
+    "labware_id": "plate_00004",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 5394.5,
+    "labware_id": "plate_00001",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 5394.5,
+    "labware_id": "plate_00001",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 5412.9,
+    "labware_id": "plate_00001",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 5412.9,
+    "labware_id": "plate_00001",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 5413.9,
+    "labware_id": "plate_00001",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 7046.8,
+    "labware_id": "plate_00004",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 7046.8,
+    "labware_id": "plate_00005",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 7046.8,
+    "labware_id": "plate_00012",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 7046.8,
+    "labware_id": "plate_00004",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 7047.8,
+    "labware_id": "plate_00012",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 7064.4,
+    "labware_id": "plate_00005",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 7064.4,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 7065.3,
+    "labware_id": "plate_00004",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 7065.3,
+    "labware_id": "plate_00004",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 7132.9,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 7132.9,
+    "labware_id": "plate_00002",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 7151.2,
+    "labware_id": "plate_00002",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 7151.2,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 7152.2,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 8872.0,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 8872.0,
+    "labware_id": "plate_00006",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 8872.0,
+    "labware_id": "plate_00013",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 8872.0,
+    "labware_id": "plate_00005",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 8873.0,
+    "labware_id": "plate_00013",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 8889.7,
+    "labware_id": "plate_00006",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 8889.7,
+    "labware_id": "plate_00006",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 8889.7,
+    "labware_id": "plate_00005",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 8889.7,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 9160.6,
+    "labware_id": "plate_00003",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 9160.6,
+    "labware_id": "plate_00003",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 9179.0,
+    "labware_id": "plate_00003",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 9179.0,
+    "labware_id": "plate_00003",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 9180.0,
+    "labware_id": "plate_00003",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 10700.7,
+    "labware_id": "plate_00006",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 10700.7,
+    "labware_id": "plate_00007",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 10700.7,
+    "labware_id": "plate_00014",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 10700.7,
+    "labware_id": "plate_00006",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 10701.7,
+    "labware_id": "plate_00014",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 10718.1,
+    "labware_id": "plate_00006",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 10718.1,
+    "labware_id": "plate_00006",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 10719.6,
+    "labware_id": "plate_00007",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 10719.6,
+    "labware_id": "plate_00007",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 10919.0,
+    "labware_id": "plate_00004",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 10919.0,
+    "labware_id": "plate_00004",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 10939.1,
+    "labware_id": "plate_00004",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 10939.1,
+    "labware_id": "plate_00004",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 10940.1,
+    "labware_id": "plate_00004",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 12422.9,
+    "labware_id": "plate_00007",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 12422.9,
+    "labware_id": "plate_00008",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 12422.9,
+    "labware_id": "plate_00015",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 12422.9,
+    "labware_id": "plate_00007",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 12423.9,
+    "labware_id": "plate_00015",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 12441.2,
+    "labware_id": "plate_00007",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 12441.2,
+    "labware_id": "plate_00007",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 12441.4,
+    "labware_id": "plate_00008",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 12441.4,
+    "labware_id": "plate_00008",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 12441.6,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 12441.6,
+    "labware_id": "plate_00005",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 12459.9,
+    "labware_id": "plate_00005",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 12459.9,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 12460.9,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 14247.4,
+    "labware_id": "plate_00008",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 14247.4,
+    "labware_id": "plate_00009",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 14247.4,
+    "labware_id": "plate_00016",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 14247.4,
+    "labware_id": "plate_00008",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 14248.4,
+    "labware_id": "plate_00016",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 14265.4,
+    "labware_id": "plate_00008",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 14265.4,
+    "labware_id": "plate_00008",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 14265.4,
+    "labware_id": "plate_00009",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 14265.4,
+    "labware_id": "plate_00009",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 14560.0,
+    "labware_id": "plate_00006",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 14560.0,
+    "labware_id": "plate_00006",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 14578.2,
+    "labware_id": "plate_00006",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 14578.2,
+    "labware_id": "plate_00006",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 14579.2,
+    "labware_id": "plate_00006",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 15916.6,
+    "labware_id": "plate_00009",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 15916.6,
+    "labware_id": "plate_00010",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 15916.6,
+    "labware_id": "plate_00017",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 15916.6,
+    "labware_id": "plate_00009",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 15917.6,
+    "labware_id": "plate_00017",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 15933.9,
+    "labware_id": "plate_00010",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 15933.9,
+    "labware_id": "plate_00010",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 15934.4,
+    "labware_id": "plate_00009",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 15934.4,
+    "labware_id": "plate_00009",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 16065.0,
+    "labware_id": "plate_00007",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 16065.0,
+    "labware_id": "plate_00007",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 16083.6,
+    "labware_id": "plate_00007",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 16083.6,
+    "labware_id": "plate_00007",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 16084.6,
+    "labware_id": "plate_00007",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 17606.1,
+    "labware_id": "plate_00010",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 17606.1,
+    "labware_id": "plate_00011",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 17606.1,
+    "labware_id": "plate_00018",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 17606.1,
+    "labware_id": "plate_00010",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 17607.1,
+    "labware_id": "plate_00018",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 17623.4,
+    "labware_id": "plate_00011",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 17623.4,
+    "labware_id": "plate_00011",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 17623.5,
+    "labware_id": "plate_00010",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 17623.5,
+    "labware_id": "plate_00010",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 17904.9,
+    "labware_id": "plate_00008",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 17904.9,
+    "labware_id": "plate_00008",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 17924.7,
+    "labware_id": "plate_00008",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 17924.7,
+    "labware_id": "plate_00008",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 17925.7,
+    "labware_id": "plate_00008",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 19301.4,
+    "labware_id": "plate_00011",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 19301.4,
+    "labware_id": "plate_00012",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 19301.4,
+    "labware_id": "plate_00019",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 19301.4,
+    "labware_id": "plate_00011",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 19302.4,
+    "labware_id": "plate_00019",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 19318.8,
+    "labware_id": "plate_00011",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 19318.8,
+    "labware_id": "plate_00011",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 19320.0,
+    "labware_id": "plate_00012",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 19320.0,
+    "labware_id": "plate_00012",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 19594.2,
+    "labware_id": "plate_00009",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 19594.2,
+    "labware_id": "plate_00009",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 19613.6,
+    "labware_id": "plate_00009",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 19613.6,
+    "labware_id": "plate_00009",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 19614.6,
+    "labware_id": "plate_00009",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 21136.5,
+    "labware_id": "plate_00012",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 21136.5,
+    "labware_id": "plate_00013",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 21136.5,
+    "labware_id": "plate_00020",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 21136.5,
+    "labware_id": "plate_00012",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 21137.5,
+    "labware_id": "plate_00020",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 21153.7,
+    "labware_id": "plate_00012",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 21153.7,
+    "labware_id": "plate_00012",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 21153.9,
+    "labware_id": "plate_00013",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 21153.9,
+    "labware_id": "plate_00013",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 21408.7,
+    "labware_id": "plate_00010",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 21408.7,
+    "labware_id": "plate_00010",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 21427.9,
+    "labware_id": "plate_00010",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 21427.9,
+    "labware_id": "plate_00010",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 21428.9,
+    "labware_id": "plate_00010",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 22873.5,
+    "labware_id": "plate_00013",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 22873.5,
+    "labware_id": "plate_00014",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 22873.5,
+    "labware_id": "plate_00021",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 22873.5,
+    "labware_id": "plate_00013",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 22874.5,
+    "labware_id": "plate_00021",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 22890.5,
+    "labware_id": "plate_00013",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 22890.5,
+    "labware_id": "plate_00013",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 22892.3,
+    "labware_id": "plate_00014",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 22892.3,
+    "labware_id": "plate_00014",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 23092.2,
+    "labware_id": "plate_00011",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 23092.2,
+    "labware_id": "plate_00011",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 23111.9,
+    "labware_id": "plate_00011",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 23111.9,
+    "labware_id": "plate_00011",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 23112.9,
+    "labware_id": "plate_00011",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 24575.0,
+    "labware_id": "plate_00014",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 24575.0,
+    "labware_id": "plate_00015",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 24575.0,
+    "labware_id": "plate_00022",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 24575.0,
+    "labware_id": "plate_00014",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 24576.0,
+    "labware_id": "plate_00022",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 24592.6,
+    "labware_id": "plate_00015",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 24592.6,
+    "labware_id": "plate_00015",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 24592.6,
+    "labware_id": "plate_00014",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 24592.6,
+    "labware_id": "plate_00014",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 24732.0,
+    "labware_id": "plate_00012",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 24732.0,
+    "labware_id": "plate_00012",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 24751.5,
+    "labware_id": "plate_00012",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 24751.5,
+    "labware_id": "plate_00012",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 24752.5,
+    "labware_id": "plate_00012",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 26299.9,
+    "labware_id": "plate_00015",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 26299.9,
+    "labware_id": "plate_00016",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 26299.9,
+    "labware_id": "plate_00023",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 26299.9,
+    "labware_id": "plate_00015",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 26300.9,
+    "labware_id": "plate_00023",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 26317.5,
+    "labware_id": "plate_00015",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 26317.5,
+    "labware_id": "plate_00015",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 26317.8,
+    "labware_id": "plate_00016",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 26317.8,
+    "labware_id": "plate_00016",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 26419.4,
+    "labware_id": "plate_00013",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 26419.4,
+    "labware_id": "plate_00013",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 26438.3,
+    "labware_id": "plate_00013",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 26438.3,
+    "labware_id": "plate_00013",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 26439.3,
+    "labware_id": "plate_00013",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 28006.9,
+    "labware_id": "plate_00016",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 28006.9,
+    "labware_id": "plate_00017",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 28006.9,
+    "labware_id": "plate_00024",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 28006.9,
+    "labware_id": "plate_00016",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 28007.9,
+    "labware_id": "plate_00024",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 28024.1,
+    "labware_id": "plate_00016",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 28024.1,
+    "labware_id": "plate_00016",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 28025.5,
+    "labware_id": "plate_00017",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 28025.5,
+    "labware_id": "plate_00017",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 28148.8,
+    "labware_id": "plate_00014",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 28148.8,
+    "labware_id": "plate_00014",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 28167.2,
+    "labware_id": "plate_00014",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 28167.2,
+    "labware_id": "plate_00014",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 28168.2,
+    "labware_id": "plate_00014",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 29835.3,
+    "labware_id": "plate_00017",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 29835.3,
+    "labware_id": "plate_00025",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 29836.3,
+    "labware_id": "plate_00025",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 29977.3,
+    "labware_id": "plate_00015",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 31603.5,
+    "labware_id": "plate_00016",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 86400.0,
+    "labware_id": "plate_00017",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 86400.0,
+    "labware_id": "plate_00015",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 86400.0,
+    "labware_id": "plate_00018",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 86418.2,
+    "labware_id": "plate_00017",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 86418.2,
+    "labware_id": "plate_00017",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 86418.6,
+    "labware_id": "plate_00018",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 86418.6,
+    "labware_id": "plate_00018",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 86419.4,
+    "labware_id": "plate_00015",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 86419.4,
+    "labware_id": "plate_00015",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 86420.4,
+    "labware_id": "plate_00015",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 86420.4,
+    "labware_id": "plate_00016",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 86439.4,
+    "labware_id": "plate_00016",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 86439.4,
+    "labware_id": "plate_00016",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 86440.4,
+    "labware_id": "plate_00016",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 88224.7,
+    "labware_id": "plate_00018",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 88224.7,
+    "labware_id": "plate_00019",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 88224.7,
+    "labware_id": "plate_00026",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 88224.7,
+    "labware_id": "plate_00018",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 88225.7,
+    "labware_id": "plate_00026",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 88241.6,
+    "labware_id": "plate_00018",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 88241.6,
+    "labware_id": "plate_00018",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 88242.3,
+    "labware_id": "plate_00019",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 88242.3,
+    "labware_id": "plate_00019",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 90034.7,
+    "labware_id": "plate_00019",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 90034.7,
+    "labware_id": "plate_00020",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 90034.7,
+    "labware_id": "plate_00027",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 90034.7,
+    "labware_id": "plate_00019",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 90035.7,
+    "labware_id": "plate_00027",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 90052.9,
+    "labware_id": "plate_00020",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 90052.9,
+    "labware_id": "plate_00020",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 90053.0,
+    "labware_id": "plate_00019",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 90053.0,
+    "labware_id": "plate_00019",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 90084.2,
+    "labware_id": "plate_00017",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 90084.2,
+    "labware_id": "plate_00017",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 90102.5,
+    "labware_id": "plate_00017",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 90102.5,
+    "labware_id": "plate_00017",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 90103.5,
+    "labware_id": "plate_00017",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 91769.5,
+    "labware_id": "plate_00020",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 91769.5,
+    "labware_id": "plate_00021",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 91769.5,
+    "labware_id": "plate_00028",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 91769.5,
+    "labware_id": "plate_00020",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 91770.5,
+    "labware_id": "plate_00028",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 91786.7,
+    "labware_id": "plate_00020",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 91786.7,
+    "labware_id": "plate_00020",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 91786.8,
+    "labware_id": "plate_00021",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 91786.8,
+    "labware_id": "plate_00021",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 91947.8,
+    "labware_id": "plate_00018",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 91947.8,
+    "labware_id": "plate_00018",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 91966.1,
+    "labware_id": "plate_00018",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 91966.1,
+    "labware_id": "plate_00018",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 91967.1,
+    "labware_id": "plate_00018",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 93448.8,
+    "labware_id": "plate_00021",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 93448.8,
+    "labware_id": "plate_00022",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 93448.8,
+    "labware_id": "plate_00029",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 93448.8,
+    "labware_id": "plate_00021",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 93449.8,
+    "labware_id": "plate_00029",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 93466.0,
+    "labware_id": "plate_00021",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 93466.0,
+    "labware_id": "plate_00021",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 93467.5,
+    "labware_id": "plate_00022",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 93467.5,
+    "labware_id": "plate_00022",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 93676.8,
+    "labware_id": "plate_00019",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 93676.8,
+    "labware_id": "plate_00019",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 93696.1,
+    "labware_id": "plate_00019",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 93696.1,
+    "labware_id": "plate_00019",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 93697.1,
+    "labware_id": "plate_00019",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 95166.2,
+    "labware_id": "plate_00022",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 95166.2,
+    "labware_id": "plate_00023",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 95166.2,
+    "labware_id": "plate_00030",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 95166.2,
+    "labware_id": "plate_00022",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 95167.2,
+    "labware_id": "plate_00030",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 95184.0,
+    "labware_id": "plate_00023",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 95184.0,
+    "labware_id": "plate_00023",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 95184.5,
+    "labware_id": "plate_00022",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 95184.5,
+    "labware_id": "plate_00022",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 95616.2,
+    "labware_id": "plate_00020",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 95616.2,
+    "labware_id": "plate_00020",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 95635.8,
+    "labware_id": "plate_00020",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 95635.8,
+    "labware_id": "plate_00020",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 95636.8,
+    "labware_id": "plate_00020",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 96836.7,
+    "labware_id": "plate_00023",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 96836.7,
+    "labware_id": "plate_00024",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 96836.7,
+    "labware_id": "plate_00031",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 96836.7,
+    "labware_id": "plate_00023",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 96837.7,
+    "labware_id": "plate_00031",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 96853.7,
+    "labware_id": "plate_00023",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 96853.7,
+    "labware_id": "plate_00023",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 96855.0,
+    "labware_id": "plate_00024",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 96855.0,
+    "labware_id": "plate_00024",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 97134.7,
+    "labware_id": "plate_00021",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 97134.7,
+    "labware_id": "plate_00021",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 97154.3,
+    "labware_id": "plate_00021",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 97154.3,
+    "labware_id": "plate_00021",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 97155.3,
+    "labware_id": "plate_00021",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 98576.8,
+    "labware_id": "plate_00024",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 98576.8,
+    "labware_id": "plate_00025",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 98576.8,
+    "labware_id": "plate_00032",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 98576.8,
+    "labware_id": "plate_00024",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 98577.8,
+    "labware_id": "plate_00032",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 98595.0,
+    "labware_id": "plate_00024",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 98595.0,
+    "labware_id": "plate_00024",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 98595.6,
+    "labware_id": "plate_00025",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 98595.6,
+    "labware_id": "plate_00025",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 98883.9,
+    "labware_id": "plate_00022",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 98883.9,
+    "labware_id": "plate_00022",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 98903.6,
+    "labware_id": "plate_00022",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 98903.6,
+    "labware_id": "plate_00022",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 98904.6,
+    "labware_id": "plate_00022",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 100364.9,
+    "labware_id": "plate_00025",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 100364.9,
+    "labware_id": "plate_00026",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 100364.9,
+    "labware_id": "plate_00033",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 100364.9,
+    "labware_id": "plate_00025",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 100365.9,
+    "labware_id": "plate_00033",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 100382.3,
+    "labware_id": "plate_00026",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 100382.3,
+    "labware_id": "plate_00026",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 100382.6,
+    "labware_id": "plate_00025",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 100382.6,
+    "labware_id": "plate_00025",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 100500.5,
+    "labware_id": "plate_00023",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 100500.5,
+    "labware_id": "plate_00023",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 100518.8,
+    "labware_id": "plate_00023",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 100518.8,
+    "labware_id": "plate_00023",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 100519.8,
+    "labware_id": "plate_00023",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 102199.6,
+    "labware_id": "plate_00026",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 102199.6,
+    "labware_id": "plate_00027",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 102199.6,
+    "labware_id": "plate_00034",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 102199.6,
+    "labware_id": "plate_00026",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 102200.6,
+    "labware_id": "plate_00034",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 102217.3,
+    "labware_id": "plate_00027",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 102217.3,
+    "labware_id": "plate_00027",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 102217.8,
+    "labware_id": "plate_00026",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 102217.8,
+    "labware_id": "plate_00026",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 102474.7,
+    "labware_id": "plate_00024",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 102474.7,
+    "labware_id": "plate_00024",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 102493.5,
+    "labware_id": "plate_00024",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 102493.5,
+    "labware_id": "plate_00024",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 102494.5,
+    "labware_id": "plate_00024",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 104036.4,
+    "labware_id": "plate_00027",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 104036.4,
+    "labware_id": "plate_00028",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 104036.4,
+    "labware_id": "plate_00035",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 104036.4,
+    "labware_id": "plate_00027",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 104037.4,
+    "labware_id": "plate_00035",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 104053.4,
+    "labware_id": "plate_00027",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 104053.4,
+    "labware_id": "plate_00027",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 104055.2,
+    "labware_id": "plate_00028",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 104055.2,
+    "labware_id": "plate_00028",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 104174.9,
+    "labware_id": "plate_00025",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 104174.9,
+    "labware_id": "plate_00025",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 104193.6,
+    "labware_id": "plate_00025",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 104193.6,
+    "labware_id": "plate_00025",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 104194.6,
+    "labware_id": "plate_00025",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 105783.1,
+    "labware_id": "plate_00028",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 105783.1,
+    "labware_id": "plate_00029",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 105783.1,
+    "labware_id": "plate_00036",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 105783.1,
+    "labware_id": "plate_00028",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 105784.1,
+    "labware_id": "plate_00036",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 105801.3,
+    "labware_id": "plate_00028",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 105801.3,
+    "labware_id": "plate_00028",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 105802.0,
+    "labware_id": "plate_00029",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 105802.0,
+    "labware_id": "plate_00029",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 105846.6,
+    "labware_id": "plate_00026",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 105846.6,
+    "labware_id": "plate_00026",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 105865.8,
+    "labware_id": "plate_00026",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 105865.8,
+    "labware_id": "plate_00026",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 105866.8,
+    "labware_id": "plate_00026",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 107502.1,
+    "labware_id": "plate_00029",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 107502.1,
+    "labware_id": "plate_00030",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 107502.1,
+    "labware_id": "plate_00037",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 107502.1,
+    "labware_id": "plate_00029",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 107503.1,
+    "labware_id": "plate_00037",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 107519.5,
+    "labware_id": "plate_00030",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 107519.5,
+    "labware_id": "plate_00030",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 107519.5,
+    "labware_id": "plate_00029",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 107519.5,
+    "labware_id": "plate_00029",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 107777.3,
+    "labware_id": "plate_00027",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 107777.3,
+    "labware_id": "plate_00027",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 107797.2,
+    "labware_id": "plate_00027",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 107797.2,
+    "labware_id": "plate_00027",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 107798.2,
+    "labware_id": "plate_00027",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 109277.8,
+    "labware_id": "plate_00030",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 109277.8,
+    "labware_id": "plate_00031",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 109277.8,
+    "labware_id": "plate_00038",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 109277.8,
+    "labware_id": "plate_00030",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 109278.8,
+    "labware_id": "plate_00038",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 109295.7,
+    "labware_id": "plate_00030",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 109295.7,
+    "labware_id": "plate_00030",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 109296.2,
+    "labware_id": "plate_00031",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 109296.2,
+    "labware_id": "plate_00031",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 109500.6,
+    "labware_id": "plate_00028",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 109500.6,
+    "labware_id": "plate_00028",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 109519.5,
+    "labware_id": "plate_00028",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 109519.5,
+    "labware_id": "plate_00028",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 109520.5,
+    "labware_id": "plate_00028",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 111022.1,
+    "labware_id": "plate_00031",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 111022.1,
+    "labware_id": "plate_00032",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 111022.1,
+    "labware_id": "plate_00039",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 111022.1,
+    "labware_id": "plate_00031",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 111023.1,
+    "labware_id": "plate_00039",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 111040.4,
+    "labware_id": "plate_00031",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 111040.4,
+    "labware_id": "plate_00031",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 111040.6,
+    "labware_id": "plate_00032",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 111040.6,
+    "labware_id": "plate_00032",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 111411.0,
+    "labware_id": "plate_00029",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 111411.0,
+    "labware_id": "plate_00029",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 111430.1,
+    "labware_id": "plate_00029",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 111430.1,
+    "labware_id": "plate_00029",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 111431.1,
+    "labware_id": "plate_00029",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 112767.1,
+    "labware_id": "plate_00032",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 112767.1,
+    "labware_id": "plate_00033",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 112767.1,
+    "labware_id": "plate_00040",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 112767.1,
+    "labware_id": "plate_00032",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 112768.1,
+    "labware_id": "plate_00040",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 112785.0,
+    "labware_id": "plate_00032",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 112785.0,
+    "labware_id": "plate_00032",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 112785.1,
+    "labware_id": "plate_00033",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 112785.1,
+    "labware_id": "plate_00033",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 113133.2,
+    "labware_id": "plate_00030",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 113133.2,
+    "labware_id": "plate_00030",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 113152.2,
+    "labware_id": "plate_00030",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 113152.2,
+    "labware_id": "plate_00030",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 113153.2,
+    "labware_id": "plate_00030",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 114441.3,
+    "labware_id": "plate_00033",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 114441.3,
+    "labware_id": "plate_00034",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 114441.3,
+    "labware_id": "plate_00041",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 114441.3,
+    "labware_id": "plate_00033",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 114442.3,
+    "labware_id": "plate_00041",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 114458.8,
+    "labware_id": "plate_00033",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 114458.8,
+    "labware_id": "plate_00033",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 114459.3,
+    "labware_id": "plate_00034",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 114459.3,
+    "labware_id": "plate_00034",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 114573.7,
+    "labware_id": "plate_00031",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 114573.7,
+    "labware_id": "plate_00031",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 114592.3,
+    "labware_id": "plate_00031",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 114592.3,
+    "labware_id": "plate_00031",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 114593.3,
+    "labware_id": "plate_00031",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 116214.3,
+    "labware_id": "plate_00034",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 116214.3,
+    "labware_id": "plate_00042",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 116215.3,
+    "labware_id": "plate_00042",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 116458.1,
+    "labware_id": "plate_00032",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 118033.4,
+    "labware_id": "plate_00033",
+    "event": "step_end",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 172800.0,
+    "labware_id": "plate_00034",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 172800.0,
+    "labware_id": "plate_00032",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 172800.0,
+    "labware_id": "plate_00035",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 172817.5,
+    "labware_id": "plate_00035",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 172817.5,
+    "labware_id": "plate_00035",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 172818.0,
+    "labware_id": "plate_00034",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 172818.0,
+    "labware_id": "plate_00034",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 172819.4,
+    "labware_id": "plate_00032",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 172819.4,
+    "labware_id": "plate_00032",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 172820.4,
+    "labware_id": "plate_00032",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 172820.4,
+    "labware_id": "plate_00033",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 172839.2,
+    "labware_id": "plate_00033",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_1"
+   },
+   {
+    "t_s": 172839.2,
+    "labware_id": "plate_00033",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 172840.2,
+    "labware_id": "plate_00033",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "unload"
+   },
+   {
+    "t_s": 174473.5,
+    "labware_id": "plate_00035",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 174473.5,
+    "labware_id": "plate_00036",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 174473.5,
+    "labware_id": "plate_00043",
+    "event": "step_start",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 174473.5,
+    "labware_id": "plate_00035",
+    "event": "transfer_start",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 174474.5,
+    "labware_id": "plate_00043",
+    "event": "step_end",
+    "instance_id": "hotel_1",
+    "step_id": "load"
+   },
+   {
+    "t_s": 174491.4,
+    "labware_id": "plate_00035",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_3"
+   },
+   {
+    "t_s": 174491.4,
+    "labware_id": "plate_00035",
+    "event": "step_start",
+    "instance_id": "incubator_1",
+    "step_id": "incubate"
+   },
+   {
+    "t_s": 174492.5,
+    "labware_id": "plate_00036",
+    "event": "transfer_end",
+    "instance_id": "lab_tech_2"
+   },
+   {
+    "t_s": 174492.5,
+    "labware_id": "plate_00036",
+    "event": "step_start",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
+   },
+   {
+    "t_s": 176270.5,
+    "labware_id": "plate_00036",
+    "event": "step_end",
+    "instance_id": "lh_1",
+    "step_id": "liquid_handling"
    }
   ]
  },
  "claims": [
   {
-   "id": "c_tput",
-   "statement": "Simulated P50 throughput does not reach the 500 plates/day target",
+   "id": "c1",
+   "statement": "Simulated P50 throughput meets the 500 plates/day target",
    "metric": "throughput.p50",
-   "comparator": "<=",
+   "comparator": ">=",
    "predicted_value": 500,
-   "confidence": 0.98,
-   "status": "supported",
-   "verified_value": 11.2,
-   "verifier_note": "throughput.p50 = 11.2, recomputed by the verifier with catalog durations restored for incubate."
+   "confidence": 0.02,
+   "status": "refuted",
+   "verified_value": 15.0,
+   "verifier_note": "throughput.p50 = 15, recomputed by the verifier."
   },
   {
-   "id": "c_budget",
+   "id": "c2",
    "statement": "BOM total is within the USD 50,000 budget",
    "metric": "bom.total_usd",
    "comparator": "<=",
    "predicted_value": 50000,
-   "confidence": 0.8,
+   "confidence": 0.85,
    "status": "supported",
    "verified_value": 42436.0,
-   "verifier_note": "bom.total_usd = 42436, recomputed by the verifier with catalog durations restored for incubate."
+   "verifier_note": "bom.total_usd = 42436, recomputed by the verifier."
   },
   {
-   "id": "c_layout",
+   "id": "c3",
    "statement": "Layout has zero violations",
    "metric": "layout.violations",
    "comparator": "==",
@@ -431,11 +3727,13 @@
    "confidence": 0.05,
    "status": "refuted",
    "verified_value": 1.0,
-   "verifier_note": "layout.violations = 1, recomputed by the verifier with catalog durations restored for incubate."
+   "verifier_note": "layout.violations = 1, recomputed by the verifier."
   }
  ],
  "follow_up_used": true,
- "first_reply": "I haven't run a simulation yet. Your operating hours and hazards aren't stated, and I don't want to guess them. But the catalog numbers already show that **this brief can't be met as written**, so it's worth fixing the requirements before I design anything.\n\n## Why 500 plates/day doesn't fit\n\n**Liquid handling is the main limit.** These are upper bounds that assume perfect efficiency, no plate transport and 24 h/day running:\n- Your 30-minute step needs 500 \u00d7 1,800 s = 900,000 s of liquid handler time per day.\n- One handler running 24 h gives 86,400 s, so you'd need **at least 11 liquid handlers** working in parallel. Fewer operating hours would mean more.\n- On a single handler, 500 plates/day would need a cycle of about 2.9 minutes per plate, not 30 minutes.\n- **The most one 30-minute handler can do is about 48 plates/day**, even running 24 h with no gaps.\n\n**Cost.** Cheapest options from the catalog, using base prices that don't include pipettes or modules:\n\n| Item | Catalog ID | Base price |\n|---|---|---|\n| Liquid handler, 30 min per plate (matches your step) | `opentrons_flex` | $24,950 each (configured systems ~$59k\u2013$124k) |\n| Cheaper liquid handler | `opentrons_ot2` | $15,950 each |\n| Incubator, 44 plates | `liconic_stx44` | ~$40,000 (mostly extrapolated, close to a placeholder; a used unit sold for ~$16.4k) |\n\n- 11 Flex units cost about **$274k**. 11 OT-2s cost about **$175k**.\n- Even the smallest possible system (1 OT-2 + 1 incubator) is about $56k, already over $50k. That's before a plate-moving robot arm, plate storage or a plate reader.\n\n**Room size.** One Flex takes 0.87 \u00d7 0.69 m plus 0.2 m clearance on each side. Eleven of them would cover more floor than your whole 6 m\u00b2 room, before any space to walk or move plates.\n\n**Incubation isn't the problem.** 500 plates \u00d7 1 h means about 21 plates in the incubator at any time, on average. One 44-slot incubator is enough.\n\n## What I need from you\n\n1. **Operating hours per day:** 24 h unattended, or staffed shifts (how many hours, how many operators)?\n2. **Hazards:** biohazard / biosafety level, toxic reagents, flammable solvents, or none?\n3. **Which requirement can change?** For example:\n   - **(a) Lower the target to fit $50k and 3 \u00d7 2 m:** at most about 48 plates/day as an upper bound, and probably only with a cheaper or manual incubation setup. I'd simulate this to get a realistic figure.\n   - **(b) Keep 500 plates/day and raise the budget and room:** roughly \u2265$300k\u2013$500k+ and a much larger room.\n   - **(c) Shorten the liquid-handling step:** for example, a 96-channel head running in minutes per plate. That's an assumption I'd only model if you confirm it suits your assay.\n4. **Readout and storage:** do you need a plate reader (absorbance or fluorescence?), plate sealing, and input/output plate storage? These add cost and space.\n\nOnce you answer, I'll build the layout, run the throughput simulation, check the design against the target, budget and layout rules, and write up the report.",
+ "first_reply": "Before I design anything, I need a few more details. A quick capacity check also suggests this target will be very hard to meet with this room and budget.\n\n**Questions**\n1. **Operating hours:** Will the lab run 24 hours a day, or for a set shift (for example, 8 or 16 hours)?\n2. **Hazards and biosafety:** What biosafety level is needed? Are there any hazards, such as biohazardous material, toxic reagents or flammable solvents?\n3. **Other steps:** You listed liquid handling and incubation. Does each plate also need a readout (absorbance, fluorescence or luminescence), sealing, or storage on the way in and out? Or should I model only those two steps?\n4. **Operators:** How many people will be available, on what shifts, and how many times a day can someone step in (for example, to restock plates and tips)?\n5. **Door and keep-out areas:** Where is the door in the 3 x 2 m room? Are there areas where equipment can't go?\n\n**Rough capacity check (not a design or simulation yet)**\n- **Liquid handling:** 500 plates \u00d7 1,800 s = 900,000 s of handler time per day. One handler running all 24 hours gives 86,400 s. So you'd need at least **11 liquid-handling slots running in parallel**, all running nonstop. With shorter hours you'd need more.\n- **Incubation:** 500 plates \u00d7 3,600 s = 1,800,000 plate-seconds per day. Over 24 hours, that means about **21 plates in the incubator at once** on average, and more at peak times.\n- **Room size:** Fitting about 11 liquid handlers, an incubator, plate storage and a robot arm in 6 m\u00b2 is very unlikely.\n- **Budget:** USD 50,000 is very unlikely to cover even one or two automated liquid handlers plus an incubator and an arm. I'll check this against catalog prices before giving a firm answer.\n\nThese are best-case numbers for each step on its own. They don't prove the design is feasible or infeasible. Once you answer, I'll search the catalog, build the design and run the throughput simulation.\n\n**If the simulation confirms the shortfall**, it would help to know which you'd consider changing:\n- a lower target (plates per day)\n- more budget\n- a bigger room\n- a shorter liquid-handling step, for example by switching to a faster dispenser. That would only work if it suits your assay.",
  "completed": true,
- "stop_reason": "end_turn"
+ "stop_reason": "end_turn",
+ "answered_at": "2026-10-03T17:16:20+00:00",
+ "model": "claude-opus-5-5"
 }

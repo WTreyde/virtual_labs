@@ -13,6 +13,7 @@ from fastapi.responses import PlainTextResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+from labforge.agent.config import load_env
 from labforge.agent.planner import run_turn
 from labforge.agent.errors import safe_error
 from labforge.agent.streaming import stream_turn
@@ -51,7 +52,18 @@ REPLAY_ONLY_MESSAGE = "Live design is off on this public demo. Open the chemistr
 
 @app.get("/health")
 def health():
-    return {"ok": True, "live_chat": not REPLAY_ONLY}
+    """`live_chat`: the chat routes are on. `api_key_loaded`: the backend process sees an Anthropic key, so the chat
+    runs the real agent; without one it serves the offline worked example. `live_agent_note` says why the agent is off."""
+    load_env()
+    key_loaded = bool(os.environ.get("ANTHROPIC_API_KEY", "").strip())
+    note = None
+    if REPLAY_ONLY:
+        note = REPLAY_ONLY_MESSAGE
+    elif not key_loaded:
+        note = ("Live agent off: no API key loaded. Put ANTHROPIC_API_KEY in the repo-root .env (not backend/.env), "
+                "make sure your shell does not export an empty ANTHROPIC_API_KEY, then restart the backend.")
+    return {"ok": True, "live_chat": not REPLAY_ONLY, "api_key_loaded": key_loaded,
+            "live_agent": key_loaded and not REPLAY_ONLY, "live_agent_note": note}
 
 
 @app.get("/example/{name}")
@@ -128,9 +140,38 @@ def optimise(req: DesignRequest):
     return optimise_instrument(req.lab_spec, req.workflow, lay, req.instance_id)
 
 
+# Agent-designed workflows for cases that only have a brief, produced offline once (never on a page view).
+VALIDATION_DESIGN_DIR = Path(__file__).resolve().parent / "validation" / "designs"
+
+
+def _stored_design(case_id: str) -> dict:
+    """{"workflow": ...} when a design was generated; a file without one records why (e.g. status no_design)."""
+    path = VALIDATION_DESIGN_DIR / f"{case_id}.json"
+    return json.loads(path.read_text()) if path.is_file() else {}
+
+
 @app.get("/validation")
 def validation():
-    return [run_case(c) for c in load_cases()]
+    """Cost every published lab from a stored design. This route never calls the agent: a case without a hand-written
+    or pre-generated workflow comes back as `no_design_yet`, and a case that fails comes back as one `error` row."""
+    rows = []
+    for case in load_cases():
+        try:
+            stored = {} if case.get("workflow") else _stored_design(case["id"])
+            workflow = case.get("workflow") or stored.get("workflow")
+            if workflow is None:
+                rows.append({"id": case["id"], "name": case["name"], "verified": case["verified"],
+                             "includes": case["reported"]["cost"]["includes"], "status": "no_design_yet",
+                             "reason": stored.get("reason") or "No stored design yet; designs are generated offline, never on page load."})
+                continue
+            row = run_case({**case, "workflow": workflow})
+            if stored.get("provenance"):
+                row["design_provenance"] = stored["provenance"]  # agent-made: model, date, commit, cost withheld
+            rows.append(row)
+        except Exception as exc:  # one bad case must not blank the whole tab
+            rows.append({"id": case.get("id"), "name": case.get("name"), "verified": case.get("verified"),
+                         "status": "error", "reason": f"{type(exc).__name__}: {exc}"[:300]})
+    return rows
 
 
 class PortfolioRequest(BaseModel):

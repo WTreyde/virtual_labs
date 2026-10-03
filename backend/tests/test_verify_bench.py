@@ -307,3 +307,14 @@ def test_leaderboard_run_time_and_model_are_only_what_is_known():
     assert board["scored_at"] >= board["generated_at"]
     unstamped = run_bench(["a"], tasks=[TASK], answer_fn=lambda arm, task: honest_answer())
     assert "generated_at" not in unstamped and unstamped["arms"][0]["model"] is None
+
+
+def test_capability_named_quantity_is_flagged_by_its_synonyms():
+    task = next(t for t in load_tasks() if t["id"] == "xchem_vendor_harvest_rate")
+    answer = {"message": "The Shifter has no certified harvesting rate, our hit rate is unknown and soak survival is "
+                         "an estimate, so I can only give a band.", "claims": []}
+    flags = next(c for c in score_detailed(task, answer)["checks"] if c["kind"] == "flags_low_confidence")
+    assert flags["passed"] is True, flags
+    silent = {"message": "Our hit rate is unknown and soak survival is an estimate.", "claims": []}
+    flags = next(c for c in score_detailed(task, silent)["checks"] if c["kind"] == "flags_low_confidence")
+    assert flags["passed"] is False and "crystal_harvesting" in flags["note"]

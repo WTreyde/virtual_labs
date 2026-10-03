@@ -256,11 +256,11 @@ class ValidationAdapterTests(unittest.TestCase):
         case = {'brief': 'Design an enzyme screening lab', 'reported': {'cost': {'value_usd': 99912345}}, 'notes': 'Do not reveal this private answer'}
         with patch.dict(os.environ, {'ANTHROPIC_API_KEY': 'test-only'}), patch('labforge.agent.validation_cases.run_turn', return_value={'completed': True, 'lab_spec': spec, 'workflow': workflow}) as run:
             self.assertEqual(design_from_brief(case), workflow)
-        run.assert_called_once_with([{'role': 'user', 'content': case['brief']}])
+        run.assert_called_once_with([{'role': 'user', 'content': case['brief']}], stream_text=True)
 
     def test_unanswered_requirements_or_offline_access_are_not_fixture_predictions(self):
         from labforge.agent.validation_cases import design_from_brief
-        with patch.dict(os.environ, {'ANTHROPIC_API_KEY': ''}), patch('labforge.agent.validation_cases.run_turn') as run:
+        with patch.dict(os.environ, {'ANTHROPIC_API_KEY': ''}), patch('labforge.agent.validation_cases.load_env'), patch('labforge.agent.validation_cases.run_turn') as run:
             self.assertIsNone(design_from_brief({'brief': 'Incomplete brief'}))
             run.assert_not_called()
         with patch.dict(os.environ, {'ANTHROPIC_API_KEY': 'test-only'}), patch('labforge.agent.validation_cases.run_turn', return_value={'completed': True, 'messages': [{'role': 'assistant', 'content': 'What room size?'}]}):
@@ -284,7 +284,7 @@ class PlannerIntegrationTests(unittest.TestCase):
         sdk = SimpleNamespace(Anthropic=lambda **kw: SimpleNamespace(messages=SimpleNamespace(create=create)))
         events = []
         with patch.dict(sys.modules, {'anthropic': sdk}), patch.dict(os.environ, {'ANTHROPIC_API_KEY': 'test-only'}), patch('labforge.agent.planner.TOOLS', self.tools):
-            out = run_turn([{'role': 'user', 'content': 'design'}], on_event=events.append)
+            out = run_turn([{'role': 'user', 'content': 'design'}], on_event=events.append, stream_text=False)
         self.assertTrue(out['verification_complete'])
         self.assertEqual(out['claims'][0]['status'], 'refuted')
         self.assertIn('refuted', out['report_markdown'])
@@ -301,7 +301,7 @@ class PlannerIntegrationTests(unittest.TestCase):
         sdk = SimpleNamespace(Anthropic=lambda **kw: SimpleNamespace(messages=SimpleNamespace(stream=lambda **kw: stream)))
         events = []
         with patch.dict(sys.modules, {'anthropic': sdk}), patch.dict(os.environ, {'ANTHROPIC_API_KEY': 'test-only'}):
-            out = run_turn([{'role': 'user', 'content': 'hello'}], on_event=events.append, stream_text=True)
+            out = run_turn([{'role': 'user', 'content': 'hello'}], on_event=events.append)
         self.assertEqual(out['messages'][0]['content'], 'Hello')
         self.assertEqual(''.join(e['text'] for e in events if e['type'] == 'text_delta'), 'Hello')
 

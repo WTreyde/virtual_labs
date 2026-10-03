@@ -13,7 +13,7 @@ def design_from_brief(case: dict) -> dict | None:
     if not isinstance(brief, str) or not brief.strip():
         raise ValueError('Validation case needs a nonempty brief')
     # The case's reported costs, notes, sources and verification status are withheld.
-    result = run_turn([{'role': 'user', 'content': brief}])
+    result = run_turn([{'role': 'user', 'content': brief}], stream_text=True)
     if not result.get('completed') or not result.get('lab_spec') or not result.get('workflow'):
         return None  # Missing requirements/catalog coverage must not become fabricated evidence.
     validate_design(result['lab_spec'], result['workflow'])

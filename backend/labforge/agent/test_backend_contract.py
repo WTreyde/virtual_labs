@@ -32,7 +32,7 @@ def test_backend_contract_stops_further_model_calls_and_keeps_proposal(monkeypat
     monkeypatch.setattr('labforge.agent.planner.load_env', lambda: None)
     monkeypatch.setenv('ANTHROPIC_API_KEY', 'test-only')
     monkeypatch.setattr('labforge.agent.planner.TOOLS', {**TOOLS, 'layout_and_simulate': (TOOLS['layout_and_simulate'][0], fail)})
-    out = run_turn([{'role':'user', 'content':'Design a lab'}])
+    out = run_turn([{'role':'user', 'content':'Design a lab'}], stream_text=False)
     assert out['stop_reason'] == 'backend_contract_error'
     assert out['completed'] is False
     assert out['failed_proposal'] == proposal
@@ -50,7 +50,7 @@ def test_empty_provider_refusal_stops_without_retry_or_crash(monkeypatch):
     monkeypatch.setitem(sys.modules, 'anthropic', sdk)
     monkeypatch.setattr('labforge.agent.planner.load_env', lambda: None)
     monkeypatch.setenv('ANTHROPIC_API_KEY', 'test-only')
-    out = run_turn([{'role':'user', 'content':'Plan a lab'}])
+    out = run_turn([{'role':'user', 'content':'Plan a lab'}], stream_text=False)
     assert len(calls) == 1
     assert out['completed'] is False and out['stop_reason'] == 'refusal'
     assert 'API declined' in out['messages'][0]['content']

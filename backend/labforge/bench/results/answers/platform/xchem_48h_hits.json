@@ -1,19 +1,19 @@
 {
  "task_id": "xchem_48h_hits",
  "arm": "platform",
- "message": "# Fragment hit list within 48 hours of soaking: provisional design\n\n**The 48-hour goal is not met in the model.** The design handles the assumed volume easily. But the simulated time from soaking to hit list is about 71\u201377 hours, and I couldn't find a supported equipment change that brings it under 48 hours. I checked the claim \"cycle time \u2264 48 h\" and it came back false, so I'm withdrawing it.\n\nYou couldn't answer my questions, so every number below that isn't cited is my own assumption.\n\n## Assumptions I made\n- **Volume:** 2 soaked 96-drop plates per day, one harvested crystal per drop, so 192 crystals per day.\n- **Scope:**\n  - The design covers fragment dispense \u2192 soak \u2192 harvest \u2192 load into pucks and the dry shipper \u2192 courier \u2192 synchrotron data collection \u2192 analysis.\n  - The earlier steps are out of scope and assumed to happen in an existing facility: protein expression, purification, setting up drops, growing crystals, and imaging plates to pick drops. I left out the Rock Imager for that reason.\n- **The 48-hour clock** starts at fragment dispense and stops when the hit list comes out. It includes shipping and the wait for beamtime.\n- **Synchrotron leg:** courier plus beamtime wait of 24 h (I allowed 12\u201348 h), assuming beamtime is pre-booked. Data collection takes about 3 minutes per crystal, or 48 minutes per 16-pin puck.\n- **Analysis:** 1 hour per puck (0.5\u20134 h).\n- **Soak time:** 2 hours (1\u20134 h).\n- **Room and staff:** a 7 \u00d7 5 m room with a door at (0, 2.5). Two crystallographers on 8-hour shifts. Liquid nitrogen is the only hazard.\n- **Budget:** unknown, so this is a provisional design.\n\n## Harvest rate (Wright et al. 2021, doi:10.1107/S2059798320014114)\n- **Shifter-assisted:** an operator mounting with the Shifter averages 35 s per crystal (103 per hour). For 96 crystals that's 3,360 s, about 56 minutes per plate. I used a range of 1,440 s (240 per hour, the top of the paper's range) to 6,912 s (50 per hour, my own allowance).\n- **Unassisted manual:** 8 crystals per hour, or about 12 hours per plate. This is why I chose the Shifter.\n- **Operator time:** harvesting is modelled as manual, so the operator is occupied for the whole step.\n- **Catalog value not used:** the catalog lists 2 hours per plate for the Shifter, but that figure is a placeholder.\n- **Pucks:** 96 crystals \u00f7 16 pins = 6 pucks per plate.\n\n## Equipment and layout\n| Item | Purpose | Est. USD |\n|---|---|---|\n| Echo 525 (`echo_1`) on a TMC vibration table | Dispenses fragments into the drops. It's the only catalog item that can do soaking. | 246,083 + 6,155 |\n| Bench `soak_bench_1` | Holds plates while they soak. No catalog incubator takes crystallisation plates, so I used a bench to represent the soak time. | 5,530 |\n| Crystal Shifter (`shifter_1`) | Operator harvests and plunge-freezes crystals into pucks | 13,400 (placeholder) |\n| Bench `handling_bench_1` | Operator loads filled pucks into the dry shipper (about 300 s per puck, my estimate) | 5,530 |\n| LN2 storage dewar | Holds pucks before shipping | 2,049 |\n| 4 \u00d7 CX100 dry shippers | Transit containers. Their 12.6-day cold hold time is not used as a step duration. | 4 \u00d7 1,398 |\n| **Total of listed catalog prices** | Excludes installation, building work and consumables | **284,339** |\n\n- **Layout:** the liquid-nitrogen zone (Shifter, dewar, shippers) and the vibration-free zone (Echo) are separated, with no layout violations. Operators carry plates; each move is about 1.4\u20133.5 m and under 20 s.\n- **Gas safety:** the liquid-nitrogen zone needs ventilation and oxygen monitoring. This design is not a safety certification.\n\n## Simulation results (model predictions, not measured)\n| | Result | 48-h goal |\n|---|---|---|\n| Throughput (median) | 576 crystals/day (10th\u201390th percentile: 541\u2013813) | Assumed 192/day target met (probability 1.0 in the model) |\n| Mean soak-to-hit-list time, planning simulation | 255,474 s (about 71 h) | Missed |\n| Mean soak-to-hit-list time, independent re-check | 277,954 s (about 77 h) | Missed |\n\nThe two time figures come from different runs, and neither one gets under 48 hours.\n\n**Why the time runs long:**\n- **Waiting outside the lab:** courier plus beamtime wait is about 24 hours by assumption. Changing the lab layout can't shorten it.\n- **Queues inside the lab:**\n  - Plates wait about 10,900 s on average for the soak bench.\n  - Pucks wait about 2,000 s for the loading bench.\n  - Both crystallographers are 69\u201371% busy on 8-hour shifts, so work stops overnight.\n- **How the simulator feeds plates:** it pushed in about 6 plates per day, not the 2 I assumed. Those queues are partly caused by that overload.\n\n**Change I tried:** I added a second soak bench. It made things worse: about 82 hours, because more plates went in and operators rose to 81\u201384% busy. I went back to the original design. No other equipment change fixes waiting that happens outside the lab or is set by operator shifts.\n\n## What could get you to 48 hours (not modelled or verified)\n1. **Shorten the synchrotron leg.** Book beamtime ahead, use same-day courier, and use unattended data collection. A 24-hour courier plus beamtime wait leaves only about 24 hours for everything else.\n2. **Feed plates in deliberately.** Start 2 plates at the beginning of a shift so they're harvested and loaded into pucks the same day. Use staggered or extended shifts so plates don't sit overnight.\n3. **Process the 6 pucks in parallel** at the synchrotron and in the analysis pipeline, so they don't queue one after another.\n\n## Limitations\n- Most durations are my own estimates. Only the harvest rate comes from a published source.\n- The other papers the search returned (laser tweezers, peak-flow meters and others) aren't relevant and I didn't cite them.\n- The 0.014 accuracy score from the claim check covers only three claims. It doesn't show the model is accurate in practice.\n\nIf you give me your real plates per day, synchrotron and courier times, room size, staffing and budget, I can rerun this.",
+ "message": "# Fragment hit list within 48 h of soaking: provisional lab design\n\n**I can't show that 48 h is achievable, and rearranging the room won't fix it.** The in-lab steps take about 3 h of the window. Shipping, the beamline queue and analysis take about 43 h. No source gave times for those external steps, so they are my estimates. With those estimates, the planned sequence totals about 46 h, a margin of about 2 h, and the external times alone could exceed 48 h. The simulation, which keeps loading plates, gave a mean of about 93\u201395 h from soak to hit list.\n\n## Assumptions (you couldn't confirm any of these)\n- **Room:** 6 m \u00d7 5 m, one door.\n- **Budget:** unknown, so the design is provisional and costs weren't constrained.\n- **Staff:** one crystallographer on an 8 h shift. The model ran 24 h/day.\n- **Runs:** one 96-well crystallisation plate soaked per day, with 48 mount attempts per plate.\n- **Hazards:** cryogens only (LN2 dewar, dry shipper). Biosafety level 1.\n- **Scope:** starts at soaking. Crystal growth and pre-soak imaging/drop selection are treated as upstream, already done, and not modelled. The Rock Imager isn't in the parts list.\n- **Diffraction:** stays an external synchrotron service; no in-house X-ray.\n\n## Design (final version, 0 layout violations)\n| Step | Equipment | Time per run | Basis |\n|---|---|---|---|\n| Fragment soak | Echo 525 on a vibration-isolation table | 900 s per plate (300\u20132,400) | Catalog estimate |\n| Soak period (plate sits, no operator) | Bench 1 | 2 h (0.5\u20134) | My estimate |\n| Harvest and freeze crystals into pucks, operator present throughout | Crystal Shifter | 48 \u00d7 35 s = 1,680 s per plate (720\u20131,728) | Published (Wright et al. 2021) |\n| Move each puck into the LN2 dewar | LN2 dewar | 120 s per puck (30\u2013600) | Catalog placeholder |\n| Load 3 pucks into the charged dry shipper (hands-on) | Bench 2, dry shipper | 900 s per 3 pucks | Catalog placeholder of 300 s per puck. This is handling time, not the shipper's 12.6-day hold time. |\n| Courier to synchrotron | External | 30 min handover plus 24 h transit (12\u201348 h) | My estimate |\n| Data collection | External | 48 \u00d7 180 s (60\u2013360 s each) plus 12 h queue (4\u201372 h) | My estimate |\n| Processing and hit calling, producing the hit list | Computational | 4 h (2\u201312 h) | My estimate |\n\n**Crystal counts:** 48 mount attempts \u00d7 86% success (Wright et al.) \u2248 41 usable crystals per plate, in three 16-pin pucks. Only successful crystals count as output.\n\n**Shifter vs unassisted mounting:**\n- Wright et al. report about 8 crystals/h unassisted by hand (from a survey, including other tasks). That is about 6 h for 48 crystals.\n- With the Shifter the mean is 103/h, about 28 min for 48. The operator is still hands-on the whole time.\n\n**Estimated equipment cost:** $280,145 from catalog estimates (Echo $246k). This excludes installation, service and consumables, and several prices are placeholders.\n\n## Simulation results (model predictions, not measurements)\n- **Throughput:** median 247.7 successful crystals/day (10th\u201390th percentile 206\u2013376), so the 41/day target is met with probability 1.0 in the model. The independent check recomputed a median of 261.4. The checked claims include this, zero layout violations, and a cycle time over 48 h.\n- **One change between runs:** a separate bench for loading the shipper, so plates sitting out their soak no longer block puck handling. Mean cycle time fell from about 149 h to about 93 h (334,826 s). The independent check recomputed 342,522 s (about 95 h).\n- **Why the simulated cycle time is so long:** the model loads plates as fast as it can, about 6\u00d7 the planned rate, so queues build up. That probably overstates latency for one plate a day. However, my ~46 h figure is just adding up the planned times, not a simulated result.\n- **Remaining issues:**\n  - The crystallographer is busy 91% of the shift at the simulated rate.\n  - The Shifter is 5.08 m from the dewar.\n  - The layout tool put Bench 2 outside the cryogen zone.\n\n  Before building, move the dewar and shipper bench next to the Shifter.\n\n## What would actually decide the 48 h\n- An agreed courier transit time and a beamline slot or priority queue booked before soaking.\n- Automated processing and hit calling.\n- Agreed figures for those steps, so they can replace my estimates.\n- An assumed 2-hour soak period, which is the biggest in-lab sensitivity.\n\n## Safety\nLN2 work needs a ventilated cryogen area with O\u2082 monitoring, and the Echo needs a vibration-free spot. This is a design note, not a safety certification.",
  "lab_spec": {
   "id": "xchem_soak_to_hits",
   "name": "Fragment soak-to-hit-list lab (provisional)",
   "domain": "biology",
-  "description": "Optimise the lab layout so we have a fragment hit list within 48 hours of soaking the crystals. PROVISIONAL: user supplied no throughput, room, budget, hours or staffing; all such values are agent assumptions.",
+  "description": "User brief: optimise the lab layout so we have a fragment hit list within 48 hours of soaking the crystals. No further details available; all other requirements are agent assumptions (see notes).",
   "throughput_target": {
-   "value": 192,
+   "value": 41,
    "unit": "crystals_per_day",
    "operating_hours_per_day": 24
   },
   "room": {
-   "width_m": 7,
+   "width_m": 6,
    "depth_m": 5,
    "height_m": 3,
    "doors": [
@@ -38,90 +38,78 @@
    "hazards": [
     "cryogens"
    ],
-   "biosafety_level": 1
+   "biosafety_level": 1,
+   "max_human_interventions_per_day": 4
   },
   "operators": [
    {
     "role": "crystallographer",
-    "count": 2,
+    "count": 1,
     "shift_hours": 8,
     "skills": [
      "crystal_harvesting",
      "cryo_cooling",
-     "manual_bench",
-     "crystal_soaking"
+     "manual_bench"
     ]
    }
   ],
+  "scenario": "fbdd_crystallography",
   "notes": [
-   "ASSUMPTION: 2 soaked 96-drop plates/day, 1 crystal harvested per drop = 192 crystals/day.",
-   "ASSUMPTION: crystals already grown and selected upstream (expression, purification, drop setup, growth and Rock Imager inspection out of scope; existing facility).",
-   "ASSUMPTION: 48 h clock starts at fragment dispense and stops at hit-list output; includes shipping and synchrotron queue.",
-   "Cryogen zone requires ventilation and O2 monitoring; Echo requires vibration-isolated bench.",
-   "Budget unknown: provisional design only."
-  ],
-  "scenario": "fbdd_crystallography"
+   "ASSUMPTION: 6 m x 5 m room, one door; user gave no dimensions.",
+   "ASSUMPTION: budget unknown; provisional design, costs unconstrained.",
+   "ASSUMPTION: one 96-well crystallisation plate soaked per day; 48 mount attempts per plate; 86% mount success (Wright et al. 2021 via catalog provenance) -> ~41 successful crystals/day target.",
+   "ASSUMPTION: crystal growth and pre-soak imaging/drop selection happen upstream, before the 48 h clock starts; not modelled here.",
+   "ASSUMPTION: 1 crystallographer, 8 h shift; operator hand-carries plates/pucks (no robot transporter).",
+   "Hazard: LN2 dewar, Shifter LN2 bath and dry shipper need a ventilated cryogen zone with O2 monitoring. Echo needs a vibration-free location.",
+   "Diffraction is an external synchrotron service; no in-house X-ray.",
+   "Revision 2: dedicated shipper-loading bench so soak residence does not block puck handling."
+  ]
  },
  "workflow": {
-  "id": "xchem_soak_to_hits_wf_v1",
+  "id": "xchem_soak_to_hits_wf_v2",
   "lab_spec_id": "xchem_soak_to_hits",
   "labware": "crystallization_plate_96",
   "equipment": [
    {
     "instance_id": "echo_1",
     "catalog_id": "beckman_echo_525",
-    "rationale": "Only catalog item with crystal_soaking; acoustic fragment transfer into crystallisation drops."
+    "rationale": "Only catalog item with crystal_soaking."
    },
    {
     "instance_id": "vib_table_1",
     "catalog_id": "tmc_vibration_table",
-    "rationale": "Provides vibration-free zone required by the Echo."
+    "rationale": "Vibration-free bench for the Echo."
    },
    {
-    "instance_id": "soak_bench_1",
+    "instance_id": "bench_1",
     "catalog_id": "lab_bench",
-    "rationale": "Passive soak residence holding area (no catalog incubation item accepts crystallisation plates)."
+    "rationale": "Soak residence bench (plates only)."
+   },
+   {
+    "instance_id": "bench_2",
+    "catalog_id": "lab_bench",
+    "rationale": "Dedicated dry-shipper loading bench next to dewar, in cryogen zone."
    },
    {
     "instance_id": "shifter_1",
     "catalog_id": "olt_crystal_shifter",
-    "rationale": "Shifter-assisted manual harvesting and plunge into pucks."
+    "rationale": "Harvesting aid; 35 s per crystal, plunge-cooling included."
    },
    {
-    "instance_id": "handling_bench_1",
-    "catalog_id": "lab_bench",
-    "rationale": "Operator bench for loading filled pucks into the charged dry shipper."
-   },
-   {
-    "instance_id": "ln2_dewar_1",
+    "instance_id": "dewar_1",
     "catalog_id": "ln2_storage_dewar",
-    "rationale": "LN2 puck buffer storage before shipping."
+    "rationale": "Holds filled pucks under LN2 before shipping."
    },
    {
     "instance_id": "shipper_1",
     "catalog_id": "taylor_wharton_cx100",
-    "rationale": "Dry shipper (transit container)."
-   },
-   {
-    "instance_id": "shipper_2",
-    "catalog_id": "taylor_wharton_cx100",
-    "rationale": "Dry shipper (transit container)."
-   },
-   {
-    "instance_id": "shipper_3",
-    "catalog_id": "taylor_wharton_cx100",
-    "rationale": "Dry shipper; rotation while others are in transit."
-   },
-   {
-    "instance_id": "shipper_4",
-    "catalog_id": "taylor_wharton_cx100",
-    "rationale": "Dry shipper; rotation while others are in transit."
+    "rationale": "Dry shipper transit container (placeholder 3 pucks per shipment)."
    }
   ],
   "steps": [
    {
-    "id": "soak_dispense",
-    "name": "Acoustic fragment dispense into drops",
+    "id": "soak",
+    "name": "Acoustic fragment soak of one crystallisation plate",
     "capability": "crystal_soaking",
     "candidate_instances": [
      "echo_1"
@@ -129,117 +117,139 @@
     "duration_s": 900,
     "after": [],
     "mode": "automated",
-    "params": {
-     "flow_unit": "crystallization plate (96 drops)",
-     "duration_per": "plate",
-     "duration_basis": "Catalog estimate for Echo 525 crystal_soaking (agent_estimate in catalog), 300-2400 s."
-    },
     "duration_uncertainty": {
      "value": 900,
      "low": 300,
      "high": 2400,
      "confidence": "estimated",
      "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "crystallization_plate_96",
+     "units_per_run": 1,
+     "duration_basis": "Per plate; catalog Echo crystal_soaking 900 s (catalog agent estimate 300-2400 s). 48 h clock starts here."
     }
    },
    {
     "id": "soak_residence",
-    "name": "Soak residence (passive)",
+    "name": "Soak residence (unattended, plate on bench)",
     "capability": "manual_bench",
     "candidate_instances": [
-     "soak_bench_1"
+     "bench_1"
     ],
     "duration_s": 7200,
     "after": [
-     "soak_dispense"
+     "soak"
     ],
     "mode": "automated",
-    "params": {
-     "flow_unit": "crystallization plate",
-     "duration_per": "plate",
-     "residence_not_handling": true,
-     "duration_basis": "Assumed 2 h soak residence, range 1-4 h; target-dependent, no source retrieved."
-    },
     "duration_uncertainty": {
      "value": 7200,
-     "low": 3600,
+     "low": 1800,
      "high": 14400,
      "confidence": "placeholder",
      "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "crystallization_plate_96",
+     "residence_not_handling": true,
+     "duration_basis": "Assumed soak residence 2 h (0.5-4 h); no operator."
     }
    },
    {
     "id": "harvest",
-    "name": "Shifter-assisted manual harvest and plunge into pucks",
+    "name": "Shifter-assisted manual harvesting and plunge-cooling into pucks",
     "capability": "crystal_harvesting",
     "candidate_instances": [
      "shifter_1"
     ],
-    "duration_s": 3360,
+    "duration_s": 1680,
     "after": [
      "soak_residence"
     ],
     "mode": "manual",
     "operator_role": "crystallographer",
-    "fan_out": 6,
-    "params": {
-     "flow_unit_in": "crystallization plate",
-     "flow_unit_out": "16-pin puck",
-     "crystals_per_plate": 96,
-     "pins_per_puck": 16,
-     "duration_per": "plate (96 crystals)",
-     "duration_basis": "Wright et al. 2021 Shifter mean 35 s/mount (103/h): 96 x 35 s = 3360 s per plate. Low 1440 s = 96 crystals at 240/h (upper abstract rate); high 6912 s = 50/h agent allowance. Unassisted manual baseline 8/h would be 43200 s (12 h) per plate. Catalog placeholder is 7200 s."
-    },
+    "fan_out": 3,
     "duration_uncertainty": {
-     "value": 3360,
-     "low": 1440,
-     "high": 6912,
+     "value": 1680,
+     "low": 720,
+     "high": 1728,
      "confidence": "literature",
      "source": "https://doi.org/10.1107/S2059798320014114"
     },
     "evidence": [
      {
-      "claim": "Shifter mean 35 s per mount (103/h) from 8271 mounts; unassisted manual baseline 8 crystals/h incl. ancillary work.",
+      "claim": "Shifter mean 35 s per mount (103/h), range 100-240 crystals/h (15-36 s); 86% of mounts judged successful.",
       "source": "https://doi.org/10.1107/S2059798320014114",
       "provider": "web"
      }
-    ]
+    ],
+    "params": {
+     "flow_unit_in": "crystallization_plate_96",
+     "flow_unit_out": "puck (16-pin)",
+     "units_per_run": 48,
+     "duration_basis": "48 mount attempts x 35 s/crystal = 1680 s per plate (48x15=720 to 48x36=1728). Operator attends throughout.",
+     "mount_success_fraction": 0.86,
+     "expected_successful_crystals_per_plate": 41.28,
+     "pucks_per_plate": 3
+    }
    },
    {
-    "id": "load_shipper",
-    "name": "Load filled puck into charged dry shipper",
-    "capability": "manual_bench",
+    "id": "puck_to_dewar",
+    "name": "Transfer filled puck to LN2 storage dewar",
+    "capability": "cryo_cooling",
     "candidate_instances": [
-     "handling_bench_1"
+     "dewar_1"
     ],
-    "duration_s": 300,
+    "duration_s": 120,
     "after": [
      "harvest"
     ],
     "mode": "manual",
     "operator_role": "crystallographer",
-    "params": {
-     "flow_unit": "16-pin puck",
-     "duration_per": "puck",
-     "shipper_instances": [
-      "shipper_1",
-      "shipper_2",
-      "shipper_3",
-      "shipper_4"
-     ],
-     "duration_basis": "Operator handling per puck (catalog agent estimate for CX100 handling), 60-900 s. Not the shipper hold time."
-    },
     "duration_uncertainty": {
-     "value": 300,
-     "low": 60,
-     "high": 900,
+     "value": 120,
+     "low": 30,
+     "high": 600,
      "confidence": "placeholder",
      "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "puck",
+     "units_per_run": 1,
+     "duration_basis": "Per puck; catalog dewar cryo_cooling 120 s placeholder."
     }
    },
    {
-    "id": "ship_to_synchrotron",
-    "name": "Courier shipping and beamline queue",
+    "id": "load_shipper",
+    "name": "Load 3 pucks into charged dry shipper (operator-attended)",
+    "capability": "manual_bench",
+    "candidate_instances": [
+     "bench_2"
+    ],
+    "duration_s": 900,
+    "after": [
+     "puck_to_dewar"
+    ],
+    "mode": "manual",
+    "operator_role": "crystallographer",
+    "batch_size": 3,
+    "duration_uncertainty": {
+     "value": 900,
+     "low": 180,
+     "high": 2700,
+     "confidence": "placeholder",
+     "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "puck",
+     "units_per_run": 3,
+     "dry_shipper_instance": "shipper_1",
+     "duration_basis": "3 pucks x 300 s handling (CX100 catalog placeholder 60-900 s per puck). Not hold time."
+    }
+   },
+   {
+    "id": "ship",
+    "name": "Courier dry shipper to synchrotron",
     "capability": "external_service",
     "candidate_instances": [],
     "duration_s": 1800,
@@ -247,86 +257,87 @@
      "load_shipper"
     ],
     "mode": "external",
-    "batch_size": 6,
+    "batch_size": 3,
+    "duration_uncertainty": {
+     "value": 1800,
+     "low": 600,
+     "high": 3600,
+     "confidence": "placeholder",
+     "source": "agent_estimate"
+    },
     "params": {
-     "flow_unit": "dry shipper consignment of 6 pucks (one plate)",
-     "duration_per": "batch of 6 pucks",
+     "flow_unit": "puck",
+     "dry_shipper_instance": "shipper_1",
      "queue_time_s": 86400,
      "queue_time_range_s": [
       43200,
       172800
      ],
-     "shipper_instances": [
-      "shipper_1",
-      "shipper_2",
-      "shipper_3",
-      "shipper_4"
-     ],
-     "duration_basis": "1800 s facility receipt/handling; queue_time_s = assumed 24 h courier + beamline queue (12-48 h). Requires pre-booked beamtime; no source retrieved."
-    },
-    "duration_uncertainty": {
-     "value": 1800,
-     "low": 600,
-     "high": 7200,
-     "confidence": "placeholder",
-     "source": "agent_estimate"
+     "duration_basis": "Handover 30 min; transit 24 h (12-48 h) as queue_time_s. Agent estimate, no source."
     }
    },
    {
     "id": "diffraction",
-    "name": "Synchrotron data collection (external)",
+    "name": "Unattended synchrotron data collection",
     "capability": "external_service",
     "candidate_instances": [],
-    "duration_s": 2880,
+    "duration_s": 8640,
     "after": [
-     "ship_to_synchrotron"
+     "ship"
     ],
     "mode": "external",
-    "params": {
-     "flow_unit": "16-pin puck",
-     "duration_per": "puck (16 crystals)",
-     "duration_basis": "Assumed ~3 min per crystal incl. robot mount/centring: 16 x 180 s; range 90-360 s/crystal. No source retrieved."
-    },
+    "batch_size": 3,
     "duration_uncertainty": {
-     "value": 2880,
-     "low": 1440,
-     "high": 5760,
+     "value": 8640,
+     "low": 2880,
+     "high": 17280,
      "confidence": "placeholder",
      "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "puck",
+     "units_per_run": 48,
+     "queue_time_s": 43200,
+     "queue_time_range_s": [
+      14400,
+      259200
+     ],
+     "duration_basis": "48 pins x 180 s (60-360 s); beamline queue 12 h (4-72 h). Agent estimates."
     }
    },
    {
-    "id": "hit_analysis",
+    "id": "analysis",
     "name": "Auto-processing and hit identification -> hit list",
     "capability": "in_silico",
     "candidate_instances": [],
-    "duration_s": 3600,
+    "duration_s": 14400,
     "after": [
      "diffraction"
     ],
     "mode": "in_silico",
-    "params": {
-     "flow_unit": "16-pin puck",
-     "duration_per": "puck",
-     "count_throughput": true,
-     "units_per_labware": 16,
-     "duration_basis": "Assumed 1 h per puck of datasets for processing/event-map analysis, range 0.5-4 h. No source retrieved."
-    },
+    "batch_size": 3,
     "duration_uncertainty": {
-     "value": 3600,
-     "low": 1800,
-     "high": 14400,
+     "value": 14400,
+     "low": 7200,
+     "high": 43200,
      "confidence": "placeholder",
      "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "puck",
+     "count_throughput": true,
+     "units_per_labware": 13.76,
+     "duration_basis": "4 h (2-12 h) per 3-puck shipment, agent estimate.",
+     "units_note": "16 pins x 0.86 success; counts successful crystals only."
     }
    }
   ]
  },
  "layout": {
-  "id": "xchem_soak_to_hits_wf_v1_layout",
-  "workflow_id": "xchem_soak_to_hits_wf_v1",
+  "id": "xchem_soak_to_hits_wf_v2_layout",
+  "workflow_id": "xchem_soak_to_hits_wf_v2",
   "room": {
-   "width_m": 7,
+   "width_m": 6,
    "depth_m": 5,
    "height_m": 3
   },
@@ -334,53 +345,53 @@
    {
     "instance_id": "echo_1",
     "position": {
-     "x": 4.761,
-     "y": 1.9,
+     "x": 0.581,
+     "y": 3.797,
      "z": 0.9
     },
-    "rotation_deg": 180.0
+    "rotation_deg": 90.0
    },
    {
     "instance_id": "vib_table_1",
     "position": {
-     "x": 4.909,
-     "y": 0.413,
+     "x": 2.095,
+     "y": 1.38,
      "z": 0.0
     },
     "rotation_deg": 180.0
    },
    {
-    "instance_id": "soak_bench_1",
+    "instance_id": "bench_1",
     "position": {
-     "x": 4.793,
-     "y": 3.674,
+     "x": 2.858,
+     "y": 4.212,
      "z": 0.0
     },
     "rotation_deg": 0.0
    },
    {
+    "instance_id": "bench_2",
+    "position": {
+     "x": 5.308,
+     "y": 1.431,
+     "z": 0.0
+    },
+    "rotation_deg": 270.0
+   },
+   {
     "instance_id": "shifter_1",
     "position": {
-     "x": 2.318,
-     "y": 1.682,
+     "x": 3.196,
+     "y": 2.202,
      "z": 0.9
     },
     "rotation_deg": 180.0
    },
    {
-    "instance_id": "handling_bench_1",
+    "instance_id": "dewar_1",
     "position": {
-     "x": 2.356,
-     "y": 3.371,
-     "z": 0.0
-    },
-    "rotation_deg": 0.0
-   },
-   {
-    "instance_id": "ln2_dewar_1",
-    "position": {
-     "x": 1.38,
-     "y": 1.288,
+     "x": 3.521,
+     "y": 1.366,
      "z": 0.0
     },
     "rotation_deg": 180.0
@@ -388,38 +399,11 @@
    {
     "instance_id": "shipper_1",
     "position": {
-     "x": 1.865,
-     "y": 0.628,
+     "x": 3.881,
+     "y": 2.166,
      "z": 0.9
     },
-    "rotation_deg": 180.0
-   },
-   {
-    "instance_id": "shipper_2",
-    "position": {
-     "x": 2.215,
-     "y": 0.603,
-     "z": 0.9
-    },
-    "rotation_deg": 180.0
-   },
-   {
-    "instance_id": "shipper_3",
-    "position": {
-     "x": 2.052,
-     "y": 0.965,
-     "z": 0.9
-    },
-    "rotation_deg": 180.0
-   },
-   {
-    "instance_id": "shipper_4",
-    "position": {
-     "x": 2.386,
-     "y": 0.968,
-     "z": 0.9
-    },
-    "rotation_deg": 180.0
+    "rotation_deg": 270.0
    }
   ],
   "operators": [
@@ -430,153 +414,239 @@
      "x": 0,
      "y": 2.5
     }
-   },
-   {
-    "id": "crystallographer_2",
-    "role": "crystallographer",
-    "home": {
-     "x": 0,
-     "y": 2.5
-    }
    }
   ],
   "transfers": [
    {
     "from_instance": "echo_1",
-    "to_instance": "soak_bench_1",
+    "to_instance": "bench_1",
     "transporter_instance": "crystallographer_1",
-    "distance_m": 1.43,
+    "distance_m": 2.89,
     "path": [
      {
-      "x": 4.761,
-      "y": 2.24,
+      "x": 0.921,
+      "y": 3.797,
       "z": 1.25
      },
      {
-      "x": 4.761,
-      "y": 2.64,
+      "x": 1.321,
+      "y": 3.797,
       "z": 1.0
      },
      {
-      "x": 4.793,
-      "y": 3.674,
+      "x": 1.85,
+      "y": 4.25,
       "z": 1.0
      },
      {
-      "x": 4.793,
-      "y": 3.674,
+      "x": 1.85,
+      "y": 4.85,
+      "z": 1.0
+     },
+     {
+      "x": 2.858,
+      "y": 4.212,
+      "z": 1.0
+     },
+     {
+      "x": 2.858,
+      "y": 4.212,
       "z": 0.9
      }
     ],
-    "est_time_s": 16.4
+    "est_time_s": 17.9
    },
    {
-    "from_instance": "soak_bench_1",
+    "from_instance": "bench_1",
     "to_instance": "shifter_1",
     "transporter_instance": "crystallographer_1",
-    "distance_m": 3.54,
+    "distance_m": 3.8,
     "path": [
      {
-      "x": 4.793,
-      "y": 3.674,
+      "x": 2.858,
+      "y": 4.212,
       "z": 0.9
      },
      {
-      "x": 4.793,
-      "y": 3.674,
+      "x": 2.858,
+      "y": 4.212,
       "z": 1.0
      },
      {
-      "x": 4.45,
-      "y": 3.05,
+      "x": 3.85,
+      "y": 4.85,
       "z": 1.0
      },
      {
-      "x": 4.15,
+      "x": 3.85,
+      "y": 3.55,
+      "z": 1.0
+     },
+     {
+      "x": 3.25,
+      "y": 2.95,
+      "z": 1.0
+     },
+     {
+      "x": 3.196,
+      "y": 2.902,
+      "z": 1.0
+     },
+     {
+      "x": 3.196,
+      "y": 2.502,
+      "z": 1.1
+     }
+    ],
+    "est_time_s": 18.8
+   },
+   {
+    "from_instance": "shifter_1",
+    "to_instance": "dewar_1",
+    "transporter_instance": "crystallographer_1",
+    "distance_m": 5.08,
+    "path": [
+     {
+      "x": 3.196,
+      "y": 2.502,
+      "z": 1.1
+     },
+     {
+      "x": 3.196,
+      "y": 2.902,
+      "z": 1.0
+     },
+     {
+      "x": 3.25,
+      "y": 2.85,
+      "z": 1.0
+     },
+     {
+      "x": 3.35,
+      "y": 2.85,
+      "z": 1.0
+     },
+     {
+      "x": 3.45,
       "y": 2.75,
       "z": 1.0
      },
      {
-      "x": 3.15,
+      "x": 3.75,
       "y": 2.75,
+      "z": 1.0
+     },
+     {
+      "x": 3.95,
+      "y": 2.55,
+      "z": 1.0
+     },
+     {
+      "x": 4.25,
+      "y": 2.55,
+      "z": 1.0
+     },
+     {
+      "x": 4.25,
+      "y": 1.85,
+      "z": 1.0
+     },
+     {
+      "x": 4.05,
+      "y": 1.65,
+      "z": 1.0
+     },
+     {
+      "x": 4.05,
+      "y": 0.85,
       "z": 1.0
      },
      {
       "x": 3.05,
-      "y": 2.65,
+      "y": 0.85,
       "z": 1.0
      },
      {
-      "x": 2.95,
-      "y": 2.65,
+      "x": 3.521,
+      "y": 1.366,
       "z": 1.0
      },
      {
-      "x": 2.85,
-      "y": 2.55,
-      "z": 1.0
-     },
-     {
-      "x": 2.75,
-      "y": 2.55,
-      "z": 1.0
-     },
-     {
-      "x": 2.65,
-      "y": 2.45,
-      "z": 1.0
-     },
-     {
-      "x": 2.55,
-      "y": 2.45,
-      "z": 1.0
-     },
-     {
-      "x": 2.45,
-      "y": 2.35,
-      "z": 1.0
-     },
-     {
-      "x": 2.318,
-      "y": 2.382,
-      "z": 1.0
-     },
-     {
-      "x": 2.318,
-      "y": 1.982,
-      "z": 1.1
+      "x": 3.521,
+      "y": 1.366,
+      "z": 0.686
      }
     ],
-    "est_time_s": 18.5
+    "est_time_s": 20.1
    },
    {
-    "from_instance": "shifter_1",
-    "to_instance": "handling_bench_1",
+    "from_instance": "dewar_1",
+    "to_instance": "bench_2",
     "transporter_instance": "crystallographer_1",
-    "distance_m": 1.39,
+    "distance_m": 4.94,
     "path": [
      {
-      "x": 2.318,
-      "y": 1.982,
-      "z": 1.1
+      "x": 3.521,
+      "y": 1.366,
+      "z": 0.686
      },
      {
-      "x": 2.318,
-      "y": 2.382,
+      "x": 3.521,
+      "y": 1.366,
       "z": 1.0
      },
      {
-      "x": 2.356,
-      "y": 3.371,
+      "x": 3.05,
+      "y": 0.85,
       "z": 1.0
      },
      {
-      "x": 2.356,
-      "y": 3.371,
+      "x": 3.15,
+      "y": 0.85,
+      "z": 1.0
+     },
+     {
+      "x": 3.35,
+      "y": 0.65,
+      "z": 1.0
+     },
+     {
+      "x": 4.05,
+      "y": 0.65,
+      "z": 1.0
+     },
+     {
+      "x": 4.15,
+      "y": 0.55,
+      "z": 1.0
+     },
+     {
+      "x": 4.55,
+      "y": 0.55,
+      "z": 1.0
+     },
+     {
+      "x": 4.65,
+      "y": 0.45,
+      "z": 1.0
+     },
+     {
+      "x": 5.95,
+      "y": 0.45,
+      "z": 1.0
+     },
+     {
+      "x": 5.308,
+      "y": 1.431,
+      "z": 1.0
+     },
+     {
+      "x": 5.308,
+      "y": 1.431,
       "z": 0.9
      }
     ],
-    "est_time_s": 16.4
+    "est_time_s": 19.9
    }
   ],
   "zones": [
@@ -584,54 +654,54 @@
     "id": "cryogen_1",
     "kind": "cryogen",
     "min": {
-     "x": 0.841,
-     "y": 0.192
+     "x": 2.596,
+     "y": 0.827
     },
     "max": {
-     "x": 2.918,
-     "y": 2.282
+     "x": 4.292,
+     "y": 2.802
     }
    },
    {
     "id": "vibration_free_1",
     "kind": "vibration_free",
     "min": {
-     "x": 4.192,
-     "y": 1.258
+     "x": 0.0,
+     "y": 3.228
     },
     "max": {
-     "x": 5.33,
-     "y": 2.541
+     "x": 1.222,
+     "y": 4.367
     }
    }
   ],
   "score": {
-   "total_weighted_distance_m": 13.31,
-   "floor_area_used_m2": 4.08
+   "total_weighted_distance_m": 36.74,
+   "floor_area_used_m2": 3.93
   },
   "violations": []
  },
  "sim_result": {
-  "id": "xchem_soak_to_hits_wf_v1_layout_sim",
-  "layout_id": "xchem_soak_to_hits_wf_v1_layout",
-  "simulated_hours": 141.0,
+  "id": "xchem_soak_to_hits_wf_v2_layout_sim",
+  "layout_id": "xchem_soak_to_hits_wf_v2_layout",
+  "simulated_hours": 165.0,
   "replicates": 10,
   "throughput": {
-   "value": 576.0,
+   "value": 247.7,
    "unit": "crystals_per_day",
-   "target": 192,
+   "target": 41,
    "meets_target": true,
-   "p10": 540.8,
-   "p50": 576.0,
-   "p90": 812.8,
+   "p10": 206.4,
+   "p50": 247.7,
+   "p90": 375.6,
    "prob_meets_target": 1.0
   },
-  "cycle_time_s": 255474.4,
+  "cycle_time_s": 334826.3,
   "utilisation": [
    {
     "instance_id": "echo_1",
-    "busy_fraction": 0.068,
-    "mean_queue_wait_s": 291.3
+    "busy_fraction": 0.07,
+    "mean_queue_wait_s": 275.7
    },
    {
     "instance_id": "vib_table_1",
@@ -639,24 +709,24 @@
     "mean_queue_wait_s": 0.0
    },
    {
-    "instance_id": "soak_bench_1",
-    "busy_fraction": 0.359,
-    "mean_queue_wait_s": 10922.5
+    "instance_id": "bench_1",
+    "busy_fraction": 0.342,
+    "mean_queue_wait_s": 11577.0
+   },
+   {
+    "instance_id": "bench_2",
+    "busy_fraction": 0.139,
+    "mean_queue_wait_s": 0.0
    },
    {
     "instance_id": "shifter_1",
-    "busy_fraction": 0.278,
-    "mean_queue_wait_s": 0.0
+    "busy_fraction": 0.104,
+    "mean_queue_wait_s": 2885.8
    },
    {
-    "instance_id": "handling_bench_1",
-    "busy_fraction": 0.088,
-    "mean_queue_wait_s": 1974.7
-   },
-   {
-    "instance_id": "ln2_dewar_1",
-    "busy_fraction": 0.0,
-    "mean_queue_wait_s": 0.0
+    "instance_id": "dewar_1",
+    "busy_fraction": 0.05,
+    "mean_queue_wait_s": 4465.2
    },
    {
     "instance_id": "shipper_1",
@@ -664,28 +734,8 @@
     "mean_queue_wait_s": 0.0
    },
    {
-    "instance_id": "shipper_2",
-    "busy_fraction": 0.0,
-    "mean_queue_wait_s": 0.0
-   },
-   {
-    "instance_id": "shipper_3",
-    "busy_fraction": 0.0,
-    "mean_queue_wait_s": 0.0
-   },
-   {
-    "instance_id": "shipper_4",
-    "busy_fraction": 0.0,
-    "mean_queue_wait_s": 0.0
-   },
-   {
     "instance_id": "crystallographer_1",
-    "busy_fraction": 0.692,
-    "mean_queue_wait_s": 0.0
-   },
-   {
-    "instance_id": "crystallographer_2",
-    "busy_fraction": 0.707,
+    "busy_fraction": 0.91,
     "mean_queue_wait_s": 0.0
    }
   ],
@@ -693,58 +743,3310 @@
    {
     "kind": "operator_capacity",
     "instances": [
-     "crystallographer_2"
+     "crystallographer_1"
+    ],
+    "severity": "high",
+    "message": "crystallographer_1 is busy 91% of their shift; it caps throughput near 272 crystals per day.",
+    "suggestion": "Add a second operator or stagger shifts."
+   },
+   {
+    "kind": "long_transfer",
+    "instances": [
+     "shifter_1",
+     "dewar_1"
     ],
     "severity": "medium",
-    "message": "crystallographer_2 is busy 71% of their shift.",
-    "suggestion": "Add a second operator or stagger shifts."
+    "message": "Labware travels 5.08 m from shifter_1 to dewar_1."
    },
    {
     "kind": "external_queue",
     "instances": [],
     "severity": "low",
-    "message": "External step 'Courier shipping and beamline queue' takes about 24 h of the 71 h cycle; the layout cannot shorten it.",
+    "message": "External step 'Courier dry shipper to synchrotron' takes about 24 h of the 93 h cycle; the layout cannot shorten it.",
     "suggestion": "Batch shipments and book access early; report turnaround as a range."
    }
   ],
   "sensitivity": [
    {
-    "parameter": "harvest.duration_s",
-    "effect": -432.0
+    "parameter": "load_shipper.duration_s",
+    "effect": -178.9
    },
    {
     "parameter": "soak_residence.duration_s",
-    "effect": -256.0
+    "effect": -96.3
    },
    {
-    "parameter": "load_shipper.duration_s",
-    "effect": -96.0
+    "parameter": "puck_to_dewar.duration_s",
+    "effect": -68.8
    },
    {
-    "parameter": "soak_dispense.duration_s",
-    "effect": -32.0
+    "parameter": "harvest.duration_s",
+    "effect": -34.4
    },
    {
     "parameter": "operator_walking_time",
-    "effect": 0.0
+    "effect": 13.8
+   },
+   {
+    "parameter": "soak.duration_s",
+    "effect": -6.9
+   }
+  ],
+  "timeline": [
+   {
+    "t_s": 0,
+    "labware_id": "plate_00001",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 773.5,
+    "labware_id": "plate_00001",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 773.5,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 773.5,
+    "labware_id": "plate_00001",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 791.8,
+    "labware_id": "plate_00001",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 791.8,
+    "labware_id": "plate_00001",
+    "event": "step_start",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 1593.5,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 1593.5,
+    "labware_id": "plate_00003",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 1593.5,
+    "labware_id": "plate_00002",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 1612.2,
+    "labware_id": "plate_00002",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 1612.2,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 2417.0,
+    "labware_id": "plate_00003",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 2417.0,
+    "labware_id": "plate_00004",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 3251.1,
+    "labware_id": "plate_00004",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 3251.1,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 4083.6,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 4083.6,
+    "labware_id": "plate_00006",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 4901.9,
+    "labware_id": "plate_00006",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 4901.9,
+    "labware_id": "plate_00007",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 5697.5,
+    "labware_id": "plate_00007",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 5697.5,
+    "labware_id": "plate_00008",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 6542.5,
+    "labware_id": "plate_00008",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 6542.5,
+    "labware_id": "plate_00009",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 7376.4,
+    "labware_id": "plate_00009",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 8995.7,
+    "labware_id": "plate_00001",
+    "event": "step_end",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 8995.7,
+    "labware_id": "plate_00003",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 8995.7,
+    "labware_id": "plate_00010",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 9015.7,
+    "labware_id": "plate_00003",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 9015.7,
+    "labware_id": "plate_00003",
+    "event": "step_start",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 9015.7,
+    "labware_id": "plate_00001",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 9035.8,
+    "labware_id": "plate_00001",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 9035.8,
+    "labware_id": "plate_00001",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 9776.8,
+    "labware_id": "plate_00010",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 9831.7,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 9831.7,
+    "labware_id": "plate_00011",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 10408.1,
+    "labware_id": "plate_00001",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 10408.1,
+    "labware_id": "plate_00004",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 10426.8,
+    "labware_id": "plate_00004",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 10426.8,
+    "labware_id": "plate_00004",
+    "event": "step_start",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 10426.8,
+    "labware_id": "plate_00002",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 10447.9,
+    "labware_id": "plate_00002",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 10447.9,
+    "labware_id": "plate_00012",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 10470.4,
+    "labware_id": "plate_00012",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 10470.4,
+    "labware_id": "plate_00002",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 10680.4,
+    "labware_id": "plate_00011",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 11949.9,
+    "labware_id": "plate_00002",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 11949.9,
+    "labware_id": "plate_00012",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 12455.5,
+    "labware_id": "plate_00012",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 12455.5,
+    "labware_id": "plate_00013",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 12477.2,
+    "labware_id": "plate_00013",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 12477.2,
+    "labware_id": "plate_00013",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 12991.6,
+    "labware_id": "plate_00013",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 12991.6,
+    "labware_id": "plate_00014",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 13014.3,
+    "labware_id": "plate_00014",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 13014.3,
+    "labware_id": "plate_00012",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 13014.3,
+    "labware_id": "plate_00013",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 13036.6,
+    "labware_id": "plate_00012",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 13036.6,
+    "labware_id": "plate_00013",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 13036.6,
+    "labware_id": "plate_00014",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 13565.6,
+    "labware_id": "plate_00014",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 13565.6,
+    "labware_id": "plate_00012",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 13565.6,
+    "labware_id": "plate_00013",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 14662.1,
+    "labware_id": "plate_00012",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 14662.1,
+    "labware_id": "plate_00013",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 14662.1,
+    "labware_id": "plate_00015",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 14682.9,
+    "labware_id": "plate_00015",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 14682.9,
+    "labware_id": "plate_00015",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 15201.1,
+    "labware_id": "plate_00015",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 15201.1,
+    "labware_id": "plate_00016",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 15223.7,
+    "labware_id": "plate_00016",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 15223.7,
+    "labware_id": "plate_00014",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 15223.7,
+    "labware_id": "plate_00015",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 15244.7,
+    "labware_id": "plate_00014",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 15244.7,
+    "labware_id": "plate_00015",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 15244.7,
+    "labware_id": "plate_00016",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 15788.4,
+    "labware_id": "plate_00016",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 15788.4,
+    "labware_id": "plate_00014",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 15788.4,
+    "labware_id": "plate_00015",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 16974.3,
+    "labware_id": "plate_00014",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 16974.3,
+    "labware_id": "plate_00015",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 16974.3,
+    "labware_id": "plate_00017",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 16974.3,
+    "labware_id": "plate_00012",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 16974.3,
+    "labware_id": "plate_00013",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 16974.3,
+    "labware_id": "plate_00014",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 16995.5,
+    "labware_id": "plate_00017",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 16995.5,
+    "labware_id": "plate_00017",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 17534.4,
+    "labware_id": "plate_00017",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 17534.4,
+    "labware_id": "plate_00016",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 17534.4,
+    "labware_id": "plate_00017",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 17556.6,
+    "labware_id": "plate_00016",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 17556.6,
+    "labware_id": "plate_00017",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 17556.6,
+    "labware_id": "plate_00016",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 17556.6,
+    "labware_id": "plate_00017",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 17766.6,
+    "labware_id": "plate_00003",
+    "event": "step_end",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 17766.6,
+    "labware_id": "plate_00018",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 18560.0,
+    "labware_id": "plate_00018",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 18582.1,
+    "labware_id": "plate_00004",
+    "event": "step_end",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 18582.1,
+    "labware_id": "plate_00019",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 18742.1,
+    "labware_id": "plate_00016",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 18742.1,
+    "labware_id": "plate_00017",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 18742.1,
+    "labware_id": "plate_00005",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 18742.1,
+    "labware_id": "plate_00015",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 18742.1,
+    "labware_id": "plate_00016",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 18742.1,
+    "labware_id": "plate_00017",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 18760.5,
+    "labware_id": "plate_00005",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 18760.5,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 18760.5,
+    "labware_id": "plate_00003",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 18781.1,
+    "labware_id": "plate_00003",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 18781.1,
+    "labware_id": "plate_00006",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 18799.4,
+    "labware_id": "plate_00006",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 18799.4,
+    "labware_id": "plate_00006",
+    "event": "step_start",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 18799.4,
+    "labware_id": "plate_00003",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 19427.0,
+    "labware_id": "plate_00019",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 20193.3,
+    "labware_id": "plate_00003",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 20193.3,
+    "labware_id": "plate_00004",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 20214.0,
+    "labware_id": "plate_00004",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 20214.0,
+    "labware_id": "plate_00020",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 20235.4,
+    "labware_id": "plate_00020",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 20235.4,
+    "labware_id": "plate_00004",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 21589.0,
+    "labware_id": "plate_00004",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 21589.0,
+    "labware_id": "plate_00020",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 22118.9,
+    "labware_id": "plate_00020",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 22118.9,
+    "labware_id": "plate_00021",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 22139.7,
+    "labware_id": "plate_00021",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 22139.7,
+    "labware_id": "plate_00021",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 22659.5,
+    "labware_id": "plate_00021",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 22659.5,
+    "labware_id": "plate_00022",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 22680.6,
+    "labware_id": "plate_00022",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 22680.6,
+    "labware_id": "plate_00020",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 22680.6,
+    "labware_id": "plate_00021",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 22701.0,
+    "labware_id": "plate_00020",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 22701.0,
+    "labware_id": "plate_00021",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 22701.0,
+    "labware_id": "plate_00022",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 23209.3,
+    "labware_id": "plate_00022",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 23209.3,
+    "labware_id": "plate_00020",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 23209.3,
+    "labware_id": "plate_00021",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 24367.5,
+    "labware_id": "plate_00020",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 24367.5,
+    "labware_id": "plate_00021",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 24367.5,
+    "labware_id": "plate_00023",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 24388.8,
+    "labware_id": "plate_00023",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 24388.8,
+    "labware_id": "plate_00023",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 24898.2,
+    "labware_id": "plate_00023",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 24898.2,
+    "labware_id": "plate_00024",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 24920.2,
+    "labware_id": "plate_00024",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 24920.2,
+    "labware_id": "plate_00022",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 24920.2,
+    "labware_id": "plate_00023",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 24942.1,
+    "labware_id": "plate_00022",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 24942.1,
+    "labware_id": "plate_00023",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 24942.1,
+    "labware_id": "plate_00024",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 25489.8,
+    "labware_id": "plate_00024",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 25489.8,
+    "labware_id": "plate_00022",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 25489.8,
+    "labware_id": "plate_00023",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 26667.6,
+    "labware_id": "plate_00022",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 26667.6,
+    "labware_id": "plate_00023",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 26667.6,
+    "labware_id": "plate_00025",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 26667.6,
+    "labware_id": "plate_00020",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 26667.6,
+    "labware_id": "plate_00021",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 26667.6,
+    "labware_id": "plate_00022",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 26688.3,
+    "labware_id": "plate_00025",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 26688.3,
+    "labware_id": "plate_00025",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 26867.8,
+    "labware_id": "plate_00006",
+    "event": "step_end",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 26867.8,
+    "labware_id": "plate_00026",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 27239.7,
+    "labware_id": "plate_00025",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 27239.7,
+    "labware_id": "plate_00007",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 27258.8,
+    "labware_id": "plate_00007",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 27258.8,
+    "labware_id": "plate_00007",
+    "event": "step_start",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 27258.8,
+    "labware_id": "plate_00006",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 27279.1,
+    "labware_id": "plate_00006",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 27279.1,
+    "labware_id": "plate_00024",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 27279.1,
+    "labware_id": "plate_00025",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 27299.7,
+    "labware_id": "plate_00024",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 27299.7,
+    "labware_id": "plate_00025",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 27299.7,
+    "labware_id": "plate_00006",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 27493.7,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 27691.9,
+    "labware_id": "plate_00026",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 27691.9,
+    "labware_id": "plate_00027",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 28506.6,
+    "labware_id": "plate_00027",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 28684.9,
+    "labware_id": "plate_00006",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 28684.9,
+    "labware_id": "plate_00024",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 28684.9,
+    "labware_id": "plate_00025",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 35390.3,
+    "labware_id": "plate_00007",
+    "event": "step_end",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 35390.3,
+    "labware_id": "plate_00031",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 36166.3,
+    "labware_id": "plate_00031",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 87419.4,
+    "labware_id": "plate_00024",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 87419.4,
+    "labware_id": "plate_00025",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 87419.4,
+    "labware_id": "plate_00008",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 87419.4,
+    "labware_id": "plate_00023",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 87419.4,
+    "labware_id": "plate_00024",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 87419.4,
+    "labware_id": "plate_00025",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 87439.3,
+    "labware_id": "plate_00008",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 87439.3,
+    "labware_id": "plate_00008",
+    "event": "step_start",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 87439.3,
+    "labware_id": "plate_00005",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 87458.9,
+    "labware_id": "plate_00005",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 87458.9,
+    "labware_id": "plate_00028",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 87479.5,
+    "labware_id": "plate_00028",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 87479.5,
+    "labware_id": "plate_00009",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 87499.6,
+    "labware_id": "plate_00009",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 87499.6,
+    "labware_id": "plate_00009",
+    "event": "step_start",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 87499.6,
+    "labware_id": "plate_00005",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 88961.3,
+    "labware_id": "plate_00005",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 88961.3,
+    "labware_id": "plate_00028",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 89473.7,
+    "labware_id": "plate_00028",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 89473.7,
+    "labware_id": "plate_00007",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 89493.5,
+    "labware_id": "plate_00007",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 89493.5,
+    "labware_id": "plate_00029",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 89515.7,
+    "labware_id": "plate_00029",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 89515.7,
+    "labware_id": "plate_00007",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 90877.7,
+    "labware_id": "plate_00007",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 90877.7,
+    "labware_id": "plate_00029",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 91415.8,
+    "labware_id": "plate_00029",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 91415.8,
+    "labware_id": "plate_00030",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 91437.2,
+    "labware_id": "plate_00030",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 91437.2,
+    "labware_id": "plate_00028",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 91437.2,
+    "labware_id": "plate_00029",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 91458.6,
+    "labware_id": "plate_00028",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 91458.6,
+    "labware_id": "plate_00029",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 91458.6,
+    "labware_id": "plate_00030",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 91990.7,
+    "labware_id": "plate_00030",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 91990.7,
+    "labware_id": "plate_00028",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 91990.7,
+    "labware_id": "plate_00029",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 93120.4,
+    "labware_id": "plate_00028",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 93120.4,
+    "labware_id": "plate_00029",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 93120.4,
+    "labware_id": "plate_00032",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 93141.4,
+    "labware_id": "plate_00032",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 93141.4,
+    "labware_id": "plate_00032",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 93665.5,
+    "labware_id": "plate_00032",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 93665.5,
+    "labware_id": "plate_00033",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 93686.4,
+    "labware_id": "plate_00033",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 93686.4,
+    "labware_id": "plate_00030",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 93686.4,
+    "labware_id": "plate_00032",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 93706.9,
+    "labware_id": "plate_00030",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 93706.9,
+    "labware_id": "plate_00032",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 93706.9,
+    "labware_id": "plate_00033",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 94247.4,
+    "labware_id": "plate_00033",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 94247.4,
+    "labware_id": "plate_00030",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 94247.4,
+    "labware_id": "plate_00032",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 95358.2,
+    "labware_id": "plate_00030",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 95358.2,
+    "labware_id": "plate_00032",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 95358.2,
+    "labware_id": "plate_00034",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 95358.2,
+    "labware_id": "plate_00028",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 95358.2,
+    "labware_id": "plate_00029",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 95358.2,
+    "labware_id": "plate_00030",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 95379.1,
+    "labware_id": "plate_00034",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 95379.1,
+    "labware_id": "plate_00034",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 95484.1,
+    "labware_id": "plate_00008",
+    "event": "step_end",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 95484.1,
+    "labware_id": "plate_00038",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 95926.6,
+    "labware_id": "plate_00034",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 95926.6,
+    "labware_id": "plate_00010",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 95937.4,
+    "labware_id": "plate_00009",
+    "event": "step_end",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 95946.4,
+    "labware_id": "plate_00010",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 95946.4,
+    "labware_id": "plate_00010",
+    "event": "step_start",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 95946.4,
+    "labware_id": "plate_00008",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 95967.1,
+    "labware_id": "plate_00008",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 95967.1,
+    "labware_id": "plate_00035",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 95989.6,
+    "labware_id": "plate_00035",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 95989.6,
+    "labware_id": "plate_00033",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 95989.6,
+    "labware_id": "plate_00034",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 96010.8,
+    "labware_id": "plate_00033",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 96010.8,
+    "labware_id": "plate_00034",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 96010.8,
+    "labware_id": "plate_00011",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 96029.6,
+    "labware_id": "plate_00011",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 96029.6,
+    "labware_id": "plate_00011",
+    "event": "step_start",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 96029.6,
+    "labware_id": "plate_00008",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 96273.8,
+    "labware_id": "plate_00038",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 96273.8,
+    "labware_id": "plate_00039",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 97050.4,
+    "labware_id": "plate_00039",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 97433.6,
+    "labware_id": "plate_00008",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 97433.6,
+    "labware_id": "plate_00035",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 97939.1,
+    "labware_id": "plate_00035",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 97939.1,
+    "labware_id": "plate_00033",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 97939.1,
+    "labware_id": "plate_00034",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 99032.2,
+    "labware_id": "plate_00033",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 99032.2,
+    "labware_id": "plate_00034",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 99032.2,
+    "labware_id": "plate_00009",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 99032.2,
+    "labware_id": "plate_00032",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 99032.2,
+    "labware_id": "plate_00033",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 99032.2,
+    "labware_id": "plate_00034",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 99052.4,
+    "labware_id": "plate_00009",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 99052.4,
+    "labware_id": "plate_00036",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 99074.7,
+    "labware_id": "plate_00036",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 99074.7,
+    "labware_id": "plate_00009",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 100504.0,
+    "labware_id": "plate_00009",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 100504.0,
+    "labware_id": "plate_00036",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 101025.1,
+    "labware_id": "plate_00036",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 101025.1,
+    "labware_id": "plate_00037",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 101046.2,
+    "labware_id": "plate_00037",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 101046.2,
+    "labware_id": "plate_00035",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 101046.2,
+    "labware_id": "plate_00036",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 101067.6,
+    "labware_id": "plate_00035",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 101067.6,
+    "labware_id": "plate_00036",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 101067.6,
+    "labware_id": "plate_00037",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 101572.0,
+    "labware_id": "plate_00037",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 101572.0,
+    "labware_id": "plate_00035",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 101572.0,
+    "labware_id": "plate_00036",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 102666.3,
+    "labware_id": "plate_00035",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 102666.3,
+    "labware_id": "plate_00036",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 102666.3,
+    "labware_id": "plate_00040",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 102687.3,
+    "labware_id": "plate_00040",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 102687.3,
+    "labware_id": "plate_00040",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 103199.7,
+    "labware_id": "plate_00040",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 103199.7,
+    "labware_id": "plate_00041",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 103222.0,
+    "labware_id": "plate_00041",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 103222.0,
+    "labware_id": "plate_00037",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 103222.0,
+    "labware_id": "plate_00040",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 103242.5,
+    "labware_id": "plate_00037",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 103242.5,
+    "labware_id": "plate_00040",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 103242.5,
+    "labware_id": "plate_00041",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 103747.0,
+    "labware_id": "plate_00041",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 103747.0,
+    "labware_id": "plate_00037",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 103747.0,
+    "labware_id": "plate_00040",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 104156.2,
+    "labware_id": "plate_00012",
+    "event": "step_end",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 104156.2,
+    "labware_id": "plate_00013",
+    "event": "step_end",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 104156.2,
+    "labware_id": "plate_00014",
+    "event": "step_end",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 104156.2,
+    "labware_id": "plate_00012",
+    "event": "step_start",
+    "step_id": "diffraction"
+   },
+   {
+    "t_s": 104156.2,
+    "labware_id": "plate_00013",
+    "event": "step_start",
+    "step_id": "diffraction"
+   },
+   {
+    "t_s": 104156.2,
+    "labware_id": "plate_00014",
+    "event": "step_start",
+    "step_id": "diffraction"
+   },
+   {
+    "t_s": 104522.1,
+    "labware_id": "plate_00011",
+    "event": "step_end",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 104522.1,
+    "labware_id": "plate_00046",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 104559.5,
+    "labware_id": "plate_00010",
+    "event": "step_end",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 104913.2,
+    "labware_id": "plate_00037",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 104913.2,
+    "labware_id": "plate_00040",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 104913.2,
+    "labware_id": "plate_00042",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 104913.2,
+    "labware_id": "plate_00035",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 104913.2,
+    "labware_id": "plate_00036",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 104913.2,
+    "labware_id": "plate_00037",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 104934.5,
+    "labware_id": "plate_00042",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 104934.5,
+    "labware_id": "plate_00018",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 104953.5,
+    "labware_id": "plate_00018",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 104953.5,
+    "labware_id": "plate_00018",
+    "event": "step_start",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 104953.5,
+    "labware_id": "plate_00011",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 104974.3,
+    "labware_id": "plate_00011",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 104974.3,
+    "labware_id": "plate_00019",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 104993.5,
+    "labware_id": "plate_00019",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 104993.5,
+    "labware_id": "plate_00019",
+    "event": "step_start",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 104993.5,
+    "labware_id": "plate_00042",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 105314.2,
+    "labware_id": "plate_00046",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 105314.2,
+    "labware_id": "plate_00047",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 105514.3,
+    "labware_id": "plate_00042",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 105514.3,
+    "labware_id": "plate_00011",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 106100.1,
+    "labware_id": "plate_00047",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 106867.0,
+    "labware_id": "plate_00011",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 106867.0,
+    "labware_id": "plate_00043",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 106888.8,
+    "labware_id": "plate_00043",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 106888.8,
+    "labware_id": "plate_00041",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 106888.8,
+    "labware_id": "plate_00042",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 106909.3,
+    "labware_id": "plate_00041",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 106909.3,
+    "labware_id": "plate_00042",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 106909.3,
+    "labware_id": "plate_00010",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 106929.4,
+    "labware_id": "plate_00010",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 106929.4,
+    "labware_id": "plate_00043",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 107469.2,
+    "labware_id": "plate_00043",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 107469.2,
+    "labware_id": "plate_00041",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 107469.2,
+    "labware_id": "plate_00042",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 108595.0,
+    "labware_id": "plate_00041",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 108595.0,
+    "labware_id": "plate_00042",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 108595.0,
+    "labware_id": "plate_00010",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 108595.0,
+    "labware_id": "plate_00040",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 108595.0,
+    "labware_id": "plate_00041",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 108595.0,
+    "labware_id": "plate_00042",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 109191.7,
+    "labware_id": "plate_00015",
+    "event": "step_end",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 109191.7,
+    "labware_id": "plate_00016",
+    "event": "step_end",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 109191.7,
+    "labware_id": "plate_00017",
+    "event": "step_end",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 109191.7,
+    "labware_id": "plate_00015",
+    "event": "step_start",
+    "step_id": "diffraction"
+   },
+   {
+    "t_s": 109191.7,
+    "labware_id": "plate_00016",
+    "event": "step_start",
+    "step_id": "diffraction"
+   },
+   {
+    "t_s": 109191.7,
+    "labware_id": "plate_00017",
+    "event": "step_start",
+    "step_id": "diffraction"
+   },
+   {
+    "t_s": 110058.2,
+    "labware_id": "plate_00010",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 110058.2,
+    "labware_id": "plate_00044",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 110080.8,
+    "labware_id": "plate_00044",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 110080.8,
+    "labware_id": "plate_00044",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 110617.9,
+    "labware_id": "plate_00044",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 110617.9,
+    "labware_id": "plate_00045",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 110640.1,
+    "labware_id": "plate_00045",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 110640.1,
+    "labware_id": "plate_00043",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 110640.1,
+    "labware_id": "plate_00044",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 110660.6,
+    "labware_id": "plate_00043",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 110660.6,
+    "labware_id": "plate_00044",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 110660.6,
+    "labware_id": "plate_00045",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 111169.9,
+    "labware_id": "plate_00045",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 111169.9,
+    "labware_id": "plate_00043",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 111169.9,
+    "labware_id": "plate_00044",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 112269.6,
+    "labware_id": "plate_00043",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 112269.6,
+    "labware_id": "plate_00044",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 112269.6,
+    "labware_id": "plate_00048",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 112291.3,
+    "labware_id": "plate_00048",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 112291.3,
+    "labware_id": "plate_00048",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 112842.9,
+    "labware_id": "plate_00048",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 112842.9,
+    "labware_id": "plate_00049",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 112865.0,
+    "labware_id": "plate_00049",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 112865.0,
+    "labware_id": "plate_00045",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 112865.0,
+    "labware_id": "plate_00048",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 112887.0,
+    "labware_id": "plate_00045",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 112887.0,
+    "labware_id": "plate_00048",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 112887.0,
+    "labware_id": "plate_00049",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 113392.1,
+    "labware_id": "plate_00049",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 113392.1,
+    "labware_id": "plate_00045",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 113392.1,
+    "labware_id": "plate_00048",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 113499.6,
+    "labware_id": "plate_00018",
+    "event": "step_end",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 113499.6,
+    "labware_id": "plate_00054",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 113716.7,
+    "labware_id": "plate_00019",
+    "event": "step_end",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 114286.9,
+    "labware_id": "plate_00054",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 114286.9,
+    "labware_id": "plate_00055",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 114508.7,
+    "labware_id": "plate_00045",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 114508.7,
+    "labware_id": "plate_00048",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 114508.7,
+    "labware_id": "plate_00050",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 114508.7,
+    "labware_id": "plate_00043",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 114508.7,
+    "labware_id": "plate_00044",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 114508.7,
+    "labware_id": "plate_00045",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 114531.4,
+    "labware_id": "plate_00050",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 114531.4,
+    "labware_id": "plate_00026",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 114551.4,
+    "labware_id": "plate_00026",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 114551.4,
+    "labware_id": "plate_00026",
+    "event": "step_start",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 114551.4,
+    "labware_id": "plate_00018",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 114570.8,
+    "labware_id": "plate_00018",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 114570.8,
+    "labware_id": "plate_00027",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 114589.9,
+    "labware_id": "plate_00027",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 114589.9,
+    "labware_id": "plate_00027",
+    "event": "step_start",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 114589.9,
+    "labware_id": "plate_00050",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 115122.3,
+    "labware_id": "plate_00055",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 115141.0,
+    "labware_id": "plate_00050",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 115141.0,
+    "labware_id": "plate_00018",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 119011.8,
+    "labware_id": "plate_00020",
+    "event": "step_end",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 119011.8,
+    "labware_id": "plate_00021",
+    "event": "step_end",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 119011.8,
+    "labware_id": "plate_00022",
+    "event": "step_end",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 119011.8,
+    "labware_id": "plate_00020",
+    "event": "step_start",
+    "step_id": "diffraction"
+   },
+   {
+    "t_s": 119011.8,
+    "labware_id": "plate_00021",
+    "event": "step_start",
+    "step_id": "diffraction"
+   },
+   {
+    "t_s": 119011.8,
+    "labware_id": "plate_00022",
+    "event": "step_start",
+    "step_id": "diffraction"
+   },
+   {
+    "t_s": 122865.4,
+    "labware_id": "plate_00027",
+    "event": "step_end",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 122865.4,
+    "labware_id": "plate_00056",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 123202.2,
+    "labware_id": "plate_00026",
+    "event": "step_end",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 123702.2,
+    "labware_id": "plate_00056",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 123702.2,
+    "labware_id": "plate_00057",
+    "event": "step_start",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 124539.1,
+    "labware_id": "plate_00057",
+    "event": "step_end",
+    "instance_id": "echo_1",
+    "step_id": "soak"
+   },
+   {
+    "t_s": 162149.1,
+    "labware_id": "plate_00012",
+    "event": "step_end",
+    "step_id": "diffraction"
+   },
+   {
+    "t_s": 162149.1,
+    "labware_id": "plate_00013",
+    "event": "step_end",
+    "step_id": "diffraction"
+   },
+   {
+    "t_s": 162149.1,
+    "labware_id": "plate_00014",
+    "event": "step_end",
+    "step_id": "diffraction"
+   },
+   {
+    "t_s": 162149.1,
+    "labware_id": "plate_00012",
+    "event": "step_start",
+    "step_id": "analysis"
+   },
+   {
+    "t_s": 162149.1,
+    "labware_id": "plate_00013",
+    "event": "step_start",
+    "step_id": "analysis"
+   },
+   {
+    "t_s": 162149.1,
+    "labware_id": "plate_00014",
+    "event": "step_start",
+    "step_id": "analysis"
+   },
+   {
+    "t_s": 170306.4,
+    "labware_id": "plate_00015",
+    "event": "step_end",
+    "step_id": "diffraction"
+   },
+   {
+    "t_s": 170306.4,
+    "labware_id": "plate_00016",
+    "event": "step_end",
+    "step_id": "diffraction"
+   },
+   {
+    "t_s": 170306.4,
+    "labware_id": "plate_00017",
+    "event": "step_end",
+    "step_id": "diffraction"
+   },
+   {
+    "t_s": 170306.4,
+    "labware_id": "plate_00015",
+    "event": "step_start",
+    "step_id": "analysis"
+   },
+   {
+    "t_s": 170306.4,
+    "labware_id": "plate_00016",
+    "event": "step_start",
+    "step_id": "analysis"
+   },
+   {
+    "t_s": 170306.4,
+    "labware_id": "plate_00017",
+    "event": "step_start",
+    "step_id": "analysis"
+   },
+   {
+    "t_s": 174167.2,
+    "labware_id": "plate_00018",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 174167.2,
+    "labware_id": "plate_00051",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 174188.9,
+    "labware_id": "plate_00051",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 174188.9,
+    "labware_id": "plate_00049",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 174188.9,
+    "labware_id": "plate_00050",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 174209.4,
+    "labware_id": "plate_00049",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 174209.4,
+    "labware_id": "plate_00050",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 174209.4,
+    "labware_id": "plate_00031",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 174228.3,
+    "labware_id": "plate_00031",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 174228.3,
+    "labware_id": "plate_00031",
+    "event": "step_start",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 174228.3,
+    "labware_id": "plate_00038",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 174248.5,
+    "labware_id": "plate_00038",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 174248.5,
+    "labware_id": "plate_00038",
+    "event": "step_start",
+    "instance_id": "bench_1",
+    "step_id": "soak_residence"
+   },
+   {
+    "t_s": 174248.5,
+    "labware_id": "plate_00019",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 174269.1,
+    "labware_id": "plate_00019",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 174269.1,
+    "labware_id": "plate_00051",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 174821.2,
+    "labware_id": "plate_00051",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 174821.2,
+    "labware_id": "plate_00049",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 174821.2,
+    "labware_id": "plate_00050",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 174880.7,
+    "labware_id": "plate_00023",
+    "event": "step_end",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 174880.7,
+    "labware_id": "plate_00024",
+    "event": "step_end",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 174880.7,
+    "labware_id": "plate_00025",
+    "event": "step_end",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 174880.7,
+    "labware_id": "plate_00023",
+    "event": "step_start",
+    "step_id": "diffraction"
+   },
+   {
+    "t_s": 174880.7,
+    "labware_id": "plate_00024",
+    "event": "step_start",
+    "step_id": "diffraction"
+   },
+   {
+    "t_s": 174880.7,
+    "labware_id": "plate_00025",
+    "event": "step_start",
+    "step_id": "diffraction"
+   },
+   {
+    "t_s": 175980.6,
+    "labware_id": "plate_00049",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 175980.6,
+    "labware_id": "plate_00050",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 175980.6,
+    "labware_id": "plate_00019",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 175980.6,
+    "labware_id": "plate_00048",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 175980.6,
+    "labware_id": "plate_00049",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 175980.6,
+    "labware_id": "plate_00050",
+    "event": "step_start",
+    "step_id": "ship"
+   },
+   {
+    "t_s": 177427.1,
+    "labware_id": "plate_00019",
+    "event": "step_end",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 177427.1,
+    "labware_id": "plate_00052",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 177448.4,
+    "labware_id": "plate_00052",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 177448.4,
+    "labware_id": "plate_00052",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 177951.6,
+    "labware_id": "plate_00052",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 177951.6,
+    "labware_id": "plate_00053",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 177973.7,
+    "labware_id": "plate_00053",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 177973.7,
+    "labware_id": "plate_00051",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 177973.7,
+    "labware_id": "plate_00052",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 177995.9,
+    "labware_id": "plate_00051",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 177995.9,
+    "labware_id": "plate_00052",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 177995.9,
+    "labware_id": "plate_00027",
+    "event": "transfer_start",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 178016.0,
+    "labware_id": "plate_00027",
+    "event": "transfer_end",
+    "instance_id": "crystallographer_1"
+   },
+   {
+    "t_s": 178016.0,
+    "labware_id": "plate_00053",
+    "event": "step_start",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 178560.9,
+    "labware_id": "plate_00053",
+    "event": "step_end",
+    "instance_id": "dewar_1",
+    "step_id": "puck_to_dewar"
+   },
+   {
+    "t_s": 178560.9,
+    "labware_id": "plate_00051",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 178560.9,
+    "labware_id": "plate_00052",
+    "event": "step_start",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 179651.6,
+    "labware_id": "plate_00051",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 179651.6,
+    "labware_id": "plate_00052",
+    "event": "step_end",
+    "instance_id": "bench_2",
+    "step_id": "load_shipper"
+   },
+   {
+    "t_s": 179651.6,
+    "labware_id": "plate_00027",
+    "event": "step_start",
+    "instance_id": "shifter_1",
+    "step_id": "harvest"
+   },
+   {
+    "t_s": 180634.5,
+    "labware_id": "plate_00020",
+    "event": "step_end",
+    "step_id": "diffraction"
+   },
+   {
+    "t_s": 180634.5,
+    "labware_id": "plate_00021",
+    "event": "step_end",
+    "step_id": "diffraction"
+   },
+   {
+    "t_s": 180634.5,
+    "labware_id": "plate_00022",
+    "event": "step_end",
+    "step_id": "diffraction"
+   },
+   {
+    "t_s": 180634.5,
+    "labware_id": "plate_00020",
+    "event": "step_start",
+    "step_id": "analysis"
+   },
+   {
+    "t_s": 180634.5,
+    "labware_id": "plate_00021",
+    "event": "step_start",
+    "step_id": "analysis"
    }
   ]
  },
  "claims": [
   {
-   "id": "c_throughput",
-   "statement": "Simulated P50 throughput meets the assumed 192 crystals/day target.",
+   "id": "c1",
+   "statement": "Median simulated throughput meets the assumed 41 successful crystals/day target.",
    "metric": "throughput.p50",
    "comparator": ">=",
-   "predicted_value": 192,
-   "confidence": 0.85,
+   "predicted_value": 41,
+   "confidence": 0.9,
    "status": "supported",
-   "verified_value": 576.0,
-   "verifier_note": "throughput.p50 = 576, recomputed by the verifier."
+   "verified_value": 261.4,
+   "verifier_note": "throughput.p50 = 261.4, recomputed by the verifier."
   },
   {
-   "id": "c_layout",
-   "statement": "Layout has zero violations.",
+   "id": "c2",
+   "statement": "The final layout has zero violations.",
    "metric": "layout.violations",
    "comparator": "==",
    "predicted_value": 0,
@@ -754,19 +4056,21 @@
    "verifier_note": "layout.violations = 0, recomputed by the verifier."
   },
   {
-   "id": "c_cycle_48h",
-   "statement": "Mean soak-to-hit-list cycle time is within 48 h (172800 s).",
+   "id": "c3",
+   "statement": "Simulated mean cycle time (soak to hit list) exceeds 48 h (172800 s), so the 48 h target is not shown to be met in this model.",
    "metric": "cycle_time_s",
-   "comparator": "<=",
+   "comparator": ">=",
    "predicted_value": 172800,
-   "confidence": 0.1,
-   "status": "refuted",
-   "verified_value": 277953.8,
-   "verifier_note": "cycle_time_s = 277954, recomputed by the verifier."
+   "confidence": 0.85,
+   "status": "supported",
+   "verified_value": 342522.5,
+   "verifier_note": "cycle_time_s = 342522, recomputed by the verifier."
   }
  ],
  "follow_up_used": true,
- "first_reply": "I need a few details before I design the lab or run a simulation. Without them I'd be making up the requirements.\n\n**What I need from you**\n\n1. **Throughput:** how many crystals do you soak per day, or per campaign? Or give fragments per day, or crystallisation plates per day, and say which unit you mean. Also, about how many crystals do you harvest from each soaked plate?\n2. **The 48-hour window:** does the clock stop when the hit list is out of analysis? Does it include shipping to the synchrotron and waiting for beamtime?\n   - Which synchrotron and shipping arrangement do you use, and what queue time should I assume?\n   - Do you already have beamtime booked?\n\n   Diffraction stays at the synchrotron (I won't add an in-house X-ray machine), so shipping and queue time may take up most of the 48 hours.\n3. **Room:** width and depth in metres, ceiling height, door positions, and any areas where equipment can't go.\n4. **Budget** in USD. If you don't have one yet, I can do a rough design if you say so.\n5. **Operating hours:** hours per day the lab runs, plus how many operators you have, their roles and shift lengths. Harvesting crystals is manual and needs an operator the whole time, even with a Shifter, so staffing will probably set the pace.\n6. **Hazards:** I'm assuming liquid nitrogen and other cryogens, which need ventilation and oxygen monitoring. Are there others, like a biosafety level for protein expression or toxic fragment solvents?\n7. **Scope:**\n   - Does the design cover only soaking to hit list (soak, harvest, cryo-cool, load pucks, ship, collect data, analyse)?\n   - Or should it also include the earlier steps: making the protein, setting up crystallisation plates and growing crystals?\n   - Do you already have equipment I should keep? If so, list it so I can optimise your current layout instead of starting from scratch.\n\n**What I'll do once I have this**\n\n- Search the catalog for equipment.\n- Find published crystal mounting rates for unassisted manual work and for Shifter-assisted work, and convert them using your crystals-per-run number.\n- Place the equipment in the room and run a simulation of the soak-to-hit-list time and throughput.\n- Find the slowest step and suggest one change if it helps, with up to two revisions.\n- Check the timing, budget and layout results, then write you a report.",
+ "first_reply": "I can design and simulate this, but I need some details first so I don't make up requirements.\n\n**What I need from you**\n\n1. **Throughput:** How many crystals do you soak per run or per day (e.g. 32 per run, or 64 crystals/day)? Is a \"hit list\" a list for one soak batch or a daily rate?\n2. **Room:** Width \u00d7 depth in metres, plus door positions and any areas that must stay clear (e.g. near the expression or LN2 zone).\n3. **Budget:** In USD. If you don't have one yet, you can tell me to make a provisional design and I'll mark the costs as unconstrained.\n4. **Working hours and staff:** Hours per day, how many operators, their roles and shift lengths. Harvesting crystals is modelled as hands-on for its whole duration, and the work is 35 s per crystal even with a Shifter. For example, 32 crystals take about 1,120 s of operator time.\n5. **Hazards:** I'll assume cryogens (LN2, dry shipper), so the room needs ventilation and O\u2082 monitoring. Are there others, such as toxic fragment solvents or biohazard from the expression work? What biosafety level?\n6. **Scope:** Does the 48-hour window cover only soak \u2192 harvest \u2192 cryo-cooling and puck loading \u2192 shipping \u2192 diffraction \u2192 analysis? Or should I model the whole pipeline from protein expression, with growth and imaging upstream?\n7. **Synchrotron:** Which facility? What are your typical times for shipping, waiting in the beamline queue, and getting data back? Does analysis happen on-site, remotely or automated?\n\n**Why the 48 hours may not depend on the layout**\n\nDiffraction will be modelled as an external synchrotron service; I won't add an in-house X-ray source. Shipping the dry shipper and waiting for beamtime are likely to take up most of the 48 hours. Those are fixed external waits that rearranging the room can't shorten. So once I have your inputs, the simulation will report two things separately:\n- the in-lab time from soaking to a loaded dry shipper\n- the external wait\n\nThen I'll check the total against 48 h. If shipping and the beamline queue alone are close to 48 h, I'll tell you the target isn't feasible however the lab is laid out, rather than shrinking those waits.\n\nOnce you reply, I'll search the equipment catalog and the Wright mounting-rate evidence, build and simulate the design, check the results against your targets and give you a report.",
  "completed": true,
- "stop_reason": "end_turn"
+ "stop_reason": "end_turn",
+ "answered_at": "2026-10-03T17:19:53+00:00",
+ "model": "claude-opus-5-5"
 }
