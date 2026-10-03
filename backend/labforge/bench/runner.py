@@ -42,22 +42,46 @@ def load_tasks() -> list[dict]:
     return [validate(json.loads(p.read_text()), "bench_task") for p in sorted(TASK_DIR.glob("*.json"))]
 
 
+FOLLOW_UP = ("No more information is available, and nobody can answer questions. State your assumptions and give "
+             "your best design, or say it can't be done and why.")
+
+
+def _ask(arm: str, task: dict) -> dict:
+    """One answer from an arm. Platform: the planner with streaming on (the SDK refuses non-streamed calls this
+    long; agent.benchmark.run_arm does not stream yet). Vanilla: strand C's arm unchanged."""
+    from labforge.agent import benchmark
+    if arm == "platform":
+        from labforge.agent.planner import run_turn
+        from labforge.contracts import validate as check
+        check(task, "bench_task")
+        return run_turn([{"role": "user", "content": task["brief"]}], stream_text=True)  # brief only, never the checks
+    return benchmark.run_arm(arm, task)
+
+
 def run_arm(arm: str, task: dict) -> dict:
-    """Ask strand C's arm for an answer. No credentials means "not run", never a made-up score."""
+    """Ask strand C's arm for an answer. No credentials means "not run", never a made-up score.
+
+    Protocol: if the first answer has no design (typically follow-up questions), the arm gets one identical
+    automatic reply (FOLLOW_UP) in a fresh message that repeats the brief and its own first reply; the
+    second answer is scored. Both arms get exactly the same treatment, and the answer records it."""
     import os
     try:
-        from labforge.agent import benchmark
         from labforge.agent.config import load_env
         load_env()
     except ImportError as e:
-        raise NotImplementedError("labforge.agent.benchmark.run_arm is not available") from e
+        raise NotImplementedError("labforge.agent is not available") from e
     if not os.getenv("ANTHROPIC_API_KEY"):
         raise NotImplementedError("no ANTHROPIC_API_KEY: arms were not run")
     try:
-        raw = benchmark.run_arm(arm, task)
+        first = normalise(_ask(arm, task), arm, task)
+        if first.get("workflow"):
+            return dict(first, follow_up_used=False)
+        second_task = dict(task, brief=f"{task['brief']}\n\nYour previous reply was:\n{first['message']}\n\n{FOLLOW_UP}")
+        second = normalise(_ask(arm, second_task), arm, task)
+        return dict(second, follow_up_used=True, first_reply=first["message"])
     except Exception as e:  # a crash or unparsable JSON is the arm's failure, scored as an empty answer
         raw = {"messages": [{"role": "assistant", "content": f"(arm failed: {type(e).__name__}: {e})"}], "failed": True}
-    return normalise(raw, arm, task)
+        return normalise(raw, arm, task)
 
 
 def normalise(raw: dict, arm: str, task: dict) -> dict:

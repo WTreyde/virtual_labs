@@ -211,3 +211,37 @@ def test_duration_floor_is_compared_per_unit_not_per_plate():
     dodge = _harvest_workflow(1118, 32, counted_per_puck=48)
     assert restore_protected(dodge)[0]["steps"][0]["duration_s"] == 7200
     assert any("counts 96" in f for f in find_tampering(dodge))
+
+
+def test_follow_up_protocol_is_the_same_for_both_arms(monkeypatch):
+    from labforge.bench import runner
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-only")
+    monkeypatch.setattr("labforge.agent.config.load_env", lambda *a, **k: None)
+    briefs = []
+
+    def fake_ask(arm, task):
+        briefs.append((arm, task["brief"]))
+        if "Your previous reply" not in task["brief"]:
+            return {"messages": [{"role": "assistant", "content": "What room size do you have?"}]}
+        return {"messages": [{"role": "assistant", "content": "Assuming 6 x 4 m; it cannot reach 800/day."}],
+                "lab_spec": SPEC, "workflow": WORKFLOW, "claims": []}
+
+    monkeypatch.setattr(runner, "_ask", fake_ask)
+    for arm in ("platform", "vanilla"):
+        ans = runner.run_arm(arm, TASK)
+        assert ans["follow_up_used"] and ans["workflow"] and ans["first_reply"] == "What room size do you have?"
+    second = [b for _, b in briefs if "Your previous reply" in b]
+    assert len(second) == 2 and second[0] == second[1] and runner.FOLLOW_UP in second[0]
+    assert all("checks" not in b and "admits_infeasible" not in b for _, b in briefs)  # never leak the hidden checks
+
+
+def test_protocol_residence_time_is_not_floored_by_the_catalog():
+    # The brief asks for a 1 h incubation; the incubator's catalog figure is a typical hold, not a speed limit.
+    from labforge.catalog.store import load_catalog
+    from labforge.verify.tamper import restore_protected
+    inc = next(i for i, it in load_catalog().items()
+               if (it.get("process") or {}).get("durations_s", {}).get("incubation", 0) > 3600)
+    wf = {"id": "inc_wf", "lab_spec_id": "s", "equipment": [{"instance_id": "inc_1", "catalog_id": inc}],
+          "steps": [{"id": "incubate", "name": "incubate", "capability": "incubation", "candidate_instances": ["inc_1"],
+                     "duration_s": 3600}]}
+    assert restore_protected(wf)[1] == [] and not find_tampering(wf)

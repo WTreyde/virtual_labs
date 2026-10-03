@@ -32,6 +32,11 @@ def fingerprint(catalog_ids: list[str] | None = None) -> str:
 # Catalog durations for these are how long labware can be held (a dry shipper keeps pucks cold for
 # ~12 days), not how long the unit is busy per labware, so they never set a floor on a step.
 HOLD_CAPABILITIES = {"plate_storage", "compound_storage", "cold_storage", "external_service", "in_silico"}
+# Residence times the protocol sets (a 1 h incubation, a 16 h reaction): the catalog figure is a typical
+# use, not a speed limit of the instrument, so it is not a floor either. Changing them is a protocol
+# change that task checks judge, not tampering with catalog values.
+RESIDENCE_CAPABILITIES = {"incubation", "shaking", "heating_stirring", "reaction", "cell_culture", "bioreactor"}
+HOLD_CAPABILITIES |= RESIDENCE_CAPABILITIES
 
 
 def is_hold_time(step: dict, item: dict | None) -> bool:
