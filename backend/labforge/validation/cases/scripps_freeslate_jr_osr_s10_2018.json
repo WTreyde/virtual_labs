@@ -20,5 +20,6 @@
     }
   },
   "verified": true,
-  "notes": "No workflow: the Freeslate Jr. is not in the catalog (Big Kahuna is a different product). Opened RePORTER API (3 Oct 2026): 1S10OD025208-01, Scripps Research Institute, 'Parallel Pressure Reactor with Sampling Capabilities', award_amount 590,735. Abstract: \"The Freeslate Jr. robotic platform configured with an OSR module (Unchained Labs) ... allows eight parallel reactions to be run with independent temperature and pressure control\". Single instrument; the nearest catalog id is unchained_big_kahuna (same vendor, different product, loose match), so treat as a weak/loose check of Unchained pricing. Mapped fraction: 1 of 1 item loosely; 0 exact."
+  "notes": "No workflow: the Freeslate Jr. is not in the catalog (Big Kahuna is a different product). Opened RePORTER API (3 Oct 2026): 1S10OD025208-01, Scripps Research Institute, 'Parallel Pressure Reactor with Sampling Capabilities', award_amount 590,735. Abstract: \"The Freeslate Jr. robotic platform configured with an OSR module (Unchained Labs) ... allows eight parallel reactions to be run with independent temperature and pressure control\". Single instrument; the nearest catalog id is unchained_big_kahuna (same vendor, different product, loose match), so treat as a weak/loose check of Unchained pricing. Mapped fraction: 1 of 1 item loosely; 0 exact.",
+  "split": "in_sample"
 }

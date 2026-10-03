@@ -50,5 +50,6 @@
       }
     ]
   },
-  "price_basis": "configured"
+  "price_basis": "configured",
+  "split": "in_sample"
 }

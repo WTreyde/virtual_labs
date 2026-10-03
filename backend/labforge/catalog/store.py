@@ -22,10 +22,15 @@ def get(item_id: str) -> dict:
     return load_catalog()[item_id]
 
 
-def search(capability: str | None = None, labware: str | None = None, max_price_usd: float | None = None) -> list[dict]:
-    """Filter the catalog. Exposed to the agent as the `search_catalog` tool and at GET /catalog."""
+def search(capability: str | None = None, labware: str | None = None, max_price_usd: float | None = None,
+           include_people: bool = False) -> list[dict]:
+    """Filter the catalog. Exposed to the agent as the `search_catalog` tool and at GET /catalog.
+    Human operator entries (transport.kind "human") are left out unless include_people is set: people are staffed
+    through LabSpec.operators, and a capability search must not offer a person as an instrument."""
     out = []
     for item in load_catalog().values():
+        if not include_people and (item.get("transport") or {}).get("kind") == "human":
+            continue
         if capability and capability not in item["capabilities"]:
             continue
         if labware and not any(labware in ap.get("labware", [labware]) for ap in item["access_points"]):

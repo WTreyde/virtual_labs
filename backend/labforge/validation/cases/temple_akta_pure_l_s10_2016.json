@@ -1,0 +1,47 @@
+{
+  "id": "temple_akta_pure_l_s10_2016",
+  "name": "Temple University viral vector core: AKTA pure L FPLC (NIH S10; 2016)",
+  "domain": "biology",
+  "sources": [
+    "https://api.reporter.nih.gov/v2/projects/search (project_num 1S10OD021583-01)"
+  ],
+  "build": "turnkey",
+  "brief": "A viral vector core replaces a decade-old, discontinued FPLC with a new workhorse chromatography system to purify recombinant AAV in larger batches for large-animal studies.",
+  "reported": {
+    "cost": {
+      "value_usd": 52599,
+      "original": "US$52,599 (NIH S10 award, FY2016)",
+      "year": 2016,
+      "includes": [
+        "instruments"
+      ],
+      "excludes_note": "NIH S10 award for one FPLC; options and any institutional match are not stated."
+    }
+  },
+  "verified": true,
+  "notes": "Out-of-sample: found after the cost model was frozen at commit 02d7678 and scored blind against it (results in docs/validation.md). Later model or catalog changes do not count as out-of-sample for this case. price_basis=configured, from the wording of a grant to buy a working FPLC instrument (no bare-unit pricing stated). Verified 3 Oct 2026 via NIH RePORTER API (1S10OD021583-01, award_amount 52599, project title \"AKTA Pure L\"; https://reporter.nih.gov/project-details/9075312). Quote: \"The primary purpose of this proposal is to fund the purchase of a General Electric AKTA pure fast protein liquid chromatography (FPLC) instrument.\" Proxy match: bought AKTA pure (title: pure L, single pump) vs catalog cytiva_akta_pure_25; 2016 vendor was GE Healthcare, not Cytiva.",
+  "workflow": {
+    "id": "temple_akta_pure_l_s10_2016_wf",
+    "lab_spec_id": "temple_akta_pure_l_s10_2016",
+    "equipment": [
+      {
+        "instance_id": "cytiva_akta_pure_25_1",
+        "catalog_id": "cytiva_akta_pure_25",
+        "rationale": "Closest catalog model to the bought model (proxy).",
+        "match": "proxy"
+      }
+    ],
+    "steps": [
+      {
+        "id": "use",
+        "name": "Placeholder step (cost comparison only)",
+        "capability": "manual_bench",
+        "candidate_instances": [],
+        "duration_s": 0
+      }
+    ]
+  },
+  "price_basis": "configured",
+  "condition": "new",
+  "split": "out_of_sample"
+}

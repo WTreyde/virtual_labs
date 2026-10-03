@@ -298,6 +298,31 @@ Both recordings retain refuted feasibility claims and layout issues; passing gat
 complete orchestration, not a procurement-ready design. See the recordings’ README for Roshan’s
 replay-copy command, metrics, diagnostic limits and owning-strand follow-ups.
 
+## Conditional growth-hotel remedy
+
+After the catalog per-crystal harvesting duration/batch basis and the verifier's matching
+conversion have both merged, fetch main and record a fresh baseline and optional remedy:
+
+```bash
+ANTHROPIC_MODEL=claude-opus-5-5 PYTHONPATH=backend .venv/bin/python \
+  -m labforge.agent.demo_scenarios --env-file /absolute/path/to/.env \
+  --scenario xchem --live --hotel-whatif --out /tmp/labforge-xchem-new-main
+```
+
+`xchem.json` always preserves the first baseline. If a resource used for incubation is the
+busiest instrument (operators excluded from this calendar-time ranking), a second agent
+turn proposes an additional or larger catalog hotel, recomputes layout/simulation, checks
+claims and reports. `xchem-whatif.json` and its event checkpoint are separate: a failed
+remedy cannot overwrite the baseline. This compares a physical equipment proposal, including
+BOM and layout, rather than silently overriding capacity or shortening growth. Timing,
+yield, inspections, shifts and external queues must remain unchanged. Audit the actual
+proposal for those invariants before publishing; report any new bottleneck or no gain.
+
+Copy the baseline with `frontend/scripts/copy_replays.py <committed-record-directory> fbdd`.
+Keep the what-if beside it for review; it is not substituted for the observed baseline.
+The catalog and verifier fixes are now on main via PR #26. Do not reuse a baseline
+recorded against the old 7200-second harvesting placeholder.
+
 ## Per-unit catalog times and landing summaries
 
 Catalog `process.duration_basis` is a capability-to-unit map. The Shifter now gives
@@ -318,15 +343,7 @@ After copying a new replay, regenerate both summaries with:
 PYTHONPATH=backend .venv/bin/python -m labforge.agent.replay_summary frontend/public/replays
 ```
 
-Fresh XChem recording is blocked until verifier PR #26 merges. Until then the published
-FBDD summary explicitly retains the historical 312 versus 112 disagreement. Hotel
-what-if PR #23 remains a separate follow-up; do not replace the baseline with a remedy.
-
-Compatibility check against pending #26 (`9dabf23`) after the per-crystal catalog update:
-`test_duration_floor_is_compared_per_unit_not_per_plate` fails because it still expects
-`7200 * 32 / 96`, while the catalog now gives 35 seconds per crystal. Its
-`catalog_units` helper does not yet read `process.duration_basis`, so it infers 96
-from the plate instead of one crystal. Maxim owns updating that conversion and test:
-for 32 attempts, mean is 1120 seconds and the catalog low is 15 * 32 = 480 seconds;
-a 300-second proposal should be restored on that basis. The temporary merge was
-aborted; this PR does not modify verifier code or pretend that compatibility passes.
+PR #26 now scales the independent verifier on the same per-crystal basis. Record the
+fresh XChem baseline before running the hotel what-if, and never replace the baseline
+with a remedy. For 32 attempts, the catalog mean is 1120 seconds and its low bound is
+480 seconds; a 300-second proposal is restored on that basis.
