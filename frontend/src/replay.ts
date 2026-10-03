@@ -1,5 +1,5 @@
 import { marked } from "marked";
-import type { CatalogItem, Design } from "./types";
+import type { CatalogItem, Design, InstrumentOptimisation } from "./types";
 
 /**
  * Strand A: ?replay=<name> plays a recorded agent run from /replays/<name>.json at demo speed with no backend
@@ -30,13 +30,38 @@ export interface ReplayHooks {
   showAnswer: (title: string, html: string) => void;
 }
 
-export async function loadReplay(name: string): Promise<RecordedRun> {
-  const res = await fetch(`${(import.meta as any).env?.BASE_URL ?? "/"}replays/${encodeURIComponent(name)}.json`);
-  // Dev servers and static hosts often answer a missing file with index.html and status 200, so check the body too.
-  const text = res.ok ? await res.text() : "";
-  if (!text.trimStart().startsWith("{"))
-    throw new Error(`There is no recorded run called "${name}" yet, so there is nothing to replay. (Looked for public/replays/${name}.json.)`);
-  return JSON.parse(text);
+const runs = new Map<string, Promise<RecordedRun>>();
+const base = () => (import.meta as any).env?.BASE_URL ?? "/";
+
+/** Load (once) a recorded run from public/replays/<name>.json. */
+export function loadReplay(name: string): Promise<RecordedRun> {
+  if (!runs.has(name)) {
+    const p = (async () => {
+      const res = await fetch(`${base()}replays/${encodeURIComponent(name)}.json`);
+      // Dev servers and static hosts often answer a missing file with index.html and status 200, so check the body too.
+      const text = res.ok ? await res.text() : "";
+      if (!text.trimStart().startsWith("{"))
+        throw new Error(`There is no recorded run called "${name}" yet, so there is nothing to replay. (Looked for public/replays/${name}.json.)`);
+      return JSON.parse(text) as RecordedRun;
+    })();
+    p.catch(() => runs.delete(name)); // let a later visit retry
+    runs.set(name, p);
+  }
+  return runs.get(name)!;
+}
+
+/**
+ * Optional cached what-if sweeps for a case (public/replays/<name>.whatif.json, written by
+ * frontend/scripts/cache_whatif.py), so the case's what-if also works without the backend.
+ */
+export async function loadWhatIfCache(name: string): Promise<Record<string, InstrumentOptimisation> | undefined> {
+  try {
+    const res = await fetch(`${base()}replays/${encodeURIComponent(name)}.whatif.json`);
+    const text = res.ok ? await res.text() : "";
+    return text.trimStart().startsWith("{") ? JSON.parse(text).by_instance : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 /** A room with nothing in it, shown while the recorded agent is still "working". */

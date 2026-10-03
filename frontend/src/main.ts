@@ -1,26 +1,40 @@
 import "@fontsource/press-start-2p";
 import Phaser from "phaser";
 import { chat, exampleDesign, leaderboard, liveCatalog, optimise, prioritise, setOffline, validation } from "./api";
-import { exampleProjects } from "./fixtures/projects";
+import demoQueue from "../../backend/labforge/catalog/data/demo_prioritise_queue.json";
+import cachedDemoSchedule from "./fixtures/demo_schedule.json";
 import { galleryDesign } from "./fixtures/gallery";
+import { renderLanding } from "./landing";
 import { LabScene } from "./LabScene";
-import { openReport } from "./report";
-import { emptyDesign, loadReplay, playReplay } from "./replay";
-import { showError, showHtml, showLeaderboard, showLoading, showSchedule, showValidation, showWhatIf } from "./views";
-import { clock } from "./timeline";
 import { renderPanel } from "./panel";
-import type { ChatMessage, Design } from "./types";
+import { openReport } from "./report";
+import { emptyDesign, loadReplay, loadWhatIfCache, playReplay } from "./replay";
+import { migrateLegacyLinks, parseRoute, routeKey, type Route } from "./router";
+import { clock } from "./timeline";
+import type { ChatMessage, Design, ProjectRequest, ProjectSchedule } from "./types";
 import { dialogue, hideStatCard, introLines, onTick, setupClock, showStatCard } from "./ui";
+import { closeModal, showError, showHtml, showLeaderboard, showLoading, showSchedule, showValidation, showWhatIf } from "./views";
 
-// `?demo=gallery` shows every sprite kind; the default is the worked example from examples/.
+/**
+ * Strand A: the one-page app. Hash routes (see router.ts) pick what the shared game, panel and modal show:
+ * the landing page, a recorded case (replay), live design chat, or a full-page view (bench, validation, schedule).
+ */
+
+migrateLegacyLinks();
 const params = new URLSearchParams(location.search);
 clock.t = +(params.get("t") ?? 0) || 0; // ?t=<sim seconds> starts mid-run, handy for screenshots
-// `?replay=<name>` plays a recorded agent run from public/replays/ with no backend calls.
-const replay = params.get("replay");
-if (replay) setOffline(true);
-let design: Design = replay ? emptyDesign() : params.get("demo") === "gallery" ? galleryDesign : exampleDesign();
+
+let design: Design = emptyDesign();
 let history: ChatMessage[] = [];
 let chatting = false;
+let route: Route = parseRoute();
+let replayToken = 0; // bumped on every route change so a replay still running stops touching the page
+let replaySkip = { now: false };
+
+const $ = <T extends HTMLElement>(sel: string) => document.querySelector<T>(sel)!;
+const log = $<HTMLDivElement>("#log");
+const badge = $<HTMLDivElement>("#replay-badge");
+const landing = $<HTMLElement>("#landing");
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
@@ -30,65 +44,117 @@ const game = new Phaser.Game({
   scale: { mode: Phaser.Scale.RESIZE, width: window.innerWidth - 340, height: window.innerHeight },
   scene: [],
 });
-// Wait for the pixel font so Phaser text doesn't bake in the fallback face.
-// ?view=bench and ?view=validation are full-page views (the demo opens them in their own tab): no game behind them.
-const pageView = ["bench", "validation"].includes(params.get("view") ?? "");
-if (pageView) document.body.classList.add("page-view");
-else {
-  // The font is bundled, but a sandbox or locked-down network can still block or stall the file. Start anyway after
-  // at most 2 s; Phaser text then uses the monospace fallback. Catching the rejection avoids an unhandled NetworkError.
-  const fontReady = Promise.race([document.fonts.load('8px "Press Start 2P"'), new Promise((r) => setTimeout(r, 2000))]);
-  fontReady.catch(() => undefined).then(() => game.scene.add("lab", LabScene, true, { design }));
-}
-// (reads `design` when the font is ready, so a replay that has already moved on is picked up)
-renderPanel(design);
-if (!replay && !pageView) dialogue.say(introLines(design));
-// With the backend up, use its catalog so BOM prices match /report; offline, keep examples/catalog.json.
-if (!params.get("demo") && !replay) liveCatalog(design).then((catalog) => { design = { ...design, catalog }; renderPanel(design); if (!params.get("view")) dialogue.say(introLines(design)); }).catch(() => {});
+// The font is bundled, but a sandbox or locked-down network can still block or stall the file. Start anyway after
+// at most 2 s; Phaser text then uses the monospace fallback. Catching the rejection avoids an unhandled NetworkError.
+// The scene reads `design` when it starts, so whatever the route has shown by then is picked up.
+const fontReady = Promise.race([document.fonts.load('8px "Press Start 2P"'), new Promise((r) => setTimeout(r, 2000))]);
+fontReady.catch(() => undefined).then(() => game.scene.add("lab", LabScene, true, { design }));
 game.events.on("tick", onTick);
 game.events.on("ready-clock", () => setupClock(design));
 game.events.on("select", (sel: { id: string; sprite?: string } | null) => (sel ? showStatCard(design, sel.id, sel.sprite) : hideStatCard()));
 
 function show(d: Design) {
   design = d;
-  // Before the font has loaded the scene doesn't exist yet; it will start with the current `design`.
   game.scene.getScene("lab")?.scene.restart({ design });
   renderPanel(d);
+  updateWhatIfButton();
 }
 
-const log = document.querySelector<HTMLDivElement>("#log")!;
+const setChatEnabled = (on: boolean) => {
+  for (const el of document.querySelectorAll<HTMLInputElement | HTMLButtonElement>("#chat-input, #chat-form button")) el.disabled = !on;
+};
 
-if (replay) startReplay(replay);
+// ---- routing ------------------------------------------------------------------------------------
+
+async function go(r: Route) {
+  route = r;
+  replayToken++;
+  replaySkip.now = true;
+  closeModal();
+  hideStatCard();
+  badge.classList.add("hidden");
+  badge.querySelector("button")?.remove();
+  log.textContent = "";
+  history = [];
+  chatting = false;
+  setOffline(false);
+  setChatEnabled(r.page === "design");
+  document.body.classList.toggle("page-view", ["bench", "validation", "schedule"].includes(r.page));
+  document.body.classList.toggle("on-landing", r.page === "landing");
+  landing.classList.toggle("hidden", r.page !== "landing");
+  for (const a of document.querySelectorAll<HTMLAnchorElement>("#topnav a"))
+    a.classList.toggle("active", a.dataset.route === routeKey(r));
+
+  switch (r.page) {
+    case "landing": return renderLanding(landing);
+    case "case": return startReplay(r.name);
+    case "design": {
+      const d = exampleDesign();
+      show(d);
+      dialogue.say(["Describe the lab you want in the box on the right. Meanwhile, here is the worked example.", ...introLines(d)]);
+      // With the backend up, use its catalog so BOM prices match /report; offline, keep examples/catalog.json.
+      liveCatalog(d).then((catalog) => { if (route === r) show({ ...design, catalog }); }).catch(() => {});
+      if (r.whatif) openWhatIf(r.whatif);
+      return;
+    }
+    case "gallery": show(galleryDesign); dialogue.say(["Sprite gallery: one of every instrument kind. Development view; not a real design."]); return;
+    case "bench": return openBench();
+    case "validation": return openValidation();
+    case "schedule": return openSchedule();
+  }
+}
+window.addEventListener("hashchange", () => go(parseRoute()));
+// Clicking the nav link of the page you're on restarts it (no hashchange fires for the same hash).
+for (const a of document.querySelectorAll<HTMLAnchorElement>("#topnav a"))
+  a.addEventListener("click", () => { if (a.getAttribute("href") === location.hash) go(parseRoute()); });
+
+// ---- case pages: recorded runs ------------------------------------------------------------------
+
 async function startReplay(name: string) {
-  const badge = document.querySelector<HTMLDivElement>("#replay-badge")!, skip = { now: false };
+  const token = replayToken, skip = { now: false };
+  replaySkip = skip;
+  const live = () => token === replayToken;
+  setOffline(true); // the replay itself never calls the backend
   badge.classList.remove("hidden");
-  badge.querySelector("#replay-skip")!.addEventListener("click", () => { skip.now = true; });
-  for (const el of document.querySelectorAll<HTMLInputElement | HTMLButtonElement>("#chat-input, #chat-form button")) el.disabled = true;
+  const skipBtn = document.createElement("button");
+  skipBtn.id = "replay-skip";
+  skipBtn.textContent = "Skip ▸▸";
+  skipBtn.addEventListener("click", () => { skip.now = true; });
+  badge.append(skipBtn);
+  show(emptyDesign());
   try {
-    const run = await loadReplay(name);
+    const [run, whatif] = await Promise.all([loadReplay(name), loadWhatIfCache(name)]);
+    if (!live()) return;
     badge.querySelector(".text")!.textContent = `Replay of a recorded run${run.model ? ` · ${run.model}` : ""}`;
     if (run.output.lab_spec) show(emptyDesign(run.output.lab_spec));
     await playReplay(run, {
-      say: (lines, speaker) => dialogue.say(lines, speaker),
-      log: (line) => { log.textContent += `\n${line}`; log.scrollTop = log.scrollHeight; },
-      showDesign: (d) => { show(d); dialogue.say(introLines(d)); },
-      showAnswer: (title, html) => showHtml(title, html),
+      say: (lines, speaker) => live() && dialogue.say(lines, speaker),
+      log: (line) => { if (live()) { log.textContent += `\n${line}`; log.scrollTop = log.scrollHeight; } },
+      showDesign: (d) => { if (live()) { show({ ...d, whatif_cache: whatif }); dialogue.say(introLines(d)); } },
+      showAnswer: (title, html) => live() && showHtml(title, html),
     }, skip);
   } catch (e) {
-    dialogue.say([String((e as Error).message ?? e)]);
+    if (live()) dialogue.say([String((e as Error).message ?? e)]);
   }
-  badge.querySelector("#replay-skip")!.remove();
+  if (!live()) return;
+  skipBtn.remove();
+  // Playback is over: the what-if may now ask the backend (it falls back to the case's cached sweep offline).
+  setOffline(false);
 }
-document.querySelector<HTMLFormElement>("#chat-form")!.addEventListener("submit", async (e) => {
+
+// ---- live chat ----------------------------------------------------------------------------------
+
+$<HTMLFormElement>("#chat-form").addEventListener("submit", async (e) => {
   e.preventDefault();
-  if (chatting || replay) return; // the form is also disabled during a replay
+  if (chatting || route.page !== "design") return; // the form is also disabled outside #/design
   chatting = true;
-  const input = document.querySelector<HTMLInputElement>("#chat-input")!;
+  const input = $<HTMLInputElement>("#chat-input"), started = route;
   history.push({ role: "user", content: input.value });
   log.textContent += `\nYou: ${input.value}`;
   input.value = "";
   try {
     const out = await chat(history, design);
+    if (route !== started) return;
     history = out.history;
     log.textContent += `\nAgent: ${out.reply}`;
     show(out.design);
@@ -102,13 +168,14 @@ document.querySelector<HTMLFormElement>("#chat-form")!.addEventListener("submit"
   }
 });
 
-document.querySelector("#report-btn")!.addEventListener("click", () => {
+// ---- report and what-if -------------------------------------------------------------------------
+
+$("#report-btn").addEventListener("click", () => {
   const snapshot = () => new Promise<string | undefined>((resolve) =>
     game.renderer.snapshot((img) => resolve(img instanceof HTMLImageElement ? img.src : undefined)));
   openReport(design, snapshot);
 });
 
-// Vendor what-if from the stat card.
 async function openWhatIf(id: string) {
   const eq = design.workflow.equipment.find((x) => x.instance_id === id), item = eq && design.catalog[eq.catalog_id];
   const name = item ? item.model : id, title = `How could ${name} be better?`;
@@ -118,22 +185,37 @@ async function openWhatIf(id: string) {
     showWhatIf(result, name, design.lab_spec?.throughput_target?.value, cached);
     if (result.headroom_note) dialogue.say([result.headroom_note]);
   } catch {
-    showError(title, "Needs the backend (make backend); no cached run for this design.");
+    showError(title, "Needs the backend (make backend); there is no cached sweep for this instrument.");
   }
 }
-document.querySelector("#statcard")!.addEventListener("click", (e) => {
+$("#statcard").addEventListener("click", (e) => {
   const id = (e.target as HTMLElement).closest<HTMLElement>(".whatif")?.dataset.id;
   if (id) openWhatIf(id);
 });
 
-// Project planning: until the demo scenario lands, plans the fixture projects on the example lab.
-async function openPlan() {
-  showLoading("What order should these projects run in?");
-  const { result, cached } = await prioritise(exampleProjects, design.layout.id);
-  showSchedule(result, exampleProjects, cached);
+/** One click from the final design to the what-if for its main bottleneck instrument. */
+const SEVERITY: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
+function updateWhatIfButton() {
+  const btn = $<HTMLButtonElement>("#whatif-btn");
+  const ids = new Set(design.workflow.equipment.map((e) => e.instance_id));
+  const b = [...design.sim_result.bottlenecks].filter((x) => x.kind !== "long_transfer" && ids.has(x.instances?.[0] ?? ""))
+    .sort((x, y) => (SEVERITY[x.severity] ?? 9) - (SEVERITY[y.severity] ?? 9))[0];
+  btn.classList.toggle("hidden", !b);
+  if (!b) return;
+  const id = b.instances![0], eq = design.workflow.equipment.find((e) => e.instance_id === id);
+  btn.textContent = `What if ${(eq && design.catalog[eq.catalog_id]?.model) ?? id} were better?`;
+  btn.onclick = () => openWhatIf(id);
 }
-document.querySelector("#plan-btn")!.addEventListener("click", openPlan);
 
+// ---- full-page views ----------------------------------------------------------------------------
+
+async function openSchedule() {
+  // Max's demo queue (three projects on one screening cell); offline, a cached /prioritise run of the same queue.
+  const projects = demoQueue.projects as unknown as ProjectRequest[];
+  showLoading("What order should these projects run in?");
+  const { result, cached } = await prioritise(projects, demoQueue.lab_id, cachedDemoSchedule.schedule as ProjectSchedule);
+  showSchedule(result, projects, cached);
+}
 async function openValidation() {
   showLoading("Does LabForge price real labs right?", "Comparing against published labs…");
   try { showValidation(await validation()); } catch { showError("Does LabForge price real labs right?", "Needs the backend (make backend)."); }
@@ -142,12 +224,5 @@ async function openBench() {
   showLoading("LabDesignBench", "Loading the leaderboard…");
   try { showLeaderboard(await leaderboard()); } catch { showError("LabDesignBench", "Needs the backend (make backend)."); }
 }
-document.querySelector("#validation-btn")!.addEventListener("click", openValidation);
-document.querySelector("#bench-btn")!.addEventListener("click", openBench);
 
-// Deep links for demos and screenshots: ?view=plan | validation | bench | whatif:<instance_id>
-const view = params.get("view");
-if (view === "plan") openPlan();
-else if (view === "validation") openValidation();
-else if (view === "bench") openBench();
-else if (view?.startsWith("whatif:")) openWhatIf(view.slice(7));
+go(route);
