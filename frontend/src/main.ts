@@ -6,6 +6,7 @@ import cachedDemoSchedule from "./fixtures/demo_schedule.json";
 import { galleryDesign } from "./fixtures/gallery";
 import { fixCard } from "./capacity";
 import { verdictsBox } from "./verdicts";
+import { AgentLog } from "./agentlog";
 import { renderLanding, summaryBox } from "./landing";
 import { LabScene } from "./LabScene";
 import { renderPanel } from "./panel";
@@ -63,8 +64,9 @@ function show(d: Design) {
 }
 
 /** One log entry per line, scrolled to the newest. */
-function appendLog(line: string) {
-  log.textContent += (log.textContent ? "\n\n" : "") + line;
+const agentLog = new AgentLog(log);
+function appendLog(line: string, kind: "user" | "agent" | "notice" = "notice") {
+  agentLog.note(line, kind);
   log.scrollTop = log.scrollHeight;
 }
 
@@ -87,7 +89,7 @@ async function go(r: Route) {
   $("#verdicts").classList.add("hidden");
   $("#skill-btn").classList.add("hidden");
   $("#agent-banner").classList.add("hidden");
-  log.textContent = "";
+  agentLog.clear();
   history = [];
   chatting = false;
   setOffline(false);
@@ -158,7 +160,8 @@ async function startReplay(name: string) {
     if (run.output.lab_spec) show(emptyDesign(run.output.lab_spec));
     await playReplay(run, {
       say: (lines, speaker) => live() && dialogue.say(lines, speaker),
-      log: (line) => { if (live()) appendLog(line); },
+      log: (line, kind) => { if (live()) appendLog(line, kind); },
+      event: (e) => { if (live()) agentLog.event(e); },
       showDesign: (d) => {
         if (!live()) return;
         show({ ...d, whatif_cache: whatif });
@@ -180,6 +183,7 @@ async function startReplay(name: string) {
       },
       showAnswer: (title, html) => live() && showHtml(title, html),
     }, skip);
+    if (live()) agentLog.finish();
   } catch (e) {
     if (live()) dialogue.say([String((e as Error).message ?? e)]);
   }
@@ -202,7 +206,7 @@ $<HTMLFormElement>("#chat-form").addEventListener("submit", async (e) => {
   chatting = true;
   const input = $<HTMLInputElement>("#chat-input"), started = route;
   history.push({ role: "user", content: input.value });
-  appendLog(`You: ${input.value}`);
+  appendLog(`You: ${input.value}`, "user");
   input.value = "";
   try {
     // Stream the agent's steps into the log and dialogue box as they happen.
@@ -213,15 +217,15 @@ $<HTMLFormElement>("#chat-form").addEventListener("submit", async (e) => {
         if (!writing) { writing = true; dialogue.say(["Writing the answer…"]); }
         return;
       }
+      agentLog.event(ev); // structured log: steps, tool calls, status, timings
       const line = describe(ev);
       if (!line) return;
-      appendLog(`Agent: ${line}`);
       dialogue.say([line]);
       writing = false;
     });
     if (route !== started) return;
     history = out.history;
-    appendLog(`Agent: ${out.reply}`);
+    appendLog(`Agent: ${out.reply}`, "agent");
     show(out.design);
     hideStatCard();
     dialogue.say([out.reply]);
@@ -229,6 +233,7 @@ $<HTMLFormElement>("#chat-form").addEventListener("submit", async (e) => {
     history.pop(); // the failed request was not committed to the conversation
     appendLog(error instanceof Error ? error.message : "Chat failed");
   } finally {
+    agentLog.finish();
     chatting = false;
   }
 });
