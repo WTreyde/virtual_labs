@@ -45,6 +45,7 @@ def test_report_and_bench():
 
 def test_gateway_offline_chat(monkeypatch):
     monkeypatch.setenv('ANTHROPIC_API_KEY', '')
+    monkeypatch.setenv('LABFORGE_ENV_FILE', '/missing/test/.env')
     client = TestClient(app)
     out = client.post("/chat", json={"messages": [{"role": "user", "content": "hi"}]}).json()
     assert errors(out["layout"], "layout") == []
@@ -61,6 +62,7 @@ def test_instrument_optimisation_finds_the_limit():
 
 def test_validation_cost_band(monkeypatch):
     monkeypatch.setenv('ANTHROPIC_API_KEY', '')
+    monkeypatch.setenv('LABFORGE_ENV_FILE', '/missing/test/.env')
     from labforge.validation.cost import compare, predicted_cost
     from labforge.validation.runner import load_cases, run_case
     pred = predicted_cost(WORKFLOW, ["instruments", "robots", "analytics"])
@@ -118,6 +120,7 @@ def test_health_says_when_no_api_key_is_loaded(monkeypatch):
     """The UI shows "live agent off: no API key loaded" instead of silently serving the offline example."""
     import labforge.gateway as gw
     monkeypatch.setenv("ANTHROPIC_API_KEY", "")
+    monkeypatch.setenv("LABFORGE_ENV_FILE", "/missing/test/.env")
     health = TestClient(gw.app).get("/health").json()
     assert health["live_chat"] is True and health["api_key_loaded"] is False and health["live_agent"] is False
     assert "no API key loaded" in health["live_agent_note"]

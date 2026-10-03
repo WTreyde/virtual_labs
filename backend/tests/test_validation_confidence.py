@@ -29,5 +29,6 @@ def test_dated_price_history_picks_the_closest_year():
 
 def test_calibration_reports_brier_against_a_baseline(monkeypatch):
     monkeypatch.setenv("ANTHROPIC_API_KEY", "")  # cases without a workflow would otherwise call the live planner
+    monkeypatch.setenv("LABFORGE_ENV_FILE", "/missing/test/.env")
     cal = calibration([run_case(c) for c in load_cases()])
     assert cal["n"] >= 1 and "brier" in cal and "brier_constant_baseline" in cal
