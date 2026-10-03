@@ -10,17 +10,23 @@ least weighted lateness when deadlines are given):
 - bottleneck_mix: release the next unit from the project whose heaviest instrument is least loaded,
   so projects that stress different instruments overlap.
 
-This is a fast deterministic model on mean durations, separate from the Monte Carlo simulator
-(sim/simulate.py) so the two can evolve independently. TODO(Maxim): confirm the recommended
-policy's makespan with the Monte Carlo simulator (P10/P90) and include transfer times.
+Policies are compared on mean durations (fast enough to try every order). `confirm_schedule` then
+re-runs the recommended and the naive schedule under the Monte Carlo simulator's uncertainty: one
+epistemic draw per step per replicate from the same ranges sim/simulate.py uses, plus run jitter,
+with the same draws for both schedules. Still ignored: transfer times and operator shifts.
 """
+import copy
 import itertools
+import random
+import statistics
 from collections import defaultdict
 
 import simpy
 
 from labforge.catalog.store import get as get_item
+from labforge.catalog.store import load_catalog
 from labforge.contracts import validate
+from labforge.sim.simulate import JITTER, duration_range
 
 MAX_PERMUTED_PROJECTS = 6
 GANTT_LIMIT = 400
@@ -57,7 +63,8 @@ def _load(project: dict, caps: dict[str, int]) -> dict[str, float]:
 
 
 def run_policy(projects: list[dict], policy: str, order: list[str] | None = None, wip: int | None = None,
-               record: bool = False) -> dict:
+               record: bool = False, rng: random.Random | None = None) -> dict:
+    """Run one release policy. With `rng`, each step run is jittered (Monte Carlo); without, mean durations."""
     env = simpy.Environment()
     caps = _capacities(projects)
     res = {i: simpy.Resource(env, capacity=c) for i, c in caps.items()}
@@ -83,8 +90,9 @@ def run_policy(projects: list[dict], policy: str, order: list[str] | None = None
             with res[inst].request() as req:
                 yield req
                 start = env.now
-                yield env.timeout(step["duration_s"])
-                busy[inst] += step["duration_s"]
+                dt = step["duration_s"] * (rng.uniform(1 - JITTER, 1 + JITTER) if rng else 1.0)
+                yield env.timeout(dt)
+                busy[inst] += dt
                 if record and len(gantt) < GANTT_LIMIT:
                     gantt.append({"project": pid, "unit": n, "step": step["id"], "instance": inst,
                                   "start_s": round(start, 1), "end_s": round(env.now, 1)})
@@ -139,7 +147,47 @@ def run_policy(projects: list[dict], policy: str, order: list[str] | None = None
     return out
 
 
-def prioritise(projects: list[dict], lab_id: str = "lab") -> dict:
+def _draw_durations(projects: list[dict], rng: random.Random) -> list[dict]:
+    """Copy of the projects with each step's mean duration drawn from its uncertainty range."""
+    catalog = load_catalog()
+    drawn = copy.deepcopy(projects)
+    for p in drawn:
+        eq = {e["instance_id"]: e["catalog_id"] for e in p["workflow"]["equipment"]}
+        for s in p["workflow"]["steps"]:
+            item = catalog.get(eq.get(s["candidate_instances"][0], "")) if s["candidate_instances"] else None
+            low, mode, high = duration_range(s, item)
+            s["duration_s"] = rng.triangular(low, high, mode) if high > low else mode
+    return drawn
+
+
+def _quantiles(xs: list[float]) -> dict:
+    q = statistics.quantiles(xs, n=10, method="inclusive") if len(xs) > 1 else xs * 9
+    return {"p10": round(q[0], 2), "p50": round(statistics.median(xs), 2), "p90": round(q[-1], 2)}
+
+
+def confirm_schedule(projects: list[dict], schedules: dict[str, tuple[str, list[str] | None]],
+                     replicates: int = 30, seed: int = 0) -> dict:
+    """Makespan P10/P50/P90 (hours) for each named schedule {label: (policy, order)} under duration uncertainty.
+
+    Every schedule sees the same drawn durations in a replicate (common random numbers), so
+    `prob_faster[a][b]` is the share of plausible worlds in which schedule a finishes before b."""
+    master = random.Random(seed)
+    seeds = [master.randrange(2**31) for _ in range(replicates)]
+    spans = {label: [] for label in schedules}
+    for sd in seeds:
+        drawn = _draw_durations(projects, random.Random(sd))
+        for label, (policy, order) in schedules.items():
+            spans[label].append(run_policy(drawn, policy, order, rng=random.Random(sd + 1))["makespan_h"])
+    labels = list(schedules)
+    return {
+        "replicates": replicates,
+        "makespan_h": {label: _quantiles(v) for label, v in spans.items()},
+        "prob_faster": {a: {b: round(sum(x < y for x, y in zip(spans[a], spans[b])) / replicates, 2)
+                            for b in labels if b != a} for a in labels},
+    }
+
+
+def prioritise(projects: list[dict], lab_id: str = "lab", mc_replicates: int = 30) -> dict:
     """Evaluate release policies for these projects and recommend one. See module docstring."""
     ids = [p["id"] for p in projects]
     objective = "weighted_tardiness" if any("deadline_h" in p for p in projects) else "makespan"
@@ -156,6 +204,24 @@ def prioritise(projects: list[dict], lab_id: str = "lab") -> dict:
         "lab_id": lab_id, "objective": objective, "candidates": cands[:10], "recommended": best["policy"],
         "gain_vs_naive": round(1 - best["makespan_h"] / naive["makespan_h"], 3) if naive["makespan_h"] else 0.0,
         "gantt": gantt,
-        "caveat": "Deterministic schedule on mean step durations without transfer times; confirm with the Monte Carlo simulator before committing.",
+        "caveat": "Policies compared on mean step durations; transfer times and operator shifts are not modelled.",
     }
+    if mc_replicates:
+        sched = {"recommended": (best["policy"].split(":")[0], best.get("order"))}
+        if best is not naive:
+            sched["order_given"] = ("sequential", ids)
+        mc = confirm_schedule(projects, sched, replicates=mc_replicates)
+        rec = mc["makespan_h"]["recommended"]
+        text = f" Monte Carlo over duration uncertainty ({mc_replicates} replicates): recommended {rec['p50']} h " \
+               f"(P10-P90 {rec['p10']}-{rec['p90']} h)"
+        if "order_given" in mc["makespan_h"]:
+            nv = mc["makespan_h"]["order_given"]
+            win = mc["prob_faster"]["recommended"]["order_given"]
+            text += f" vs order given {nv['p50']} h ({nv['p10']}-{nv['p90']} h); recommended finishes first in {win:.0%} of replicates."
+        else:
+            text += "; the order given is already the best."
+        result["caveat"] += text
+        if objective == "makespan" and "order_given" in mc["makespan_h"] \
+                and mc["prob_faster"]["recommended"]["order_given"] < 0.5:
+            result["caveat"] += " Under uncertainty the recommendation is NOT reliably better; do not quote the saving."
     return validate(result, "project_schedule")

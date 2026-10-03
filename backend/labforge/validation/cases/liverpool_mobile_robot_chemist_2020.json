@@ -1,0 +1,28 @@
+{
+  "id": "liverpool_mobile_robot_chemist_2020",
+  "name": "Liverpool mobile robotic chemist (Burger et al., Nature 2020)",
+  "domain": "chemistry",
+  "sources": [
+    "https://www.nature.com/articles/s41586-020-2442-2",
+    "https://doi.org/10.1038/s41586-020-2442-2",
+    "https://www.newsweek.com/ai-autonomous-robot-scientist-created-1516255",
+    "https://www.sciencefocus.com/future-technology/kuka-mobile-robot"
+  ],
+  "brief": "A free-roaming mobile robot with a 7-axis arm and custom grippers works in an ordinary, lightly modified chemistry lab built for humans. It carries sample vials between separate commercial stations: a solid-dosing balance with a cartridge hotel, a liquid handling and capping/crimping station, a photolysis station, and a headspace gas chromatograph. A Bayesian optimiser chooses the next batch of photocatalyst formulations; the lab ran about 688 experiments over 8 days (about 172 hours) optimising photocatalytic hydrogen evolution.",
+  "reported": {
+    "cost": {
+      "value_usd": 125000,
+      "low_usd": 63000,
+      "high_usd": 190000,
+      "original": "roughly GBP 100,000 (USD 125,000) for the robot; 'mobile robots of this kind cost between GBP 50,000 and GBP 150,000'",
+      "year": 2020,
+      "includes": [
+        "robots"
+      ],
+      "excludes_note": "Robot platform only (the figure was given as the cost to construct the robot, about three years). It does NOT cover the fixed instruments (Quantos solid doser, GC, liquid handler, photolysis rack, capper-crimper), software, or lab space. Cooper says the GC alone is in the same GBP 50-150k range, so a full-system figure would be materially higher. Press interview figure, not stated in the paper."
+    }
+  },
+  "throughput": null,
+  "verified": true,
+  "notes": "No workflow on purpose: the catalog's KUKA KMR iiwa price comes from the same Newsweek article, so comparing them would be circular. Needs an independent KMR iiwa price first. Verified 3 Oct 2026, but the cost is NOT in the Nature paper (full text searched for GBP/cost: none). It comes from interviews with PI Andrew Cooper. Newsweek (Jul 2020): \"the robot took about three years to construct, and cost roughly £100,000 ($125,000)\" (fetched; the article does not say what is included). BBC Science Focus: \"Mobile robots of this kind cost between £50,000 and £150,000, depending on their capabilities ... the gas chromatograph ... falls in the same range.\" Paper hardware confirmed from nature.com HTML: KUKA Mobile Robot (820 mm reach), Quantos solid dispenser with cartridge hotel, combined liquid handling/capping station with Liverpool Inertization Capper-Crimper (LICC), photolysis station, unmodified commercial headspace GC. Liverpool news page and C&EN have no cost. Use low/high as a band for the robot only; do not compare to a whole-lab prediction without subtracting instruments. Throughput: 688 experiments in 8 days (C&EN, Jul 2020) = about 86/day; reported.throughput left empty because the schema field needs an uncertain_number."
+}

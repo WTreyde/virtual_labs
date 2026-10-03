@@ -1,0 +1,46 @@
+{
+  "id": "ot2_crystallization_scaleup_2025",
+  "name": "Opentrons OT-2 automation of protein crystallisation scale-up (DeRoo et al., SLAS Technology 2025)",
+  "domain": "biology",
+  "sources": [
+    "https://doi.org/10.1016/j.slast.2025.100268",
+    "https://pmc.ncbi.nlm.nih.gov/articles/PMC12229254/"
+  ],
+  "brief": "Crystallography sample preparation: a single benchtop liquid-handling robot with a custom adapter and module sets up sitting-drop scale-up crystallisation plates (4 microlitre drops) with a humidity-controlled deck, replacing manual pipetting of crystal growth reproducibility trials.",
+  "reported": {
+    "cost": {
+      "value_usd": 13500,
+      "original": "A single OT-2 costs $13,500 at the time of this writing (2025)",
+      "year": 2025,
+      "includes": [
+        "instruments",
+        "robots"
+      ],
+      "excludes_note": "One robot only; adapter, custom module, humidifier and consumables excluded. The paper compares with a Gryphon crystallisation robot at $55,000-$75,000."
+    }
+  },
+  "verified": true,
+  "notes": "Single-instrument price check: the reported figure is one OT-2 with pipettes/modules, so this tests the catalog price band, not whole-lab design. includes covers 'instruments' because the catalog files liquid handlers there. Verified 3 Oct 2026 via Europe PMC full text (PMC12229254): \"A single OT-2 costs $13,500 at the time of this writing, significantly cheaper than a Gryphon machine priced at $55,000-$75,000.\" This is an instrument price rather than a lab total, so it is a weak validation point; included as the only crystallography case with a stated hardware price. Searches for XChem build cost, the Shifter crystal harvester (Wright et al. 2021, no price in text) and S10 crystallisation awards found no usable lab-level figure.",
+  "workflow": {
+    "id": "ot2_crystallization_scaleup_2025_wf",
+    "lab_spec_id": "ot2_crystallization_scaleup_2025",
+    "equipment": [
+      {
+        "instance_id": "lh_1",
+        "catalog_id": "opentrons_ot2",
+        "rationale": "The single OT-2 the paper prices."
+      }
+    ],
+    "steps": [
+      {
+        "id": "run",
+        "name": "Automated protocol on the OT-2",
+        "capability": "liquid_handling",
+        "candidate_instances": [
+          "lh_1"
+        ],
+        "duration_s": 3600
+      }
+    ]
+  }
+}
