@@ -23,6 +23,8 @@ Rules:
 - Run `make check` before every commit. Commit small, and at least once an hour do: `git fetch origin && git rebase origin/main && make check && git push -u origin strand/game`. Open a draft PR into main early and keep it mergeable.
 - Develop against examples/*.json (the client already renders them offline with `make frontend`); the backend runs on :8000 with `make backend`.
 
+Also read docs/validation.md (judge feedback: validation against real labs and a vendor optimisation view); tasks 8–9 in your brief come from it.
+
 Start with task 1 in docs/strands/A-game-client.md (pixel-art sprites per instrument category), show me a screenshot-worthy result quickly, then continue down the list. Tell me after each task what changed and what's next.
 ```
 
@@ -41,6 +43,8 @@ Rules:
 - Run `make check` before every commit. At least once an hour: `git fetch origin && git rebase origin/main && make check && git push -u origin strand/catalog`. Open a draft PR into main early.
 - Every catalog number needs a source and confidence in `provenance`; unknown values are `placeholder`, never silent guesses. Validate each item with labforge.contracts.validate(item, "catalog_item").
 - Keep the cached catalog JSON in git; the demo must not depend on the network.
+
+Also read docs/validation.md: you also own backend/labforge/validation/ (real published labs with known costs, the cost model and the validation runner). Tasks 6–8 in your brief cover it; verified cases are a headline result for the judges, so start collecting them early.
 
 Start by listing every instrument and robot needed for both pipelines in docs/pipelines.md as VENDOR_PAGES in scrape.py (ids + product URLs) and push that first, because the agent strand plans against those ids. Then build the scraper (Claude extraction, run on Modal), then safety_rules.json, then ~20 benchmark tasks (about half with traps). Report after each step.
 ```
@@ -61,6 +65,8 @@ Rules:
 - Use the official anthropic Python SDK with model claude-opus-5-5 (planner.py already has the tool-use loop). Keep the offline fallback working so others can develop without a key.
 - The agent must never invent equipment outside the catalog or citations it did not retrieve; when evidence is missing it widens uncertainty and says so.
 
+Also read docs/validation.md; tasks 9–10 in your brief come from judge feedback.
+
 Start with task 1 in docs/strands/C-agent.md: a system prompt plus templates so the agent produces schema-valid LabSpec and Workflow JSON for the chemistry library-cascade scenario, end to end through layout_and_simulate. Then the FBDD crystallography scenario, then Amass, claims, iteration, report, and the no-tools "vanilla" bench arm. Report after each step.
 ```
 
@@ -74,11 +80,13 @@ You are my coding agent on LabForge, a hackathon project (demo at 13:00 on 4 Oct
 I own Strand D: room layout optimisation, the SimPy Monte Carlo throughput simulator, the claim verifier, and LabDesignBench scoring. Before writing code, read CLAUDE.md, CONTRIBUTING.md, ARCHITECTURE.md, docs/pipelines.md, docs/strands/D-layout-sim.md, all of schemas/, and backend/labforge/layout/, sim/, verify/, bench/runner.py.
 
 Rules:
-- Only edit backend/labforge/layout/, sim/, verify/ and bench/runner.py. Never edit schemas/ or examples/; draft contract changes for me to send to the integrator.
+- Only edit backend/labforge/layout/, sim/ (including whatif.py), verify/ and bench/runner.py. Never edit schemas/ or examples/; draft contract changes for me to send to the integrator.
 - Work on branch strand/sim: `git fetch origin && git checkout -b strand/sim origin/main`.
 - Run `make check` before every commit. At least once an hour: `git fetch origin && git rebase origin/main && make check && git push -u origin strand/sim`. Open a draft PR into main early.
 - Outputs must validate against schemas/layout, sim_result and claim. Add a test in backend/tests/ for each new behaviour.
 - The verifier must never trust numbers the agent reports; it recomputes them.
+
+Also read docs/validation.md; task 7 in your brief (vendor what-if sweeps) comes from judge feedback.
 
 Start with task 1 in docs/strands/D-layout-sim.md (batch_size, fan_out, operators with shifts, external and in-silico steps in the simulator), because both demo pipelines need it. Then multi-cluster placement with annealing, the safety validator, sensitivity analysis, Modal parallelism, and bench checks plus a leaderboard JSON. Report after each step.
 ```

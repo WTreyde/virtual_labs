@@ -14,6 +14,8 @@ from labforge.catalog.store import search
 from labforge.contracts import load_example
 from labforge.layout.placer import generate_layout
 from labforge.sim.simulate import simulate
+from labforge.sim.whatif import optimise_instrument
+from labforge.validation.runner import load_cases, run_case
 from labforge.verify.verifier import brier_score, verify_claims
 
 app = FastAPI(title="LabForge")
@@ -30,6 +32,7 @@ class DesignRequest(BaseModel):
     layout: dict | None = None
     sim_result: dict | None = None
     claims: list[dict] = []
+    instance_id: str | None = None
 
 
 @app.get("/health")
@@ -79,3 +82,14 @@ def report(req: DesignRequest):
 @app.get("/bench/tasks")
 def bench_tasks():
     return load_tasks()
+
+
+@app.post("/optimise")
+def optimise(req: DesignRequest):
+    lay = req.layout or generate_layout(req.lab_spec, req.workflow)
+    return optimise_instrument(req.lab_spec, req.workflow, lay, req.instance_id)
+
+
+@app.get("/validation")
+def validation():
+    return [run_case(c) for c in load_cases()]

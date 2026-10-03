@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "instrument_optimisation.schema.json",
+  "title": "InstrumentOptimisation",
+  "description": "Vendor view: how lab throughput responds when one instrument's spec changes in a given lab setup, and which change is worth most.",
+  "type": "object",
+  "required": ["instance_id", "catalog_id", "layout_id", "baseline", "sweeps"],
+  "properties": {
+    "instance_id": { "$ref": "common.schema.json#/$defs/id" },
+    "catalog_id": { "$ref": "common.schema.json#/$defs/id" },
+    "layout_id": { "$ref": "common.schema.json#/$defs/id" },
+    "baseline": {
+      "type": "object",
+      "required": ["throughput_p50"],
+      "properties": { "throughput_p50": { "type": "number" }, "unit": { "type": "string" }, "utilisation": { "type": "number" } }
+    },
+    "sweeps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["parameter", "points"],
+        "properties": {
+          "parameter": { "type": "string", "enum": ["cycle_time", "capacity", "transfer_time", "uptime"], "description": "cycle_time scales the instrument's step durations; capacity adds parallel slots." },
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["value", "throughput_p50"],
+              "properties": {
+                "value": { "type": "number", "description": "Multiplier for cycle_time/transfer_time/uptime, absolute slots for capacity." },
+                "throughput_p50": { "type": "number" },
+                "throughput_p10": { "type": "number" },
+                "throughput_p90": { "type": "number" }
+              }
+            }
+          },
+          "elasticity": { "type": "number", "description": "% throughput change per % improvement near baseline; ~0 means this spec is not the limit here." }
+        }
+      }
+    },
+    "headroom_note": { "type": "string", "description": "Plain-language takeaway for the vendor, e.g. 'beyond 30% faster, the LC-MS becomes the bottleneck'." },
+    "next_bottleneck": { "type": "string", "description": "Instance that limits throughput once this instrument is improved." }
+  }
+}

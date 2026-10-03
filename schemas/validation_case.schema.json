@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "validation_case.schema.json",
+  "title": "ValidationCase",
+  "description": "A real, published autonomous lab with a reported cost (and ideally throughput). LabForge designs the same lab from its brief and we compare predicted against reported.",
+  "type": "object",
+  "required": ["id", "name", "sources", "brief", "reported", "verified"],
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "name": { "type": "string" },
+    "domain": { "type": "string", "enum": ["biology", "chemistry", "materials", "mixed"] },
+    "sources": { "type": "array", "minItems": 1, "items": { "type": "string", "description": "DOI or URL." } },
+    "brief": { "type": "string", "description": "What the lab does, written as a user would describe it to LabForge. Must not mention the reported cost." },
+    "lab_spec": { "type": "object", "description": "Optional hand-written LabSpec, to test layout/sim/BOM without the agent." },
+    "workflow": { "type": "object", "description": "Optional hand-written Workflow using catalog ids." },
+    "reported": {
+      "type": "object",
+      "required": ["cost"],
+      "properties": {
+        "cost": {
+          "type": "object",
+          "required": ["value_usd", "includes"],
+          "properties": {
+            "value_usd": { "type": "number" },
+            "low_usd": { "type": "number" },
+            "high_usd": { "type": "number" },
+            "original": { "type": "string", "description": "As published, e.g. '£36,900 (2024)'." },
+            "year": { "type": "integer" },
+            "includes": {
+              "type": "array",
+              "description": "Which cost categories the reported figure covers, so we compare like with like.",
+              "items": { "type": "string", "enum": ["instruments", "robots", "analytics", "consumables", "software", "integration_labour", "construction", "staff"] }
+            },
+            "excludes_note": { "type": "string" }
+          }
+        },
+        "throughput": { "$ref": "common.schema.json#/$defs/uncertain_number" },
+        "throughput_unit": { "type": "string" }
+      }
+    },
+    "verified": { "type": "boolean", "description": "True only once a team member has read the primary source and checked the figures." },
+    "notes": { "type": "string" }
+  }
+}

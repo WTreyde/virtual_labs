@@ -24,6 +24,13 @@ Inferred conclusion: NL → vendor-agnostic, room-scale lab design with throughp
 3. **LabDesignBench.** ~20 briefs with hidden checks ([`bench_task.schema.json`](schemas/bench_task.schema.json)), including traps: impossible targets, rooms too small, placeholder specs, a simulator config the agent *could* edit to inflate throughput, unsafe shortcuts. We score agents on admitting infeasibility, not tampering, and calibration. Demo: a leaderboard showing our platform solving tasks that vanilla Claude without tools gets wrong.
 4. **Safe, standard control.** Layout rules for fume hoods, BSL zones, cryogens, robot/human envelopes; the BOM flags each instrument's control standard (SiLA 2, OPC-UA, vendor SDK) so the design is controllable, not just pretty.
 
+## Judge feedback (3 Oct): validation and vendor optimisation
+
+Details and owners in [`docs/validation.md`](docs/validation.md).
+
+5. **Validated against real labs.** Published autonomous labs with known costs become `ValidationCase`s; LabForge designs each from its brief and we report whether the real cost falls inside our P10–P90 band (like-for-like on what the figure covers).
+6. **Optimisation for vendors.** For any instrument in a designed lab, sweep its cycle time and capacity through the simulator: elasticity, headroom, and what becomes the bottleneck next. Tells a vendor which spec improvement is worth building for which kind of lab.
+
 ## Demo flow (5 minutes)
 
 1. Type the chemistry brief. Agent asks two follow-ups, cites literature via Amass for step durations, picks equipment.
