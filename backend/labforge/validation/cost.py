@@ -41,6 +41,11 @@ INTEGRATION_FRACTION = {
 }
 
 
+# Reported-cost categories the model can price from the catalog. Consumables, software licences and staff are not
+# modelled, so a published figure that includes them would be under-predicted; the runner flags such cases.
+MODELLED_CATEGORIES = {"instruments", "robots", "analytics", "construction", "integration_labour"}
+
+
 def cost_category(item: dict) -> str | None:
     """Which reported-cost category an item's purchase price belongs to; None for services, which are not capex."""
     if "external_service" in item["capabilities"]:

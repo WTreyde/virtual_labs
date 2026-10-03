@@ -10,7 +10,7 @@ import json
 from pathlib import Path
 
 from labforge.contracts import validate
-from labforge.validation.cost import compare, predicted_cost
+from labforge.validation.cost import MODELLED_CATEGORIES, compare, predicted_cost
 
 CASE_DIR = Path(__file__).parent / "cases"
 
@@ -28,7 +28,8 @@ def design_from_brief(case: dict) -> dict | None:
 def run_case(case: dict) -> dict:
     workflow = case.get("workflow") or design_from_brief(case)
     cost = case["reported"]["cost"]
-    row = {"id": case["id"], "name": case["name"], "verified": case["verified"], "includes": cost["includes"]}
+    row = {"id": case["id"], "name": case["name"], "verified": case["verified"], "includes": cost["includes"],
+           "unmodelled_categories": sorted(set(cost["includes"]) - MODELLED_CATEGORIES)}
     if workflow is None:
         return {**row, "status": "no_design_yet"}
     return {**row, "status": "compared", **compare(cost["value_usd"], predicted_cost(workflow, cost["includes"], build=case.get("build", "turnkey"),
