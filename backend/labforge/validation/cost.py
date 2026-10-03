@@ -61,9 +61,13 @@ def price_range(item: dict, basis: str | None = None) -> tuple[float, float, flo
     p = item.get("price_usd_estimate", 0.0)
     prov = item.get("provenance", {})
     prov = (basis and prov.get(f"price_usd_estimate.{basis}")) or prov.get("price_usd_estimate")
-    if prov and "low" in prov and "high" in prov:
+    if prov and "low" in prov and "high" in prov and prov["high"] > prov["low"]:
         return prov["low"], prov.get("value", p), prov["high"]
-    lo, hi = PRICE_BAND[item.get("data_confidence", "estimated")]
+    # No range (or a single number such as one list price): use the confidence band, because real purchase
+    # prices still vary around a list price.
+    if prov:
+        p = prov.get("value", p)
+    lo, hi = PRICE_BAND[(prov or {}).get("confidence") or item.get("data_confidence", "estimated")]
     return p * lo, p, p * hi
 
 
