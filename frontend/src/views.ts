@@ -100,75 +100,124 @@ function tile(label: string, before: string, after: string, good: boolean) {
   return `<div class="tile"><div class="tile-label">${esc(label)}</div><div class="tile-val"><span class="was">${esc(before)}</span> → <b>${esc(after)}</b> ${good ? "✓" : ""}</div></div>`;
 }
 
-export function showSchedule(s: ProjectSchedule, projects: ProjectRequest[], cached: boolean) {
+/** Readable project names for the demo queue; anything else falls back to its humanised id. */
+const PROJECT_NAME: Record<string, string> = {
+  enzyme_campaign: "Enzyme campaign", chem_library_screen: "Chemistry library screen", urgent_retest: "Urgent hit re-test",
+};
+const projectName = (id: string) => PROJECT_NAME[id] ?? id.replace(/_/g, " ");
+
+/**
+ * The Schedule tab: which order to run several projects through one existing lab. It states the question and the
+ * answer in plain words (built from the queue and the /prioritise result), explains each figure, names instruments
+ * by vendor and model rather than instance id, and restates the backend's caveat in plain words.
+ */
+export function showSchedule(s: ProjectSchedule, projects: ProjectRequest[], cached: boolean, deviceNames: Record<string, { short: string; full: string }> = {}) {
   const given = projects.map((p) => p.id);
   const rec = s.candidates.find((c) => c.policy === s.recommended) ?? s.candidates[0];
   const naive = s.candidates.find((c) => c.order?.join(">") === given.join(">"));
   const colour = Object.fromEntries(given.map((id, i) => [id, PROJECT_COLOURS[i] ?? C.before]));
   const pct = (f: number) => `${Math.round(f * 100)}%`;
+  // Lanes show the model (short); hover shows vendor and model (full).
+  const dev = (id: string) => deviceNames[id]?.full ?? id, devShort = (id: string) => deviceNames[id]?.short ?? id;
+  const short = (t: string) => (t.length > 24 ? `${t.slice(0, 23)}…` : t);
+  const instruments = new Set(projects.flatMap((p) => p.workflow.equipment.map((e) => e.instance_id)));
+  const plates = (p: ProjectRequest) => `${p.units} ${/^sbs|plate/.test(String((p.workflow as any).labware ?? "")) ? (p.units === 1 ? "plate" : "plates") : "units"}`;
+  const list = (xs: string[]) => (xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs.at(-1)}`);
 
+  // The question and the answer, in plain words.
+  const asked = list(projects.map((p) => `${/^[aeiou]/i.test(projectName(p.id)) ? "an" : "a"} ${projectName(p.id).toLowerCase()} (${plates(p)}${p.deadline_h != null ? `, due within ${num(p.deadline_h)} h` : ""})`));
+  const anyDeadline = projects.some((p) => p.deadline_h != null);
+  const question = `One existing screening cell, with ${instruments.size} instruments, has ${projects.length} projects waiting: ${asked}.
+    In what order should they run so ${anyDeadline ? "deadlines are met and " : ""}everything finishes soonest?`;
+  const recOrder = rec.order ?? [];
+  const fin = rec.project_finish_h ?? {};
+  const firstDue = recOrder.map((id) => projects.find((p) => p.id === id)).find((p) => p?.deadline_h != null);
+  const steps = recOrder.map((id, i) => {
+    const p = projects.find((q) => q.id === id), name = projectName(id);
+    const first = i === 0 ? `Run the ${name.toLowerCase()} first` : i === recOrder.length - 1 ? `then the ${name.toLowerCase()}` : `then the ${name.toLowerCase()}`;
+    return p === firstDue && fin[id] != null ? `${first} (done at ${num(fin[id])} h, deadline ${num(p!.deadline_h!)} h)` : first;
+  });
+  const answer = recOrder.length
+    ? `${steps.join(", ")}: everything is done in <b>${num(rec.makespan_h)} h</b>${naive ? ` instead of ${num(naive.makespan_h)} h in the order listed` : ""}${
+      (rec.deadline_misses?.length ?? 0) === 0 ? ", with no missed deadline" : `, but ${esc(list((rec.deadline_misses ?? []).map(projectName)))} still miss their deadline`}.`
+    : `Recommended: ${esc(rec.policy)}.`;
+
+  const tile2 = (label: string, explain: string, before: string, after: string, good: boolean) =>
+    `<div class="tile"><div class="tile-label">${esc(label)}</div><div class="tile-val"><span class="was">${esc(before)}</span> → <b>${esc(after)}</b> ${good ? "✓" : ""}</div><div class="tile-explain">${esc(explain)}</div></div>`;
   const tiles = naive
-    ? tile("Finishes in", `${num(naive.makespan_h)} h`, `${num(rec.makespan_h)} h`, rec.makespan_h < naive.makespan_h) +
-      tile("Lab busy", pct(naive.mean_utilisation), pct(rec.mean_utilisation), rec.mean_utilisation > naive.mean_utilisation) +
-      tile("Deadlines missed", String(naive.deadline_misses?.length ?? 0), String(rec.deadline_misses?.length ?? 0), (rec.deadline_misses?.length ?? 0) < (naive.deadline_misses?.length ?? 0))
+    ? tile2("Finishes in", "time until all projects are done (order listed → recommended)", `${num(naive.makespan_h)} h`, `${num(rec.makespan_h)} h`, rec.makespan_h < naive.makespan_h) +
+      tile2("Lab busy", "average share of time the cell's instruments are working", pct(naive.mean_utilisation), pct(rec.mean_utilisation), rec.mean_utilisation > naive.mean_utilisation) +
+      tile2("Deadlines missed", "projects finishing after their deadline", String(naive.deadline_misses?.length ?? 0), String(rec.deadline_misses?.length ?? 0), (rec.deadline_misses?.length ?? 0) < (naive.deadline_misses?.length ?? 0))
     : "";
 
-  // Gantt: one lane per instrument, bars coloured by project. Zero-length steps (load/unload) are omitted.
+  // Gantt: one lane per instrument (named by vendor and model), bars coloured by project. Zero-length steps omitted.
   const bars = (s.gantt ?? []).filter((g) => g.end_s > g.start_s);
   const lanes = [...new Set(bars.map((g) => g.instance))];
   const endH = Math.max(rec.makespan_h, ...bars.map((g) => g.end_s / 3600));
   const deadlines = projects.filter((p) => p.deadline_h != null);
   // Deadline labels sit above the chart at the top of their line, clear of the x-axis title below.
-  const W = 700, L = 96, R = 14, T = deadlines.length ? 22 : 8, lane = 24, H = T + lanes.length * lane + 34;
+  const W = 720, L = 160, R = 14, T = deadlines.length ? 22 : 8, lane = 24, H = T + lanes.length * lane + 34;
   const X = (h: number) => L + (h / endH) * (W - L - R);
   const step = endH > 12 ? 2 : 1, hours = Array.from({ length: Math.floor(endH / step) + 1 }, (_, i) => i * step);
   const gantt = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Gantt chart of the recommended schedule by instrument">
     ${hours.map((h) => `<line x1="${X(h)}" x2="${X(h)}" y1="${T}" y2="${T + lanes.length * lane}" stroke="${C.grid}"/><text x="${X(h)}" y="${T + lanes.length * lane + 14}" text-anchor="middle" class="tick">${h} h</text>`).join("")}
-    ${lanes.map((id, i) => `<text x="${L - 8}" y="${T + i * lane + lane / 2 + 4}" text-anchor="end" class="lane">${esc(id)}</text>`).join("")}
+    ${lanes.map((id, i) => `<text x="${L - 8}" y="${T + i * lane + lane / 2 + 4}" text-anchor="end" class="lane" data-tip="${esc(`<b>${esc(dev(id))}</b> (${esc(id)})`)}">${esc(short(devShort(id)))}</text>`).join("")}
     ${bars.map((g) => {
       const y = T + lanes.indexOf(g.instance) * lane + 5, x = X(g.start_s / 3600), w = Math.max(2, X(g.end_s / 3600) - x - 2);
-      const t = `<b>${esc(g.project)}</b> #${g.unit} · ${esc(g.step)} on ${esc(g.instance)}<br>${num(g.start_s / 3600, 2)}–${num(g.end_s / 3600, 2)} h`;
+      const t = `<b>${esc(projectName(g.project))}</b>, plate ${g.unit} · ${esc(g.step.replace(/_/g, " "))} on ${esc(dev(g.instance))}<br>${num(g.start_s / 3600, 2)}–${num(g.end_s / 3600, 2)} h`;
       return `<rect data-tip="${esc(t)}" x="${x}" y="${y}" width="${w}" height="14" rx="2" fill="${colour[g.project] ?? C.before}"/>`;
     }).join("")}
     ${deadlines.map((p) => {
-      const x = X(p.deadline_h!), label = `${p.id} deadline ${p.deadline_h} h`, right = x + 4 + label.length * 5.6 <= W - R;
+      const x = X(p.deadline_h!), label = `${projectName(p.id)} deadline ${num(p.deadline_h!)} h`, right = x + 4 + label.length * 5.6 <= W - R;
       return `<line x1="${x}" x2="${x}" y1="${T - 18}" y2="${T + lanes.length * lane}" stroke="${C.ink}" stroke-width="1.5" stroke-dasharray="5 3"/>
       <text x="${right ? x + 4 : x - 4}" y="${T - 9}" text-anchor="${right ? "start" : "end"}" class="ref">${esc(label)}</text>`;
     }).join("")}
     <text x="${L}" y="${H - 4}" class="axis">hours from start, recommended order</text></svg>`;
-  const legend = `<div class="legend">${given.map((id) => `<span><i style="background:${colour[id]}"></i>${esc(id)}</span>`).join("")}</div>`;
+  const legend = `<div class="legend">${given.map((id) => `<span><i style="background:${colour[id]}"></i>${esc(projectName(id))}</span>`).join("")}</div>`;
 
-  // Busy % per instrument, given order vs recommended.
+  // Busy % per instrument, order listed vs recommended.
   let busy = "";
   if (naive?.utilisation && rec.utilisation) {
     const ids = Object.keys(rec.utilisation).filter((k) => (rec.utilisation![k] ?? 0) > 0 || (naive.utilisation![k] ?? 0) > 0);
-    const BW = 700, BL = 96, row = 30, BH = ids.length * row + 8, bx = (f: number) => (BW - BL - 60) * f;
-    busy = `<h3>Lab busy % by instrument</h3>
-      <div class="legend"><span><i style="background:${C.before}"></i>order given (${esc(given.join(" → "))})</span><span><i style="background:${C.s1}"></i>recommended</span></div>
-      <svg viewBox="0 0 ${BW} ${BH}" role="img" aria-label="Busy fraction per instrument, order given versus recommended">
+    const BW = 720, BL = 160, row = 30, BH = ids.length * row + 8, bx = (f: number) => (BW - BL - 60) * f;
+    busy = `<h3>How busy each instrument is</h3>
+      <div class="legend"><span><i style="background:${C.before}"></i>order listed</span><span><i style="background:${C.s1}"></i>recommended order</span></div>
+      <svg viewBox="0 0 ${BW} ${BH}" role="img" aria-label="Busy fraction per instrument, order listed versus recommended">
       ${ids.map((id, i) => {
         const y = 4 + i * row, a = naive.utilisation![id] ?? 0, b = rec.utilisation![id] ?? 0;
-        return `<text x="${BL - 8}" y="${y + 14}" text-anchor="end" class="lane">${esc(id)}</text>
-          <rect data-tip="${esc(`<b>${id}</b> busy ${pct(a)} in the order given`)}" x="${BL}" y="${y}" width="${Math.max(2, bx(a))}" height="9" rx="2" fill="${C.before}"/>
+        return `<text x="${BL - 8}" y="${y + 14}" text-anchor="end" class="lane">${esc(short(devShort(id)))}</text>
+          <rect data-tip="${esc(`<b>${esc(dev(id))}</b> busy ${pct(a)} in the order listed`)}" x="${BL}" y="${y}" width="${Math.max(2, bx(a))}" height="9" rx="2" fill="${C.before}"/>
           <text x="${BL + bx(a) + 6}" y="${y + 8}" class="tick">${pct(a)}</text>
-          <rect data-tip="${esc(`<b>${id}</b> busy ${pct(b)} recommended`)}" x="${BL}" y="${y + 11}" width="${Math.max(2, bx(b))}" height="9" rx="2" fill="${C.s1}"/>
+          <rect data-tip="${esc(`<b>${esc(dev(id))}</b> busy ${pct(b)} in the recommended order`)}" x="${BL}" y="${y + 11}" width="${Math.max(2, bx(b))}" height="9" rx="2" fill="${C.s1}"/>
           <text x="${BL + bx(b) + 6}" y="${y + 19}" class="tick">${pct(b)}</text>`;
       }).join("")}</svg>`;
   }
 
-  const table = `<details><summary>Table view: every policy evaluated</summary><table>
-    <tr><th>Policy</th><th>Finishes (h)</th><th>Lab busy</th><th>Deadlines missed</th></tr>
-    ${s.candidates.map((c) => `<tr${c === rec ? ' class="rec"' : ""}><td>${esc(c.order ? c.order.join(" → ") : c.policy)}${c === rec ? " (recommended)" : c === naive ? " (order given)" : ""}</td>
-      <td>${num(c.makespan_h)}</td><td>${pct(c.mean_utilisation)}</td><td>${esc(c.deadline_misses?.join(", ") || "none")}</td></tr>`).join("")}
+  const orderText = (c: ProjectSchedule["candidates"][number]) => c.order ? c.order.map(projectName).join(" → ") : ({ interleave: "Take turns between projects", bottleneck_mix: "Mix projects to spread the load" } as Record<string, string>)[c.policy] ?? c.policy;
+  const table = `<details><summary>Table view: every order LabForge tried</summary><table>
+    <tr><th>Order</th><th>Finishes (h)</th><th>Lab busy</th><th>Deadlines missed</th></tr>
+    ${s.candidates.map((c) => `<tr${c === rec ? ' class="rec"' : ""}><td>${esc(orderText(c))}${c === rec ? " (recommended)" : c === naive ? " (order listed)" : ""}</td>
+      <td>${num(c.makespan_h)}</td><td>${pct(c.mean_utilisation)}</td><td>${esc((c.deadline_misses ?? []).map(projectName).join(", ") || "none")}</td></tr>`).join("")}
     </table></details>`;
 
-  const order = rec.order ? rec.order.join(" → ") : rec.policy;
+  // The backend's caveat in plain words when it has the usual shape; otherwise as written.
+  const m = s.caveat?.match(/\((\d+) replicates\):\s*recommended ([\d.]+) h \(P10-P90 ([\d.]+)-([\d.]+) h\) vs order given ([\d.]+) h \(([\d.]+)-([\d.]+) h\); recommended finishes first in (\d+)% of replicates/);
+  const caveat = m
+    ? `Planned on average step times, without transfer times or operator shifts. A check over ${m[1]} simulated variations of the step times
+       still gives about <b>${num(+m[2])} h</b> (likely ${num(+m[3])}–${num(+m[4])} h) for the recommended order vs ${num(+m[5])} h (${num(+m[6])}–${num(+m[7])} h) for the order listed;
+       the recommended order finished first in ${m[8]}% of them.`
+    : s.caveat ? esc(s.caveat) : "";
+
   openModal("What order should these projects run in?", `
-    <p class="muted">Recommended: <b>${esc(order)}</b>${s.gain_vs_naive != null ? `, finishing ${Math.round(s.gain_vs_naive * 100)}% sooner than the order given` : ""}.
-      Objective: ${s.objective === "weighted_tardiness" ? "meet deadlines first (weighted lateness)" : "finish soonest"}.${cached ? " <i>(cached run; backend offline)</i>" : ""}</p>
+    <div class="sched-qa">
+      <p class="sched-q"><span class="qa-tag">The question</span>${esc(question)}</p>
+      <p class="sched-a"><span class="qa-tag">The answer</span>${answer}${cached ? " <i class=\"muted\">(cached run; backend offline)</i>" : ""}</p>
+      <p class="muted">A separate planning example, not one of the case studies: it plans work through a lab that already exists.
+        The chemistry library screen here is the screening stage of a library like the chemistry case.</p>
+    </div>
     <div class="tiles">${tiles}</div>
     <h3>Recommended schedule</h3>${legend}${gantt}${busy}${table}
-    ${s.caveat ? `<p class="note">⚠ ${esc(s.caveat)}</p>` : ""}`);
+    ${caveat ? `<p class="note">⚠ ${caveat}</p>` : ""}`);
 }
 
 // ---- validation: predicted vs reported lab cost ------------------------------------------------
