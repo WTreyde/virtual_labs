@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "frontend/src/style.css"
+        ],
+        "createdAt": "2026-10-04T11:02:23.843Z",
+        "reason": "Existing case-study good/bad rules use green/red semantic status markers; commits predate and are outside this architecture-page change."
+      },
+      {
+        "rule": "border-accent-on-rounded",
+        "value": "*",
+        "files": [
+          "frontend/src/style.css"
+        ],
+        "createdAt": "2026-10-04T11:02:23.905Z",
+        "reason": "Existing top navigation has a square bottom divider, not an accent on a rounded card; commit predates and is outside this architecture-page change."
+      }
+    ]
+  }
+}
