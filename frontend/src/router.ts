@@ -10,7 +10,7 @@ export type Route =
 export function parseRoute(hash = location.hash): Route {
   const [a, b] = hash.replace(/^#\/?/, "").split("/");
   switch (a) {
-    case "case": return b ? { page: "case", name: decodeURIComponent(b) } : { page: "cases" };
+    case "case": return !b ? { page: "cases" } : b === "schedule" ? { page: "schedule" } : { page: "case", name: decodeURIComponent(b) };
     case "cases": return { page: "cases" };
     case "design": return { page: "design", whatif: b ? decodeURIComponent(b) : undefined };
     case "bench": case "validation": case "schedule": case "how": case "market": case "gallery": return { page: a };
@@ -25,7 +25,7 @@ export function migrateLegacyLinks() {
   let hash: string | undefined;
   const replay = q.get("replay"), view = q.get("view");
   if (replay) hash = `#/case/${encodeURIComponent(replay)}`;
-  else if (view === "plan") hash = "#/schedule";
+  else if (view === "plan") hash = "#/case/schedule";
   else if (view === "bench" || view === "validation") hash = `#/${view}`;
   else if (view?.startsWith("whatif:")) hash = `#/design/${encodeURIComponent(view.slice(7))}`;
   else if (q.get("demo") === "gallery") hash = "#/gallery";
