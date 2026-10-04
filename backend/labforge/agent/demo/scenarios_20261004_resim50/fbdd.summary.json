@@ -31,8 +31,7 @@
     "0 recorded layout violations; physical feasibility is qualified.",
     "Planning median 410.7 versus independent verifier 424.0 crystals_per_day; the headline is the planning simulation, not a verified measurement.",
     "Growth-hotel crystallisation-plate compatibility, shipper capacity and transit concurrency need confirmation.",
-    "Timing and yield assumptions are provisional; no physical lab was operated.",
-    "The current imager what-ifs also add staff; they do not isolate the effect of moving growth alone."
+    "Timing and yield assumptions are provisional; no physical lab was operated."
   ],
   "imager_staffing_whatifs": {
     "method": "independent verifier recomputation; no agent/model call",
@@ -41,12 +40,51 @@
       "seed": 12345
     },
     "baseline_verified_p50": 424.0,
-    "changes": [
-      "move crystal-growth residence to the existing Rock Imager",
-      "increase skilled-operator availability"
-    ],
-    "attribution": "These variants change growth residence and staffing together, so their throughput gain cannot be attributed to either change alone.",
+    "attribution": "The third_operator_only variant isolates added staff while growth stays in the STX44. Comparing it with third_operator estimates the additional imager-growth effect at the same staffing level.",
+    "isolated_effects": {
+      "third_operator_with_hotel_vs_baseline": -13.3,
+      "move_growth_to_imager_at_three_operators": 224.0,
+      "unit": "crystals_per_day",
+      "basis": "Differences between independently verified P50s with common replicate count and seed; simulation estimates, not causal measurements."
+    },
     "variants": {
+      "third_operator_only": {
+        "verified_p50": 410.7,
+        "p10": 332.3,
+        "p90": 560.0,
+        "unit": "crystals_per_day",
+        "baseline_verified_p50": 424.0,
+        "delta_vs_baseline": -13.3,
+        "beats_baseline": false,
+        "operator_utilisation": [
+          {
+            "instance_id": "skilled_operator_1",
+            "busy_fraction": 0.56,
+            "mean_queue_wait_s": 0.0
+          },
+          {
+            "instance_id": "skilled_operator_2",
+            "busy_fraction": 0.531,
+            "mean_queue_wait_s": 0.0
+          },
+          {
+            "instance_id": "skilled_operator_3",
+            "busy_fraction": 0.548,
+            "mean_queue_wait_s": 0.0
+          }
+        ],
+        "binding_limits": [
+          {
+            "kind": "instrument_capacity",
+            "instances": [
+              "growth_hotel_1"
+            ],
+            "severity": "medium",
+            "message": "growth_hotel_1 is busy 84% of the time.",
+            "suggestion": "Add a parallel unit or move slow steps elsewhere."
+          }
+        ]
+      },
       "third_operator": {
         "verified_p50": 634.7,
         "p10": 485.3,

@@ -25,5 +25,10 @@ def test_variants_change_only_growth_assignment_and_operator_availability():
         assert all(step['candidate_instances'] == ['imager_1']
                    for step in workflow['steps'] if step['id'] in changed)
 
+    spec, workflow, audit = prepare_variant(baseline, 8, move_growth=False)
+    assert spec['operators'][0]['count'] == 3
+    assert not audit['changed_fields']
+    assert workflow == original['workflow']
+
     assert original['lab_spec']['operators'][0]['count'] == 2
     assert original['lab_spec']['operators'][0]['shift_hours'] == 8

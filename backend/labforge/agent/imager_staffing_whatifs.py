@@ -1,9 +1,9 @@
-"""Verify two deterministic XChem imager/staffing what-ifs without a model call.
+"""Verify deterministic XChem imager/staffing what-ifs without a model call.
 
-Variant A moves crystal-growth residence to the existing Rock Imager and adds a
-third operator. Variant B keeps that change and models a second staffed shift as
-16 hours/day of availability for each of the three operators. Both variants use
-the independent verifier with 50 Monte Carlo replicates.
+One variant adds a third operator while growth stays in the STX44, isolating the
+staffing change. The combined variants also move growth to the existing Rock
+Imager, with either one or two staffed shifts. Every variant uses the independent
+verifier with 50 Monte Carlo replicates.
 """
 import argparse
 import copy
@@ -23,8 +23,8 @@ VERIFY_SEED = 12345
 RECORDED_BASELINE_P50 = 424.0
 
 
-def prepare_variant(baseline: dict, shift_hours: float) -> tuple[dict, dict, dict]:
-    """Copy the design, move growth to the imager, and staff three operators."""
+def prepare_variant(baseline: dict, shift_hours: float, move_growth: bool = True) -> tuple[dict, dict, dict]:
+    """Copy the design, optionally move growth, and staff three operators."""
     original = baseline['output']
     lab_spec = copy.deepcopy(original['lab_spec'])
     if len(lab_spec.get('operators', [])) != 1:
@@ -32,7 +32,11 @@ def prepare_variant(baseline: dict, shift_hours: float) -> tuple[dict, dict, dic
     before_operators = copy.deepcopy(lab_spec['operators'])
     lab_spec['operators'][0]['count'] = 3
     lab_spec['operators'][0]['shift_hours'] = shift_hours
-    workflow, growth_audit = move_growth_to_imager(original['workflow'])
+    if move_growth:
+        workflow, growth_audit = move_growth_to_imager(original['workflow'])
+    else:
+        workflow = copy.deepcopy(original['workflow'])
+        growth_audit = {'changed_fields': [], 'rule': 'Crystal-growth residence stays in the recorded STX44 hotel.'}
     validate(lab_spec, 'lab_spec')
     return lab_spec, workflow, {
         **growth_audit,
@@ -51,8 +55,8 @@ def prepare_variant(baseline: dict, shift_hours: float) -> tuple[dict, dict, dic
     }
 
 
-def verify_variant(baseline: dict, name: str, shift_hours: float) -> dict:
-    lab_spec, workflow, audit = prepare_variant(baseline, shift_hours)
+def verify_variant(baseline: dict, name: str, shift_hours: float, move_growth: bool = True) -> dict:
+    lab_spec, workflow, audit = prepare_variant(baseline, shift_hours, move_growth)
     proposed_layout = generate_layout(lab_spec, workflow)
     verified = recompute(lab_spec, workflow, proposed_layout,
                          replicates=VERIFY_REPLICATES, seed=VERIFY_SEED)
@@ -79,8 +83,9 @@ def verify_variant(baseline: dict, name: str, shift_hours: float) -> dict:
         'name': name,
         'method': 'deterministic recorded-design what-if; no agent/model call',
         'baseline_verified_p50': RECORDED_BASELINE_P50,
-        'change': ('Move crystal-growth residence to the Rock Imager; staff three operators for '
-                   f'{shift_hours:g} hours/day.'),
+        'change': (('Move crystal-growth residence to the Rock Imager; ' if move_growth else
+                    'Keep crystal-growth residence in the STX44; ') +
+                   f'staff three operators for {shift_hours:g} hours/day.'),
         'shift_model': ('The simulator represents a second shift as 16 hours/day availability for each operator; '
                         'it does not model shift handoff overhead.' if shift_hours == 16 else
                         'One 8-hour staffed shift.'),
@@ -120,6 +125,7 @@ def main() -> None:
     baseline = json.loads(args.baseline.read_text())
     args.output_directory.mkdir(parents=True, exist_ok=True)
     variants = {
+        'third_operator_only': verify_variant(baseline, 'third_operator_only', 8, move_growth=False),
         'third_operator': verify_variant(baseline, 'third_operator', 8),
         'second_shift': verify_variant(baseline, 'second_shift', 16),
     }

@@ -34,15 +34,29 @@ def _imager_whatif_summary(record):
 
 def _staffing_whatif_summary(record):
     summary = record['summary']
+    variants = summary['variants']
+    baseline = summary['recorded_baseline_verified_p50']
+    staff_only = variants.get('third_operator_only', {}).get('verified_p50')
+    combined = variants.get('third_operator', {}).get('verified_p50')
+    isolated = None
+    if staff_only is not None and combined is not None:
+        isolated = {
+            'third_operator_with_hotel_vs_baseline': round(staff_only - baseline, 1),
+            'move_growth_to_imager_at_three_operators': round(combined - staff_only, 1),
+            'unit': variants['third_operator']['unit'],
+            'basis': ('Differences between independently verified P50s with common replicate count and seed; '
+                      'simulation estimates, not causal measurements.'),
+        }
     return {
         'method': summary['method'],
         'verification_config': summary['verification_config'],
-        'baseline_verified_p50': summary['recorded_baseline_verified_p50'],
-        'changes': ['move crystal-growth residence to the existing Rock Imager',
-                    'increase skilled-operator availability'],
-        'attribution': ('These variants change growth residence and staffing together, so their throughput gain '
-                        'cannot be attributed to either change alone.'),
-        'variants': summary['variants'],
+        'baseline_verified_p50': baseline,
+        'attribution': ('The third_operator_only variant isolates added staff while growth stays in the STX44. '
+                        'Comparing it with third_operator estimates the additional imager-growth effect at the '
+                        'same staffing level.' if isolated else
+                        'The combined variants change growth residence and staffing together; attribution is not isolated.'),
+        'isolated_effects': isolated,
+        'variants': variants,
     }
 
 
@@ -114,9 +128,10 @@ def summarise(name, run, imager_whatif=None):
     if name == 'fbdd' and imager_whatif:
         if imager_whatif.get('kind') == 'imager_staffing_bundle':
             summary['imager_staffing_whatifs'] = _staffing_whatif_summary(imager_whatif)
-            summary['limits'].append(
-                'The current imager what-ifs also add staff; they do not isolate the effect of moving growth alone.'
-            )
+            if summary['imager_staffing_whatifs']['isolated_effects'] is None:
+                summary['limits'].append(
+                    'The current imager what-ifs also add staff; they do not isolate the effect of moving growth alone.'
+                )
         else:
             summary['imager_growth_whatif'] = _imager_whatif_summary(imager_whatif)
     return summary

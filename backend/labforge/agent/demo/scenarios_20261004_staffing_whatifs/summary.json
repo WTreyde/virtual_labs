@@ -6,6 +6,43 @@
   },
   "recorded_baseline_verified_p50": 424.0,
   "variants": {
+    "third_operator_only": {
+      "verified_p50": 410.7,
+      "p10": 332.3,
+      "p90": 560.0,
+      "unit": "crystals_per_day",
+      "baseline_verified_p50": 424.0,
+      "delta_vs_baseline": -13.3,
+      "beats_baseline": false,
+      "operator_utilisation": [
+        {
+          "instance_id": "skilled_operator_1",
+          "busy_fraction": 0.56,
+          "mean_queue_wait_s": 0.0
+        },
+        {
+          "instance_id": "skilled_operator_2",
+          "busy_fraction": 0.531,
+          "mean_queue_wait_s": 0.0
+        },
+        {
+          "instance_id": "skilled_operator_3",
+          "busy_fraction": 0.548,
+          "mean_queue_wait_s": 0.0
+        }
+      ],
+      "binding_limits": [
+        {
+          "kind": "instrument_capacity",
+          "instances": [
+            "growth_hotel_1"
+          ],
+          "severity": "medium",
+          "message": "growth_hotel_1 is busy 84% of the time.",
+          "suggestion": "Add a parallel unit or move slow steps elsewhere."
+        }
+      ]
+    },
     "third_operator": {
       "verified_p50": 634.7,
       "p10": 485.3,

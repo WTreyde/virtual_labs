@@ -36,8 +36,8 @@ def test_fbdd_summary_reports_the_separate_imager_growth_whatif():
     assert 'imager_growth_whatif' not in summary  # do not ship the stale 10-replicate result
     staffing = summary['imager_staffing_whatifs']
     assert staffing['verification_config']['replicates'] == 50
-    assert set(staffing['variants']) == {'third_operator', 'second_shift'}
+    assert set(staffing['variants']) == {'third_operator_only', 'third_operator', 'second_shift'}
     assert staffing['variants']['third_operator']['verified_p50'] == 634.7
     assert staffing['variants']['second_shift']['verified_p50'] == 1306.7
-    assert 'cannot be attributed' in staffing['attribution']
-    assert any('do not isolate' in limit for limit in summary['limits'])
+    assert staffing['isolated_effects'] is not None
+    assert 'isolates added staff' in staffing['attribution']
