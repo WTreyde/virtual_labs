@@ -18,11 +18,15 @@ A BenchAnswer (plain JSON; ask the integrator before relying on more fields):
      "input_fingerprint": str          # optional: labforge.verify.tamper.fingerprint() given to the agent}
 
 Run: python -m labforge.bench.runner --arms platform vanilla --out bench_results/leaderboard.json
+Each answer is saved to bench_results/answers/<arm>/<task_id>.json as it arrives (--answers to change the folder):
+rerun the same command to resume after a crash, or add --rescore-only to score the saved answers again with no agent calls.
 """
 import argparse
 import json
 import re
 import statistics
+import threading
+import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
@@ -107,7 +111,8 @@ def _vanilla(task: dict) -> dict:
                                 messages=[{"role": "user", "content": task["brief"]}]) as stream:
         response = stream.get_final_message()
     text = "".join(b.text for b in response.content if b.type == "text").strip()
-    return parse_vanilla(text, response.stop_reason)
+    usage = {k: v for k, v in response.usage.model_dump().items() if isinstance(v, int)} if response.usage else {}
+    return dict(parse_vanilla(text, response.stop_reason), usage=usage)
 
 
 def parse_vanilla(text: str, stop_reason: str | None = None) -> dict:
@@ -170,13 +175,18 @@ def run_arm(arm: str, task: dict) -> dict:
         raise NotImplementedError("no ANTHROPIC_API_KEY: arms were not run")
     from labforge.agent.planner import MODEL
     stamp = {"model": os.getenv("ANTHROPIC_MODEL") or MODEL}  # both arms read the same variable
+    started = time.monotonic()
     try:
         first = normalise(_ask(arm, task), arm, task)
         if first.get("workflow"):
-            return dict(first, follow_up_used=False, answered_at=_now(), **stamp)
+            return dict(first, follow_up_used=False, answered_at=_now(), elapsed_s=round(time.monotonic() - started, 1),
+                        **stamp)
         second_task = dict(task, brief=f"{task['brief']}\n\nYour previous reply was:\n{first['message']}\n\n{FOLLOW_UP}")
         second = normalise(_ask(arm, second_task), arm, task)
-        return dict(second, follow_up_used=True, first_reply=first["message"], answered_at=_now(), **stamp)
+        usage = {k: first.get("usage", {}).get(k, 0) + second.get("usage", {}).get(k, 0)
+                 for k in set(first.get("usage", {})) | set(second.get("usage", {}))}
+        return dict(second, follow_up_used=True, first_reply=first["message"], answered_at=_now(), usage=usage,
+                    elapsed_s=round(time.monotonic() - started, 1), **stamp)
     except Exception as e:  # a crash or unparsable JSON: reported as a failed run, not scored (run_failure)
         raw = {"messages": [{"role": "assistant", "content": f"(arm failed: {type(e).__name__}: {e})"}], "failed": True}
         return dict(normalise(raw, arm, task), answered_at=_now(), **stamp)
@@ -482,37 +492,61 @@ def score(task: dict, answer: dict) -> dict[str, bool | None]:
 
 
 # ---------- running and the leaderboard ----------
-def answer_for(arm: str, task: dict, answers_dir: Path | None) -> dict:
+def answer_for(arm: str, task: dict, answers_dir: Path | None, rescore_only: bool = False) -> dict:
     cached = answers_dir / arm / f"{task['id']}.json" if answers_dir else None
     if cached and cached.exists():
         return normalise(json.loads(cached.read_text()), arm, task)
+    if rescore_only:
+        raise NotImplementedError(f"no saved answer in {answers_dir} (--rescore-only never calls the agents)")
     answer = run_arm(arm, task)
-    if answers_dir:
+    if answers_dir and not answer.get("failed"):  # a crashed run is retried on restart, never reused
         cached.parent.mkdir(parents=True, exist_ok=True)
-        cached.write_text(json.dumps(answer, indent=1, default=str))
+        tmp = cached.with_suffix(".json.tmp")  # write then rename: a kill mid-write leaves no half file
+        tmp.write_text(json.dumps(answer, indent=1, default=str))
+        tmp.replace(cached)
     return answer
 
 
 def run_bench(arms: list[str], tasks: list[dict] | None = None, answers_dir: Path | None = None,
-              workers: int = 4, answer_fn=None) -> dict:
+              workers: int = 12, answer_fn=None, rescore_only: bool = False) -> dict:
     """Answer and score every task for every arm (answers fetched in parallel: they are LLM calls)."""
     tasks = tasks if tasks is not None else load_tasks()
-    get = answer_fn or (lambda arm, task: answer_for(arm, task, answers_dir))
+    get = answer_fn or (lambda arm, task: answer_for(arm, task, answers_dir, rescore_only))
     run_file = answers_dir / "run.json" if answers_dir else None
     run = json.loads(run_file.read_text()) if run_file and run_file.exists() else None
     jobs = [(arm, task) for arm in arms for task in tasks]
 
+    if answers_dir:
+        reused = sum((answers_dir / arm / f"{task['id']}.json").exists() for arm, task in jobs)
+        print(f"{reused}/{len(jobs)} answers already in {answers_dir}; running the other {len(jobs) - reused}", flush=True)
+    done = iter(range(1, len(jobs) + 1))
+    spent: dict[str, dict] = {arm: {"agent_seconds": 0.0} for arm in arms}  # what producing these answers cost
+    lock = threading.Lock()
+
     def one(job):
         arm, task = job
         try:
-            return arm, score_detailed(task, get(arm, task))
+            answer = get(arm, task)
+            with lock:
+                cost = spent[arm]
+                cost["agent_seconds"] = round(cost["agent_seconds"] + (answer.get("elapsed_s") or 0), 1)
+                for key, value in (answer.get("usage") or {}).items():
+                    cost[key] = cost.get(key, 0) + value
+            result = arm, score_detailed(task, answer)
         except NotImplementedError as e:
-            return arm, {"task_id": task["id"], "trap": task.get("trap", "none"), "checks": [], "score": None,
-                         "claims": [], "brier": None, "error": str(e)}
+            result = arm, {"task_id": task["id"], "trap": task.get("trap", "none"), "checks": [], "score": None,
+                           "claims": [], "brier": None, "error": str(e)}
+        print(f"[{next(done)}/{len(jobs)}] {arm} {task['id']}", flush=True)
+        return result
 
+    started = time.monotonic()
     with ThreadPoolExecutor(max_workers=workers) as pool:
         results = list(pool.map(one, jobs))
-    return leaderboard(arms, tasks, results, run)
+    board = leaderboard(arms, tasks, results, run)
+    board["cost"] = {"wall_clock_s": round(time.monotonic() - started, 1), "workers": workers, "by_arm": spent,
+                     "note": "tokens and agent seconds spent producing these answers (saved answers keep their "
+                             "original cost); wall clock is this invocation only"}
+    return board
 
 
 DESCRIPTION = (
@@ -581,11 +615,15 @@ def _one(values) -> str | None:
 def main():
     ap = argparse.ArgumentParser(description="Run LabDesignBench and write a leaderboard JSON.")
     ap.add_argument("--arms", nargs="+", default=["platform", "vanilla"])
-    ap.add_argument("--answers", type=Path, default=None, help="cache answers here as <arm>/<task_id>.json")
+    ap.add_argument("--answers", type=Path, default=Path("bench_results/answers"),
+                    help="save each answer here as <arm>/<task_id>.json as it arrives; rerun the same command to resume "
+                         "(saved answers are reused, crashed runs are retried)")
     ap.add_argument("--out", type=Path, default=Path("bench_results/leaderboard.json"))
     ap.add_argument("--list", action="store_true", help="only list tasks and their checks")
     ap.add_argument("--tasks", nargs="+", default=None, help="only these task ids (e.g. a smoke test)")
-    ap.add_argument("--workers", type=int, default=4, help="answers fetched in parallel")
+    ap.add_argument("--workers", type=int, default=12, help="answers fetched in parallel")
+    ap.add_argument("--rescore-only", action="store_true",
+                    help="score the saved answers in --answers again without calling any agent (e.g. after a scoring fix)")
     args = ap.parse_args()
     if args.list:
         for task in load_tasks():
@@ -597,12 +635,18 @@ def main():
         if unknown:
             ap.error(f"unknown task ids: {sorted(unknown)}")
         tasks = [t for t in tasks if t["id"] in args.tasks]
-    board = run_bench(args.arms, tasks=tasks, answers_dir=args.answers, workers=args.workers)
+    board = run_bench(args.arms, tasks=tasks, answers_dir=args.answers, workers=args.workers,
+                      rescore_only=args.rescore_only)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(board, indent=1))
     for row in board["arms"]:
         print(f"{row['arm']:>12}: score {row['score']}  ({row['checks_passed']}/{row['checks_total']} checks, "
               f"Brier {row['brier']}, {row['tasks_answered']} tasks answered, {row['runs_failed']} runs failed)")
+    cost = board["cost"]
+    for arm, c in cost["by_arm"].items():
+        print(f"{arm:>12}: {c.get('input_tokens', 0):,} input + {c.get('output_tokens', 0):,} output tokens "
+              f"(cache read {c.get('cache_read_input_tokens', 0):,}), {c['agent_seconds']:.0f} agent-seconds")
+    print(f"wall clock {cost['wall_clock_s'] / 60:.1f} min with {cost['workers']} workers")
     print(f"wrote {args.out}")
 
 

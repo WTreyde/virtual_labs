@@ -1,4 +1,19 @@
-# LabDesignBench results (3 Oct 2026, 21 tasks)
+# LabDesignBench results
+
+**Current leaderboard (4 Oct 2026, 21 tasks, main at 427c06e):** `leaderboard.json` here is a copy of `backend/bench_results/leaderboard.json` (PR #107). Its 42 answers are in `backend/bench_results/answers/`; re-score them with no API calls:
+
+    cd backend && python -m labforge.bench.runner --rescore-only --answers bench_results/answers --out /tmp/leaderboard.json
+
+| Arm | Checks passed | Brier | Tasks answered |
+|---|---|---|---|
+| platform (`claude-opus-5-5` + catalog, layout, simulator, verifier) | **0.810** (34/42) | 0.048 | 21 / 21 |
+| vanilla (`claude-opus-5-5`, no tools) | 0.658 (25/38) | 0.192 | 20 / 21 (one API refusal, both attempts kept) |
+
+On the 20 tasks both arms answered, platform passes 31/38 (0.82). One run; ~11 min with 12 workers. This run follows the platform-arm scoring fix in #109 (the scorer had read the planner's status line instead of its reply); no task, check or prompt changed. The earlier 4 Oct run (vanilla 0.703, platform 0.361) was scored with that bug.
+
+Everything below is the superseded 3 Oct run, kept for the record. Its answers are in `answers/`.
+
+## Superseded: 3 Oct 2026 run
 
 `leaderboard.json` is served at `GET /bench/leaderboard`. `answers/<arm>/<task>.json` are the arms' answers. They're trimmed to what the scorer reads (tool transcripts, reports and chat history removed), so you can re-score without API calls:
 

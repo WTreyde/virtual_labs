@@ -11,6 +11,7 @@ import { CASES, renderCases, renderLanding, summaryBox } from "./landing";
 import { LabScene } from "./LabScene";
 import { renderPanel } from "./panel";
 import { openReport } from "./report";
+import { howItWorksHtml } from "./howitworks";
 import { protocolsFor, renderProtocol, renderProtocolList } from "./protocols";
 import { describe, emptyDesign, loadReplay, loadSummary, loadWhatIfCache, playReplay } from "./replay";
 import { migrateLegacyLinks, parseRoute, routeKey, type Route } from "./router";
@@ -115,8 +116,11 @@ async function updateProtocolsPanel(d: Design) {
   const found = caps.length ? await protocolsFor(caps) : [];
   if (design !== d) return;
   box.classList.toggle("hidden", !found.length);
+  // Near the top of the panel (folded like every section); the count shows on its bar.
+  box.closest(".acc")!.querySelector(".acc-peek")!.textContent = found.length ? `${found.length} published` : "";
   box.innerHTML = found.length ? `<b>Protocols for this lab</b><ul>${found.map(({ row, matched }) =>
-    `<li><a href="#/protocols/${encodeURIComponent(row.id)}">${row.title.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`)}</a><div class="muted">covers ${matched.map((c) => c.replace(/_/g, " ")).join(", ")}</div></li>`).join("")}</ul>` : "";
+    `<li><a href="#/protocols/${encodeURIComponent(row.id)}">${row.title.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`)}</a><div class="muted">covers ${matched.map((c) => c.replace(/_/g, " ")).join(", ")}</div></li>`).join("")}</ul>
+    <a class="all-protocols" href="#/protocols">All protocols ▸</a>` : "";
 }
 
 /** One log entry per line, scrolled to the newest. */
@@ -154,7 +158,7 @@ async function go(r: Route) {
   setOffline(false);
   setChatEnabled(r.page === "design");
   $<HTMLInputElement>("#chat-input").placeholder = "Describe your lab...";
-  document.body.classList.toggle("page-view", ["bench", "validation", "schedule", "protocols"].includes(r.page));
+  document.body.classList.toggle("page-view", ["bench", "validation", "schedule", "protocols", "how"].includes(r.page));
   const onLanding = r.page === "landing" || r.page === "cases";
   document.body.classList.toggle("on-landing", onLanding);
   landing.classList.toggle("hidden", !onLanding);
@@ -195,6 +199,7 @@ async function go(r: Route) {
     case "validation": return openValidation();
     case "schedule": return openSchedule();
     case "protocols": return openProtocols(r.id);
+    case "how": return openModal("How LabForge works", howItWorksHtml(), true);
   }
 }
 window.addEventListener("hashchange", () => go(parseRoute()));
@@ -400,8 +405,16 @@ async function openSchedule() {
   // Max's demo queue (three projects on one screening cell); offline, a cached /prioritise run of the same queue.
   const projects = demoQueue.projects as unknown as ProjectRequest[];
   showLoading("What order should these projects run in?");
-  const { result, cached } = await prioritise(projects, demoQueue.lab_id, cachedDemoSchedule.schedule as ProjectSchedule);
-  showSchedule(result, projects, cached);
+  const extra = await Promise.all(["chem", "fbdd"].map((n) => loadReplay(n).then((x) => x.catalog ?? {}).catch(() => ({}))));
+  const [{ result, cached }, catalog] = await Promise.all([
+    prioritise(projects, demoQueue.lab_id, cachedDemoSchedule.schedule as ProjectSchedule), catalogItems(extra)]);
+  // Instruments by vendor and model, not instance id; a readable catalog id when the catalog doesn't have it.
+  const deviceNames: Record<string, { short: string; full: string }> = {};
+  for (const p of projects) for (const e of p.workflow.equipment) {
+    const it = catalog[e.catalog_id], fallback = e.catalog_id.replace(/_/g, " ");
+    deviceNames[e.instance_id] = it ? { short: it.model, full: `${it.vendor} ${it.model}` } : { short: fallback, full: fallback };
+  }
+  showSchedule(result, projects, cached, deviceNames);
 }
 /** #/protocols (list) and #/protocols/<id> (detail), static files from public/protocols/. */
 async function openProtocols(id?: string) {
