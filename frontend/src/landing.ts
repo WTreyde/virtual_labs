@@ -1,5 +1,6 @@
 import { health, LIVE_CHAT_MESSAGE } from "./api";
 import { loadReplay, loadSummary, type RecordedRun } from "./replay";
+import { startTwinHero, twinHero } from "./twin";
 import type { CaseSummary } from "./types";
 
 /**
@@ -75,17 +76,20 @@ export function caseHeadline(run: RecordedRun): { throughput?: string; detail?: 
   return { throughput: `${fmt(t.p50 ?? t.value)} ${unit}`, detail, bottleneck };
 }
 
-/** The landing page (#/): the pitch and two buttons, "Design your own lab" and "Case studies". */
+/** The landing page (#/): title, the pitch, two buttons ("Design your own lab", "Case studies") and the twin hero. */
 export function renderLanding(el: HTMLElement) {
   el.innerHTML = `
     <div class="landing-inner home">
+      <h1 class="hero-title">Digital twin for autonomous labs</h1>
       <p class="pitch">Describe the autonomous lab you want. An agent designs it from real vendor equipment, lays it out, simulates it,
         and tells you which of its own numbers it doesn't trust.</p>
       <div class="big-buttons">
         <a class="big-btn own" href="#/design"><span class="big-label">Design your own lab</span><span class="big-sub">Chat with the agent about your brief</span></a>
         <a class="big-btn" href="#/cases"><span class="big-label">Case studies</span><span class="big-sub">Two recorded agent runs, with what we checked</span></a>
       </div>
-    </div>`;
+    </div>
+    ${twinHero()}`;
+  startTwinHero(el);
   // Say up front when live design is unavailable (public demo, no backend, or no API key).
   health().then(({ state, liveAgent, note }) => {
     const own = el.querySelector<HTMLElement>(".big-btn.own");
