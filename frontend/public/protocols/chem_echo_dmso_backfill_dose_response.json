@@ -1,0 +1,81 @@
+{
+  "id": "chem_echo_dmso_backfill_dose_response",
+  "title": "Acoustic dose-response plate design with constant DMSO backfill",
+  "domain": "chemistry",
+  "pipeline": "chem_library",
+  "pipeline_steps": [
+    "liquid_handling"
+  ],
+  "summary": "A design pattern for Echo-based dose-response experiments: compounds sit in Echo-qualified source plates, each dose is transferred in multiples of the 2.5 nL drop, and DMSO is backfilled so every well carries the same solvent load; controls are added per plate and well positions can be randomised.",
+  "automation_level": "automated",
+  "steps": [
+    {
+      "order": 1,
+      "text": "Define the source plate map: well, compound and stock concentration, in Echo-qualified 384PP or 384LDV plates.",
+      "capability": "manual_bench"
+    },
+    {
+      "order": 2,
+      "text": "Plan a nine-point dose-response layout where each transfer volume is rounded to a multiple of 2.5 nL.",
+      "capability": "manual_bench"
+    },
+    {
+      "order": 3,
+      "text": "Add DMSO backfill so total DMSO per well is constant (about 100 nL in the example).",
+      "capability": "liquid_handling",
+      "catalog_ids": [
+        "beckman_echo_650"
+      ]
+    },
+    {
+      "order": 4,
+      "text": "Acoustically transfer compound doses into the destination plate.",
+      "capability": "liquid_handling",
+      "catalog_ids": [
+        "beckman_echo_650"
+      ],
+      "duration_s": {
+        "value": 300,
+        "confidence": "estimated",
+        "low": 120,
+        "high": 300,
+        "note": "Per-plate time not stated in source; 2-5 min per plate from docs/pipelines.md planning figure."
+      }
+    },
+    {
+      "order": 5,
+      "text": "Add vehicle and positive controls on every plate.",
+      "capability": "liquid_handling"
+    },
+    {
+      "order": 6,
+      "text": "Optionally randomise destination wells and keep replicates far apart to limit positional bias.",
+      "capability": "manual_bench"
+    }
+  ],
+  "equipment": [
+    {
+      "name": "Echo acoustic liquid handler",
+      "catalog_id": "beckman_echo_650"
+    },
+    {
+      "name": "Echo-qualified 384PP/384LDV source plates"
+    }
+  ],
+  "materials": [
+    "Compounds in DMSO"
+  ],
+  "safety": [],
+  "source": {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13370356/",
+    "publisher": "bioRxiv preprint (via PMC)",
+    "authors": "Kattunga V.M., Wrobel S.A., Lerner C.A. et al.",
+    "year": 2026,
+    "doi": "10.64898/2026.07.05.735934"
+  },
+  "license": "CC BY-NC 4.0",
+  "access": "open",
+  "confidence": "literature",
+  "notes": "Preprint (not peer reviewed). Source does not say which Echo model; echo_650 is our assumption.",
+  "retrieved": "2026-10-04"
+}

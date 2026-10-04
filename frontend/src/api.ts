@@ -197,3 +197,15 @@ export async function catalogNames(): Promise<Record<string, string>> {
     return {};
   }
 }
+
+/**
+ * Full catalog entries by id: the live /catalog when the backend is up, else the entries bundled offline (the two
+ * replays' catalogs and examples/catalog.json), so protocol equipment chips work without a backend.
+ */
+export async function catalogItems(offlineExtra: Record<string, CatalogItem>[] = []): Promise<Record<string, CatalogItem>> {
+  try {
+    const live: CatalogItem[] = await (await apiFetch("/catalog", { signal: AbortSignal.timeout(8000) })).json();
+    if (Array.isArray(live) && live.length) return byId(live);
+  } catch { /* offline: fall through */ }
+  return Object.assign({}, byId(catalogList as CatalogItem[]), ...offlineExtra);
+}

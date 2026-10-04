@@ -1,0 +1,105 @@
+{
+  "id": "chem_amide_library_fluorous_spe_96",
+  "title": "Parallel amide coupling in 96-well plates with automated fluorous solid-phase extraction",
+  "domain": "chemistry",
+  "pipeline": "chem_library",
+  "pipeline_steps": [
+    "reaction",
+    "filtration",
+    "evaporation",
+    "lcms"
+  ],
+  "summary": "Describes a 96-well parallel amide-coupling library using a fluorous triazine coupling reagent, workup through an ion-exchange resin plate, automated fluorous SPE, and Genevac evaporation, with LC-MS purity check. Useful for timing the coupling, workup and evaporation stages together.",
+  "automation_level": "semi_automated",
+  "steps": [
+    {
+      "order": 1,
+      "text": "Set up 8 x 12 reactions in a 96-well plate at 0.05 mmol scale (acid plus fluorous triazine reagent and N-methylmorpholine) and shake 30 min at 25 C.",
+      "capability": "reaction",
+      "duration_s": {
+        "value": 1800,
+        "confidence": "literature",
+        "note": "30 min stated."
+      }
+    },
+    {
+      "order": 2,
+      "text": "Add the amines and allow the coupling to run about 2 h.",
+      "capability": "reaction",
+      "duration_s": {
+        "value": 7200,
+        "confidence": "literature",
+        "note": "2 h stated."
+      }
+    },
+    {
+      "order": 3,
+      "text": "Transfer mixtures to a plate holding silica-supported SAX resin and rinse with THF (about 0.75 mL) to remove acid and byproducts.",
+      "capability": "filtration"
+    },
+    {
+      "order": 4,
+      "text": "Concentrate the filtrates on a Genevac EZ-2 centrifugal evaporator.",
+      "capability": "evaporation",
+      "catalog_ids": [
+        "genevac_ez2"
+      ]
+    },
+    {
+      "order": 5,
+      "text": "Redissolve residues in 0.5-1 mL DMF and load onto an automated fluorous SPE system (conditioning, load, 90:10 DMF/water fluorophobic elution of non-fluorous product, THF cartridge wash).",
+      "capability": "filtration",
+      "duration_s": {
+        "value": 540,
+        "confidence": "literature",
+        "note": "About 9 min per cartridge stated; up to ~100 separations in 1-2 h unattended."
+      }
+    },
+    {
+      "order": 6,
+      "text": "Evaporate the collected product fractions again on the Genevac and transfer to pre-weighed vials.",
+      "capability": "evaporation",
+      "catalog_ids": [
+        "genevac_ez2"
+      ]
+    },
+    {
+      "order": 7,
+      "text": "Check product purity by LC-MS with UV detection (87 of 96 products above 90% in the paper).",
+      "capability": "lcms"
+    }
+  ],
+  "equipment": [
+    {
+      "name": "Genevac EZ-2 evaporator",
+      "catalog_id": "genevac_ez2"
+    },
+    {
+      "name": "Automated F-SPE system (RapidTrace)"
+    },
+    {
+      "name": "96-well reaction plate and SAX resin plate"
+    },
+    {
+      "name": "LC-MS"
+    }
+  ],
+  "materials": [
+    "Fluorous triazine coupling reagent, carboxylic acids, amines, NMM, THF, DMF"
+  ],
+  "safety": [
+    "Flammable solvents; evaporator and SPE in ventilated area."
+  ],
+  "source": {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC1934609/",
+    "publisher": "Journal of Combinatorial Chemistry (via PMC)",
+    "authors": "Zhang W., Lu Y.",
+    "year": 2006,
+    "doi": "10.1021/cc0601130"
+  },
+  "license": "unknown: link and paraphrase only",
+  "access": "open",
+  "confidence": "literature",
+  "notes": "PMC copyright notice only; treat as link-and-paraphrase.",
+  "retrieved": "2026-10-04"
+}

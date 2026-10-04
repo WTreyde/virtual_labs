@@ -301,3 +301,35 @@ body.has-brief #statcard { overflow-y: auto; } /* top and max-height set from th
 #clockbar { width: 330px; } #clock-t { white-space: nowrap; font-size: 10px; }
 #modal table.sortable th[data-dir="asc"]::after { content: " ▲"; } #modal table.sortable th[data-dir="desc"]::after { content: " ▼"; }
 #modal .footnote { color: var(--muted); font-size: 13px; }
+
+/* Protocols tab */
+#modal .proto-filters { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin: 8px 0 14px; font: 13px var(--sys); }
+#modal .proto-filters select { font: 13px var(--sys); margin-left: 4px; }
+#modal .proto-group h3 { margin: 14px 0 8px; }
+#modal .proto-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+#modal .proto-card { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border: 2px solid #d9d6cc; border-radius: 8px; text-decoration: none; color: #1d2330; background: #fff; }
+#modal .proto-card:hover { border-color: #2b2f36; box-shadow: 0 3px 0 #0002; }
+#modal .proto-title { font-weight: 700; line-height: 1.35; }
+#modal .proto-meta, #modal .proto-src { font-size: 12px; color: var(--muted); }
+#modal .cap { display: inline-block; font-size: 11px; padding: 1px 7px; margin: 0 4px 3px 0; border-radius: 10px; background: #e7eef8; color: #1f4f8f; }
+#modal .lic { font-size: 11px; align-self: flex-start; padding: 1px 7px; border-radius: 4px; }
+#modal .lic.open { background: #e3f3e8; color: #1a5e33; } #modal .lic.restricted { background: #fff1d6; color: #7a5200; }
+#modal .proto-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+#modal .proto-kicker { color: var(--muted); font-size: 13px; }
+#modal .read-original { font-weight: 700; font-size: 15px; padding: 8px 14px; border: 2px solid #2b2f36; border-radius: 8px; background: #ffd23f; color: #1d2330; text-decoration: none; }
+#modal .licence-line { font-size: 13px; color: #1d2330; background: #f1efe6; padding: 8px 10px; border-radius: 6px; }
+#modal .proto-summary { font-size: 15px; line-height: 1.55; }
+#modal .safety { border: 2px solid #a3271a; background: #fde4df; color: #5c1209; border-radius: 8px; padding: 8px 12px; margin: 10px 0; }
+#modal .safety ul { margin: 4px 0 0 18px; padding: 0; }
+#modal .proto-steps { padding-left: 22px; } #modal .proto-steps li { margin: 8px 0 10px; line-height: 1.5; }
+#modal .step-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 4px; font-size: 12px; }
+#modal .equip { font: 12px var(--sys); padding: 2px 8px; border: 1px solid #2b2f36; border-radius: 10px; background: #fff; cursor: pointer; }
+#modal .equip:hover { background: #ffd23f; } #modal .equip.off { border-style: dashed; color: var(--muted); cursor: default; }
+#modal .step-dur { margin-left: auto; } #modal .no-time { color: var(--muted); font-style: italic; }
+#modal .materials { columns: 2; font-size: 13px; }
+body.page-view #statcard { position: fixed; top: auto; bottom: 24px; right: 24px; left: auto; max-height: 60vh; overflow-y: auto; z-index: 60; display: block; } /* clear of the header and its "Read the original" link */
+body.page-view #statcard.hidden { display: none !important; }
+body.page-view #statcard .whatif { display: none; } /* no simulated design behind a protocol */
+#protocols-for { padding: 8px 10px; border: 3px solid #2b2f36; border-radius: 6px; background: #fbfbf5; }
+#protocols-for ul { margin: 4px 0 0; padding-left: 16px; font: 13px/1.45 var(--sys); } #protocols-for li { margin: 4px 0; }
+#protocols-for a { color: #1f5fae; }

@@ -1,0 +1,117 @@
+{
+  "id": "chem_modular_block_synthesis_workup_lcms",
+  "title": "Multistep parallel synthesis in a 96-vial reaction block with block-level workup and LC-MS yields",
+  "domain": "chemistry",
+  "pipeline": "chem_library",
+  "pipeline_steps": [
+    "reaction",
+    "heating_stirring",
+    "filtration",
+    "lcms"
+  ],
+  "summary": "A three-step modular synthesis run in a 96-vial stirred reaction block (Para-dox style), where building block stocks are dosed by volume, steps run overnight to two days, and crude mixtures are worked up in-block and quantified by LC-MS against an internal standard. Gives realistic dosing volumes and step durations for a block-based cascade.",
+  "automation_level": "semi_automated",
+  "steps": [
+    {
+      "order": 1,
+      "text": "Prepare 0.25 M stock solutions of 8 carbonyl building blocks and the sulfinamide partner; dose about 80 uL of each per vial plus about 40 mg solid base.",
+      "capability": "liquid_dosing",
+      "duration_s": {
+        "value": 0,
+        "confidence": "placeholder",
+        "note": "Time to dose not stated."
+      }
+    },
+    {
+      "order": 2,
+      "text": "Stir the first reaction at room temperature for 14 h.",
+      "capability": "reaction",
+      "catalog_ids": [
+        "chemspeed_isynth"
+      ],
+      "duration_s": {
+        "value": 50400,
+        "confidence": "literature",
+        "note": "14 h stated."
+      }
+    },
+    {
+      "order": 3,
+      "text": "Add toluene (about 400 uL), stir 5 min at 1000 rpm, centrifuge and extract to get crude intermediate.",
+      "capability": "centrifugation",
+      "duration_s": {
+        "value": 300,
+        "confidence": "literature",
+        "note": "5 min stirring stated."
+      }
+    },
+    {
+      "order": 4,
+      "text": "Add the bifunctional reagent, Ni catalyst and Zn powder, stir 48 h at room temperature.",
+      "capability": "reaction",
+      "duration_s": {
+        "value": 172800,
+        "confidence": "literature",
+        "note": "48 h stated."
+      }
+    },
+    {
+      "order": 5,
+      "text": "Add photocatalyst and silyl triflate solutions (about 50 uL each) and irradiate with blue light for 20 h.",
+      "capability": "reaction",
+      "duration_s": {
+        "value": 72000,
+        "confidence": "literature",
+        "note": "20 h stated."
+      }
+    },
+    {
+      "order": 6,
+      "text": "Quench with ammonia in acetonitrile (about 600 uL per vial), stir 10 min, then concentrate, exchange solvent and filter.",
+      "capability": "filtration",
+      "duration_s": {
+        "value": 600,
+        "confidence": "literature",
+        "note": "10 min stirring stated."
+      }
+    },
+    {
+      "order": 7,
+      "text": "Take aliquots of the crude mixtures and run LC-MS with an internal standard (1,3,5-trimethoxybenzene) to get yields by peak-area ratio.",
+      "capability": "lcms"
+    }
+  ],
+  "equipment": [
+    {
+      "name": "96-vial parallel synthesis block (Para-dox)"
+    },
+    {
+      "name": "Photoreactor, blue LED"
+    },
+    {
+      "name": "LC-MS"
+    },
+    {
+      "name": "Chemspeed ISYNTH (suggested equivalent)",
+      "catalog_id": "chemspeed_isynth"
+    }
+  ],
+  "materials": [
+    "Aldehyde/ketone stocks, sulfinamide, Cs2CO3, Ni catalyst, Zn nanopowder, TMSOTf, pyrylium photocatalyst"
+  ],
+  "safety": [
+    "Zn nanopowder, TMSOTf and ammonia need ventilated handling; blue-light reactor shielding."
+  ],
+  "source": {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10610918",
+    "publisher": "Science Advances (via PMC)",
+    "authors": "Goetz et al.",
+    "year": 2023,
+    "doi": "10.1126/sciadv.adj2314"
+  },
+  "license": "CC BY-NC 4.0",
+  "access": "open",
+  "confidence": "literature",
+  "notes": "This is a SLAP-reagent cascade, not Suzuki; used as a block-format multistep analogue. Equipment mapping is ours.",
+  "retrieved": "2026-10-04"
+}

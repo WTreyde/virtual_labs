@@ -5,7 +5,7 @@
  */
 export type Route =
   | { page: "landing" } | { page: "cases" } | { page: "case"; name: string } | { page: "design"; whatif?: string }
-  | { page: "bench" } | { page: "validation" } | { page: "schedule" } | { page: "gallery" };
+  | { page: "bench" } | { page: "validation" } | { page: "schedule" } | { page: "gallery" } | { page: "protocols"; id?: string };
 
 export function parseRoute(hash = location.hash): Route {
   const [a, b] = hash.replace(/^#\/?/, "").split("/");
@@ -14,6 +14,7 @@ export function parseRoute(hash = location.hash): Route {
     case "cases": return { page: "cases" };
     case "design": return { page: "design", whatif: b ? decodeURIComponent(b) : undefined };
     case "bench": case "validation": case "schedule": case "gallery": return { page: a };
+    case "protocols": return { page: "protocols", id: b ? decodeURIComponent(b) : undefined };
     default: return { page: "landing" };
   }
 }
