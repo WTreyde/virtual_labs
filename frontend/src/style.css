@@ -342,6 +342,8 @@ body.page-view #statcard .whatif { display: none; } /* no simulated design behin
 #protocols-for { padding: 8px 10px; border: 3px solid #2b2f36; border-radius: 6px; background: #fbfbf5; }
 #protocols-for ul { margin: 4px 0 0; padding-left: 16px; font: 13px/1.45 var(--sys); } #protocols-for li { margin: 4px 0; }
 #protocols-for a { color: #1f5fae; }
+#protocols-for summary { cursor: pointer; } #protocols-for summary .muted { font: 12px var(--sys); }
+#protocols-for .all-protocols { display: inline-block; margin-top: 4px; font: 12px var(--sys); color: #1f5fae; }
 
 /* Schedule tab: question, answer and tile explanations. */
 #modal .sched-qa { margin: 4px 0 12px; }

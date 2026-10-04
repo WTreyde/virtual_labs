@@ -86,8 +86,10 @@ async function updateProtocolsPanel(d: Design) {
   const found = caps.length ? await protocolsFor(caps) : [];
   if (design !== d) return;
   box.classList.toggle("hidden", !found.length);
-  box.innerHTML = found.length ? `<b>Protocols for this lab</b><ul>${found.map(({ row, matched }) =>
-    `<li><a href="#/protocols/${encodeURIComponent(row.id)}">${row.title.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`)}</a><div class="muted">covers ${matched.map((c) => c.replace(/_/g, " ")).join(", ")}</div></li>`).join("")}</ul>` : "";
+  // Near the top of the panel, collapsed, so it is visible on case pages without pushing the rest down.
+  box.innerHTML = found.length ? `<details><summary><b>Protocols for this lab (${found.length})</b> <span class="muted">published methods for its steps</span></summary><ul>${found.map(({ row, matched }) =>
+    `<li><a href="#/protocols/${encodeURIComponent(row.id)}">${row.title.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`)}</a><div class="muted">covers ${matched.map((c) => c.replace(/_/g, " ")).join(", ")}</div></li>`).join("")}</ul>
+    <a class="all-protocols" href="#/protocols">All protocols ▸</a></details>` : "";
 }
 
 /** One log entry per line, scrolled to the newest. */
