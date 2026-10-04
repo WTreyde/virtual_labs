@@ -69,6 +69,14 @@ class SessionTests(unittest.TestCase):
         self.assertEqual(dispense['minimum_parallel_slots_for_target'], 3)
         self.assertEqual(dispense['upper_bound_plates_per_day'], 48)
 
+    def test_planner_simulation_uses_noise_aware_sample_floor(self):
+        from labforge.agent.tools import PLANNER_REPLICATES, _layout_and_simulate
+        with patch('labforge.layout.placer.generate_layout', return_value=copy.deepcopy(self.result['layout'])), \
+             patch('labforge.sim.simulate.simulate', return_value=copy.deepcopy(self.result['sim_result'])) as simulate:
+            _layout_and_simulate(self.spec, self.workflow)
+        self.assertEqual(PLANNER_REPLICATES, 50)
+        self.assertEqual(simulate.call_args.kwargs['replicates'], PLANNER_REPLICATES)
+
     def test_spoofed_status_is_ignored_and_invalid_numbers_rejected(self):
         self.design()
         c = {**claim(), 'status': 'supported', 'verified_value': 999}
