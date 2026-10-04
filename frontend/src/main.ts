@@ -1,6 +1,6 @@
 import "@fontsource/press-start-2p";
 import Phaser from "phaser";
-import { benchTasks, chatStream, exampleDesign, health, HttpError, LIVE_CHAT_MESSAGE, leaderboard, liveCatalog, optimise, prioritise, setOffline, validation } from "./api";
+import { benchTasks, catalogItems, catalogNames, chatStream, exampleDesign, health, HttpError, LIVE_CHAT_MESSAGE, leaderboard, liveCatalog, optimise, prioritise, setOffline, validation } from "./api";
 import demoQueue from "../../backend/labforge/catalog/data/demo_prioritise_queue.json";
 import cachedDemoSchedule from "./fixtures/demo_schedule.json";
 import { galleryDesign } from "./fixtures/gallery";
@@ -11,12 +11,13 @@ import { CASES, renderCases, renderLanding, summaryBox } from "./landing";
 import { LabScene } from "./LabScene";
 import { renderPanel } from "./panel";
 import { openReport } from "./report";
+import { protocolsFor, renderProtocol, renderProtocolList } from "./protocols";
 import { describe, emptyDesign, loadReplay, loadSummary, loadWhatIfCache, playReplay } from "./replay";
 import { migrateLegacyLinks, parseRoute, routeKey, type Route } from "./router";
 import { clock } from "./timeline";
 import type { ChatMessage, Design, ProjectRequest, ProjectSchedule } from "./types";
 import { dialogue, hideStatCard, introLines, onTick, setupClock, showStatCard } from "./ui";
-import { closeModal, showError, showHtml, showLeaderboard, showLoading, showSchedule, showValidation, showWhatIf } from "./views";
+import { closeModal, openModal, showError, showHtml, showLeaderboard, showLoading, showSchedule, showValidation, showWhatIf } from "./views";
 
 /**
  * Strand A: the one-page app. Hash routes (see router.ts) pick what the shared game, panel and modal show:
@@ -75,6 +76,18 @@ function show(d: Design) {
   game.scene.getScene("lab")?.scene.restart({ design });
   renderPanel(d);
   updateWhatIfButton();
+  updateProtocolsPanel(d);
+}
+
+/** "Protocols for this lab": published protocols covering this design's capabilities (client-side for_workflow). */
+async function updateProtocolsPanel(d: Design) {
+  const box = $("#protocols-for");
+  const caps = [...new Set(d.workflow.equipment.flatMap((e) => d.catalog[e.catalog_id]?.capabilities ?? []))];
+  const found = caps.length ? await protocolsFor(caps) : [];
+  if (design !== d) return;
+  box.classList.toggle("hidden", !found.length);
+  box.innerHTML = found.length ? `<b>Protocols for this lab</b><ul>${found.map(({ row, matched }) =>
+    `<li><a href="#/protocols/${encodeURIComponent(row.id)}">${row.title.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`)}</a><div class="muted">covers ${matched.map((c) => c.replace(/_/g, " ")).join(", ")}</div></li>`).join("")}</ul>` : "";
 }
 
 /** One log entry per line, scrolled to the newest. */
@@ -112,7 +125,7 @@ async function go(r: Route) {
   setOffline(false);
   setChatEnabled(r.page === "design");
   $<HTMLInputElement>("#chat-input").placeholder = "Describe your lab...";
-  document.body.classList.toggle("page-view", ["bench", "validation", "schedule"].includes(r.page));
+  document.body.classList.toggle("page-view", ["bench", "validation", "schedule", "protocols"].includes(r.page));
   const onLanding = r.page === "landing" || r.page === "cases";
   document.body.classList.toggle("on-landing", onLanding);
   landing.classList.toggle("hidden", !onLanding);
@@ -151,6 +164,7 @@ async function go(r: Route) {
     case "bench": return openBench();
     case "validation": return openValidation();
     case "schedule": return openSchedule();
+    case "protocols": return openProtocols(r.id);
   }
 }
 window.addEventListener("hashchange", () => go(parseRoute()));
@@ -361,9 +375,34 @@ async function openSchedule() {
   const { result, cached } = await prioritise(projects, demoQueue.lab_id, cachedDemoSchedule.schedule as ProjectSchedule);
   showSchedule(result, projects, cached);
 }
+/** #/protocols (list) and #/protocols/<id> (detail), static files from public/protocols/. */
+async function openProtocols(id?: string) {
+  openModal(id ? "Protocol" : "Protocols", `<div id="proto-root"><p class="muted">Loading…</p></div>`, true);
+  const root = $("#proto-root"), r = route;
+  if (!id) return renderProtocolList(root);
+  const extra = await Promise.all(["chem", "fbdd"].map((n) => loadReplay(n).then((x) => x.catalog ?? {}).catch(() => ({}))));
+  const catalog = await catalogItems(extra);
+  if (route !== r) return;
+  await renderProtocol(root, id, catalog);
+  const h2 = document.querySelector("#modal h2"), title = root.querySelector<HTMLElement>(".proto-head")?.dataset.title;
+  if (h2 && title) h2.textContent = title;
+  // Equipment chips open the catalog stat card, as clicking the instrument in the lab would.
+  root.addEventListener("click", (e) => {
+    const cid = (e.target as HTMLElement).closest<HTMLElement>(".equip[data-cid]")?.dataset.cid;
+    if (!cid) return;
+    const d = emptyDesign();
+    d.catalog = catalog;
+    d.workflow = { id: "protocol", equipment: [{ instance_id: cid, catalog_id: cid }] };
+    showStatCard(d, cid);
+  });
+}
+
 async function openValidation() {
   showLoading("Does LabForge price real labs right?", "Comparing against published labs…");
-  try { showValidation(await validation()); } catch (e) {
+  try {
+    const [rows, names] = await Promise.all([validation(), catalogNames()]);
+    showValidation(rows, names);
+  } catch (e) {
     showError("Does LabForge price real labs right?", e instanceof HttpError ? `The backend returned an error (${e.status}).` : "Needs the backend (make backend).");
   }
 }

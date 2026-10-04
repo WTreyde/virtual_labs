@@ -1,0 +1,94 @@
+{
+  "id": "chem_integrated_synthesis_purification_testing",
+  "title": "Integrated small-library synthesis, MS-triggered purification, DMSO stock prep and TR-FRET testing",
+  "domain": "chemistry",
+  "pipeline": "chem_library",
+  "pipeline_steps": [
+    "reaction",
+    "hplc",
+    "concentration_measurement",
+    "evaporation",
+    "liquid_handling",
+    "fluorescence_read"
+  ],
+  "summary": "A fast loop from synthesis to biochemical read: up to 48 compounds per run are made in vials on a synthesiser, purified by MS-triggered prep-HPLC with concentration from charged-aerosol detection, dried in 96-well plates, taken up in DMSO, serially diluted and screened by TR-FRET. Turn-around was 15-30 h versus 7-10 days conventionally.",
+  "automation_level": "semi_automated",
+  "steps": [
+    {
+      "order": 1,
+      "text": "Run amide (acylation) or Buchwald coupling reactions for up to 48 compounds in 4 mL vials on an automated microwave synthesiser.",
+      "capability": "reaction",
+      "catalog_ids": [
+        "chemspeed_swing_xl"
+      ]
+    },
+    {
+      "order": 2,
+      "text": "Purify crude products by MS-triggered preparative HPLC.",
+      "capability": "hplc"
+    },
+    {
+      "order": 3,
+      "text": "Measure concentration of each purified fraction with a charged aerosol detector.",
+      "capability": "concentration_measurement"
+    },
+    {
+      "order": 4,
+      "text": "Transfer fractions to 96-well plates (two aliquots per compound: bioassay and NMR purity) and dry on a vacuum evaporator.",
+      "capability": "evaporation"
+    },
+    {
+      "order": 5,
+      "text": "Dissolve dried compound to 10 mM in DMSO.",
+      "capability": "liquid_handling"
+    },
+    {
+      "order": 6,
+      "text": "Make 11-point, 3-fold serial dilutions in a 384-well plate.",
+      "capability": "liquid_handling"
+    },
+    {
+      "order": 7,
+      "text": "Run the TR-FRET binding assay (EED target) and read on an EnVision plate reader.",
+      "capability": "fluorescence_read",
+      "duration_s": {
+        "value": 54000,
+        "confidence": "literature",
+        "note": "Whole 22-member amide loop (synthesis to assay result) stated as 15 h; attached here as an end-to-end figure."
+      }
+    }
+  ],
+  "equipment": [
+    {
+      "name": "Chemspeed SWAVE microwave synthesiser (SWING XL suggested as nearest catalog item)",
+      "catalog_id": "chemspeed_swing_xl"
+    },
+    {
+      "name": "Prep HPLC-MS with CAD"
+    },
+    {
+      "name": "UltraVap Mistral evaporator"
+    },
+    {
+      "name": "PerkinElmer EnVision"
+    }
+  ],
+  "materials": [
+    "Acids, amines, aryl halides, DMSO, EED TR-FRET reagents"
+  ],
+  "safety": [
+    "Microwave synthesis and prep-HPLC solvents: ventilated area."
+  ],
+  "source": {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5392760/",
+    "publisher": "ACS Medicinal Chemistry Letters (via PMC)",
+    "authors": "Baranczak A. et al.",
+    "year": 2017,
+    "doi": "10.1021/acsmedchemlett.7b00054"
+  },
+  "license": "unknown: link and paraphrase only",
+  "access": "open",
+  "confidence": "literature",
+  "notes": "Step 7 duration is end-to-end loop time, not the read time. Catalog id is a nearest match, not the paper's instrument.",
+  "retrieved": "2026-10-04"
+}

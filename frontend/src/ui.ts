@@ -172,7 +172,12 @@ export function showStatCard(d: Design, instanceId: string, sprite?: string) {
 
 const bar = document.querySelector<HTMLDivElement>("#clockbar")!;
 const play = bar.querySelector<HTMLButtonElement>("#play")!, scrub = bar.querySelector<HTMLInputElement>("#scrub")!;
-const hms = (s: number) => [s / 3600, (s / 60) % 60, s % 60].map((n) => String(Math.floor(n)).padStart(2, "0")).join(":");
+/** Sim time as "Day 3, 14:05:22": the day into the run (day 1 starts at t = 0) and the time within that day. */
+export function dayClock(t: number): string {
+  const s = Math.max(0, Math.floor(t)), day = Math.floor(s / 86400) + 1, r = s % 86400;
+  const hms = [r / 3600, (r / 60) % 60, r % 60].map((n) => String(Math.floor(n)).padStart(2, "0")).join(":");
+  return `Day ${day}, ${hms}`;
+}
 let scrubbing = false;
 
 function setPlaying(on: boolean) { clock.playing = on; play.textContent = on ? "❚❚" : "▶"; }
@@ -189,7 +194,7 @@ export function setupClock(d: Design) {
 }
 
 export function onTick(e: { t: number; end: number; done: number; moving: number }) {
-  bar.querySelector("#clock-t")!.textContent = `T+${hms(e.t)}`;
+  bar.querySelector("#clock-t")!.textContent = dayClock(e.t);
   bar.querySelector("#clock-done")!.textContent = `${e.done} finished · ${e.moving} in transit`;
   if (!scrubbing) scrub.value = String(Math.round((1000 * e.t) / Math.max(1, e.end)));
 }

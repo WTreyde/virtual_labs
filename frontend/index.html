@@ -26,6 +26,7 @@
       <a href="#/bench" data-route="bench">Bench</a>
       <a href="#/validation" data-route="validation">Validation</a>
       <a href="#/schedule" data-route="schedule">Schedule</a>
+      <a href="#/protocols" data-route="protocols">Protocols</a>
     </nav>
     <section id="landing" class="hidden" aria-label="Start"></section>
     <main id="app">
@@ -39,7 +40,7 @@
             <option value="1">1×</option><option value="60">60×</option><option value="300" selected>300×</option>
             <option value="1800">1800×</option><option value="3600">3600×</option>
           </select>
-          <span id="clock-t">T+00:00:00</span>
+          <span id="clock-t" title="Simulated time: day into the run, then hours:minutes:seconds">Day 1, 00:00:00</span>
         </div>
         <input id="scrub" type="range" min="0" max="1000" value="0" aria-label="Sim time" />
         <div class="stats"><span id="clock-done"></span><span id="clock-src"></span></div>
@@ -56,6 +57,7 @@
       <section id="fix" class="hidden"></section>
       <section id="verdicts" class="hidden"></section>
       <section id="bom"></section>
+      <section id="protocols-for" class="hidden"></section>
       <section id="chat">
         <div id="log"></div>
         <form id="chat-form"><input id="chat-input" placeholder="Describe your lab..." /><button>Send</button></form>

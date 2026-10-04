@@ -1,0 +1,91 @@
+{
+  "id": "xchem_dry_shipper_unipuck_shipping",
+  "title": "Shipping UniPucks to a synchrotron in a dry shipper",
+  "domain": "biology",
+  "pipeline": "xchem",
+  "pipeline_steps": [
+    "cryo_cooling",
+    "cold_storage",
+    "external_service",
+    "xray_diffraction"
+  ],
+  "summary": "Pack up to 16 pins per UniPuck, stack pucks in a dry-shipper dewar charged with liquid nitrogen, and send by courier to the beamline. The UniPuck is the standard that European synchrotron sample changers accept.",
+  "automation_level": "manual",
+  "steps": [
+    {
+      "order": 1,
+      "text": "Load up to 16 pins per UniPuck, crystals upward, under LN2.",
+      "capability": "cryo_cooling",
+      "catalog_ids": [
+        "ln2_storage_dewar"
+      ]
+    },
+    {
+      "order": 2,
+      "text": "Place pucks in the shipping cane/canister; a CX100-type dewar takes up to 7 pucks (112 samples), newer high-throughput dewars up to 24 (384).",
+      "capability": "cryo_cooling"
+    },
+    {
+      "order": 3,
+      "text": "Charge the dry-shipper dewar with LN2 until the absorbent liner is saturated, let it settle, then pour off free liquid.",
+      "capability": "cold_storage",
+      "duration_s": {
+        "value": 7200,
+        "confidence": "estimated",
+        "note": "Standard dry-shipper conditioning is hours; source gives no time. 2 h assumed."
+      }
+    },
+    {
+      "order": 4,
+      "text": "Insert the cane and close the shipper; keep it upright and avoid tipping.",
+      "capability": "cold_storage"
+    },
+    {
+      "order": 5,
+      "text": "Register the shipment with the facility and send by courier, checking that cold holding time covers transit plus delays.",
+      "capability": "external_service"
+    },
+    {
+      "order": 6,
+      "text": "At the facility the pucks are loaded on the beamline sample changer (e.g. Diamond I04-1).",
+      "capability": "xray_diffraction",
+      "catalog_ids": [
+        "diamond_i04_1"
+      ]
+    }
+  ],
+  "equipment": [
+    {
+      "name": "Dry-shipper dewar"
+    },
+    {
+      "name": "UniPuck set"
+    },
+    {
+      "name": "Beamline",
+      "catalog_id": "diamond_i04_1"
+    }
+  ],
+  "materials": [
+    "UniPucks",
+    "Shipping cane or canister",
+    "Liquid nitrogen"
+  ],
+  "safety": [
+    "Liquid nitrogen: eye and hand protection; ventilate rooms.",
+    "Dry shippers must be stood upright; do not ship damaged ones.",
+    "Check courier dangerous-goods rules for nitrogen dry shippers."
+  ],
+  "source": {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5633908/",
+    "publisher": "Acta Crystallographica Section D (IUCr, via PMC)",
+    "authors": "Papp et al.",
+    "year": 2017,
+    "doi": "10.1107/S2059798317013742"
+  },
+  "license": "CC BY",
+  "access": "open",
+  "confidence": "literature",
+  "notes": "Diamond's own shipping pages (dry shipping puck holders) were found in search results but returned 403 when opened, so facility-specific rules are NOT paraphrased here; consult them. Pflugrath 2015 (PMC4461322) adds: fill dry shippers with LN2 on arrival, dry the foam after use, use overnight couriers.",
+  "retrieved": "2026-10-04"
+}

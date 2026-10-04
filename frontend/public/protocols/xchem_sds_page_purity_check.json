@@ -1,0 +1,101 @@
+{
+  "id": "xchem_sds_page_purity_check",
+  "title": "Assessing protein purity by SDS-PAGE with Coomassie staining",
+  "domain": "biology",
+  "pipeline": "xchem",
+  "pipeline_steps": [
+    "protein_qc"
+  ],
+  "summary": "Prepare reduced, heat-denatured samples, run them on a precast gel at constant 180 V alongside a ladder, and stain with Coomassie G250 to judge purity by band pattern. Community protocol on protocols.io (draft, no DOI).",
+  "automation_level": "manual",
+  "steps": [
+    {
+      "order": 1,
+      "text": "Dilute the purified protein to about 0.5 mg/mL (cell lysates about 20 mg/mL), after measuring concentration with a Bradford assay.",
+      "capability": "protein_qc"
+    },
+    {
+      "order": 2,
+      "text": "Mix sample with 4x LDS sample buffer and DTT, bringing the total to 50 uL.",
+      "capability": "protein_qc"
+    },
+    {
+      "order": 3,
+      "text": "Heat the mixture at 95 C for 5 minutes.",
+      "capability": "protein_qc",
+      "duration_s": {
+        "value": 300,
+        "confidence": "literature",
+        "note": "Stated in source."
+      }
+    },
+    {
+      "order": 4,
+      "text": "Rinse the wells of a precast 4-12% gel, mount it, and fill the buffer chambers with 1x running buffer.",
+      "capability": "protein_qc",
+      "catalog_ids": [
+        "biorad_mini_protean_tetra"
+      ]
+    },
+    {
+      "order": 5,
+      "text": "Load a prestained ladder (10 uL) and samples (about 10 uL purified protein, 20 uL lysate), keeping under the well capacity.",
+      "capability": "protein_qc"
+    },
+    {
+      "order": 6,
+      "text": "Run at constant 180 V until the dye front reaches the bottom; this takes roughly 30-70 minutes depending on gel and buffer.",
+      "capability": "protein_qc",
+      "duration_s": {
+        "value": 3000,
+        "confidence": "literature",
+        "note": "Source gives 30-70 min; midpoint 50 min."
+      }
+    },
+    {
+      "order": 7,
+      "text": "Wash the gel in warm water, stain with Coomassie G250 for about 30 minutes with gentle agitation, de-stain, and read the bands for contaminants.",
+      "capability": "protein_qc",
+      "duration_s": {
+        "value": 1800,
+        "confidence": "literature",
+        "note": "30 min staining as stated."
+      }
+    }
+  ],
+  "equipment": [
+    {
+      "name": "Mini vertical gel system (source used a different brand)",
+      "catalog_id": "biorad_mini_protean_tetra"
+    },
+    {
+      "name": "Power supply"
+    },
+    {
+      "name": "Water bath or heat block"
+    }
+  ],
+  "materials": [
+    "Precast gel",
+    "LDS sample buffer",
+    "DTT",
+    "Running buffer",
+    "Coomassie Brilliant Blue G250",
+    "Protein ladder"
+  ],
+  "safety": [
+    "Concentrated HCl (used to make the stain) goes in a fume hood.",
+    "Never touch the tank while power is on; switch off before handling leaks."
+  ],
+  "source": {
+    "url": "https://www.protocols.io/view/assessing-protein-purity-using-sds-page-cegktbuw.pdf",
+    "publisher": "protocols.io",
+    "authors": "Shalo, Fadanka, Mowoh",
+    "year": 2022
+  },
+  "license": "CC BY 4.0 (stated in the protocol's own licence line)",
+  "access": "open",
+  "confidence": "literature",
+  "notes": "Protocol is marked draft/working on protocols.io and has no DOI. Catalog id is a stand-in for the brand used in the source.",
+  "retrieved": "2026-10-04"
+}

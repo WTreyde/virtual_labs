@@ -32,7 +32,7 @@ modal.addEventListener("mouseleave", () => tip.classList.add("hidden"));
 
 export function closeModal() { modal.classList.add("hidden"); tip.classList.add("hidden"); }
 
-function openModal(title: string, html: string, wide = false) {
+export function openModal(title: string, html: string, wide = false) {
   modal.classList.toggle("wide", wide);
   modal.innerHTML = `<button class="close" aria-label="Close" title="Close (Esc)">✕</button><h2>${esc(title)}</h2>${html}`;
   modal.classList.remove("hidden");
@@ -177,9 +177,21 @@ const usd = (v: number) => (v >= 1e6 ? `$${+(v / 1e6).toFixed(1)}M` : v >= 1e3 ?
 const shortName = (n: string) => { const s = n.split(/[(:,]/)[0].trim(); return s.length > 26 ? `${s.slice(0, 24)}…` : s; };
 
 const STATUS_TEXT: Record<string, string> = { no_design_yet: "No design yet", error: "Error", not_costable: "Not costable", compared: "Compared" };
+/** "42% medium": the stated chance the real cost is within ±25% of P50, and its label. Experimental. */
 const confidenceText = (r: ValidationRow) => {
-  const c = r.predicted?.confidence?.within_25pct;
-  return c == null ? "" : `${Math.round(c * 100)}% chance within ±25%`;
+  const c = r.predicted?.confidence;
+  return c?.within_25pct == null ? "" : `${Math.round(c.within_25pct * 100)}%${c.label ? ` ${c.label}` : ""}`;
+};
+/** Plain words for the cost model's main_gap codes. */
+const GAP_TEXT: Record<string, string> = {
+  range: "wide price range", source: "weak price source", year_gap: "old price", basis_mismatch: "bare vs equipped price unknown",
+  proxy_model: "similar model used as stand-in", configuration: "configuration unknown",
+};
+const mainUncertainty = (r: ValidationRow, names: Record<string, string>) => {
+  const d = r.predicted?.confidence?.drivers?.[0];
+  if (!d) return "";
+  const name = names[d.catalog_id] ?? d.catalog_id.replace(/_/g, " ");
+  return `${name} (${GAP_TEXT[d.main_gap ?? ""] ?? String(d.main_gap ?? "").replace(/_/g, " ")})`;
 };
 
 /**
@@ -188,10 +200,17 @@ const confidenceText = (r: ValidationRow) => {
  * only as "experimental" because it does not yet beat a constant baseline (docs/validation.md). Cases without a
  * comparison (no design yet, error, not costable) are listed with their reason, never plotted as $0.
  */
-export function showValidation(rows: ValidationRow[]) {
+export function showValidation(rows: ValidationRow[], names: Record<string, string> = {}) {
   const pts = rows.filter((r) => r.status === "compared" && r.reported_usd && r.predicted);
   const rest = rows.filter((r) => !pts.includes(r));
   const inBand = pts.filter((r) => r.within_p10_p90).length;
+  const within25 = pts.filter((r) => r.within_25pct != null);
+  const blind = pts.filter((r) => r.split === "out_of_sample"), hasSplit = pts.some((r) => r.split);
+  // Calibration of the experimental score, from the data: mean stated chance vs how often cases actually landed
+  // within ±25%, on verified like-for-like cases only.
+  const calib = pts.filter((r) => r.verified && r.like_for_like !== false && r.within_25pct != null && r.predicted?.confidence?.within_25pct != null);
+  const stated = calib.length ? calib.reduce((s, r) => s + r.predicted!.confidence!.within_25pct!, 0) / calib.length : undefined;
+  const observed = calib.length ? calib.filter((r) => r.within_25pct).length / calib.length : undefined;
   let chart = `<p class="muted">No case has a LabForge design to compare yet.</p>`, hiddenLabels = 0;
   if (pts.length) {
     const vals = pts.flatMap((r) => [r.reported_usd!, r.predicted!.p10, r.predicted!.p90]);
@@ -213,6 +232,9 @@ export function showValidation(rows: ValidationRow[]) {
     const taken: Box[] = pts.map((r) => ({ x0: X(r.reported_usd!) - 6, x1: X(r.reported_usd!) + 6, y0: Y(r.predicted!.p90), y1: Y(r.predicted!.p10) }));
     const marks = [...pts].sort((a, b) => a.reported_usd! - b.reported_usd!).map((r) => {
       const p = r.predicted!, x = X(r.reported_usd!), y = Y(p.p50), hollow = !r.verified, name = shortName(r.name), w = name.length * 5.9 + 6;
+      // Not like-for-like (e.g. a used robot against new prices): greyed with a dashed band. Blind-test cases: diamonds.
+      const unfair = r.like_for_like === false, col = unfair ? C.before : C.s1, dash = unfair ? ' stroke-dasharray="3 3"' : "";
+      const blindPt = r.split === "out_of_sample";
       const spots: { x: number; y: number; a: string; box: Box; lead?: boolean }[] = [];
       for (const dy of [0, -14, 14, -28, 28, -42, 42, -56, 56, -70, 70]) {
         const ly = y + dy;
@@ -229,47 +251,83 @@ export function showValidation(rows: ValidationRow[]) {
         const leader = spot.lead ? `<line x1="${x + (spot.a === "start" ? 6 : -6)}" y1="${y}" x2="${spot.a === "start" ? spot.box.x0 - 2 : spot.box.x1 + 2}" y2="${spot.y - 4}" stroke="${C.ink2}" stroke-width="1"/>` : "";
         label = `${leader}<text x="${spot.x}" y="${spot.y}" text-anchor="${spot.a}" class="lane">${esc(name)}</text>`;
       } else hiddenLabels++;
-      const conf = confidenceText(r);
+      const c = p.confidence, mu = mainUncertainty(r, names);
       const tip = `<b>${esc(r.name)}</b><br>Reported ${usd(r.reported_usd!)} · predicted ${usd(p.p50)} (80% band ${usd(p.p10)}–${usd(p.p90)})<br>` +
-        `${r.within_p10_p90 ? "Inside" : "Outside"} the band${r.like_for_like === false ? " · not like-for-like" : ""}` +
-        (conf ? `<br>Confidence (experimental): ${conf}` : "") +
+        `${r.within_p10_p90 ? "Inside" : "Outside"} the band${r.within_25pct != null ? ` · ${r.within_25pct ? "within" : "not within"} ±25%` : ""}` +
+        (unfair ? `<br><i>Not like-for-like${r.like_for_like_reason ? ` (${esc(r.like_for_like_reason)})` : ""}; left out of calibration</i>` : "") +
+        (r.split ? `<br>${r.split === "out_of_sample" ? "Blind test (out of sample)" : "In sample (method tuned on it)"}` : "") +
+        (c?.within_25pct != null ? `<br>Confidence ${Math.round(c.within_25pct * 100)}% (${esc(c.label ?? "")}${c.experimental !== false ? ", experimental" : ""})${
+          c.data_coverage != null ? ` · data coverage ${Math.round(c.data_coverage * 100)}%` : ""}` : "") +
+        (mu ? `<br>Main uncertainty: ${esc(mu)}` : "") +
+        (c?.unpriced_items?.length ? `<br>Unpriced: ${esc(c.unpriced_items.join(", "))}` : "") +
         (r.unmodelled_categories?.length ? `<br>Not modelled: ${esc(r.unmodelled_categories.join(", "))}` : "") +
         (r.design_provenance ? "<br><i>Designed by the agent, cost withheld</i>" : "") +
         (hollow ? "<br><i>Reported cost not verified</i>" : "");
-      return `<g data-tip="${esc(tip)}">
-        <line x1="${x}" x2="${x}" y1="${Y(p.p10)}" y2="${Y(p.p90)}" stroke="${C.s1}" stroke-width="2"/>
-        <line x1="${x - 5}" x2="${x + 5}" y1="${Y(p.p10)}" y2="${Y(p.p10)}" stroke="${C.s1}" stroke-width="2"/>
-        <line x1="${x - 5}" x2="${x + 5}" y1="${Y(p.p90)}" y2="${Y(p.p90)}" stroke="${C.s1}" stroke-width="2"/>
+      const marker = blindPt
+        ? `<path d="M ${x} ${y - 7} L ${x + 7} ${y} L ${x} ${y + 7} L ${x - 7} ${y} Z" fill="${hollow ? C.surface : col}" stroke="${hollow ? col : C.surface}" stroke-width="2"/>`
+        : `<circle cx="${x}" cy="${y}" r="5" fill="${hollow ? C.surface : col}" stroke="${hollow ? col : C.surface}" stroke-width="2"/>`;
+      return `<g data-tip="${esc(tip)}"${unfair ? ' opacity="0.75"' : ""}>
+        <line x1="${x}" x2="${x}" y1="${Y(p.p10)}" y2="${Y(p.p90)}" stroke="${col}" stroke-width="2"${dash}/>
+        <line x1="${x - 5}" x2="${x + 5}" y1="${Y(p.p10)}" y2="${Y(p.p10)}" stroke="${col}" stroke-width="2"/>
+        <line x1="${x - 5}" x2="${x + 5}" y1="${Y(p.p90)}" y2="${Y(p.p90)}" stroke="${col}" stroke-width="2"/>
         <circle cx="${x}" cy="${y}" r="14" fill="transparent"/>
-        <circle cx="${x}" cy="${y}" r="5" fill="${hollow ? C.surface : C.s1}" stroke="${hollow ? C.s1 : C.surface}" stroke-width="2"/>
+        ${marker}
         ${label}</g>`;
     }).join("");
     chart = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Predicted against reported lab cost, log scales">${grid}${diag}${marks}
       <text x="${(L + W - R) / 2}" y="${H - 8}" text-anchor="middle" class="axis">reported cost (USD, log scale)</text>
       <text x="14" y="${(T + H - B) / 2}" text-anchor="middle" class="axis" transform="rotate(-90 14 ${(T + H - B) / 2})">LabForge predicted cost, P50 with 80% band (USD, log)</text></svg>
       <div class="legend"><span><i style="background:${C.s1};border-radius:50%"></i>reported cost verified</span><span><i style="background:${C.surface};border:2px solid ${C.s1};border-radius:50%;width:7px;height:7px"></i>reported cost not verified</span>
-        <span><i style="background:${C.s1};width:2px;height:12px;border-radius:0"></i>80% band (P10–P90)</span>${hiddenLabels ? `<span class="muted">${hiddenLabels} labels left off to avoid overlap; hover a point for its name</span>` : ""}</div>`;
+        <span><i style="background:${C.s1};width:2px;height:12px;border-radius:0"></i>80% band (P10–P90)</span>
+        ${pts.some((r) => r.like_for_like === false) ? `<span><i style="background:${C.before};border-radius:50%"></i>not like-for-like (dashed band)</span>` : ""}
+        ${hasSplit ? `<span><i style="background:${C.s1};transform:rotate(45deg);border-radius:0;width:8px;height:8px"></i>blind test (out of sample)</span>` : ""}${hiddenLabels ? `<span class="muted">${hiddenLabels} labels left off to avoid overlap; hover a point for its name</span>` : ""}</div>`;
   }
   const byStatus = (st: string) => rest.filter((r) => r.status === st);
   const restList = ["not_costable", "error", "no_design_yet"].filter((st) => byStatus(st).length).map((st) =>
     `<p class="muted"><b>${STATUS_TEXT[st]} (${byStatus(st).length}):</b> ${byStatus(st).map((r) => `<span title="${esc(r.reason ?? "")}">${esc(shortName(r.name))}</span>`).join(" · ")}${
       new Set(byStatus(st).map((r) => r.reason)).size === 1 && byStatus(st)[0].reason ? ` <i>(${esc(byStatus(st)[0].reason)})</i>` : ""}</p>`).join("");
-  const table = `<details${pts.length ? "" : " open"}><summary>Table view: all ${rows.length} cases</summary><table>
-    <tr><th>Case</th><th>Status</th><th>Reported</th><th>Predicted P10 – P50 – P90</th><th>In band</th><th>Confidence (experimental)</th><th>Source verified</th></tr>
-    ${rows.map((r) => `<tr><td>${esc(r.name)}</td>
+  const table = `<details${pts.length ? "" : " open"}><summary>Table view: all ${rows.length} cases (click a column to sort)</summary><table class="sortable">
+    <thead><tr><th data-k="name">Case</th><th data-k="status">Status</th><th data-k="reported" data-num>Reported</th><th data-k="p50" data-num>Predicted P10 – P50 – P90</th><th data-k="band">In band</th>
+      <th data-k="conf" data-num>Confidence (experimental)</th><th data-k="mu">Main uncertainty</th><th data-k="verified">Source verified</th></tr></thead><tbody>
+    ${rows.map((r) => `<tr data-name="${esc(r.name)}" data-status="${esc(r.status)}" data-reported="${r.reported_usd ?? -1}" data-p50="${r.status === "compared" ? r.predicted?.p50 ?? -1 : -1}"
+      data-band="${r.within_p10_p90 == null ? "" : r.within_p10_p90 ? "yes" : "no"}" data-conf="${r.predicted?.confidence?.within_25pct ?? -1}" data-mu="${esc(mainUncertainty(r, names))}" data-verified="${r.verified ? "yes" : "no"}"><td>${esc(r.name)}${r.like_for_like === false ? ' <span class="muted">(not like-for-like)</span>' : ""}</td>
       <td>${esc(STATUS_TEXT[r.status] ?? r.status.replace(/_/g, " "))}${r.reason ? `<div class="muted">${esc(r.reason)}</div>` : ""}</td>
       <td>${r.reported_usd ? usd(r.reported_usd) : "–"}</td>
       <td>${r.status === "compared" && r.predicted ? `${usd(r.predicted.p10)} – ${usd(r.predicted.p50)} – ${usd(r.predicted.p90)}` : "–"}</td>
-      <td>${r.within_p10_p90 == null ? "–" : r.within_p10_p90 ? "yes" : "no"}</td><td>${esc(confidenceText(r) || "–")}</td><td>${r.verified ? "yes" : "no"}</td></tr>`).join("")}
-    </table></details>`;
+      <td>${r.within_p10_p90 == null ? "–" : r.within_p10_p90 ? "yes" : "no"}</td><td>${esc(confidenceText(r) || "–")}</td><td>${esc(mainUncertainty(r, names) || "–")}</td><td>${r.verified ? "yes" : "no"}</td></tr>`).join("")}
+    </tbody></table></details>`;
   openModal("Does LabForge price real labs right?", `
-    <p class="lead">Our 80% cost band (P10–P90) caught <b>${inBand} of ${pts.length}</b> published labs we could compare.
+    <p class="lead">${blind.length ? `Blind test: <b>${blind.filter((r) => r.within_p10_p90).length} of ${blind.length}</b> inside the 80% band. ` : ""}Our 80% cost band (P10–P90) caught <b>${inBand} of ${pts.length}</b> published labs we could compare.
       Points on the dashed line would be exact.</p>
-    <p class="muted">${pts.length} of ${rows.length} cases have a LabForge design to compare. The single-number confidence score is
-      <b>experimental</b>: it does not yet beat a constant baseline, so we show the band, not the score.</p>
+    <p class="muted">${pts.length} of ${rows.length} cases have a LabForge design to compare${within25.length ? `; within ±25% of our P50: <b>${within25.filter((r) => r.within_25pct).length} of ${within25.length}</b>` : ""}.
+      The single-number confidence score is <b>experimental</b>: it does not yet beat a constant baseline, so we show the band, not the score.</p>
     ${chart}
+    ${stated != null && observed != null ? `<p class="footnote">Confidence is checked against ${calib.length} verified like-for-like labs: it states ${Math.round(stated * 100)}% on average and ${Math.round(observed * 100)}% landed within ±25%${
+      stated > observed + 0.05 ? ", so it is currently <b>overconfident</b>" : stated < observed - 0.05 ? ", so it is currently underconfident" : ""}.</p>` : ""}
     ${restList}
     ${table}`, true);
+  makeSortable(modal.querySelector<HTMLTableElement>("table.sortable"));
+}
+
+/** Click a header to sort by that column (numbers numerically, missing values last); click again to reverse. */
+function makeSortable(table: HTMLTableElement | null) {
+  if (!table) return;
+  for (const th of table.querySelectorAll<HTMLTableCellElement>("th[data-k]")) {
+    th.style.cursor = "pointer";
+    th.addEventListener("click", () => {
+      const k = th.dataset.k!, num = th.hasAttribute("data-num"), dir = th.dataset.dir === "asc" ? -1 : 1;
+      for (const o of table.querySelectorAll("th")) delete (o as HTMLElement).dataset.dir;
+      th.dataset.dir = dir === 1 ? "asc" : "desc";
+      const body = table.tBodies[0], rows = [...body.rows];
+      const val = (r: HTMLTableRowElement) => (num ? Number(r.dataset[k]) : (r.dataset[k] ?? "").toLowerCase());
+      rows.sort((a, b) => {
+        const x = val(a), y = val(b), missA = num ? x === -1 : x === "", missB = num ? y === -1 : y === "";
+        if (missA !== missB) return missA ? 1 : -1; // missing last either way
+        return (x < y ? -1 : x > y ? 1 : 0) * dir;
+      });
+      body.append(...rows);
+    });
+  }
 }
 
 // ---- LabDesignBench leaderboard ------------------------------------------------------------------

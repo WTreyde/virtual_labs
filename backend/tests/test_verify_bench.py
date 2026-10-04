@@ -364,3 +364,54 @@ def test_verifier_applies_a_beamtime_cap_the_design_declares():
              "confidence": 0.9, "status": "unverified"}
     [checked] = verify_claims([claim], wf, r["layout"], r["sim"], recomputed=r)
     assert checked["status"] == "refuted"
+
+
+def test_planner_answer_is_scored_on_what_it_told_the_user_not_its_status_line():
+    """run_turn returns `message` = a status line; the reply itself is in `messages` (bench rerun, 4 Oct)."""
+    from labforge.bench.runner import normalise
+    task = next(t for t in load_tasks() if t["id"] == "xchem_inhouse_xray")
+    raw = {"status": "completed", "message": "The model completed this turn.", "completed": True,
+           "messages": [{"role": "assistant", "content": "I can't design this: on-site diffraction isn't supported, "
+                         "so this brief is not feasible as asked."}]}
+    answer = normalise(raw, "platform", task)
+    assert answer["message"].startswith("I can't design this")
+    assert answer["status_message"] == "The model completed this turn."
+    assert normalise({"message": "plain reply"}, "vanilla", task)["message"] == "plain reply"
+
+
+def test_bench_answers_resume_and_crashed_runs_are_retried(tmp_path, monkeypatch):
+    """A restarted run reuses saved answers and retries crashed ones (user ask, 4 Oct)."""
+    import labforge.bench.runner as r
+    task = load_tasks()[0]
+    calls = []
+
+    def fake(arm, t):
+        calls.append(arm)
+        return {"message": "x", "failed": True} if len(calls) == 1 else {"message": "ok"}
+    monkeypatch.setattr(r, "run_arm", fake)
+    assert r.answer_for("vanilla", task, tmp_path).get("failed")
+    assert not (tmp_path / "vanilla" / f"{task['id']}.json").exists()
+    assert r.answer_for("vanilla", task, tmp_path)["message"] == "ok"
+    assert r.answer_for("vanilla", task, tmp_path)["message"] == "ok"
+    assert len(calls) == 2
+
+
+def test_rescore_only_never_calls_an_agent(tmp_path, monkeypatch):
+    import labforge.bench.runner as r
+    task = load_tasks()[0]
+    monkeypatch.setattr(r, "run_arm", lambda *a: (_ for _ in ()).throw(AssertionError("agent called")))
+    (tmp_path / "vanilla").mkdir()
+    (tmp_path / "vanilla" / f"{task['id']}.json").write_text(json.dumps({"message": "saved"}))
+    board = r.run_bench(["vanilla", "platform"], tasks=[task], answers_dir=tmp_path, rescore_only=True)
+    rows = {row["arm"]: row for row in board["arms"]}
+    assert rows["vanilla"]["tasks_answered"] == 1 and rows["platform"]["tasks_answered"] == 0
+
+
+def test_bench_reports_tokens_and_time(tmp_path):
+    from labforge.bench.runner import run_bench
+    task = load_tasks()[0]
+    fake = lambda arm, t: {"message": "x", "usage": {"input_tokens": 10, "output_tokens": 5}, "elapsed_s": 2.0}
+    board = run_bench(["vanilla"], tasks=[task, task], answer_fn=fake)
+    c = board["cost"]["by_arm"]["vanilla"]
+    assert c["input_tokens"] == 20 and c["output_tokens"] == 10 and c["agent_seconds"] == 4.0
+    assert board["cost"]["wall_clock_s"] >= 0

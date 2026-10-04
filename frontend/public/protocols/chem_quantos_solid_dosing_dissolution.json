@@ -1,0 +1,85 @@
+{
+  "id": "chem_quantos_solid_dosing_dissolution",
+  "title": "Automated powder dosing with a Quantos and automated dissolution of the dose",
+  "domain": "chemistry",
+  "pipeline": "chem_library",
+  "pipeline_steps": [
+    "powder_dosing",
+    "liquid_dosing",
+    "plate_transport_arm"
+  ],
+  "summary": "An automated platform doses solid into tared vials with a modified Mettler Toledo Quantos, then a robot arm moves the vial to a stirring station where solvent is added in small increments until the solid dissolves. Shows the hand-offs and per-sample time scale of powder dosing as a library-prep bottleneck.",
+  "automation_level": "automated",
+  "steps": [
+    {
+      "order": 1,
+      "text": "Load solids into Quantos dosing heads once; after that no manual intervention.",
+      "capability": "manual_bench"
+    },
+    {
+      "order": 2,
+      "text": "Robot arm picks a clean vial, uncaps it and positions it in the Quantos.",
+      "capability": "plate_transport_arm"
+    },
+    {
+      "order": 3,
+      "text": "Quantos tares the balance and doses the target mass of solid.",
+      "capability": "powder_dosing",
+      "catalog_ids": [
+        "mettler_quantos"
+      ]
+    },
+    {
+      "order": 4,
+      "text": "Arm lifts the vial out, recaps it with torque feedback and moves it to the stir station.",
+      "capability": "plate_transport_arm"
+    },
+    {
+      "order": 5,
+      "text": "Syringe pump adds an initial solvent volume and stirring starts.",
+      "capability": "liquid_dosing"
+    },
+    {
+      "order": 6,
+      "text": "Add further solvent in 10-30 uL increments, checking each time whether the solid has dissolved, until clear.",
+      "capability": "liquid_dosing",
+      "duration_s": {
+        "value": 3000,
+        "confidence": "literature",
+        "low": 1200,
+        "high": 4800,
+        "note": "Source: 20-80 min per solvent system; midpoint rounded."
+      }
+    }
+  ],
+  "equipment": [
+    {
+      "name": "Mettler Toledo Quantos (modified)",
+      "catalog_id": "mettler_quantos"
+    },
+    {
+      "name": "Robot arm with vial gripper"
+    },
+    {
+      "name": "Syringe pump and stir plate"
+    }
+  ],
+  "materials": [
+    "Test solids, solvents"
+  ],
+  "safety": [
+    "Dust control when dosing solids; ventilated enclosure for solvents."
+  ],
+  "source": {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7921605/",
+    "publisher": "iScience (via PMC)",
+    "authors": "Shiri P. et al.",
+    "year": 2021,
+    "doi": "10.1016/j.isci.2021.102176"
+  },
+  "license": "CC BY-NC-ND 4.0",
+  "access": "open",
+  "confidence": "literature",
+  "notes": "Source is a solubility screen, so the steps adapt to building-block stock prep; the dissolution check loop would be replaced by a fixed volume in a library workflow. Quantos dose time itself is not given.",
+  "retrieved": "2026-10-04"
+}
