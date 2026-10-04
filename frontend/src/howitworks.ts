@@ -91,8 +91,8 @@ function pill(x: number, y: number, w: number, label: string, color = C.ink): st
     <text x="${x + w / 2}" y="${y + 18}" text-anchor="middle" class="hw-pill">${esc(label)}</text>`;
 }
 
-function arrow(path: string, color = C.ink, label = "", x = 0, y = 0, dashed = false): string {
-  return `<path d="${path}" class="hw-arrow" stroke="${color}"${dashed ? ` stroke-dasharray="7 6"` : ""} marker-end="url(#hw-arrowhead)"/>
+function arrow(path: string, color = C.ink, label = "", x = 0, y = 0, dashed = false, marker = "hw-arrowhead"): string {
+  return `<path d="${path}" class="hw-arrow" stroke="${color}"${dashed ? ` stroke-dasharray="7 6"` : ""} marker-end="url(#${marker})"/>
     ${label ? `<text x="${x}" y="${y}" class="hw-flow-label" style="fill:${color}">${esc(label)}</text>` : ""}`;
 }
 
@@ -140,7 +140,8 @@ function diagram(): string {
   s.push(arrow("M430 300V340H203V382", C.evidence, "evidence", 322, 329));
   s.push(arrow("M515 300V382", C.engine, "simulate", 523, 345));
   s.push(arrow("M625 300V340H982V382", C.verify, "claims", 902, 329));
-  s.push(arrow("M796 484H774V326H676", C.verify, "refute → revise", 782, 316, true));
+  // Refuted claims go back to the planner: up from the verifier, under the Hugging Face badge, into the planner.
+  s.push(arrow("M1100 382V270H713", C.verify, "refute → revise", 868, 262, true));
 
   s.push(`<text x="32" y="635" class="hw-section">CHECKED DESIGN CONTRACT</text>`);
   s.push(`<rect x="32" y="660" width="1136" height="152" rx="18" class="hw-output-band"/>`);
@@ -172,6 +173,111 @@ function diagram(): string {
   </svg></div>`;
 }
 
+/**
+ * The same architecture as diagram(), stacked for a phone so it scrolls down rather than sideways: brief, planner,
+ * the three tools, then the checked design contract as a vertical checklist. Shown below 760px (style.css).
+ */
+function diagramTall(): string {
+  const W = 380, X = 22, PW = 320, M = "hw-arrowhead-tall", s: string[] = [];
+  const cx = X + PW / 2;
+  const lines = (text: string, width: number) => wrap(text, width).length;
+  // Panel height from its wrapped body (as panel() lays it out), plus room for a row of pills.
+  const panelH = (body: string, pills: boolean) => 87 + (lines(body, PW - 44) - 1) * 18 + (pills ? 64 : 24);
+  const pillRow = (y: number, items: [string, number][], color: string) => {
+    let x = X + 22;
+    for (const [label, w] of items) { s.push(pill(x, y, w, label, color)); x += w + 7; }
+  };
+  let y = 38;
+
+  s.push(`<text x="16" y="${y}" class="hw-display" style="font-size:23px">One brief in.</text>`);
+  s.push(`<text x="16" y="${y + 30}" class="hw-display" style="font-size:23px">One verified lab design out.</text>`);
+  y += 62;
+  const sub = "The model plans; evidence and simulation test the design; an independent verifier checks the claims.";
+  s.push(multiline(16, y, sub, 300, "hw-subtitle", 20));
+  y += lines(sub, 300) * 20 + 10;
+  s.push(huggingFaceBadge(40, y));
+  y += 100;
+
+  const brief = "Target, room, budget, shifts and scientific constraints.";
+  const hBrief = panelH(brief, false);
+  s.push(panel(X, y, PW, hBrief, "Plain-English brief", brief, C.output,
+    "A user brief is converted into schema-validated LabSpec and Workflow objects.", "INPUT"));
+  y += hBrief;
+  s.push(arrow(`M${cx} ${y}V${y + 30}`, C.output, "", 0, 0, false, M));
+  y += 32;
+
+  const plan = "Builds the workflow, selects real equipment, calls tools, reads bottlenecks and revises the design.";
+  const hPlan = panelH(plan, true), planTop = y;
+  s.push(panel(X, y, PW, hPlan, "Planner agent", plan, C.agent, "backend/labforge/agent/planner.py — the Claude tool-use loop.", "REASONING LOOP"));
+  s.push(claudeBadge(X + PW - 164, y + 14));
+  pillRow(y + hPlan - 46, [["LabSpec", 84], ["Workflow", 96], ["Claims", 80]], C.agent);
+  y += hPlan;
+  const planMid = planTop + hPlan / 2;
+  s.push(arrow(`M${cx} ${y}V${y + 52}`, C.agent, "evidence · simulate · claims", cx + 10, y + 30, false, M));
+  y += 56;
+
+  s.push(`<text x="${X}" y="${y + 6}" class="hw-section">TOOLS THE AGENT CAN CALL</text>`);
+  y += 20;
+  const tool = (title: string, body: string, color: string, tip: string, kicker: string, pills: [string, number][], badge?: (x: number, y: number) => string) => {
+    const h = panelH(body, true);
+    s.push(panel(X, y, PW, h, title, body, color, tip, kicker));
+    if (badge) s.push(badge(X + PW - 130, y + 14));
+    pillRow(y + h - 46, pills, color);
+    const top = y;
+    y += h + 16;
+    return { top, h };
+  };
+  tool("Evidence layer", "Searches 79 vendor items and retrieves literature. Every number keeps its source and uncertainty range.", C.evidence,
+    "backend/labforge/catalog and backend/labforge/agent/amass.py.", "REAL-WORLD INPUTS", [["search_catalog", 128], ["search_evidence", 140]], amassBadge);
+  tool("Digital twin", "Places equipment with safety clearances, then samples uncertain durations to calculate throughput, queues and bottlenecks.", C.engine,
+    "backend/labforge/layout and backend/labforge/sim. Modal is available as the Monte Carlo replicate backend.", "LAYOUT + MONTE CARLO",
+    [["layout engine", 130], ["Monte Carlo", 130]], modalBadge);
+  const ver = tool("Independent verifier", "Ignores the agent’s reported results, rebuilds the layout and simulation, checks tampering, and marks each claim supported, refuted or unverifiable.", C.verify,
+    "backend/labforge/verify/verifier.py and tamper.py.", "FALSIFICATION", [["recompute", 86], ["compare", 80], ["Brier score", 96]]);
+
+  // Refuted claims go back up the right-hand side into the planner.
+  const spine = X + PW + 18, vy = ver.top + 44;
+  s.push(arrow(`M${X + PW} ${vy}H${spine}V${planMid}H${X + PW + 3}`, C.verify, "", 0, 0, true, M));
+  s.push(`<text x="${spine + 13}" y="${(vy + planMid) / 2 + 40}" transform="rotate(-90 ${spine + 13} ${(vy + planMid) / 2 + 40})" class="hw-flow-label" style="fill:${C.verify}">refute → revise</text>`);
+
+  y -= 16;
+  s.push(arrow(`M${cx} ${y}V${y + 44}`, C.output, "verified result", cx + 10, y + 26, false, M));
+  y += 48;
+
+  s.push(`<text x="${X}" y="${y + 18}" class="hw-section">CHECKED DESIGN CONTRACT</text>`);
+  y += 32;
+  const outputs: [string, string][] = [
+    ["Room layout", "Placements, safety zones and every handoff path"],
+    ["Throughput", "P10 / P50 / P90, target probability and bottleneck"],
+    ["Decision pack", "Bill of materials, report, risks and unknowns"],
+    ["Honesty record", "Checked claims, confidence and verifier status"],
+  ];
+  const rowH = outputs.map(([, body]) => 30 + lines(body, 250) * 17);
+  const bandTop = y;
+  s.push(`<rect x="${X}" y="${y}" width="${PW}" height="${rowH.reduce((a, b) => a + b, 0) + 16}" rx="18" class="hw-output-band"/>`);
+  y += 12;
+  outputs.forEach(([title, body], i) => {
+    s.push(`<circle cx="${X + 34}" cy="${y + 18}" r="16" fill="${C.output}" opacity=".12"/>`);
+    s.push(`<path d="M${X + 27} ${y + 18}l5 5 10-11" fill="none" stroke="${C.output}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`);
+    s.push(`<text x="${X + 62}" y="${y + 16}" class="hw-output-title">${esc(title)}</text>`);
+    s.push(multiline(X + 62, y + 36, body, 250, "hw-output-body", 17));
+    y += rowH[i];
+  });
+  y = bandTop + rowH.reduce((a, b) => a + b, 0) + 16 + 22;
+
+  const rails = ["JSON schemas", "source-labelled uncertainty", "immutable catalogue values", "hidden trap briefs"];
+  s.push(`<rect x="${X}" y="${y}" width="${PW}" height="${40 + rails.length * 20}" rx="12" class="hw-rail"/>`);
+  s.push(`<text x="${X + 20}" y="${y + 26}" class="hw-rail-text">Integrity rails</text>`);
+  rails.forEach((r, i) => s.push(`<text x="${X + 20}" y="${y + 50 + i * 20}" class="hw-rail-copy">•  ${esc(r)}</text>`));
+  y += 40 + rails.length * 20 + 16;
+
+  return `<svg class="hw-svg hw-svg-tall" viewBox="0 0 ${W} ${y}" role="img" aria-label="LabForge system architecture, stacked: brief, Claude planner, evidence, digital twin and independent verifier tools, then the checked design contract">
+    <defs><marker id="${M}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="context-stroke"/></marker></defs>
+    ${s.join("\n")}
+  </svg>`;
+}
+
 export function howItWorksHtml(): string {
-  return `<div class="howitworks">${diagram()}</div>`;
+  // Wide diagram on desktop, the stacked one on phones (style.css swaps them at 760px).
+  return `<div class="howitworks"><div class="hw-wide">${diagram()}</div><div class="hw-tall">${diagramTall()}</div></div>`;
 }

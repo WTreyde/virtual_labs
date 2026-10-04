@@ -404,6 +404,7 @@ body.page-view #statcard .whatif { display: none; } /* no simulated design behin
 #alerts-btn.invite { animation: alerts-pulse 1.4s ease-in-out infinite; }
 @keyframes alerts-pulse { 50% { transform: scale(1.12); box-shadow: 0 4px 0 #0006, 0 0 0 6px #e0503c55; } }
 @media (min-width: 901px) { #alerts-btn { display: none !important; } }
+body.page-view #alerts-btn, body.on-landing #alerts-btn { display: none !important; } /* pages that hide the lab hide its controls too */
 
 /* ---- Phones and narrow windows ---- */
 @media (max-width: 900px) {
@@ -517,3 +518,14 @@ body.page-view #statcard .whatif { display: none; } /* no simulated design behin
   #modal .howitworks { margin-inline: -4px; }
   .hw-svg { min-width: 820px; }
 }
+/* Phones get the stacked diagram (howitworks.ts diagramTall), which fits the width and scrolls down, not sideways. */
+.hw-tall { display: none; }
+.hw-svg.hw-svg-tall { min-width: 0; }
+@media (max-width: 760px) {
+  .hw-wide { display: none; }
+  .hw-tall { display: block; }
+}
+
+/* Full-page views (e.g. #/market "Why this matters") scroll with the page: no second scroll box inside. */
+body.page-view #modal .answer { max-height: none; overflow: visible; }
+@media (max-width: 900px) { body.page-view #modal .answer figure { margin: 0; } } /* charts use the full phone width */
