@@ -161,7 +161,7 @@ export function showStatCard(d: Design, instanceId: string, sprite?: string) {
     storage = `<div class="busy-big">${pct(mine.busy)} busy${mine.slots != null ? ` · ${esc(slotsText(mine.slots))}` : ""}</div>
       ${peers.map((f) => `<div class="sub">Compare: ${esc(f.model)} (${esc(f.id)}) ${pct(f.busy)} busy${f.slots != null ? `, ${esc(slotsText(f.slots))}` : ""}</div>`).join("")}`;
   }
-  card.innerHTML = `<button class="close" aria-label="Close">✕</button>
+  card.innerHTML = `<button class="close" aria-label="Close" title="Close (Esc)">✕</button>
     <div class="head">${img}<div><div class="name">${title}</div><div class="id">${esc(instanceId)}${item ? ` · ${badge(item.data_confidence)}` : ""}</div></div></div>
     ${storage}
     ${body}`;
