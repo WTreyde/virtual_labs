@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { fitRoom, iso, PIX, TILE, Z_SQUASH } from "./iso";
+import { fitRoom, iso, ORIGIN, PIX, TILE, Z_SQUASH } from "./iso";
 import { bakeRoom, bakeVoxels, model, OPERATOR_RES, operatorLook, spriteKind } from "./sprites";
 import { clock, Timeline } from "./timeline";
 import type { Design, Vec3 } from "./types";
@@ -36,6 +36,8 @@ export class LabScene extends Phaser.Scene {
   private timeline?: Timeline;
   private plates = new Map<string, Phaser.GameObjects.Image>();
   private paths = new Map<string, { screen: Path; floor: Path }>();
+  /** Screen pixels at the top kept clear of the room and bubbles (phones: replay badge and time controls). */
+  private topInset = 0;
   private ops: { id: string; img: Phaser.GameObjects.Image; label: Phaser.GameObjects.Text; home: Pt; pos: Pt }[] = [];
   private busy!: Phaser.GameObjects.Graphics;
   private badges: Record<string, Phaser.GameObjects.Text> = {};
@@ -63,8 +65,12 @@ export class LabScene extends Phaser.Scene {
 
   create() {
     const { layout } = this.design;
-    // Keep the room clear of the dialogue box along the bottom.
-    fitRoom(layout.room.width_m, layout.room.depth_m, this.scale.width, this.scale.height - 120);
+    // Keep the room clear of the dialogue box along the bottom and, on phones (style.css, max-width 900px), of the
+    // replay badge and time controls stacked across the top.
+    const narrow = window.matchMedia("(max-width: 900px)").matches, top = narrow ? 140 : 0, bottom = narrow ? 90 : 120;
+    this.topInset = top;
+    fitRoom(layout.room.width_m, layout.room.depth_m, this.scale.width, this.scale.height - top - bottom);
+    ORIGIN.y += top;
     for (const k of this.textures.getTextureKeys()) if (k.startsWith("lf:")) this.textures.remove(k);
     this.drawRoom();
     this.drawEquipment();
@@ -275,21 +281,30 @@ export class LabScene extends Phaser.Scene {
       this.tweens.add({ targets: aura, alpha: 0.08, yoyo: true, repeat: -1, duration: 700 });
       const s = iso(pos.x, pos.y, 1.4);
       const txt = this.add.text(s.x, s.y - 64, b.message, {
-        fontFamily: '"Press Start 2P", monospace', fontSize: "8px", lineSpacing: 5, color: "#222", wordWrap: { width: 210 },
+        fontFamily: '"Press Start 2P", monospace', fontSize: "8px", lineSpacing: 5, color: "#222", wordWrap: { width: this.topInset ? 150 : 210 },
       }).setOrigin(0.5, 1).setDepth(1001);
       const pad = 9;
-      // Raise this bubble until it clears the ones already placed.
-      for (let tries = 0; tries < 8; tries++) {
-        const r = txt.getBounds(), box = new Phaser.Geom.Rectangle(r.x - pad - 4, r.y - pad - 4, r.width + 2 * pad + 8, r.height + 2 * pad + 8);
-        if (!placed.some((o) => Phaser.Geom.Intersects.RectangleToRectangle(o, box))) { placed.push(box); break; }
-        txt.y -= 24;
-      }
+      // Keep the bubble on screen: inside the side edges and below the top inset (the phone's time controls).
+      const W = this.scale.width, minY = this.topInset + pad + 7;
+      const clamp = () => {
+        const f = txt.getBounds();
+        txt.x += Math.max(0, pad + 7 - f.x) - Math.max(0, f.right + pad + 7 - W);
+        txt.y += Math.max(0, minY - f.y);
+      };
+      const box = () => { const r = txt.getBounds(); return new Phaser.Geom.Rectangle(r.x - pad - 4, r.y - pad - 4, r.width + 2 * pad + 8, r.height + 2 * pad + 8); };
+      const clear = () => !placed.some((o) => Phaser.Geom.Intersects.RectangleToRectangle(o, box()));
+      // Raise this bubble until it clears the ones already placed; if the top edge stops it, step it down instead.
+      clamp();
+      for (let tries = 0; tries < 8 && !clear() && txt.getBounds().y - 24 >= minY; tries++) txt.y -= 24;
+      for (let tries = 0; tries < 12 && !clear(); tries++) txt.y += 24;
+      placed.push(box());
       // Speech bubble in the same frame style as the HTML dialogue box, tail pointing at the instrument.
       const r = txt.getBounds(), g = this.add.graphics().setDepth(1000);
+      const tip = Math.min(Math.max(s.x, r.x + 4), r.right - 4); // the tail stays under the (possibly shifted) bubble
       g.fillStyle(0x2b2f36).fillRoundedRect(r.x - pad - 3, r.y - pad - 3, r.width + 2 * pad + 6, r.height + 2 * pad + 6, 8);
-      g.fillTriangle(s.x - 10, r.bottom + pad, s.x + 10, r.bottom + pad, s.x, r.bottom + pad + 14);
+      g.fillTriangle(tip - 10, r.bottom + pad, tip + 10, r.bottom + pad, tip, r.bottom + pad + 14);
       g.fillStyle(0xfbfbf5).fillRoundedRect(r.x - pad, r.y - pad, r.width + 2 * pad, r.height + 2 * pad, 6);
-      g.fillTriangle(s.x - 6, r.bottom + pad - 1, s.x + 6, r.bottom + pad - 1, s.x, r.bottom + pad + 9);
+      g.fillTriangle(tip - 6, r.bottom + pad - 1, tip + 6, r.bottom + pad - 1, tip, r.bottom + pad + 9);
       this.tweens.add({ targets: [txt, g], y: "-=3", yoyo: true, repeat: -1, duration: 600, ease: "Stepped" });
     }
   }

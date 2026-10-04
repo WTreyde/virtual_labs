@@ -408,7 +408,7 @@ body.page-view #statcard .whatif { display: none; } /* no simulated design behin
   /* The page scrolls: the lab on top, the side panel folded underneath it. */
   body { height: auto; min-height: 100vh; }
   #app { flex-direction: column; }
-  #game { flex: none; height: 64vh; min-height: 360px; }
+  #game { flex: none; height: 72vh; min-height: 460px; } /* room for the lab between the time controls and the dialogue */
   #panel { width: 100%; border-left: none; border-top: 6px solid #333; overflow: visible; }
   #chat { min-height: 0; }
   #log { max-height: 50vh; }
