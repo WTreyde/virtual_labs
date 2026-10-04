@@ -33,9 +33,21 @@ are unchanged; the model shortened some descriptive `params` wording. Planning P
 to 653.3 crystals/day and the verifier returned 522.7 crystals/day. The two growth hotels
 then bind jointly at 60.1% and 58.9%; the Shifter is next at 22.6%.
 
-This is not the requested Rock Imager growth what-if. Although the catalog now records
-970 SBS storage slots, the simulator has one capacity dimension and sees the Rock Imager's
-single-camera `process.capacity` as one slot. It cannot independently model 970 residence
-slots and one camera on the same unit. Publishing this follow-up as
-`imager_growth_whatif` would therefore be misleading; it remains an auditable separate
-record until the simulator supports distinct storage and processing capacities.
+This is not the requested Rock Imager growth what-if. It predates the simulator's separate
+storage-slot support and remains only as an audit record.
+
+## Rock Imager growth what-if
+
+`xchem-imager-whatif.json` uses Maxim's separate storage pool for the Rock Imager's 970
+SBS slots while its imaging camera remains capacity one. This is a deterministic replay of
+the recorded design, not another model call. The only workflow edits are the
+`candidate_instances` on `grow_d1`, `grow_d2` and `grow_d3`, from `growth_hotel_1` to
+`imager_1`. The soak remains on the STX44. LabSpec, equipment, step count, durations,
+uncertainty ranges, yields, inspection schedule, staffing and external queues are unchanged.
+
+The planning simulation gives P10/P50/P90 257.6 / 560.0 / 642.1 crystals/day. The
+independent verifier gives 410.7 crystals/day, a 26.7% gap, so the scenario agreement gate
+fails and both figures are reported. Both skilled operators bind at 97.4% of their shifts;
+the Shifter is 22.0%, the Echo 20.9%, and the Rock Imager camera 18.5% busy. The remedy is
+therefore operator-limited, not imaging- or harvesting-limited, and is not presented as a
+validated physical upgrade.

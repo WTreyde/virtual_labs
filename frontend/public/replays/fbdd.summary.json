@@ -32,5 +32,15 @@
     "Planning median 410.7 versus independent verifier 424.0 crystals_per_day; the headline is the planning simulation, not a verified measurement.",
     "Growth-hotel crystallisation-plate compatibility, shipper capacity and transit concurrency need confirmation.",
     "Timing and yield assumptions are provisional; no physical lab was operated."
-  ]
+  ],
+  "imager_growth_whatif": {
+    "planned_p50": 560.0,
+    "verified_p50": 410.7,
+    "unit": "crystals_per_day",
+    "bottleneck": {
+      "instance_id": "skilled_operator_1",
+      "kind": "operator",
+      "busy_fraction": 0.974
+    }
+  }
 }

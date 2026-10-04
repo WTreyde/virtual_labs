@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 
 import pytest
-from labforge.agent.replay_summary import summarise
+from labforge.agent.replay_summary import _load_imager_whatif, summarise
 
 REPLAYS = Path(__file__).resolve().parents[3] / 'frontend/public/replays'
 
@@ -11,7 +11,8 @@ REPLAYS = Path(__file__).resolve().parents[3] / 'frontend/public/replays'
 @pytest.mark.parametrize('name', ['chem', 'fbdd'])
 def test_landing_summary_preserves_recorded_results_and_refutations(name):
     record = json.loads((REPLAYS / f'{name}.json').read_text())
-    summary = summarise(name, record)
+    whatif = _load_imager_whatif(record) if name == 'fbdd' else None
+    summary = summarise(name, record, whatif)
     assert summary == json.loads((REPLAYS / f'{name}.summary.json').read_text())
     o = record['output']
     for key in ('p10', 'p50', 'p90', 'unit'):
@@ -24,3 +25,13 @@ def test_landing_summary_preserves_recorded_results_and_refutations(name):
     for c in o['claims']:
         if c['status'] == 'refuted' and c['metric'] != 'layout.violations':
             assert any(c['statement'] in limit for limit in summary['limits'])
+
+
+def test_fbdd_summary_reports_the_separate_imager_growth_whatif():
+    record = json.loads((REPLAYS / 'fbdd.json').read_text())
+    whatif = _load_imager_whatif(record)
+    assert whatif['method'] == 'deterministic recorded-design what-if; no model call'
+    summary = summarise('fbdd', record, whatif)['imager_growth_whatif']
+    assert set(summary) == {'planned_p50', 'verified_p50', 'unit', 'bottleneck'}
+    assert summary['unit'] == 'crystals_per_day'
+    assert summary['bottleneck']['kind'] in ('instrument', 'operator')
