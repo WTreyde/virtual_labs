@@ -1,10 +1,11 @@
 import { marked } from "marked";
 import { report } from "./api";
 import type { Design } from "./types";
+import { openModal, showLoading } from "./views";
 
 /**
  * Strand A: the "Report" button. Renders the /report Markdown as a printable page with a snapshot of
- * the lab scene; the browser's print dialog saves it as PDF. Works offline with a clearly labelled draft.
+ * the lab scene, shown in-page; the browser's print dialog saves it as PDF. Works offline with a clearly labelled draft.
  */
 
 /** Markdown built from the design alone, for when the backend (and the agent's report) is unavailable. */
@@ -66,31 +67,55 @@ const PAGE_CSS = `
   th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid #e2e4e8; } th { background: #f4f5f7; }
   td:nth-child(4) { text-align: right; font-variant-numeric: tabular-nums; }
   blockquote { margin: 12px 0; padding: 8px 14px; border-left: 4px solid #e0503c; background: #fdf1ef; }
+  body.embedded .bar button { display: none; }
   @media print { .bar button { display: none; } body { margin: 0 auto; } h2 { break-after: avoid; } table, img { break-inside: avoid; } }
 `;
 
 /**
- * Opens the report window. The window is opened synchronously in the click handler so popup blockers allow it,
- * then filled once the snapshot and /report arrive.
+ * Shows the report in-page (an iframe in the modal) instead of a pop-up window: window.open returns null in
+ * sandboxed embeds such as the Hugging Face Space iframe and in some browsers even with pop-ups allowed.
+ * From the modal the report can be printed / saved as PDF, downloaded as HTML, or opened in a new tab.
  */
 export async function openReport(d: Design, snapshot: () => Promise<string | undefined>) {
-  const w = window.open("", "_blank");
-  if (!w) return alert("Allow pop-ups for this page to open the report.");
-  w.document.write(`<!doctype html><title>Generating report…</title><body style="font:16px system-ui;padding:40px">Generating report…</body>`);
+  const title = String(d.lab_spec?.name ?? "Lab design");
+  const modalTitle = `${title}: lab proposal`;
+  showLoading(modalTitle, "Generating report…");
 
   const [img, md] = await Promise.all([
     snapshot().catch(() => undefined),
     report(d).then((text) => ({ text, live: !d.report_markdown })).catch(() => ({ text: offlineDraft(d), live: false })),
   ]);
-  const title = String(d.lab_spec?.name ?? "Lab design");
   const when = new Date().toLocaleString();
-  w.document.open();
-  w.document.write(`<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${title.replace(/</g, "&lt;")}: lab proposal</title>
+  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${title.replace(/</g, "&lt;")}: lab proposal</title>
     <style>${PAGE_CSS}</style></head><body>
     <div class="bar"><span class="meta">LabForge · ${when} · ${d.report_markdown ? "report from a recorded agent run" : md.live ? "report from the agent backend" : "offline draft"}</span>
       <button onclick="print()">Print / Save as PDF</button></div>
     ${img ? `<img class="scene" src="${img}" alt="Isometric view of the proposed lab layout"><div class="caption">Proposed layout as shown in LabForge. Instrument sizes follow catalog footprints; art is schematic.</div>` : ""}
     ${await marked.parse(linkedEvidenceOnly(md.text).replace(/</g, "&lt;"))}
-    </body></html>`);
-  w.document.close();
+    </body></html>`;
+
+  // The user closed the loading modal while the report was generating: don't pop it back up.
+  if (document.querySelector("#modal")?.classList.contains("hidden")) return;
+  openModal(modalTitle, `<div class="report-actions">
+      <button data-act="print">Print / Save as PDF</button>
+      <button data-act="download">Download (.html)</button>
+      <button data-act="tab">Open in new tab</button>
+      <span class="muted report-note"></span></div>
+    <iframe class="report-frame" title="Lab proposal report"></iframe>`, true);
+  const frame = document.querySelector<HTMLIFrameElement>("#modal .report-frame")!;
+  frame.srcdoc = html.replace("<body>", `<body class="embedded">`); // the modal has its own Print button
+  const note = document.querySelector<HTMLSpanElement>("#modal .report-note")!;
+  const blobUrl = () => URL.createObjectURL(new Blob([html], { type: "text/html" }));
+  document.querySelector("#modal .report-actions")!.addEventListener("click", (e) => {
+    const act = (e.target as HTMLElement).closest<HTMLButtonElement>("button")?.dataset.act;
+    if (act === "print") frame.contentWindow?.print();
+    else if (act === "download") {
+      const a = Object.assign(document.createElement("a"), { href: blobUrl(), download: `${title.replace(/[^\w.-]+/g, "_")}-report.html` });
+      document.body.append(a);
+      a.click();
+      a.remove();
+    } else if (act === "tab" && !window.open(blobUrl(), "_blank")) {
+      note.textContent = "This page can't open new tabs here; use Download instead.";
+    }
+  });
 }
