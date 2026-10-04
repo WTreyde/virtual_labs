@@ -8,13 +8,15 @@ import { describe, type AgentEvent } from "./replay";
  * Durations are shown only when the event reports them; nothing is estimated.
  */
 
-type Status = "running" | "succeeded" | "failed";
+type Status = "running" | "succeeded" | "failed" | "declined";
 interface Row { key: string; name: string; label: string; status: Status; ms?: number; summary?: string; el: HTMLElement }
 interface Step { n: number; status: Status; ms?: number; summary?: string; rows: Row[]; el: HTMLDetailsElement }
 
 const esc = (s: unknown) => String(s ?? "").replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 const secs = (ms?: number) => (ms == null ? "" : ms < 1000 ? `${Math.round(ms)} ms` : `${(ms / 1000).toFixed(ms < 10000 ? 1 : 0)} s`);
-const ICON: Record<Status, string> = { running: "…", succeeded: "✓", failed: "✗" };
+const ICON: Record<Status, string> = { running: "…", succeeded: "✓", failed: "✗", declined: "⊘" };
+/** The planner reports a provider refusal as status "declined_by_model". */
+const norm = (s?: string): Status | undefined => (s === "declined_by_model" ? "declined" : (s as Status | undefined));
 
 /** One-line summary for recordings made before the planner emitted `summary`. */
 function derivedSummary(e: AgentEvent): string | undefined {
@@ -45,7 +47,7 @@ export class AgentLog {
   get isEmpty() { return !this.el.childElementCount; }
 
   /** A plain entry: the user's message, the agent's answer, or a notice. */
-  note(text: string, kind: "user" | "agent" | "notice" = "notice") {
+  note(text: string, kind: "user" | "agent" | "notice" | "declined" = "notice") {
     const div = document.createElement("div");
     div.className = `log-note ${kind}`;
     div.textContent = text;
@@ -58,7 +60,7 @@ export class AgentLog {
     if (e.type === "model_call") return this.startStep(ev.step);
     if (e.type === "model_result") {
       const s = this.stepFor(ev.step);
-      Object.assign(s, { status: ev.status ?? "succeeded", ms: ev.duration_ms, summary: ev.summary });
+      Object.assign(s, { status: norm(ev.status) ?? "succeeded", ms: ev.duration_ms, summary: ev.summary });
       return this.renderStep(s);
     }
     if (e.type === "tool_start") {
@@ -88,6 +90,12 @@ export class AgentLog {
    */
   finish() { for (const s of this.steps) this.settle(s); }
 
+  /** The turn ended with a refusal: mark its last step declined, even when no step event said so (older backends). */
+  declineLast() {
+    const s = this.steps.at(-1);
+    if (s && s.status !== "failed") { s.status = "declined"; this.renderStep(s); }
+  }
+
   private settle(s: Step) {
     if (s.status !== "running") return;
     s.status = s.rows.some((r) => r.status === "failed") ? "failed" : "succeeded";
@@ -108,7 +116,7 @@ export class AgentLog {
 
   private renderStep(s: Step) {
     const failed = s.rows.some((r) => r.status === "failed"), running = s.status === "running" && s.rows.some((r) => r.status === "running");
-    const status: Status = failed || s.status === "failed" ? "failed" : running ? "running" : s.status;
+    const status: Status = s.status === "declined" ? "declined" : failed || s.status === "failed" ? "failed" : running ? "running" : s.status;
     const calls = s.rows.length ? `${s.rows.length} tool call${s.rows.length === 1 ? "" : "s"}` : "thinking";
     s.el.querySelector("summary")!.innerHTML = `<span class="st ${status}">${ICON[status]}</span> <b>Step ${s.n}</b> · ${calls}${s.ms != null ? ` · ${secs(s.ms)}` : ""}${
       s.summary ? `<div class="sum">${esc(s.summary)}</div>` : ""}`;
