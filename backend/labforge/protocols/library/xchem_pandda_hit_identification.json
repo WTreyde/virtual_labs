@@ -1,0 +1,74 @@
+{
+  "id": "xchem_pandda_hit_identification",
+  "title": "PanDDA hit identification from many soaked datasets",
+  "domain": "biology",
+  "pipeline": "xchem",
+  "pipeline_steps": [
+    "in_silico"
+  ],
+  "summary": "Collect many crystallographic datasets (over 30 unbound ground-state), align them, average the ground-state density, compute Z-maps and event maps with a background correction factor, and cluster significant regions to flag bound ligands. Method paper for the Pan-Dataset Density Analysis.",
+  "automation_level": "automated",
+  "steps": [
+    {
+      "order": 1,
+      "text": "Gather more than 30 ground-state datasets plus the soaked test datasets.",
+      "capability": "in_silico"
+    },
+    {
+      "order": 2,
+      "text": "Align structures and maps using flexible alignment so that perfect isomorphism is not needed.",
+      "capability": "in_silico"
+    },
+    {
+      "order": 3,
+      "text": "Build the ground-state model by averaging the density maps of unbound crystals in real space.",
+      "capability": "in_silico"
+    },
+    {
+      "order": 4,
+      "text": "Compute per-point Z-scores for each test dataset against the ground-state ensemble; look for outliers (Z of about 2.5-3 or higher).",
+      "capability": "in_silico"
+    },
+    {
+      "order": 5,
+      "text": "Generate event maps by subtracting an optimised fraction of the ground-state map (background density correction).",
+      "capability": "in_silico"
+    },
+    {
+      "order": 6,
+      "text": "Cluster significant Z-score regions (minimum volume roughly 10 A^3) to nominate hits objectively.",
+      "capability": "in_silico"
+    },
+    {
+      "order": 7,
+      "text": "Model the ligand and validate with RSCC > 0.7, RSZD < 3, sensible B-factors and RMSD < 1 A.",
+      "capability": "in_silico"
+    }
+  ],
+  "equipment": [
+    {
+      "name": "Compute workstation / cluster"
+    },
+    {
+      "name": "PanDDA software (CCP4/XChemExplorer)"
+    }
+  ],
+  "materials": [
+    "Processed diffraction datasets and refined ground-state model"
+  ],
+  "safety": [
+    "No wet-lab hazards."
+  ],
+  "source": {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5413968/",
+    "publisher": "Nature Communications (via PMC)",
+    "authors": "Pearce et al.",
+    "year": 2017,
+    "doi": "10.1038/ncomms15123"
+  },
+  "license": "CC BY 4.0",
+  "access": "open",
+  "confidence": "literature",
+  "notes": "No wall-clock durations stated, so none recorded. XChemExplorer (Krojer et al. 2017, PMC5349439, CC BY) wraps this workflow; its page was also opened but is not the primary source.",
+  "retrieved": "2026-10-04"
+}

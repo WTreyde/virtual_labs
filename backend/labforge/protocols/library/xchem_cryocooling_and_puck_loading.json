@@ -1,0 +1,95 @@
+{
+  "id": "xchem_cryocooling_and_puck_loading",
+  "title": "Cryoprotection, flash-cooling and loading crystals into pucks",
+  "domain": "biology",
+  "pipeline": "xchem",
+  "pipeline_steps": [
+    "cryo_cooling",
+    "cold_storage"
+  ],
+  "summary": "Quickly dip the crystal in cryoprotectant (or oil), plunge it into liquid nitrogen in under a second, and transfer the pin into a labelled puck under LN2 for storage in a dewar. Compiled from a practical cryocrystallography review.",
+  "automation_level": "manual",
+  "steps": [
+    {
+      "order": 1,
+      "text": "Decide on cryoprotection: grow in a cryoprotectant if possible (glycerol, ethylene glycol, PEG 400, sucrose at 25-50%), or briefly soak or oil-coat the crystal.",
+      "capability": "cryo_cooling"
+    },
+    {
+      "order": 2,
+      "text": "Dip the looped crystal for 1-15 seconds in cryoprotectant, minimising carry-over; for oil, coat and dab off excess.",
+      "capability": "cryo_cooling",
+      "duration_s": {
+        "value": 8,
+        "confidence": "literature",
+        "note": "1-15 s stated; midpoint."
+      }
+    },
+    {
+      "order": 3,
+      "text": "Plunge the crystal into fresh liquid nitrogen in under one second with one continuous motion.",
+      "capability": "cryo_cooling",
+      "catalog_ids": [
+        "ln2_storage_dewar"
+      ],
+      "duration_s": {
+        "value": 1,
+        "confidence": "literature",
+        "note": "'under 1 second'."
+      }
+    },
+    {
+      "order": 4,
+      "text": "Transfer the pin into a puck with pre-chilled tongs within seconds, keeping everything below the LN2 surface or in cold gas.",
+      "capability": "cryo_cooling",
+      "catalog_ids": [
+        "ln2_storage_dewar"
+      ]
+    },
+    {
+      "order": 5,
+      "text": "Record position and unique ID for each pin (steel 1 mm pins suit robotic handling).",
+      "capability": "cryo_cooling"
+    },
+    {
+      "order": 6,
+      "text": "Store loaded pucks in canes or canisters submerged in a dewar until shipping.",
+      "capability": "cold_storage",
+      "catalog_ids": [
+        "ln2_storage_dewar"
+      ]
+    }
+  ],
+  "equipment": [
+    {
+      "name": "LN2 dewar",
+      "catalog_id": "ln2_storage_dewar"
+    },
+    {
+      "name": "Crystallographer",
+      "catalog_id": "operator_crystallographer"
+    }
+  ],
+  "materials": [
+    "Cryoprotectant",
+    "Loops/pins",
+    "Pucks (UniPuck)",
+    "Cryo-tongs"
+  ],
+  "safety": [
+    "Liquid nitrogen: wear eye protection and cryogenic gloves; asphyxiation risk in small rooms.",
+    "Keep dewars covered to limit ice; avoid skin contact with cold tools."
+  ],
+  "source": {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4461322/",
+    "publisher": "Acta Crystallographica Section F (IUCr, via PMC)",
+    "authors": "J. W. Pflugrath",
+    "year": 2015,
+    "doi": "10.1107/S2053230X15008304"
+  },
+  "license": "CC BY",
+  "access": "open",
+  "confidence": "literature",
+  "notes": "Review article, so numbers are general guidance rather than a single lab's recipe. Per-step durations are literature ranges.",
+  "retrieved": "2026-10-04"
+}

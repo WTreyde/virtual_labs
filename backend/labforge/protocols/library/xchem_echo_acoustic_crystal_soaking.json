@@ -1,0 +1,91 @@
+{
+  "id": "xchem_echo_acoustic_crystal_soaking",
+  "title": "Fragment soaking of crystals by Echo acoustic dispensing",
+  "domain": "biology",
+  "pipeline": "xchem",
+  "pipeline_steps": [
+    "acoustic_dispensing",
+    "crystal_soaking"
+  ],
+  "summary": "Fragments in DMSO (100 mM) are shot from a source plate straight into crystallisation drops with an Echo, aimed away from the crystals so the solvent diffuses in gently. Soak 4-6 h or overnight, then harvest. This is the core XChem soaking method.",
+  "automation_level": "automated",
+  "steps": [
+    {
+      "order": 1,
+      "text": "Prepare fragment source plate (1536-well Echo format) at 100 mM in DMSO.",
+      "capability": "compound_storage"
+    },
+    {
+      "order": 2,
+      "text": "Choose the DMSO load: crystals tolerated around 20% when hit directly and up to about 40% when the solvent is aimed away; across 16 targets the optimum was 10-40% (mean about 23%).",
+      "capability": "acoustic_dispensing"
+    },
+    {
+      "order": 3,
+      "text": "Unseal the crystal plate (SwissCI 3-drop sitting-drop plate) and mount it inverted above the source plate; unsealing takes 1-2 minutes per plate.",
+      "capability": "acoustic_dispensing",
+      "catalog_ids": [
+        "beckman_echo_525"
+      ],
+      "duration_s": {
+        "value": 90,
+        "confidence": "literature",
+        "note": "1-2 min per plate, midpoint."
+      }
+    },
+    {
+      "order": 4,
+      "text": "Transfer 5-50 nL per drop in 2.5 nL droplets at 200 Hz, targeting the drop edge away from the crystal; solvent diffuses in over 2-5 minutes.",
+      "capability": "acoustic_dispensing",
+      "catalog_ids": [
+        "beckman_echo_525"
+      ],
+      "duration_s": {
+        "value": 300,
+        "confidence": "literature",
+        "note": "Diffusion over 2-5 min; ~1000 transfers can be done in under 10 minutes."
+      }
+    },
+    {
+      "order": 5,
+      "text": "Reseal the plate and let crystals soak: 4-6 h for routine screening, overnight for weak binders; strong binders may appear within minutes.",
+      "capability": "crystal_soaking",
+      "duration_s": {
+        "value": 18000,
+        "confidence": "literature",
+        "note": "4-6 h stated; 5 h midpoint."
+      }
+    },
+    {
+      "order": 6,
+      "text": "Hand the plate on for harvesting and cryo-cooling.",
+      "capability": "crystal_harvesting"
+    }
+  ],
+  "equipment": [
+    {
+      "name": "Echo acoustic dispenser (paper used Echo 550)",
+      "catalog_id": "beckman_echo_525"
+    }
+  ],
+  "materials": [
+    "Fragment library in DMSO, 1536-well Echo source plate",
+    "Crystallisation plate with grown crystals"
+  ],
+  "safety": [
+    "DMSO penetrates skin and carries solutes with it; wear gloves.",
+    "Unseal plates only briefly to limit evaporation."
+  ],
+  "source": {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5349437/",
+    "publisher": "Acta Crystallographica Section D (IUCr, via PMC)",
+    "authors": "Collins et al.",
+    "year": 2017,
+    "doi": "10.1107/S205979831700331X"
+  },
+  "license": "CC BY",
+  "access": "open",
+  "confidence": "literature",
+  "notes": "Paper used Echo 550; catalog id beckman_echo_525 (the catalog entry that includes crystal_soaking) is the nearest match. Citation is Collins et al., 'Gentle, fast and effective crystal soaking by acoustic dispensing'.",
+  "retrieved": "2026-10-04"
+}
