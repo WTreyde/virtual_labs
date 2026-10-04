@@ -3,6 +3,8 @@ import argparse
 import json
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[3]
+
 CASES = {
     'chem': ('Chemistry library, QC and screening',
              'Plan an abstract two-stage 768-compound library, quality control and screening against a supplied protein target.',
@@ -14,7 +16,31 @@ CASES = {
 }
 
 
-def summarise(name, run):
+def _imager_whatif_summary(record):
+    output = record['output']
+    throughput = output['sim_result']['throughput']
+    verified = next((claim.get('verified_value') for claim in output['claims']
+                     if claim.get('metric') == 'throughput.p50'), None)
+    equipment = {e['instance_id'] for e in output['workflow']['equipment']}
+    utilisation = output['sim_result']['utilisation']
+    busiest = max(utilisation, key=lambda row: row['busy_fraction'])
+    return {
+        'planned_p50': throughput['p50'], 'verified_p50': verified, 'unit': throughput['unit'],
+        'bottleneck': {'instance_id': busiest['instance_id'],
+                       'kind': 'instrument' if busiest['instance_id'] in equipment else 'operator',
+                       'busy_fraction': busiest['busy_fraction']},
+    }
+
+
+def _load_imager_whatif(run):
+    source = run.get('source')
+    if not source:
+        return None
+    path = ROOT / Path(source).parent / 'xchem-imager-whatif.json'
+    return json.loads(path.read_text()) if path.is_file() else None
+
+
+def summarise(name, run, imager_whatif=None):
     title, brief, caveats = CASES[name]
     output = run['output']
     sim = output['sim_result']
@@ -40,7 +66,7 @@ def summarise(name, run):
     limits.extend(caveats)
     if name == 'fbdd' and 'scenarios_20261003_harvesting/' in (run.get('source') or ''):
         limits.append('This historical recording predates the per-crystal catalog and batch-aware verifier fixes; its verifier restores 7200 seconds for harvesting.')
-    return {
+    summary = {
         'title': title, 'brief': brief, 'source': run.get('source'),
         'headline_throughput': {'p50': throughput['p50'], 'p10': throughput['p10'],
                                'p90': throughput['p90'], 'unit': throughput['unit'],
@@ -63,6 +89,9 @@ def summarise(name, run):
         'gate_passed': bool(run['gate']['passed'] and required_claims_pass),
         'limits': limits,
     }
+    if name == 'fbdd' and imager_whatif:
+        summary['imager_growth_whatif'] = _imager_whatif_summary(imager_whatif)
+    return summary
 
 
 def main():
@@ -71,7 +100,8 @@ def main():
     args = parser.parse_args()
     for name in CASES:
         run = json.loads((args.directory / f'{name}.json').read_text())
-        (args.directory / f'{name}.summary.json').write_text(json.dumps(summarise(name, run), indent=2) + '\n')
+        whatif = _load_imager_whatif(run) if name == 'fbdd' else None
+        (args.directory / f'{name}.summary.json').write_text(json.dumps(summarise(name, run, whatif), indent=2) + '\n')
 
 
 if __name__ == '__main__':
