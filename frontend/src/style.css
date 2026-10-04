@@ -85,6 +85,9 @@ button { font: inherit; border: 3px solid #333; background: #fff; cursor: pointe
   font: 12px/1.4 system-ui, sans-serif; max-width: 280px; box-shadow: 0 4px 12px #0004; }
 
 #modal.wide { width: min(1100px, calc(100% - 32px)); }
+#modal .report-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; }
+#modal .report-actions button { font: inherit; padding: 6px 12px; border: 2px solid #2b2f36; border-radius: 6px; background: #fbfbf5; cursor: pointer; }
+#modal .report-frame { width: 100%; height: 70vh; border: 2px solid #e4e3dd; border-radius: 6px; background: #fff; }
 #modal .answer { max-height: 60vh; overflow-y: auto; } #modal .answer table { font-size: 12px; } #modal .answer td { border-bottom: 1px solid #e4e3dd; }
 #modal .tile.lead { border-color: #2a78d6; }
 #modal table.bench td { vertical-align: top; border-bottom: 1px solid #e4e3dd; padding: 6px; }

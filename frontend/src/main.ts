@@ -12,6 +12,7 @@ import { LabScene } from "./LabScene";
 import { renderPanel } from "./panel";
 import { openReport } from "./report";
 import { howItWorksHtml } from "./howitworks";
+import { marketHtml } from "./market";
 import { protocolsFor, renderProtocol, renderProtocolList } from "./protocols";
 import { describe, emptyDesign, loadReplay, loadSummary, loadWhatIfCache, playReplay } from "./replay";
 import { migrateLegacyLinks, parseRoute, routeKey, type Route } from "./router";
@@ -158,7 +159,7 @@ async function go(r: Route) {
   setOffline(false);
   setChatEnabled(r.page === "design");
   $<HTMLInputElement>("#chat-input").placeholder = "Describe your lab...";
-  document.body.classList.toggle("page-view", ["bench", "validation", "schedule", "protocols", "how"].includes(r.page));
+  document.body.classList.toggle("page-view", ["bench", "validation", "schedule", "protocols", "how", "market"].includes(r.page));
   const onLanding = r.page === "landing" || r.page === "cases";
   document.body.classList.toggle("on-landing", onLanding);
   landing.classList.toggle("hidden", !onLanding);
@@ -200,6 +201,7 @@ async function go(r: Route) {
     case "schedule": return openSchedule();
     case "protocols": return openProtocols(r.id);
     case "how": return openModal("How LabForge works", howItWorksHtml(), true);
+    case "market": return openModal("Why this matters", marketHtml(), true);
   }
 }
 window.addEventListener("hashchange", () => go(parseRoute()));
