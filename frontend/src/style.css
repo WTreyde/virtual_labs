@@ -254,3 +254,10 @@ body.page-view #modal table.bench thead th { top: 46px; }
 .badge { font-size: 9px; } #verdicts .v-status { font-size: 9px; } #fix .fix-show, #statcard .whatif, #whatif-btn, #skill-btn { font-size: 10px; }
 #dialogue .caret { color: #a3271a; }
 #log .st.declined { color: #7a5200; } #log .log-note.declined { color: #7a5200; font-weight: 600; }
+
+/* Logo: pixel flask on a bright yellow badge, wordmark in the same bright yellow (11:1 on the nav). */
+#topnav .brand { display: inline-flex; align-items: center; gap: 8px; padding: 2px 12px 2px 4px; margin-right: 14px; border-radius: 8px; }
+#topnav .brand:hover { background: #3a4048; }
+#topnav .brand .logo-mark { background: #ffd23f; border-radius: 6px; padding: 2px; box-shadow: 0 0 0 2px #1b1f24, 0 3px 0 #000a; }
+#topnav .brand .logo-word { color: #ffd23f; font-size: 16px; letter-spacing: 1px; text-shadow: 2px 2px 0 #000; }
+#topnav .brand.active { background: transparent; }
