@@ -34,7 +34,7 @@ export function closeModal() { modal.classList.add("hidden"); tip.classList.add(
 
 function openModal(title: string, html: string, wide = false) {
   modal.classList.toggle("wide", wide);
-  modal.innerHTML = `<button class="close" aria-label="Close">✕</button><h2>${esc(title)}</h2>${html}`;
+  modal.innerHTML = `<button class="close" aria-label="Close" title="Close (Esc)">✕</button><h2>${esc(title)}</h2>${html}`;
   modal.classList.remove("hidden");
 }
 

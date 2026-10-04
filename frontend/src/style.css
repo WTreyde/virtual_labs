@@ -288,3 +288,10 @@ body.page-view #modal table.bench thead th { top: 46px; }
 #brief .brief-full { max-height: 40vh; overflow-y: auto; white-space: pre-wrap; }
 body.has-brief #replay-badge { left: 16px; transform: none; }
 body.has-brief #statcard { overflow-y: auto; } /* top and max-height set from the brief's height (main.ts) */
+
+/* Close buttons: a 40x40 target with a visible frame (team feedback: the stat card's "x" was too small to hit). */
+#statcard .close, #modal .close { position: absolute; top: 8px; right: 8px; width: 40px; height: 40px; padding: 0; display: grid; place-items: center;
+  font: 700 20px/1 var(--sys); color: #1d2330; background: #f1efe6; border: 2px solid #2b2f36; border-radius: 8px; cursor: pointer; z-index: 2; }
+#statcard .close:hover, #modal .close:hover { background: #ffd23f; }
+#statcard .close:focus-visible, #modal .close:focus-visible { outline: 3px solid #1f5fae; outline-offset: 2px; }
+#statcard .head { padding-right: 44px; }
