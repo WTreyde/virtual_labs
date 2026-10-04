@@ -9,6 +9,17 @@ uncertainty, yield, inspection and external-queue assumptions.
 The comparison baseline is the recorded independently verified **424.0
 crystals/day**.
 
+## Control: third operator only, growth stays in the STX44
+
+- Verified P10/P50/P90: **332.3 / 410.7 / 560.0 crystals/day**.
+- P50 change versus the recorded baseline: **-13.3/day (-3.1%)**, which is no
+  credible gain at this Monte Carlo resolution.
+- The STX44 remains the binding resource at **84%**; the three operators are
+  only **53.1–56.0%** busy.
+
+Extra staff alone does not relieve the recorded design because the growth hotel
+still constrains it.
+
 ## A. Rock Imager growth plus a third operator
 
 - Verified P10/P50/P90: **485.3 / 634.7 / 821.3 crystals/day**.
@@ -16,8 +27,10 @@ crystals/day**.
 - All three operators bind at **94.0%, 93.9% and 93.5%** of their shifts.
 - Zero layout violations; no catalog duration was restored by the verifier.
 
-This variant beats the baseline, but it remains staff-limited. The Rock Imager
-is not reported as the bottleneck.
+This variant beats both the baseline and the third-operator-only control. At the
+same three-operator staffing, moving growth to the imager adds **224.0/day** at
+P50 (634.7 versus 410.7). It then becomes staff-limited; the Rock Imager is not
+reported as the bottleneck.
 
 ## B. Same design plus a second staffed shift
 
@@ -32,5 +45,7 @@ stagger named workers.
   their available time.
 - Zero layout violations; no catalog duration was restored by the verifier.
 
-Both what-ifs beat 424/day. The supported pitch remains: the imager has spare
-capacity after growth moves into it, while skilled staff are the next limit.
+The isolation run shows that the imager assignment does the initial work:
+adding a third operator without moving growth produces no gain. Once growth
+moves into the imager, skilled staff become the next limit, and the second shift
+raises the modelled ceiling again.
