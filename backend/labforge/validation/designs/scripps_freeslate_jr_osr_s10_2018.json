@@ -1,0 +1,10 @@
+{
+  "status": "no_design",
+  "reason": "No design in one run: the agent asked clarifying questions instead of designing (spot-checked on earlier_flow_sdl: it asks for the throughput target, room size and budget, which these published-lab briefs do not state). Answering for it would mean inventing inputs, so it was not re-run.",
+  "provenance": {
+    "model": "claude-opus-5-5",
+    "date": "2026-10-04T09:04:05+00:00",
+    "commit": "9794e15",
+    "cost_withheld": true
+  }
+}
