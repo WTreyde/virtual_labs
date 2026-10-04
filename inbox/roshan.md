@@ -1,6 +1,6 @@
 # Inbox: Roshan (Strand A: game client and report)
 
-Last updated: 2026-10-04 01:30 BST by the integrator. Main at `282fe00` (plus this inbox commit).
+Last updated: 2026-10-04 02:00 BST by the integrator. Main at `53fbd2a` (plus this inbox commit).
 
 The integrator rewrites this file on every integration pass (every 30 min until the 09:00 freeze on 4 Oct).
 Work the open items top to bottom. Done items drop off once your merged work on main shows them done.
@@ -9,12 +9,7 @@ Don't edit this file; report progress in your PR description.
 ## Open items
 
 ```
-Your #65 (readability: system font for prose, contrast fixed) is merged, and you confirmed the
-XChem page reads correctly with the new replay. Thanks.
-P0 (new)
-0. Live chat refusal: Albert is making a provider refusal end with status "declined_by_model" and a
-   message. Show it in the dialogue box as "The model declined this request" plus the message, not as
-   an error or the offline example.
+Your #68 (declined requests shown in the chat and log) is merged; it matches Albert's #67 fields.
 P1 (team feedback)
 2. LabForge logo at the top in a bright, highly visible colour.
 3. Landing page: two buttons only, "Design your own lab" and "Case studies".
