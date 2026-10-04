@@ -1,0 +1,81 @@
+{
+  "id": "chem_acoustic_serial_dilution_jove",
+  "title": "Acoustic serial dilution of stocks in source plates, then 11-point curve transfer",
+  "domain": "chemistry",
+  "pipeline": "chem_library",
+  "pipeline_steps": [
+    "liquid_handling",
+    "centrifugation"
+  ],
+  "summary": "A JoVE-style method that builds serial dilutions by repeatedly firing 250 nL from one source plate into the next and backfilling with buffer, then acoustically transfers into assay plates to produce 11-point curves in duplicate. Buffer rather than DMSO is used because the analytes are peptides.",
+  "automation_level": "semi_automated",
+  "steps": [
+    {
+      "order": 1,
+      "text": "Fill source plate A with 25 uL of 100x stocks, controls and buffer; fill source plate B with 10 uL buffer in dilution columns; pre-fill assay plates with 5 uL buffer.",
+      "capability": "liquid_handling"
+    },
+    {
+      "order": 2,
+      "text": "Transfer 250 nL from A to B and backfill 15 uL buffer.",
+      "capability": "liquid_handling",
+      "duration_s": {
+        "value": 0,
+        "confidence": "placeholder",
+        "note": "Per-step time not stated."
+      }
+    },
+    {
+      "order": 3,
+      "text": "Centrifuge the receiving source plate for 1 min at 300 g.",
+      "capability": "centrifugation",
+      "catalog_ids": [
+        "bionex_hig4"
+      ],
+      "duration_s": {
+        "value": 60,
+        "confidence": "literature",
+        "note": "1 min stated."
+      }
+    },
+    {
+      "order": 4,
+      "text": "Repeat the transfer, backfill and spin from B to A and again from A to B for further dilution steps.",
+      "capability": "liquid_handling"
+    },
+    {
+      "order": 5,
+      "text": "Acoustically transfer from the dilution series into assay plates to form 11-point curves in duplicate.",
+      "capability": "liquid_handling",
+      "catalog_ids": [
+        "beckman_echo_525"
+      ]
+    }
+  ],
+  "equipment": [
+    {
+      "name": "Acoustic liquid handler (Echo)",
+      "catalog_id": "beckman_echo_525"
+    },
+    {
+      "name": "Plate centrifuge",
+      "catalog_id": "bionex_hig4"
+    }
+  ],
+  "materials": [
+    "Peptide stocks, assay buffer"
+  ],
+  "safety": [],
+  "source": {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5226112/",
+    "publisher": "Journal of Visualized Experiments (via PMC)",
+    "authors": "Naylor J., Rossi A., Brankin C., Hornigold D.C.",
+    "year": 2016,
+    "doi": "10.3791/54542"
+  },
+  "license": "unknown: link and paraphrase only",
+  "access": "open",
+  "confidence": "literature",
+  "notes": "Aqueous, peptide-specific; for DMSO small molecules use DMSO backfill (see chem_echo_dmso_backfill_dose_response). Echo model and centrifuge are our catalog suggestions.",
+  "retrieved": "2026-10-04"
+}

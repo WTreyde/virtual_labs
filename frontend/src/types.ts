@@ -83,8 +83,19 @@ export interface ValidationRow {
   predicted?: {
     p10: number; p50: number; p90: number; n_items?: number;
     /** Experimental: does not yet beat a constant baseline (docs/validation.md). */
-    confidence?: { within_25pct?: number; label?: string; data_coverage?: number };
+    confidence?: {
+      within_25pct?: number; label?: "low" | "medium" | "high" | string; data_coverage?: number; experimental?: boolean; note?: string;
+      unpriced_items?: string[];
+      drivers?: { catalog_id: string; variance_share?: number; main_gap?: "range" | "source" | "year_gap" | "basis_mismatch" | "proxy_model" | "configuration" | string }[];
+    };
+    /** Per-item price evidence (optional detail). */
+    items?: { catalog_id: string; priced?: boolean; median_usd?: number; sigma?: number; source?: string; source_year?: number; year_gap?: number;
+      basis_matched?: boolean; model_match?: string; evidence_score?: number }[];
   };
+  /** in_sample (the method was tuned on it) or out_of_sample (blind test), when the backend reports it. */
+  split?: "in_sample" | "out_of_sample" | string;
+  /** Why the case is not like-for-like, when the backend says. */
+  like_for_like_reason?: string;
   within_p10_p90?: boolean; log10_error?: number; within_25pct?: boolean; like_for_like?: boolean;
   unmodelled_categories?: string[];
   /** Set when the design was made by the agent (with the reported cost withheld from it). */
