@@ -1,0 +1,36 @@
+{
+  "title": "XChem-style fragment screening",
+  "brief": "Plan protein production, crystallisation, fragment soaking and manual harvesting followed by external synchrotron diffraction.",
+  "source": "backend/labforge/agent/demo/scenarios_20261004_resim50/xchem.json",
+  "headline_throughput": {
+    "p50": 410.7,
+    "p10": 336.0,
+    "p90": 522.7,
+    "unit": "crystals_per_day",
+    "basis": "recorded planning simulation",
+    "verified_p50": 424.0,
+    "target": 300
+  },
+  "bottleneck": {
+    "instance_id": "growth_hotel_1",
+    "name": "growth hotel 1",
+    "catalog_id": "liconic_stx44",
+    "model": "STX44",
+    "busy_fraction": 0.824,
+    "basis": "busiest recorded instrument by calendar-time utilisation; operators excluded"
+  },
+  "budget_vs_bom": {
+    "currency": "USD",
+    "budget": 2000000,
+    "bom": 1072775.0,
+    "claim_status": "supported",
+    "basis": "recorded checked equipment cost; excludes installation, service, consumables and building work"
+  },
+  "gate_passed": true,
+  "limits": [
+    "0 recorded layout violations; physical feasibility is qualified.",
+    "Planning median 410.7 versus independent verifier 424.0 crystals_per_day; the headline is the planning simulation, not a verified measurement.",
+    "Growth-hotel crystallisation-plate compatibility, shipper capacity and transit concurrency need confirmation.",
+    "Timing and yield assumptions are provisional; no physical lab was operated."
+  ]
+}
