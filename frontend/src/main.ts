@@ -1,6 +1,6 @@
 import "@fontsource/press-start-2p";
 import Phaser from "phaser";
-import { benchTasks, chatStream, exampleDesign, health, HttpError, LIVE_CHAT_MESSAGE, leaderboard, liveCatalog, optimise, prioritise, setOffline, validation } from "./api";
+import { benchTasks, catalogNames, chatStream, exampleDesign, health, HttpError, LIVE_CHAT_MESSAGE, leaderboard, liveCatalog, optimise, prioritise, setOffline, validation } from "./api";
 import demoQueue from "../../backend/labforge/catalog/data/demo_prioritise_queue.json";
 import cachedDemoSchedule from "./fixtures/demo_schedule.json";
 import { galleryDesign } from "./fixtures/gallery";
@@ -363,7 +363,10 @@ async function openSchedule() {
 }
 async function openValidation() {
   showLoading("Does LabForge price real labs right?", "Comparing against published labs…");
-  try { showValidation(await validation()); } catch (e) {
+  try {
+    const [rows, names] = await Promise.all([validation(), catalogNames()]);
+    showValidation(rows, names);
+  } catch (e) {
     showError("Does LabForge price real labs right?", e instanceof HttpError ? `The backend returned an error (${e.status}).` : "Needs the backend (make backend).");
   }
 }

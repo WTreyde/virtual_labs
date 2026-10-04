@@ -299,3 +299,5 @@ body.has-brief #statcard { overflow-y: auto; } /* top and max-height set from th
 #fix .variants li.control { color: #4a515c; } #fix .assume { display: block; color: #7a5200; font-size: 12px; }
 /* "Day 3, 14:05:22" on one line: a little wider clock panel and no wrapping. */
 #clockbar { width: 330px; } #clock-t { white-space: nowrap; font-size: 10px; }
+#modal table.sortable th[data-dir="asc"]::after { content: " ▲"; } #modal table.sortable th[data-dir="desc"]::after { content: " ▼"; }
+#modal .footnote { color: var(--muted); font-size: 13px; }
