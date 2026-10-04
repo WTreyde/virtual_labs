@@ -1,0 +1,92 @@
+{
+  "id": "xchem_shifter_crystal_harvesting",
+  "title": "Crystal harvesting with the Shifter microscope stage",
+  "domain": "biology",
+  "pipeline": "xchem",
+  "pipeline_steps": [
+    "crystal_harvesting"
+  ],
+  "summary": "Load an unsealed crystallisation plate into the Shifter, let software park each chosen drop under a small access hole, mount crystals with loops by hand, and log annotations on the touch screen for CSV export. Reported rates are 100-240 crystals per hour.",
+  "automation_level": "semi_automated",
+  "steps": [
+    {
+      "order": 1,
+      "text": "Remove the plate seal completely before loading.",
+      "capability": "crystal_harvesting"
+    },
+    {
+      "order": 2,
+      "text": "Pass the plate through the port in the protective lid of the Shifter enclosure.",
+      "capability": "crystal_harvesting",
+      "catalog_ids": [
+        "olt_crystal_shifter"
+      ]
+    },
+    {
+      "order": 3,
+      "text": "Use the touch screen to select a drop; the stage positions it under the aperture in about 30-35 s.",
+      "capability": "crystal_harvesting",
+      "catalog_ids": [
+        "olt_crystal_shifter"
+      ],
+      "duration_s": {
+        "value": 33,
+        "confidence": "literature",
+        "note": "30-35 s per location."
+      }
+    },
+    {
+      "order": 4,
+      "text": "Fish the crystal out with a loop through the aperture using normal technique.",
+      "capability": "crystal_harvesting",
+      "catalog_ids": [
+        "operator_crystallographer"
+      ]
+    },
+    {
+      "order": 5,
+      "text": "Record the outcome and annotations with the touch-screen buttons (timestamped automatically).",
+      "capability": "crystal_harvesting",
+      "catalog_ids": [
+        "olt_crystal_shifter"
+      ]
+    },
+    {
+      "order": 6,
+      "text": "Export the log as CSV for the lab database or LIMS.",
+      "capability": "crystal_harvesting",
+      "catalog_ids": [
+        "olt_crystal_shifter"
+      ]
+    }
+  ],
+  "equipment": [
+    {
+      "name": "Shifter microscope stage",
+      "catalog_id": "olt_crystal_shifter"
+    },
+    {
+      "name": "Crystallographer",
+      "catalog_id": "operator_crystallographer"
+    }
+  ],
+  "materials": [
+    "Crystal loops/pins",
+    "Unsealed crystallisation plates"
+  ],
+  "safety": [
+    "Pins and cryo-tongs are used with liquid nitrogen; see the cryo-cooling protocol."
+  ],
+  "source": {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7787106/",
+    "publisher": "Acta Crystallographica Section D (IUCr, via PMC)",
+    "authors": "Wright et al.",
+    "year": 2021,
+    "doi": "10.1107/S2059798320014114"
+  },
+  "license": "CC BY",
+  "access": "open",
+  "confidence": "literature",
+  "notes": "Reported mounting rate: 100-240 per hour (mean 103, median 120). The first fetched page summary lists this but not the full methods; per-crystal time derived as about 3600/120 = 30 s median.",
+  "retrieved": "2026-10-04"
+}

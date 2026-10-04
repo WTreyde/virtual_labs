@@ -1,0 +1,105 @@
+{
+  "id": "chem_hte_microscale_96well_setup",
+  "title": "Practical microscale HTE in 96-well vial plates (Suzuki-type screening workflow)",
+  "domain": "chemistry",
+  "pipeline": "chem_library",
+  "pipeline_steps": [
+    "reaction",
+    "heating_stirring",
+    "liquid_handling",
+    "filtration",
+    "lcms"
+  ],
+  "summary": "A bench-practical recipe for running reaction arrays at 10 umol scale in glass vial inserts held in 96-well metal blocks. Reagents are dosed as stock solutions, the block is inerted and sealed, heated with tumble stirring, then diluted into daughter plates for fast UPLC analysis. Cross-couplings such as Suzuki-Miyaura are the typical use case.",
+  "automation_level": "semi_automated",
+  "steps": [
+    {
+      "order": 1,
+      "text": "Make stock solutions of substrates, catalysts, ligands and bases (roughly 0.1 M for substrate) rather than weighing solids per well; use pre-dosed catalyst/reagent libraries if available.",
+      "capability": "liquid_dosing"
+    },
+    {
+      "order": 2,
+      "text": "Place 8 x 30 mm glass vial inserts in a 96-well metal block (about 100 uL per reaction, 20 uL in 4 x 21 mm inserts if material is scarce).",
+      "capability": "manual_bench"
+    },
+    {
+      "order": 3,
+      "text": "Dose the stock solutions into the vials with multichannel pipettes or a liquid handler, working inside a glovebox if the chemistry is air-sensitive.",
+      "capability": "liquid_handling",
+      "catalog_ids": [
+        "opentrons_flex",
+        "mbraun_glovebox"
+      ]
+    },
+    {
+      "order": 4,
+      "text": "Seal the block (cap mat or sealing film; pressure vessel if a reactive gas is needed).",
+      "capability": "plate_sealing"
+    },
+    {
+      "order": 5,
+      "text": "Heat the block on a plate heater with tumble stirring (or vortex shaking) for the set reaction time.",
+      "capability": "heating_stirring",
+      "catalog_ids": [
+        "ika_rct_digital"
+      ],
+      "duration_s": {
+        "value": 0,
+        "confidence": "placeholder",
+        "note": "Source gives no time; reaction time depends on chemistry."
+      }
+    },
+    {
+      "order": 6,
+      "text": "Quench and dilute an aliquot from every well into a daughter plate using a multichannel pipette; remove volatile solvents with a vacuum centrifuge or filter solids through a filter plate if needed.",
+      "capability": "filtration"
+    },
+    {
+      "order": 7,
+      "text": "Analyse each well by reverse-phase UPLC(-MS) with a fast gradient; the source quotes a few minutes per sample.",
+      "capability": "lcms",
+      "duration_s": {
+        "value": 180,
+        "confidence": "estimated",
+        "low": 120,
+        "high": 300,
+        "note": "'a few minutes per sample' paraphrased; 3 min taken as midpoint."
+      }
+    }
+  ],
+  "equipment": [
+    {
+      "name": "96-well metal block with glass vial inserts"
+    },
+    {
+      "name": "Tumble stirrer / plate heater",
+      "catalog_id": "ika_rct_digital"
+    },
+    {
+      "name": "Glovebox",
+      "catalog_id": "mbraun_glovebox"
+    },
+    {
+      "name": "UPLC-MS"
+    }
+  ],
+  "materials": [
+    "Aryl halide, boronic acid, Pd catalyst/ligand, base stocks (Suzuki example)"
+  ],
+  "safety": [
+    "Flammable solvents; handle Pd catalysts and bases in a ventilated enclosure."
+  ],
+  "source": {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5467193/",
+    "publisher": "ACS Medicinal Chemistry Letters (via PMC)",
+    "authors": "Shevlin M.",
+    "year": 2017,
+    "doi": "10.1021/acsmedchemlett.7b00165"
+  },
+  "license": "CC BY (ACS AuthorChoice, as stated on the PMC page)",
+  "access": "open",
+  "confidence": "literature",
+  "notes": "Suzuki is named as a typical use, not a single step-by-step Suzuki recipe; step 5 time is a placeholder. Catalog ids are suggested equivalents, not what the author used.",
+  "retrieved": "2026-10-04"
+}

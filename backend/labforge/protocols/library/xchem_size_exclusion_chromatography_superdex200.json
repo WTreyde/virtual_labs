@@ -1,0 +1,89 @@
+{
+  "id": "xchem_size_exclusion_chromatography_superdex200",
+  "title": "Size-exclusion polishing on Superdex 200, concentration and flash-freezing",
+  "domain": "biology",
+  "pipeline": "xchem",
+  "pipeline_steps": [
+    "protein_purification",
+    "concentration_measurement",
+    "cold_storage"
+  ],
+  "summary": "Final polishing of a purified protein by gel filtration on Superdex 200, followed by ultrafiltration to about 3 mg/mL and flash-freezing in liquid nitrogen. Source is the same crystallography paper as the IMAC protocol.",
+  "automation_level": "semi_automated",
+  "steps": [
+    {
+      "order": 1,
+      "text": "Equilibrate a Superdex 200 column in 20 mM HEPES pH 7.5, 500 mM NaCl, 0.5 mM TCEP.",
+      "capability": "protein_purification",
+      "catalog_ids": [
+        "cytiva_akta_pure_25"
+      ]
+    },
+    {
+      "order": 2,
+      "text": "Inject the post-reverse-IMAC protein and collect the monodisperse peak fractions.",
+      "capability": "protein_purification",
+      "catalog_ids": [
+        "cytiva_akta_pure_25"
+      ]
+    },
+    {
+      "order": 3,
+      "text": "Pool clean fractions (judge by SDS-PAGE) and concentrate in a 10 kDa cut-off Amicon Ultra device to about 3 mg/mL.",
+      "capability": "concentration_measurement",
+      "catalog_ids": [
+        "eppendorf_5810r"
+      ],
+      "duration_s": {
+        "value": 1800,
+        "confidence": "estimated",
+        "note": "Spin time depends on volume; 30 min assumed."
+      }
+    },
+    {
+      "order": 4,
+      "text": "Flash-freeze aliquots in liquid nitrogen and keep at -80 C until crystallisation.",
+      "capability": "cold_storage",
+      "catalog_ids": [
+        "ln2_storage_dewar"
+      ]
+    }
+  ],
+  "equipment": [
+    {
+      "name": "Chromatography system",
+      "catalog_id": "cytiva_akta_pure_25"
+    },
+    {
+      "name": "Centrifuge for ultrafiltration",
+      "catalog_id": "eppendorf_5810r"
+    },
+    {
+      "name": "LN2 dewar",
+      "catalog_id": "ln2_storage_dewar"
+    }
+  ],
+  "materials": [
+    "Superdex 200 column",
+    "Amicon Ultra 10 kDa MWCO",
+    "HEPES",
+    "NaCl",
+    "TCEP"
+  ],
+  "safety": [
+    "Liquid nitrogen: cryo gloves, face shield, never seal a closed vessel.",
+    "TCEP is an irritant; wear gloves."
+  ],
+  "source": {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11480361/",
+    "publisher": "Nature Communications (Springer Nature, via PMC)",
+    "authors": "Kroupova et al.",
+    "year": 2024,
+    "doi": "10.1038/s41467-024-52871-9"
+  },
+  "license": "CC BY 4.0",
+  "access": "open",
+  "confidence": "literature",
+  "notes": "Source reports yield of about 1.5 mg per litre of culture. Column dimensions, flow rate and injection volume are not given, so no run time is recorded.",
+  "retrieved": "2026-10-04"
+}

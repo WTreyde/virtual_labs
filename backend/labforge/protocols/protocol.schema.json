@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "protocol.schema.json",
+  "title": "Protocol",
+  "description": "A published lab protocol, paraphrased with a link to its source, mapped to LabForge capabilities and catalog equipment. Strand B draft; propose to the integrator for schemas/ if the UI adopts it.",
+  "type": "object",
+  "required": ["id", "title", "domain", "pipeline", "summary", "steps", "source", "license", "confidence", "retrieved"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+    "title": {"type": "string"},
+    "domain": {"type": "string", "enum": ["chemistry", "biology", "general"]},
+    "pipeline": {"type": "string", "enum": ["chem_library", "xchem", "general"], "description": "Which LabForge demo pipeline it belongs to (docs/pipelines.md)."},
+    "pipeline_steps": {"type": "array", "items": {"type": "string"}, "description": "Capabilities (common.schema.json capability enum) this protocol covers."},
+    "summary": {"type": "string", "description": "Two or three sentences in our own words."},
+    "automation_level": {"type": "string", "enum": ["manual", "semi_automated", "automated"]},
+    "steps": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["order", "text"], "properties": {
+      "order": {"type": "integer", "minimum": 1},
+      "text": {"type": "string", "description": "Paraphrased step, not copied."},
+      "capability": {"type": "string"},
+      "catalog_ids": {"type": "array", "items": {"type": "string"}},
+      "duration_s": {"type": "object", "required": ["value", "confidence"], "properties": {
+        "value": {"type": "number"}, "low": {"type": "number"}, "high": {"type": "number"},
+        "confidence": {"type": "string", "enum": ["datasheet", "literature", "estimated", "placeholder"]}, "note": {"type": "string"}}}}}},
+    "equipment": {"type": "array", "items": {"type": "object", "required": ["name"], "properties": {
+      "name": {"type": "string"}, "catalog_id": {"type": ["string", "null"]}}}},
+    "materials": {"type": "array", "items": {"type": "string"}},
+    "safety": {"type": "array", "items": {"type": "string"}},
+    "source": {"type": "object", "required": ["url", "publisher"], "properties": {
+      "url": {"type": "string"}, "publisher": {"type": "string"}, "authors": {"type": "string"},
+      "year": {"type": "integer"}, "doi": {"type": "string"}}},
+    "license": {"type": "string", "description": "e.g. 'CC BY 4.0', 'CC0', 'Apache-2.0', or 'unknown: link and paraphrase only'."},
+    "access": {"type": "string", "enum": ["open", "free_registration", "paywalled"]},
+    "confidence": {"type": "string", "enum": ["datasheet", "literature", "estimated", "placeholder"], "description": "How well the source supports the steps and times recorded here."},
+    "notes": {"type": "string"},
+    "retrieved": {"type": "string", "description": "ISO date the source was opened."}
+  }
+}
