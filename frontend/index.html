@@ -19,19 +19,26 @@
           <rect x="6" y="6" width="4" height="2" fill="#e9f7ff"/><rect x="5" y="8" width="6" height="2" fill="#3ee07a"/><rect x="4" y="10" width="8" height="4" fill="#3ee07a"/>
           <rect x="5" y="11" width="1" height="1" fill="#b6ffd2"/><rect x="8" y="12" width="1" height="1" fill="#b6ffd2"/><rect x="10" y="10" width="1" height="1" fill="#b6ffd2"/>
         </svg><span class="logo-word">LabForge</span></a>
-      <a href="#/cases" data-route="cases">Case studies</a>
-      <a href="#/case/chem" data-route="case/chem">Chemistry case</a>
-      <a href="#/case/fbdd" data-route="case/fbdd">XChem case</a>
-      <a href="#/design" data-route="design">Design your own</a>
-      <a href="#/bench" data-route="bench">Bench</a>
-      <a href="#/validation" data-route="validation">Validation</a>
-      <a href="#/schedule" data-route="schedule">Schedule</a>
-      <a href="#/protocols" data-route="protocols">Protocols</a>
+      <!-- Phones: the page links fold into this one "Menu" dropdown, in the same bar as the logo. -->
+      <button id="menu-btn" type="button" aria-expanded="false" aria-controls="nav-links">Menu <span class="chev" aria-hidden="true">▾</span></button>
+      <div id="nav-links">
+        <a href="#/design" data-route="design">Design your own</a>
+        <div class="nav-group" data-group="case">
+          <a href="#/cases" data-route="cases" aria-haspopup="true">Case studies <span class="chev" aria-hidden="true">▾</span></a>
+          <div class="nav-sub" aria-label="Case studies">
+            <a href="#/case/chem" data-route="case/chem">Chemistry case</a>
+            <a href="#/case/fbdd" data-route="case/fbdd">XChem case</a>
+          </div>
+        </div>
+        <a href="#/bench" data-route="bench">Bench</a>
+        <a href="#/validation" data-route="validation">Validation</a>
+        <a href="#/schedule" data-route="schedule">Schedule</a>
+        <a href="#/protocols" data-route="protocols">Protocols</a>
+      </div>
     </nav>
     <section id="landing" class="hidden" aria-label="Start"></section>
     <main id="app">
     <div id="game">
-      <div id="brief" class="frame hidden" aria-label="Case brief"></div>
       <div id="statcard" class="frame hidden"></div>
       <div id="clockbar" class="frame hidden">
         <div class="controls">
@@ -52,7 +59,15 @@
       <div id="dialogue" class="frame hidden"><div class="speaker">LABFORGE</div><div class="text"></div><span class="caret">▼</span></div>
     </div>
     <aside id="panel">
-      <section id="metrics"></section>
+      <!-- Brief and Throughput share the top of the panel: open one and the other folds away. -->
+      <section id="brief-acc" class="acc hidden">
+        <button type="button" class="acc-head" aria-expanded="true" aria-controls="brief"><span>The brief</span><span class="chev" aria-hidden="true">▾</span></button>
+        <div id="brief" class="acc-body" aria-label="Case brief"></div>
+      </section>
+      <section id="metrics-acc" class="acc open">
+        <button type="button" class="acc-head" aria-expanded="true" aria-controls="metrics"><span>Throughput</span><span class="acc-peek"></span><span class="chev" aria-hidden="true">▾</span></button>
+        <div id="metrics" class="acc-body"></div>
+      </section>
       <section id="checked" class="hidden"></section>
       <section id="fix" class="hidden"></section>
       <section id="verdicts" class="hidden"></section>

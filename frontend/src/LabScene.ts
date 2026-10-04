@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { fitRoom, iso, PIX, TILE, Z_SQUASH } from "./iso";
-import { bakeRoom, bakeVoxels, model, spriteKind } from "./sprites";
+import { bakeRoom, bakeVoxels, model, OPERATOR_RES, operatorLook, spriteKind } from "./sprites";
 import { clock, Timeline } from "./timeline";
 import type { Design, Vec3 } from "./types";
 
@@ -234,13 +234,15 @@ export class LabScene extends Phaser.Scene {
   }
 
   private drawOperators() {
-    for (const op of this.design.layout.operators ?? []) {
-      const img = this.place(bakeVoxels(this, `lf:op:${op.id}`, model("operator", 0.4, 0.25, 1.7, 0), 0, { w: 0.4, d: 0.25 }), op.home.x, op.home.y);
+    (this.design.layout.operators ?? []).forEach((op, i) => {
+      const look = operatorLook(i);
+      const tex = bakeVoxels(this, `lf:op:${op.id}`, model(look.kind, 0.6, 0.6, 1.72, 0), 0, { w: 0.5, d: 0.4 }, OPERATOR_RES);
+      const img = this.place(tex, op.home.x, op.home.y).setScale(PIX / OPERATOR_RES);
       this.sprites[op.id] = img;
-      const label = this.label(img, op.role).setAlpha(0.85);
+      const label = this.label(img, `${look.name} · ${op.role}`).setAlpha(0.9);
       this.ops.push({ id: op.id, img, label, home: { ...op.home }, pos: { ...op.home } });
       img.setInteractive({ pixelPerfect: true, useHandCursor: true }).on("pointerdown", () => this.select(op.id, img));
-    }
+    });
   }
 
   /**

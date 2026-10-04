@@ -12,7 +12,7 @@ import type { CatalogItem, Layout } from "./types";
 
 export type SpriteKind =
   | "liquid_handler" | "arm" | "incubator" | "reader" | "lcms" | "crystal_imager" | "centrifuge"
-  | "sealer" | "hotel" | "hood" | "mobile" | "operator" | "generic";
+  | "sealer" | "hotel" | "hood" | "mobile" | "operator" | "steve" | "creeper" | "generic";
 
 const KIND_BY_CAPABILITY: [SpriteKind, string[]][] = [
   ["arm", ["plate_transport_arm", "plate_transport_rail"]],
@@ -30,7 +30,7 @@ const KIND_BY_CAPABILITY: [SpriteKind, string[]][] = [
 
 /** Pick the sprite from capabilities (the schema's `category` is too coarse to draw from). */
 export function spriteKind(item: CatalogItem): SpriteKind {
-  if (item.transport?.kind === "human") return "operator";
+  if (item.transport?.kind === "human") return "steve";
   if (item.transport?.kind === "mobile") return "mobile";
   if (item.transport?.kind === "arm" || item.transport?.kind === "rail") return "arm";
   for (const [kind, caps] of KIND_BY_CAPABILITY) if (item.capabilities.some((c) => caps.includes(c))) return kind;
@@ -40,8 +40,14 @@ export function spriteKind(item: CatalogItem): SpriteKind {
 const DEFAULT_COLOUR: Record<SpriteKind, number> = {
   liquid_handler: 0x4a7bd0, arm: 0x9aa4ad, incubator: 0xd08a4a, reader: 0x5b6b8c, lcms: 0xd9dde2,
   crystal_imager: 0x5a4f8f, centrifuge: 0xc9ced6, sealer: 0x7d8b99, hotel: 0x8d99a6, hood: 0xe6e1d3,
-  mobile: 0x3fa7a0, operator: 0xf3f3f3, generic: 0x8899aa,
+  mobile: 0x3fa7a0, operator: 0xf3f3f3, steve: 0x00a8a8, creeper: 0x5bb64a, generic: 0x8899aa,
 };
+
+/** Lab staff are drawn as Minecraft's Steve and Creeper, alternating, so people stand out from the instruments. */
+export const OPERATOR_LOOKS = [{ kind: "steve", name: "Steve" }, { kind: "creeper", name: "Creeper" }] as const;
+export const operatorLook = (index: number) => OPERATOR_LOOKS[Math.max(0, index) % OPERATOR_LOOKS.length];
+/** Operators bake at this many times the art resolution (then scale down), so their 8x8 faces stay readable. */
+export const OPERATOR_RES = 3;
 
 // Fixed palette (PICO-8-ish accents) so details read the same on any body colour.
 const C = {
@@ -62,6 +68,24 @@ const cbox = (cx: number, cy: number, sx: number, sy: number, z0: number, z1: nu
   ({ x0: cx - sx / 2, y0: cy - sy / 2, z0, x1: cx + sx / 2, y1: cy + sy / 2, z1, c, decals, outline });
 const d = (face: Face, u0: number, v0: number, u1: number, v1: number, c: number, extra: Partial<Decal> = {}): Decal =>
   ({ face, u0, v0, u1, v1, c, ...extra });
+
+/** An 8x8 (or any size) texture painted cell by cell on one face; row 0 is the top. Unknown letters stay see-through. */
+function grid(face: Face, rows: string[], pal: Record<string, number>, lit = ""): Decal[] {
+  const n = rows.length, m = rows[0].length, out: Decal[] = [];
+  rows.forEach((row, r) => [...row].forEach((ch, c) => {
+    if (pal[ch] == null) return;
+    out.push(d(face, c / m, 1 - (r + 1) / n, (c + 1) / m, 1 - r / n, pal[ch], { lit: lit.includes(ch) }));
+  }));
+  return out;
+}
+
+const STEVE = { H: 0x3b2614, h: 0x4f3420, S: 0xc8977a, s: 0xb4846a, W: 0xffffff, E: 0x4a3a9a, N: 0x8a523c, M: 0x5e3826 };
+const STEVE_FACE = ["HHHHHHHH", "HHHHHHHH", "HSSSSSSH", "SSSSSSSS", "SWESSEWS", "SSSNNSSS", "SSMSSMSS", "SSMMMMSS"];
+const STEVE_SIDE = ["HHHHHHHH", "HHHHHHHH", "HHHHHHSS", "HHHHSSSS", "HHHSSSSS", "HHSSSSss", "SSSSSSSS", "SSSSSSSS"];
+const STEVE_TOP = ["HhHHhHHH", "HHHhHHhH", "hHHHHHHH", "HHhHHhHH", "HHHHHHHh", "HhHHhHHH", "HHHhHHHH", "hHHHHhHH"];
+const CREEPER = { g: 0x5bb64a, d: 0x3f8f34, l: 0x8fd87a, k: 0x101a0e, K: 0x24361f };
+const CREEPER_FACE = ["lgdglgdg", "gdglgggl", "gkkgdkkg", "dkKglKkg", "glgkkgdl", "gdkKKkgg", "lgkkkkdg", "gdkgdkgl"];
+const CREEPER_SKIN = ["gldgdlgg", "dgglgdgl", "glgdglgd", "lgdggdlg", "gdglgldg", "dgldgggl", "glggdlgd", "gdlgglgg"];
 
 /** Bench slab and legs under bench-mounted items, so they sit on furniture rather than float. */
 function bench(w: number, dp: number, B: number): Vox[] {
@@ -201,6 +225,28 @@ export function model(kind: SpriteKind, w: number, dp: number, h: number, B: num
         cbox(0, -0.01, 0.22, 0.22, 1.58, 1.7, C.hair),
       );
       break;
+    case "steve": {
+      // Minecraft proportions with the head enlarged: legs, body and arms 0.6 m, head a 0.52 m cube facing +y.
+      const pants = 0x3c3cb4, shoe = 0x5a5a62, skin = STEVE.S;
+      const leg = (x: number) => cbox(x, 0, 0.2, 0.2, 0, 0.6, pants, [d("front", 0, 0, 1, 0.14, shoe), d("right", 0, 0, 1, 0.14, shoe)]);
+      const arm = (x: number) => cbox(x, 0, 0.18, 0.2, 0.6, 1.2, skin, [d("front", 0, 0.62, 1, 1, body), d("right", 0, 0.62, 1, 1, body)]);
+      out.push(leg(-0.1), leg(0.1),
+        cbox(0, 0, 0.4, 0.2, 0.6, 1.2, body, [d("front", 0.36, 0.86, 0.64, 1, skin), d("front", 0, 0, 1, 0.08, pants), d("right", 0, 0, 1, 0.08, pants)]),
+        arm(-0.29), arm(0.29),
+        cbox(0, 0, 0.52, 0.52, 1.2, 1.72, skin, [
+          ...grid("front", STEVE_FACE, STEVE, "WE"), ...grid("right", STEVE_SIDE, STEVE), ...grid("top", STEVE_TOP, STEVE),
+        ]));
+      break;
+    }
+    case "creeper": {
+      // Four stubby legs, a tall body and the famous face; mottled green all over.
+      const skin = (rows = CREEPER_SKIN): Decal[] => [...grid("front", rows, CREEPER), ...grid("right", rows, CREEPER), ...grid("top", CREEPER_SKIN, CREEPER)];
+      const leg = (x: number, y: number) => cbox(x, y, 0.2, 0.2, 0, 0.34, body, skin(CREEPER_SKIN.slice(0, 4)));
+      out.push(leg(-0.1, -0.2), leg(0.1, -0.2), leg(-0.1, 0.2), leg(0.1, 0.2),
+        cbox(0, 0, 0.4, 0.22, 0.34, 1.2, body, skin([...CREEPER_SKIN, ...CREEPER_SKIN.slice(0, 4)])),
+        cbox(0, 0, 0.52, 0.52, 1.2, 1.72, body, [...grid("front", CREEPER_FACE, CREEPER, "kK"), ...grid("right", CREEPER_SKIN, CREEPER), ...grid("top", CREEPER_SKIN, CREEPER)]));
+      break;
+    }
     default:
       out.push(cbox(0, 0, w, dp, B, z1, body, [d("front", 0.15, 0.2, 0.85, 0.8, shade(body, 1.1)), led("front", 0.8, 0.86)]));
   }
@@ -240,8 +286,8 @@ export interface SpriteTexture { key: string; ox: number; oy: number }
  * Rasterise voxels into a Phaser texture. Returns the art-pixel position of the local origin
  * (footprint centre on the floor) so the caller can anchor the image at iso(x, y, 0).
  */
-export function bakeVoxels(scene: Phaser.Scene, key: string, vox: Vox[], rotDeg = 0, shadow?: { w: number; d: number }): SpriteTexture {
-  const t = TILE / PIX;
+export function bakeVoxels(scene: Phaser.Scene, key: string, vox: Vox[], rotDeg = 0, shadow?: { w: number; d: number }, res = 1): SpriteTexture {
+  const t = (TILE / PIX) * res; // res > 1: finer art pixels (display at scale PIX / res)
   const a = (rotDeg * Math.PI) / 180, ca = Math.cos(a), sa = Math.sin(a);
   const rot: Rot = (x, y) => ({ x: x * ca - y * sa, y: x * sa + y * ca });
   const proj = (p: Pt, z: number): Pt => ({ x: (p.x - p.y) * t * 0.866, y: (p.x + p.y) * t * 0.5 - z * t });

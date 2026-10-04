@@ -58,18 +58,32 @@ game.events.on("ready-clock", () => setupClock(design));
 game.events.on("select", (sel: { id: string; sprite?: string } | null) => {
   if (!sel) return hideStatCard();
   showStatCard(design, sel.id, sel.sprite);
-  placeStatCard();
 });
 
-/** On case pages the stat card opens just below the brief (whose height varies) and stops above the dialogue box. */
-function placeStatCard() {
-  const card = $("#statcard"), brief = $("#brief");
-  if (!document.body.classList.contains("has-brief")) { card.style.top = ""; card.style.maxHeight = ""; return; }
-  const game = $("#game").getBoundingClientRect(), b = brief.getBoundingClientRect();
-  const top = Math.round(b.bottom - game.top + 10), bottomGap = 140; // clear of the dialogue box
-  card.style.top = `${top}px`;
-  card.style.maxHeight = `${Math.max(160, game.height - top - bottomGap)}px`;
+// ---- side panel accordion: the brief and the throughput share the top of the panel ------------------
+
+type Acc = "brief" | "metrics";
+/** Open one section and fold the other; `null` folds both. */
+function openAcc(which: Acc | null) {
+  for (const k of ["brief", "metrics"] as Acc[]) {
+    const sec = $(`#${k}-acc`), on = k === which;
+    sec.classList.toggle("open", on);
+    sec.querySelector(".acc-head")!.setAttribute("aria-expanded", String(on));
+  }
 }
+for (const k of ["brief", "metrics"] as Acc[])
+  $(`#${k}-acc .acc-head`).addEventListener("click", () => openAcc($(`#${k}-acc`).classList.contains("open") ? null : k));
+
+// ---- top nav: "Menu" dropdown on phones, "Case studies" dropdown everywhere -------------------------
+
+const menuBtn = $<HTMLButtonElement>("#menu-btn"), topnav = $("#topnav");
+function setMenu(open: boolean) {
+  topnav.classList.toggle("menu-open", open);
+  menuBtn.setAttribute("aria-expanded", String(open));
+}
+menuBtn.addEventListener("click", (e) => { e.stopPropagation(); setMenu(!topnav.classList.contains("menu-open")); });
+document.addEventListener("click", (e) => { if (!topnav.contains(e.target as Node)) setMenu(false); });
+window.addEventListener("keydown", (e) => { if (e.key === "Escape") setMenu(false); });
 
 function show(d: Design) {
   design = d;
@@ -114,9 +128,9 @@ async function go(r: Route) {
   $("#checked").classList.add("hidden");
   $("#fix").classList.add("hidden");
   $("#verdicts").classList.add("hidden");
-  $("#brief").classList.add("hidden");
-  document.body.classList.remove("has-brief");
-  placeStatCard();
+  $("#brief-acc").classList.add("hidden");
+  openAcc("metrics");
+  setMenu(false);
   $("#skill-btn").classList.add("hidden");
   $("#agent-banner").classList.add("hidden");
   agentLog.clear();
@@ -131,6 +145,7 @@ async function go(r: Route) {
   landing.classList.toggle("hidden", !onLanding);
   for (const a of document.querySelectorAll<HTMLAnchorElement>("#topnav a"))
     a.classList.toggle("active", a.dataset.route === routeKey(r));
+  $(".nav-group[data-group=case]").classList.toggle("active", r.page === "case" || r.page === "cases");
 
   switch (r.page) {
     case "landing": return renderLanding(landing);
@@ -233,20 +248,17 @@ async function startReplay(name: string) {
 }
 
 /**
- * Keep the case's problem statement on screen for the whole replay: the case title, the short brief from the
- * summary, and the agent's full brief behind a toggle.
+ * Keep the case's problem statement in the side panel for the whole replay: the case title, the short brief from
+ * the summary, and the agent's full brief behind a toggle. Open by default; the Throughput bar below folds it away.
  */
 function showBrief(name: string, full: string, short?: string) {
   const el = $("#brief"), title = CASES.find((c) => c.name === name)?.title ?? name;
   const esc = (v: string) => v.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
-  el.innerHTML = `<div class="brief-kicker">The brief</div><div class="brief-title">${esc(title)}</div>
+  el.innerHTML = `<div class="brief-title">${esc(title)}</div>
     <p class="brief-short">${esc(short ?? full.split(/(?<=\.)\s/)[0])}</p>
     <details><summary>Full brief</summary><p class="brief-full">${esc(full)}</p></details>`;
-  el.classList.remove("hidden");
-  document.body.classList.add("has-brief");
-  // Expanding the full brief needs the space: close any open stat card (reopen by clicking the instrument).
-  const details = el.querySelector("details")!;
-  details.addEventListener("toggle", () => (details.open ? hideStatCard() : placeStatCard()));
+  $("#brief-acc").classList.remove("hidden");
+  openAcc("brief");
 }
 
 // ---- live chat ----------------------------------------------------------------------------------
