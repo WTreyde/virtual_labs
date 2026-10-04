@@ -1,6 +1,6 @@
 # Inbox: Maxim (Strand D: layout, sim, verifier, bench runner)
 
-Last updated: 2026-10-04 06:00 BST by the integrator. Main at `dc71974` (plus this inbox commit).
+Last updated: 2026-10-04 07:00 BST by the integrator. Main at `9ffb0d4` (plus this inbox commit).
 
 The integrator rewrites this file on every integration pass (every 30 min until the 09:00 freeze on 4 Oct).
 Work the open items top to bottom. Done items drop off once your merged work on main shows them done.
