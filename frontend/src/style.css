@@ -297,3 +297,5 @@ body.has-brief #statcard { overflow-y: auto; } /* top and max-height set from th
 #statcard .head { padding-right: 44px; }
 #fix .variants { margin: 4px 0 4px 16px; padding: 0; font: 13px/1.5 var(--sys); color: #1d2330; } #fix .variants li { margin: 3px 0; }
 #fix .variants li.control { color: #4a515c; } #fix .assume { display: block; color: #7a5200; font-size: 12px; }
+/* "Day 3, 14:05:22" on one line: a little wider clock panel and no wrapping. */
+#clockbar { width: 330px; } #clock-t { white-space: nowrap; font-size: 10px; }
