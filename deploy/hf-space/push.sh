@@ -15,8 +15,12 @@ rm -rf "$tmp/docs/img"
 find "$tmp" -name .DS_Store -delete
 cd "$tmp"
 git init -q -b main
-git lfs install --local >/dev/null 2>&1 || true
-git lfs track "*.png" "*.jpg" >/dev/null 2>&1 || true   # the Hub rejects plain binaries
+# The Hub rejects plain binary files, and the app needs its landing images (frontend/public/landing), so they go via Git LFS.
+if ! git lfs install --local >/dev/null 2>&1; then
+  echo "git-lfs is needed to push the Space's images. Install it (macOS: brew install git-lfs; Debian/Ubuntu: sudo apt install git-lfs), then rerun." >&2
+  exit 1
+fi
+git lfs track "*.png" "*.jpg" "*.jpeg" "*.gif" "*.webp" >/dev/null
 git add -A
 git -c user.name="LabForge" -c user.email="labforge@users.noreply.huggingface.co" commit -qm "Deploy $(git -C "$root" rev-parse --short HEAD)"
 url="https://huggingface.co/spaces/$space"
