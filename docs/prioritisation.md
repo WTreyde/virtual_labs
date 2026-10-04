@@ -6,7 +6,7 @@
 
 **Example from the tests:** a dispense-heavy and a read-heavy project on the enzyme lab finish in 6.2 h in the recommended order versus 11.0 h in the order given, a 44% saving, because the two projects then load different instruments at the same time.
 
-**Honest limits:** mean durations, no transfer times, no operator shifts. The recommendation should be confirmed with the Monte Carlo simulator before we quote it, which is the first follow-up task.
+**Honest limits:** the policy search uses mean durations, with no transfer times and no operator shifts. The recommendation is then checked with the Monte Carlo simulator over duration uncertainty (result below).
 
 ## Demo queue (Strand B)
 
@@ -26,12 +26,22 @@ Result from `POST /prioritise` (3 Oct, current catalog):
 | All projects finish | 46.7 h | **39.2 h (16% sooner)** |
 | Mean instrument utilisation | 21% | 25% |
 
+**Monte Carlo check (4 Oct, main at 427c06e, 30 replicates over duration uncertainty):**
+
+| | Given order | Recommended |
+|---|---|---|
+| All projects finish, P50 | 49.8 h | **43.9 h** |
+| P10–P90 | 42.5–64.8 h | 37.4–51.7 h |
+| Recommended finishes first | | **30 of 30 runs** |
+
+The P50s are longer than the mean-duration figures above because slow draws on the bottleneck instruments compound; the ranking holds in every run. Reproduce with `labforge.sim.portfolio.prioritise` on the demo queue (its `caveat` field carries these numbers).
+
 Why: the re-test needs the LC-MS, which the library would otherwise hold for ~32 h, and the enzyme campaign loads the liquid handler instead, so running the library early overlaps the two bottlenecks. Step durations are planning estimates from `docs/pipelines.md` (each step's `params.duration_source`). The queue sizes were chosen so the demo shows the effect: with fewer than ~50 plates queued, every project fits into the lab at once and the order barely matters.
 
 ## Owners and cut line for the 09:00 freeze
 | Work | Owner | Must-have by freeze? |
 |---|---|---|
-| Confirm recommended vs naive schedule in the Monte Carlo simulator (P10–P90 makespan) | Maxim | Yes, a single comparison |
+| Confirm recommended vs naive schedule in the Monte Carlo simulator (P10–P90 makespan) | Maxim | Done (see above) |
 | Demo scenario: 3 projects (chem library screen, enzyme campaign, urgent re-test with deadline) | Max | Yes |
 | Agent tool `plan_projects` so a user can ask "what order should I run these?" | Albert | Nice to have |
 | Gantt chart and "lab busy %" before/after in the UI | Roshan | Nice to have; a static chart in the slides is the fallback |
