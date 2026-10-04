@@ -1,0 +1,85 @@
+{
+  "id": "xchem_sitting_drop_mosquito_setup",
+  "title": "Sitting-drop vapour-diffusion setup on a mosquito nanolitre dispenser",
+  "domain": "biology",
+  "pipeline": "xchem",
+  "pipeline_steps": [
+    "crystallization_setup",
+    "plate_sealing",
+    "incubation"
+  ],
+  "summary": "Fill a 96-well sitting-drop plate with reservoir, dispense equal 200 nL volumes of protein and reservoir into each drop at room temperature, and seal the plate. Example from a methods section of a crystallography paper; the crystallisation recipe itself is protein specific.",
+  "automation_level": "semi_automated",
+  "steps": [
+    {
+      "order": 1,
+      "text": "Fill the reservoirs of a 96-well MRC (SwissCI) sitting-drop plate with about 80 uL of screen solution each.",
+      "capability": "crystallization_setup"
+    },
+    {
+      "order": 2,
+      "text": "Load protein and plate onto the mosquito nanolitre liquid handler held at about 20 C (293 K).",
+      "capability": "crystallization_setup",
+      "catalog_ids": [
+        "sptlabtech_mosquito_xtal3"
+      ]
+    },
+    {
+      "order": 3,
+      "text": "Dispense 200 nL protein and 200 nL reservoir solution into each drop well.",
+      "capability": "crystallization_setup",
+      "catalog_ids": [
+        "sptlabtech_mosquito_xtal3"
+      ],
+      "duration_s": {
+        "value": 600,
+        "confidence": "estimated",
+        "note": "Per-plate dispense time not stated; 96 drops at about 6 s assumed."
+      }
+    },
+    {
+      "order": 4,
+      "text": "Seal the plate with clear sealing tape.",
+      "capability": "plate_sealing"
+    },
+    {
+      "order": 5,
+      "text": "Move the plate to an incubator or imager at constant temperature (20 C here; another paper in this set used 4 C or 20 C).",
+      "capability": "incubation",
+      "catalog_ids": [
+        "formulatrix_rock_imager_1000"
+      ]
+    }
+  ],
+  "equipment": [
+    {
+      "name": "Nanolitre crystallisation dispenser",
+      "catalog_id": "sptlabtech_mosquito_xtal3"
+    },
+    {
+      "name": "Plate hotel / imager",
+      "catalog_id": "formulatrix_rock_imager_1000"
+    }
+  ],
+  "materials": [
+    "96-well MRC SwissCI sitting-drop plates",
+    "Crystallisation screen",
+    "Clear sealing tape",
+    "Concentrated protein"
+  ],
+  "safety": [
+    "Screens may contain toxic salts or organics; wear gloves."
+  ],
+  "source": {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8985602/",
+    "publisher": "Journal of Applied Crystallography (IUCr, via PMC)",
+    "authors": "D. Bellini",
+    "year": 2022,
+    "doi": "10.1107/S1600576722002382"
+  },
+  "license": "CC BY 4.0",
+  "access": "open",
+  "confidence": "literature",
+  "notes": "Source licence line quotes CC-BY. Instrument model (mosquito Xtal3 vs LCP) is not stated; catalog id is the pipeline default. The 200+200 nL ratio was used for one protein and is not universal.",
+  "retrieved": "2026-10-04"
+}

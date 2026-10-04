@@ -1,0 +1,81 @@
+{
+  "id": "chem_lcms_library_qc_uv_elsd",
+  "title": "LC-MS/DAD/ELSD quality check of a DMSO compound library in 384-well plates",
+  "domain": "chemistry",
+  "pipeline": "chem_library",
+  "pipeline_steps": [
+    "lcms",
+    "concentration_measurement",
+    "liquid_handling"
+  ],
+  "summary": "Analytical QC of a large DMSO-stored compound collection: stock plates are thawed, diluted to a few mM, and injected on a short fast-gradient run with DAD, ELSD and CLND detection; identity needs mass adducts and purity/concentration come from calibrated universal detectors.",
+  "automation_level": "semi_automated",
+  "steps": [
+    {
+      "order": 1,
+      "text": "Thaw 384-well plates of 20 mM DMSO stocks without heating, sonicate briefly and centrifuge.",
+      "capability": "centrifugation",
+      "catalog_ids": [
+        "bionex_hig4"
+      ]
+    },
+    {
+      "order": 2,
+      "text": "Dilute stocks to roughly 3 mM for analysis.",
+      "capability": "liquid_handling"
+    },
+    {
+      "order": 3,
+      "text": "Place the plate directly in the autosampler.",
+      "capability": "lcms"
+    },
+    {
+      "order": 4,
+      "text": "Run a C18 column (50 x 3.0 mm, 2.5 um, 50 C) with water/methanol containing 0.1% acetic acid, 5-100% B in 3 min then hold 0.3 min at 1.5 mL/min.",
+      "capability": "lcms",
+      "catalog_ids": [
+        "waters_acquity_uplc_qda"
+      ],
+      "duration_s": {
+        "value": 198,
+        "confidence": "literature",
+        "note": "3 min gradient + 0.3 min hold = 3.3 min stated; equilibration not included."
+      }
+    },
+    {
+      "order": 5,
+      "text": "Quantify purity and concentration from ELSD and CLND signals via linear calibration curves.",
+      "capability": "concentration_measurement"
+    },
+    {
+      "order": 6,
+      "text": "Call identity only if the expected adduct masses appear consistently across detectors.",
+      "capability": "lcms"
+    }
+  ],
+  "equipment": [
+    {
+      "name": "Agilent 1100/1200 HPLC with DAD, ELSD, CLND and MS"
+    },
+    {
+      "name": "Waters ACQUITY UPLC-QDa (suggested equivalent)",
+      "catalog_id": "waters_acquity_uplc_qda"
+    }
+  ],
+  "materials": [
+    "20 mM DMSO stock plates, water, methanol, acetic acid"
+  ],
+  "safety": [],
+  "source": {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11752516",
+    "publisher": "Chemical Research in Toxicology (via PMC)",
+    "authors": "Richard A.M. et al.",
+    "year": 2024,
+    "doi": "10.1021/acs.chemrestox.4c00330"
+  },
+  "license": "CC BY-NC-ND 4.0",
+  "access": "open",
+  "confidence": "literature",
+  "notes": "Tox21 environmental/drug library, not a synthetic library; the method is generic. Catalog ids are suggested equivalents; the paper used an Agilent HPLC with CLND.",
+  "retrieved": "2026-10-04"
+}

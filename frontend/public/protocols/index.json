@@ -1,0 +1,538 @@
+[
+  {
+    "id": "chem_acoustic_serial_dilution_jove",
+    "title": "Acoustic serial dilution of stocks in source plates, then 11-point curve transfer",
+    "domain": "chemistry",
+    "pipeline": "chem_library",
+    "automation_level": "semi_automated",
+    "capabilities": [
+      "centrifugation",
+      "liquid_handling"
+    ],
+    "n_steps": 5,
+    "catalog_ids": [
+      "beckman_echo_525",
+      "bionex_hig4"
+    ],
+    "source": {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5226112/",
+      "publisher": "Journal of Visualized Experiments (via PMC)",
+      "authors": "Naylor J., Rossi A., Brankin C., Hornigold D.C.",
+      "year": 2016,
+      "doi": "10.3791/54542"
+    },
+    "license": "unknown: link and paraphrase only",
+    "access": "open",
+    "confidence": "literature"
+  },
+  {
+    "id": "chem_amide_library_fluorous_spe_96",
+    "title": "Parallel amide coupling in 96-well plates with automated fluorous solid-phase extraction",
+    "domain": "chemistry",
+    "pipeline": "chem_library",
+    "automation_level": "semi_automated",
+    "capabilities": [
+      "evaporation",
+      "filtration",
+      "lcms",
+      "reaction"
+    ],
+    "n_steps": 7,
+    "catalog_ids": [
+      "genevac_ez2"
+    ],
+    "source": {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC1934609/",
+      "publisher": "Journal of Combinatorial Chemistry (via PMC)",
+      "authors": "Zhang W., Lu Y.",
+      "year": 2006,
+      "doi": "10.1021/cc0601130"
+    },
+    "license": "unknown: link and paraphrase only",
+    "access": "open",
+    "confidence": "literature"
+  },
+  {
+    "id": "chem_echo_dmso_backfill_dose_response",
+    "title": "Acoustic dose-response plate design with constant DMSO backfill",
+    "domain": "chemistry",
+    "pipeline": "chem_library",
+    "automation_level": "automated",
+    "capabilities": [
+      "liquid_handling",
+      "manual_bench"
+    ],
+    "n_steps": 6,
+    "catalog_ids": [
+      "beckman_echo_650"
+    ],
+    "source": {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13370356/",
+      "publisher": "bioRxiv preprint (via PMC)",
+      "authors": "Kattunga V.M., Wrobel S.A., Lerner C.A. et al.",
+      "year": 2026,
+      "doi": "10.64898/2026.07.05.735934"
+    },
+    "license": "CC BY-NC 4.0",
+    "access": "open",
+    "confidence": "literature"
+  },
+  {
+    "id": "chem_hte_microscale_96well_setup",
+    "title": "Practical microscale HTE in 96-well vial plates (Suzuki-type screening workflow)",
+    "domain": "chemistry",
+    "pipeline": "chem_library",
+    "automation_level": "semi_automated",
+    "capabilities": [
+      "filtration",
+      "heating_stirring",
+      "lcms",
+      "liquid_dosing",
+      "liquid_handling",
+      "manual_bench",
+      "plate_sealing",
+      "reaction"
+    ],
+    "n_steps": 7,
+    "catalog_ids": [
+      "ika_rct_digital",
+      "mbraun_glovebox",
+      "opentrons_flex"
+    ],
+    "source": {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5467193/",
+      "publisher": "ACS Medicinal Chemistry Letters (via PMC)",
+      "authors": "Shevlin M.",
+      "year": 2017,
+      "doi": "10.1021/acsmedchemlett.7b00165"
+    },
+    "license": "CC BY (ACS AuthorChoice, as stated on the PMC page)",
+    "access": "open",
+    "confidence": "literature"
+  },
+  {
+    "id": "chem_hts_assay_validation_zprime",
+    "title": "HTS assay validation: plate uniformity and Z' factor",
+    "domain": "chemistry",
+    "pipeline": "chem_library",
+    "automation_level": "manual",
+    "capabilities": [
+      "fluorescence_read",
+      "liquid_handling",
+      "manual_bench"
+    ],
+    "n_steps": 6,
+    "catalog_ids": [
+      "bmg_pherastar_fsx"
+    ],
+    "source": {
+      "url": "https://www.ncbi.nlm.nih.gov/sites/books/NBK83783/",
+      "publisher": "NCBI Bookshelf, Assay Guidance Manual (NCATS/Eli Lilly)"
+    },
+    "license": "CC BY-NC-SA 3.0",
+    "access": "open",
+    "confidence": "literature"
+  },
+  {
+    "id": "chem_integrated_synthesis_purification_testing",
+    "title": "Integrated small-library synthesis, MS-triggered purification, DMSO stock prep and TR-FRET testing",
+    "domain": "chemistry",
+    "pipeline": "chem_library",
+    "automation_level": "semi_automated",
+    "capabilities": [
+      "concentration_measurement",
+      "evaporation",
+      "fluorescence_read",
+      "hplc",
+      "liquid_handling",
+      "reaction"
+    ],
+    "n_steps": 7,
+    "catalog_ids": [
+      "chemspeed_swing_xl"
+    ],
+    "source": {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5392760/",
+      "publisher": "ACS Medicinal Chemistry Letters (via PMC)",
+      "authors": "Baranczak A. et al.",
+      "year": 2017,
+      "doi": "10.1021/acsmedchemlett.7b00054"
+    },
+    "license": "unknown: link and paraphrase only",
+    "access": "open",
+    "confidence": "literature"
+  },
+  {
+    "id": "chem_lcms_library_qc_uv_elsd",
+    "title": "LC-MS/DAD/ELSD quality check of a DMSO compound library in 384-well plates",
+    "domain": "chemistry",
+    "pipeline": "chem_library",
+    "automation_level": "semi_automated",
+    "capabilities": [
+      "centrifugation",
+      "concentration_measurement",
+      "lcms",
+      "liquid_handling"
+    ],
+    "n_steps": 6,
+    "catalog_ids": [
+      "bionex_hig4",
+      "waters_acquity_uplc_qda"
+    ],
+    "source": {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11752516",
+      "publisher": "Chemical Research in Toxicology (via PMC)",
+      "authors": "Richard A.M. et al.",
+      "year": 2024,
+      "doi": "10.1021/acs.chemrestox.4c00330"
+    },
+    "license": "CC BY-NC-ND 4.0",
+    "access": "open",
+    "confidence": "literature"
+  },
+  {
+    "id": "chem_modular_block_synthesis_workup_lcms",
+    "title": "Multistep parallel synthesis in a 96-vial reaction block with block-level workup and LC-MS yields",
+    "domain": "chemistry",
+    "pipeline": "chem_library",
+    "automation_level": "semi_automated",
+    "capabilities": [
+      "centrifugation",
+      "filtration",
+      "heating_stirring",
+      "lcms",
+      "liquid_dosing",
+      "reaction"
+    ],
+    "n_steps": 7,
+    "catalog_ids": [
+      "chemspeed_isynth"
+    ],
+    "source": {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10610918",
+      "publisher": "Science Advances (via PMC)",
+      "authors": "Goetz et al.",
+      "year": 2023,
+      "doi": "10.1126/sciadv.adj2314"
+    },
+    "license": "CC BY-NC 4.0",
+    "access": "open",
+    "confidence": "literature"
+  },
+  {
+    "id": "chem_quantos_solid_dosing_dissolution",
+    "title": "Automated powder dosing with a Quantos and automated dissolution of the dose",
+    "domain": "chemistry",
+    "pipeline": "chem_library",
+    "automation_level": "automated",
+    "capabilities": [
+      "liquid_dosing",
+      "manual_bench",
+      "plate_transport_arm",
+      "powder_dosing"
+    ],
+    "n_steps": 6,
+    "catalog_ids": [
+      "mettler_quantos"
+    ],
+    "source": {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7921605/",
+      "publisher": "iScience (via PMC)",
+      "authors": "Shiri P. et al.",
+      "year": 2021,
+      "doi": "10.1016/j.isci.2021.102176"
+    },
+    "license": "CC BY-NC-ND 4.0",
+    "access": "open",
+    "confidence": "literature"
+  },
+  {
+    "id": "chem_trfret_bromodomain_hts_384",
+    "title": "TR-FRET bromodomain-histone peptide binding screen in 384-well plates",
+    "domain": "chemistry",
+    "pipeline": "chem_library",
+    "automation_level": "semi_automated",
+    "capabilities": [
+      "fluorescence_read",
+      "incubation",
+      "liquid_handling",
+      "manual_bench",
+      "reagent_dispensing"
+    ],
+    "n_steps": 6,
+    "catalog_ids": [
+      "bmg_pherastar_fsx",
+      "thermo_multidrop_combi"
+    ],
+    "source": {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7468272/",
+      "publisher": "Acta Pharmacologica Sinica (via PMC)",
+      "authors": "Zhang et al.",
+      "year": 2019,
+      "doi": "10.1038/s41401-019-0256-2"
+    },
+    "license": "unknown: link and paraphrase only",
+    "access": "open",
+    "confidence": "literature"
+  },
+  {
+    "id": "xchem_cryocooling_and_puck_loading",
+    "title": "Cryoprotection, flash-cooling and loading crystals into pucks",
+    "domain": "biology",
+    "pipeline": "xchem",
+    "automation_level": "manual",
+    "capabilities": [
+      "cold_storage",
+      "cryo_cooling"
+    ],
+    "n_steps": 6,
+    "catalog_ids": [
+      "ln2_storage_dewar",
+      "operator_crystallographer"
+    ],
+    "source": {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4461322/",
+      "publisher": "Acta Crystallographica Section F (IUCr, via PMC)",
+      "authors": "J. W. Pflugrath",
+      "year": 2015,
+      "doi": "10.1107/S2053230X15008304"
+    },
+    "license": "CC BY",
+    "access": "open",
+    "confidence": "literature"
+  },
+  {
+    "id": "xchem_dry_shipper_unipuck_shipping",
+    "title": "Shipping UniPucks to a synchrotron in a dry shipper",
+    "domain": "biology",
+    "pipeline": "xchem",
+    "automation_level": "manual",
+    "capabilities": [
+      "cold_storage",
+      "cryo_cooling",
+      "external_service",
+      "xray_diffraction"
+    ],
+    "n_steps": 6,
+    "catalog_ids": [
+      "diamond_i04_1",
+      "ln2_storage_dewar"
+    ],
+    "source": {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5633908/",
+      "publisher": "Acta Crystallographica Section D (IUCr, via PMC)",
+      "authors": "Papp et al.",
+      "year": 2017,
+      "doi": "10.1107/S2059798317013742"
+    },
+    "license": "CC BY",
+    "access": "open",
+    "confidence": "literature"
+  },
+  {
+    "id": "xchem_echo_acoustic_crystal_soaking",
+    "title": "Fragment soaking of crystals by Echo acoustic dispensing",
+    "domain": "biology",
+    "pipeline": "xchem",
+    "automation_level": "automated",
+    "capabilities": [
+      "acoustic_dispensing",
+      "compound_storage",
+      "crystal_harvesting",
+      "crystal_soaking"
+    ],
+    "n_steps": 6,
+    "catalog_ids": [
+      "beckman_echo_525"
+    ],
+    "source": {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5349437/",
+      "publisher": "Acta Crystallographica Section D (IUCr, via PMC)",
+      "authors": "Collins et al.",
+      "year": 2017,
+      "doi": "10.1107/S205979831700331X"
+    },
+    "license": "CC BY",
+    "access": "open",
+    "confidence": "literature"
+  },
+  {
+    "id": "xchem_ecoli_bl21de3_iptg_expression",
+    "title": "Recombinant protein expression in E. coli BL21(DE3) with IPTG induction (cold overnight)",
+    "domain": "biology",
+    "pipeline": "xchem",
+    "automation_level": "manual",
+    "capabilities": [
+      "cell_culture",
+      "centrifugation",
+      "incubation"
+    ],
+    "n_steps": 5,
+    "catalog_ids": [
+      "beckman_avanti_jxn26",
+      "infors_multitron_pro"
+    ],
+    "source": {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11480361/",
+      "publisher": "Nature Communications (Springer Nature, via PMC)",
+      "authors": "Kroupova et al.",
+      "year": 2024,
+      "doi": "10.1038/s41467-024-52871-9"
+    },
+    "license": "CC BY 4.0",
+    "access": "open",
+    "confidence": "literature"
+  },
+  {
+    "id": "xchem_ni_nta_his_tag_purification",
+    "title": "His-tag Ni-NTA affinity purification with TEV tag removal and reverse IMAC",
+    "domain": "biology",
+    "pipeline": "xchem",
+    "automation_level": "semi_automated",
+    "capabilities": [
+      "cell_lysis",
+      "incubation",
+      "protein_purification"
+    ],
+    "n_steps": 6,
+    "catalog_ids": [
+      "avestin_emulsiflex_c3",
+      "cytiva_akta_pure_25"
+    ],
+    "source": {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11480361/",
+      "publisher": "Nature Communications (Springer Nature, via PMC)",
+      "authors": "Kroupova et al.",
+      "year": 2024,
+      "doi": "10.1038/s41467-024-52871-9"
+    },
+    "license": "CC BY 4.0",
+    "access": "open",
+    "confidence": "literature"
+  },
+  {
+    "id": "xchem_pandda_hit_identification",
+    "title": "PanDDA hit identification from many soaked datasets",
+    "domain": "biology",
+    "pipeline": "xchem",
+    "automation_level": "automated",
+    "capabilities": [
+      "in_silico"
+    ],
+    "n_steps": 7,
+    "catalog_ids": [],
+    "source": {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5413968/",
+      "publisher": "Nature Communications (via PMC)",
+      "authors": "Pearce et al.",
+      "year": 2017,
+      "doi": "10.1038/ncomms15123"
+    },
+    "license": "CC BY 4.0",
+    "access": "open",
+    "confidence": "literature"
+  },
+  {
+    "id": "xchem_sds_page_purity_check",
+    "title": "Assessing protein purity by SDS-PAGE with Coomassie staining",
+    "domain": "biology",
+    "pipeline": "xchem",
+    "automation_level": "manual",
+    "capabilities": [
+      "protein_qc"
+    ],
+    "n_steps": 7,
+    "catalog_ids": [
+      "biorad_mini_protean_tetra"
+    ],
+    "source": {
+      "url": "https://www.protocols.io/view/assessing-protein-purity-using-sds-page-cegktbuw.pdf",
+      "publisher": "protocols.io",
+      "authors": "Shalo, Fadanka, Mowoh",
+      "year": 2022
+    },
+    "license": "CC BY 4.0 (stated in the protocol's own licence line)",
+    "access": "open",
+    "confidence": "literature"
+  },
+  {
+    "id": "xchem_shifter_crystal_harvesting",
+    "title": "Crystal harvesting with the Shifter microscope stage",
+    "domain": "biology",
+    "pipeline": "xchem",
+    "automation_level": "semi_automated",
+    "capabilities": [
+      "crystal_harvesting"
+    ],
+    "n_steps": 6,
+    "catalog_ids": [
+      "olt_crystal_shifter",
+      "operator_crystallographer"
+    ],
+    "source": {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7787106/",
+      "publisher": "Acta Crystallographica Section D (IUCr, via PMC)",
+      "authors": "Wright et al.",
+      "year": 2021,
+      "doi": "10.1107/S2059798320014114"
+    },
+    "license": "CC BY",
+    "access": "open",
+    "confidence": "literature"
+  },
+  {
+    "id": "xchem_sitting_drop_mosquito_setup",
+    "title": "Sitting-drop vapour-diffusion setup on a mosquito nanolitre dispenser",
+    "domain": "biology",
+    "pipeline": "xchem",
+    "automation_level": "semi_automated",
+    "capabilities": [
+      "crystallization_setup",
+      "incubation",
+      "plate_sealing"
+    ],
+    "n_steps": 5,
+    "catalog_ids": [
+      "formulatrix_rock_imager_1000",
+      "sptlabtech_mosquito_xtal3"
+    ],
+    "source": {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8985602/",
+      "publisher": "Journal of Applied Crystallography (IUCr, via PMC)",
+      "authors": "D. Bellini",
+      "year": 2022,
+      "doi": "10.1107/S1600576722002382"
+    },
+    "license": "CC BY 4.0",
+    "access": "open",
+    "confidence": "literature"
+  },
+  {
+    "id": "xchem_size_exclusion_chromatography_superdex200",
+    "title": "Size-exclusion polishing on Superdex 200, concentration and flash-freezing",
+    "domain": "biology",
+    "pipeline": "xchem",
+    "automation_level": "semi_automated",
+    "capabilities": [
+      "cold_storage",
+      "concentration_measurement",
+      "protein_purification"
+    ],
+    "n_steps": 4,
+    "catalog_ids": [
+      "cytiva_akta_pure_25",
+      "eppendorf_5810r",
+      "ln2_storage_dewar"
+    ],
+    "source": {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11480361/",
+      "publisher": "Nature Communications (Springer Nature, via PMC)",
+      "authors": "Kroupova et al.",
+      "year": 2024,
+      "doi": "10.1038/s41467-024-52871-9"
+    },
+    "license": "CC BY 4.0",
+    "access": "open",
+    "confidence": "literature"
+  }
+]

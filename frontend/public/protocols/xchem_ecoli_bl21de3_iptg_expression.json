@@ -1,0 +1,95 @@
+{
+  "id": "xchem_ecoli_bl21de3_iptg_expression",
+  "title": "Recombinant protein expression in E. coli BL21(DE3) with IPTG induction (cold overnight)",
+  "domain": "biology",
+  "pipeline": "xchem",
+  "pipeline_steps": [
+    "cell_culture",
+    "incubation",
+    "centrifugation"
+  ],
+  "summary": "Grow a kanamycin-selected BL21(DE3) culture to mid-log, induce with IPTG at reduced temperature, and harvest cells the next day. Parameters are taken from the Methods of a crystallography paper (zinc-binding CRBNmidi construct) and are a worked example, not a universal recipe.",
+  "automation_level": "manual",
+  "steps": [
+    {
+      "order": 1,
+      "text": "Inoculate lysogeny broth containing kanamycin (50 ug/mL) with the BL21(DE3) transformant carrying the expression plasmid.",
+      "capability": "cell_culture"
+    },
+    {
+      "order": 2,
+      "text": "Shake the culture at 37 C (temperature assumed, not stated in the paper) until the optical density at 600 nm reaches about 0.8.",
+      "capability": "cell_culture",
+      "catalog_ids": [
+        "infors_multitron_pro"
+      ],
+      "duration_s": {
+        "value": 10800,
+        "confidence": "estimated",
+        "note": "Growth time to OD600 0.8 is not stated; 2-4 h typical, 3 h midpoint assumed."
+      }
+    },
+    {
+      "order": 3,
+      "text": "Cool the flask, then induce with 0.5 mM IPTG; for this zinc-binding target also add 50 uM ZnCl2.",
+      "capability": "cell_culture"
+    },
+    {
+      "order": 4,
+      "text": "Continue shaking overnight at 18 C to favour soluble protein.",
+      "capability": "incubation",
+      "catalog_ids": [
+        "infors_multitron_pro"
+      ],
+      "duration_s": {
+        "value": 57600,
+        "confidence": "estimated",
+        "note": "'Overnight' in source; 16 h assumed."
+      }
+    },
+    {
+      "order": 5,
+      "text": "Pellet the cells by centrifugation (speed and time not given in the source; typically a few thousand x g for 15 min) and store or lyse immediately.",
+      "capability": "centrifugation",
+      "catalog_ids": [
+        "beckman_avanti_jxn26"
+      ],
+      "duration_s": {
+        "value": 900,
+        "confidence": "estimated",
+        "note": "Typical bench value, not from the source."
+      }
+    }
+  ],
+  "equipment": [
+    {
+      "name": "Temperature-controlled shaking incubator",
+      "catalog_id": "infors_multitron_pro"
+    },
+    {
+      "name": "High-capacity floor centrifuge",
+      "catalog_id": "beckman_avanti_jxn26"
+    }
+  ],
+  "materials": [
+    "LB broth",
+    "Kanamycin",
+    "IPTG",
+    "ZnCl2 (target-specific)"
+  ],
+  "safety": [
+    "Wear gloves and lab coat; treat recombinant E. coli as biosafety level 1 and decontaminate cultures and consumables before disposal."
+  ],
+  "source": {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11480361/",
+    "publisher": "Nature Communications (Springer Nature, via PMC)",
+    "authors": "Kroupova et al.",
+    "year": 2024,
+    "doi": "10.1038/s41467-024-52871-9"
+  },
+  "license": "CC BY 4.0",
+  "access": "open",
+  "confidence": "literature",
+  "notes": "Source reports OD600 0.8, 0.5 mM IPTG, 18 C overnight, and kanamycin 50 ug/mL. Pre-induction temperature, harvest spin and all durations are assumptions flagged per step. Transformation step of the pipeline is not covered by this source.",
+  "retrieved": "2026-10-04"
+}

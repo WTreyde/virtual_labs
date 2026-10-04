@@ -1,0 +1,102 @@
+{
+  "id": "xchem_ni_nta_his_tag_purification",
+  "title": "His-tag Ni-NTA affinity purification with TEV tag removal and reverse IMAC",
+  "domain": "biology",
+  "pipeline": "xchem",
+  "pipeline_steps": [
+    "cell_lysis",
+    "protein_purification",
+    "incubation"
+  ],
+  "summary": "Capture a His6-tagged protein from clarified lysate on a Ni-NTA (HisTrap HP) column with an imidazole gradient, exchange buffer, cleave the tag with His6-TEV protease overnight, and pass over Ni-NTA again to recover untagged protein. Worked example from a crystallography paper.",
+  "automation_level": "semi_automated",
+  "steps": [
+    {
+      "order": 1,
+      "text": "Lyse the pelleted cells and clarify the lysate by high-speed centrifugation (method not detailed in the source).",
+      "capability": "cell_lysis",
+      "catalog_ids": [
+        "avestin_emulsiflex_c3"
+      ],
+      "duration_s": {
+        "value": 3600,
+        "confidence": "estimated",
+        "note": "Lysis plus clarification spin; not stated in source, ~1 h assumed."
+      }
+    },
+    {
+      "order": 2,
+      "text": "Load the clarified lysate onto a HisTrap HP Ni-NTA column.",
+      "capability": "protein_purification",
+      "catalog_ids": [
+        "cytiva_akta_pure_25"
+      ]
+    },
+    {
+      "order": 3,
+      "text": "Wash, then elute the tagged protein with an imidazole gradient; the target came off at roughly 100-125 mM imidazole.",
+      "capability": "protein_purification",
+      "catalog_ids": [
+        "cytiva_akta_pure_25"
+      ]
+    },
+    {
+      "order": 4,
+      "text": "Desalt the eluate on a HiPrep Sephadex G-25 column into the expression buffer to remove imidazole.",
+      "capability": "protein_purification",
+      "catalog_ids": [
+        "cytiva_akta_pure_25"
+      ]
+    },
+    {
+      "order": 5,
+      "text": "Add His6-TEV protease and incubate overnight at 4 C to cut off the tag.",
+      "capability": "incubation",
+      "duration_s": {
+        "value": 57600,
+        "confidence": "estimated",
+        "note": "'Overnight' in source; 16 h assumed."
+      }
+    },
+    {
+      "order": 6,
+      "text": "Run the digest over Ni-NTA again; the untagged target flows through or elutes at low imidazole (10-20 mM) while tag and protease stay bound.",
+      "capability": "protein_purification",
+      "catalog_ids": [
+        "cytiva_akta_pure_25"
+      ]
+    }
+  ],
+  "equipment": [
+    {
+      "name": "Chromatography system (AKTA class; the paper names the columns, not the instrument)",
+      "catalog_id": "cytiva_akta_pure_25"
+    },
+    {
+      "name": "Cell disruptor",
+      "catalog_id": "avestin_emulsiflex_c3"
+    }
+  ],
+  "materials": [
+    "HisTrap HP column",
+    "HiPrep Sephadex G-25 desalting column",
+    "Imidazole",
+    "His6-TEV protease"
+  ],
+  "safety": [
+    "High-pressure cell disruptors need guarding and pressure release before servicing.",
+    "Chromatography buffers with TCEP/imidazole: wear gloves and eye protection."
+  ],
+  "source": {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11480361/",
+    "publisher": "Nature Communications (Springer Nature, via PMC)",
+    "authors": "Kroupova et al.",
+    "year": 2024,
+    "doi": "10.1038/s41467-024-52871-9"
+  },
+  "license": "CC BY 4.0",
+  "access": "open",
+  "confidence": "literature",
+  "notes": "Catalog mapping to AKTA pure is the pipeline's assumption; the source only lists columns and buffers. Lysis details and step durations are not in the source.",
+  "retrieved": "2026-10-04"
+}

@@ -1,0 +1,99 @@
+{
+  "id": "chem_trfret_bromodomain_hts_384",
+  "title": "TR-FRET bromodomain-histone peptide binding screen in 384-well plates",
+  "domain": "chemistry",
+  "pipeline": "chem_library",
+  "pipeline_steps": [
+    "liquid_handling",
+    "reagent_dispensing",
+    "incubation",
+    "fluorescence_read"
+  ],
+  "summary": "A homogeneous HTRF-type competition assay: tagged bromodomain protein, biotinylated acetylated-H4 peptide and Eu cryptate / XL665 antibodies give a FRET signal that compounds can disrupt. Reported Z' of 0.87 at 0.25% DMSO. Mirrors the BRD4-style screen in the pipeline.",
+  "automation_level": "semi_automated",
+  "steps": [
+    {
+      "order": 1,
+      "text": "Prepare assay buffer (HEPES pH 7.4, NaCl, BSA, Triton X-100).",
+      "capability": "manual_bench"
+    },
+    {
+      "order": 2,
+      "text": "Dispense compound and 10 nM GST-bromodomain protein into white 384-well plates; incubate 30 min at room temperature.",
+      "capability": "liquid_handling",
+      "catalog_ids": [
+        "thermo_multidrop_combi"
+      ],
+      "duration_s": {
+        "value": 1800,
+        "confidence": "literature",
+        "note": "30 min stated."
+      }
+    },
+    {
+      "order": 3,
+      "text": "Add 100 nM biotinylated acetylated H4 peptide; incubate 30 min.",
+      "capability": "reagent_dispensing",
+      "catalog_ids": [
+        "thermo_multidrop_combi"
+      ],
+      "duration_s": {
+        "value": 1800,
+        "confidence": "literature",
+        "note": "30 min stated."
+      }
+    },
+    {
+      "order": 4,
+      "text": "Add anti-GST-Eu cryptate donor and XL665 acceptor reagents (40 uL total volume); incubate 90 min.",
+      "capability": "reagent_dispensing",
+      "catalog_ids": [
+        "thermo_multidrop_combi"
+      ],
+      "duration_s": {
+        "value": 5400,
+        "confidence": "literature",
+        "note": "90 min stated."
+      }
+    },
+    {
+      "order": 5,
+      "text": "Read time-resolved fluorescence: excite 337 nm, emission 615 nm and 665 nm.",
+      "capability": "fluorescence_read",
+      "catalog_ids": [
+        "bmg_pherastar_fsx"
+      ]
+    },
+    {
+      "order": 6,
+      "text": "Compute ratio inhibition; call hits above 70% inhibition at 50 uM and compute Z' from controls.",
+      "capability": "manual_bench"
+    }
+  ],
+  "equipment": [
+    {
+      "name": "Bulk dispenser",
+      "catalog_id": "thermo_multidrop_combi"
+    },
+    {
+      "name": "TR-FRET plate reader (paper: EnVision)",
+      "catalog_id": "bmg_pherastar_fsx"
+    }
+  ],
+  "materials": [
+    "GST-CBP bromodomain, biotin-H4 peptide, Eu-anti-GST, XL665-anti-GST"
+  ],
+  "safety": [],
+  "source": {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7468272/",
+    "publisher": "Acta Pharmacologica Sinica (via PMC)",
+    "authors": "Zhang et al.",
+    "year": 2019,
+    "doi": "10.1038/s41401-019-0256-2"
+  },
+  "license": "unknown: link and paraphrase only",
+  "access": "open",
+  "confidence": "literature",
+  "notes": "Target is CBP bromodomain, not BRD4. Reader and dispenser are our catalog suggestions.",
+  "retrieved": "2026-10-04"
+}
