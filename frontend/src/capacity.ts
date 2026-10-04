@@ -57,7 +57,10 @@ export function fixCard(d: Design, summary?: CaseSummary): string {
   const n = (v: number) => (Math.abs(v) >= 100 ? Math.round(v).toLocaleString() : String(+(+v).toFixed(1)));
   const base = summary?.headline_throughput.verified_p50, after = w?.verified_p50, planned = w?.planned_p50 ?? w?.p50;
   let result: string;
-  if (w && base != null && after != null) {
+  const staffing = summary?.imager_staffing_whatifs as Record<string, any> | undefined;
+  if (staffing?.variants && Object.keys(staffing.variants).length) {
+    result = staffingResult(staffing, perDay, n);
+  } else if (w && base != null && after != null) {
     const change = (after - base) / base;
     const verdict = Math.abs(change) < NOISE ? "No throughput gain" : change > 0 ? `${Math.round(change * 100)}% more throughput` : `${Math.round(-change * 100)}% less throughput`;
     const nb = w.bottleneck;
@@ -75,4 +78,29 @@ export function fixCard(d: Design, summary?: CaseSummary): string {
     <div class="check-row"><span>Extra equipment</span><span>$0 (already in the design)</span></div>
     ${result}
     <button class="fix-show" data-id="${esc(a.id)}">Show the ${esc(a.model)}</button>`;
+}
+
+const VARIANT_LABEL: Record<string, string> = {
+  third_operator: "Grow in the imager + a third operator",
+  second_shift: "… + a second shift",
+};
+
+/**
+ * Verified staffing what-ifs (summary.imager_staffing_whatifs, Albert's #88): each variant's checked P50 and band
+ * against the checked baseline. The variants change growth location and staffing together, so the card says both
+ * changes drive the gain together, never that the imager alone does; staffing is extra people, not free equipment.
+ */
+function staffingResult(st: Record<string, any>, perDay: string, n: (v: number) => string): string {
+  const base = st.baseline_verified_p50;
+  const rows = Object.entries(st.variants as Record<string, any>).map(([key, v]) => {
+    const gain = base ? Math.round(((v.verified_p50 - base) / base) * 100) : undefined;
+    const band = v.p10 != null && v.p90 != null ? ` <span class="muted">(${n(v.p10)}–${n(v.p90)})</span>` : "";
+    const busiest = (v.operator_utilisation ?? []).reduce((m: number, u: any) => Math.max(m, u.busy_fraction ?? 0), 0);
+    return `<li><b>${esc(VARIANT_LABEL[key] ?? key.replace(/_/g, " "))}</b>: ${esc(n(v.verified_p50))}${perDay} checked${band}${
+      gain != null ? `, ${gain >= 0 ? "+" : ""}${gain}% vs ${esc(n(base))}` : ""}${busiest ? `. Operators still the limit (${Math.round(busiest * 100)}% busy).` : "."}</li>`;
+  }).join("");
+  return `<div class="check-row"><span>Simulated</span><span>independent check${st.verification_config?.replicates ? `, ${st.verification_config.replicates} replicates` : ""}</span></div>
+    <ul class="variants">${rows}</ul>
+    <p class="footnote">Both changes together drive the gain: growth moves to the imager and staffing increases, so it cannot be credited to either alone.
+      The extra operators are people, not equipment. Shift handoff is not modelled.</p>`;
 }

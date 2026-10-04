@@ -119,4 +119,6 @@ export interface CaseSummary {
   limits?: string[];
   /** Albert's what-if for growing plates in the imager instead of the hotel (shape may still change). */
   imager_growth_whatif?: Record<string, unknown>;
+  /** Verified staffing what-ifs (Albert's #88): variants with verified_p50, band and operator utilisation. */
+  imager_staffing_whatifs?: Record<string, unknown>;
 }
