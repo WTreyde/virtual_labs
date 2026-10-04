@@ -1,7 +1,9 @@
 # Live evaluation results — 4 October 2026
 
-These artifacts were generated from `main` at `a383d79` using `claude-opus-5-5`.
-They replace the obsolete 74% versus 59% comparison, whose vanilla arm was broken.
+The benchmark artifacts were generated from `main` at `427c06e` using
+`claude-opus-5-5`. They replace the obsolete 74% versus 59% comparison, whose
+vanilla arm was broken. The separate XChem acceptance and X-ray timing artifacts
+below predate this rerun and were generated at `a383d79`.
 
 ## Corrected LabDesignBench
 
@@ -11,10 +13,23 @@ Command, run from `backend/`:
 python -m labforge.bench.runner --arms platform vanilla --out bench_results/leaderboard.json
 ```
 
-- Vanilla: 0.703 (26/37 checkable checks), Brier 0.155, 20/21 tasks answered, one run failure.
-- Platform: 0.361 (13/36 checkable checks), Brier 0.068, 21/21 tasks answered, no run failures.
+- Platform: 0.810 (34/42 checkable checks), Brier 0.048, 21/21 tasks answered,
+  no run failures.
+- Vanilla: 0.658 (25/38 checkable checks), Brier 0.192, 20/21 tasks answered,
+  one run failure.
+- Platform usage: 10,493,176 input + 346,030 output tokens; 4,072 agent-seconds.
+- Vanilla usage in the initial complete invocation: 715,973 input + 273,330
+  output tokens; 2,714 agent-seconds.
+- Wall clock: 11.2 minutes with 12 workers.
 
-The command did not specify `--answers`, so raw per-task benchmark answers were not persisted.
+All 42 active answers are persisted under `answers/`. The only failed run was
+`vanilla/chem_cascade_baseline`: the provider returned an empty response with
+`stop_reason: refusal`. A second live attempt also returned a refusal. The first
+attempt is preserved under `failed_attempts/`; the second is the active cached
+answer. Including both attempts, vanilla actually consumed 768,695 input and
+274,396 output tokens across the experiment and retry. The local resume/rescore
+took 1.0 minute and the one-answer retry plus rescore took 1.3 minutes.
+
 Do not quote the previous 74% versus 59% result.
 
 ## Live XChem acceptance run

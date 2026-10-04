@@ -1,0 +1,626 @@
+{
+ "message": "## Short answer: one week's protein probably cannot supply 600 soaked crystals next week\n\nYou did not give room size, budget, operating hours or hazards. I could not ask, so this is a **provisional design** built on stated assumptions. No tools were available. Nothing here was simulated or checked against evidence.\n\n### 1. Protein supply limits the plan (user figures plus placeholder assumptions)\n| Item | Value | Basis |\n|---|---|---|\n| Protein per week | 0.5 mg (1 L \u00d7 0.5 mg/L) | your figures |\n| Usable after QC and handling losses | ~0.4 mg (range 0.3\u20130.45) | placeholder, 80% recovery |\n| Protein consumed per drop | ~1 \u00b5g (range 0.3\u20132 \u00b5g) | placeholder, not evidence |\n| Drops affordable | ~400, so **4 plates \u00d7 96 drops = 384 drops** | arithmetic |\n| Drops with a usable crystal | 60% (30\u201385%), giving ~230 | placeholder |\n| Crystals that survive soaking | 85% (60\u201395%), giving ~196 | placeholder |\n| Successful mounts | 90% of ~218 attempted mounts (2 rounded attempts per plate), giving **~176 crystals** | placeholder |\n\n**What 600 mounted crystals would need:**\n- 600 \u00f7 (0.6 \u00d7 0.85 \u00d7 0.9) \u2248 **1,307 drops**, which is about **14 plates**.\n- At 1 \u00b5g per drop, that is about **1.6 mg of protein**, or roughly **3\u20134 weeks of expression** at your current rate.\n- One week's protein only reaches 600 if the most optimistic values all hold together (about 0.3 \u00b5g per drop with high hit and survival rates).\n\n### 2. The timing does not fit inside a week either\nIf next week's 1 L culture is also the protein source, the steps run one after another:\n- expression and purification\n- crystal growth (placeholder 3 days, range 1\u201314 days)\n- imaging and drop selection\n- soaking and harvesting\n\nThat likely pushes soaked crystals beyond next week. Shipping and the beamline queue (catalog estimate 7 days) come after that.\n\nIf you already hold purified protein or grown plates from an earlier lot, please tell me. That would change this conclusion.\n\n### 3. Harvesting workload (operator attended the whole time)\n- The Shifter rate is **35 s per crystal, not per plate**. Its catalog data confidence is only placeholder.\n- **Per plate:** about 49 attempted mounts (96 \u00d7 0.6 \u00d7 0.85) \u00d7 35 s \u2248 **1,715 s**, giving about 44 successful crystals. Failed mounts are not counted as output.\n- **For 600 successes:** about 667 attempts \u00d7 35 s \u2248 **23,300 s (about 6.5 h)** of crystallographer time.\n- I could not retrieve the Wright mounting-rate comparison, so I cannot compare unassisted manual work with Shifter-assisted work. That evidence is missing, not invented.\n\n### 4. Recommended plan\n- **With one week's protein:** set up **4 plates (384 drops)** and expect roughly **150\u2013200 mounted soaked crystals**. These are placeholder-based numbers.\n- **For 600 crystals:**\n  - pool about 3\u20134 weekly lots and plan about 14 plates, or\n  - raise per-litre yield, or\n  - confirm a lower protein use per drop.\n\n### 5. Equipment graph\n\n**Upstream (protein production):**\n- Multitron shaker for expression\n- Avanti JXN-26 centrifuge for cell harvest and clarification\n- EmulsiFlex-C3 for lysis\n- \u00c4KTA pure 25 for purification\n- gel QC system and NanoDrop\n\n**Crystallisation:**\n- **Drop setup:** mosquito Xtal3, fan-out of 4 plates per lot.\n- **Imaging:** Rock Imager 1000. It has one camera (capacity 1) and takes 180 s per plate per inspection.\n  - **Inspection schedule:** day 0, day 1 and day 3. Only day 0 and the final inspection are modelled, so camera load is slightly understated.\n- **Growth:** kept in a separate LiCONiC STX44 incubator (capacity 44). The installed contracts cannot represent the imager's own storage hotel as residence capacity, so I did not use its slots for growth and did not raise camera parallelism.\n- **Plate moves:** a UR5e arm links the mosquito, incubator and imager. Operators move everything else.\n\n**Soaking and harvesting:**\n- Echo 525 soak dispensing, then incubator soak residence.\n- **Harvesting is manual** with the Crystal Shifter on a vibration-isolated table.\n\n**Puck loading and shipping:**\n- Pucks are filled at the LN2 dewar, 16 crystals per puck.\n- Loading pucks into the CX100 dry shipper is a manual bench handling step. Its 900 s duration is a placeholder.\n- The shipper's hold time is cold retention only. I did not use it as a step duration.\n- Its puck capacity is not in the catalog, so I assumed 3 pucks per load (placeholder).\n\n**External diffraction:**\n- Modelled as an external service, based on the Diamond I04-1 catalog entry.\n- Processing is 2,304 s per puck. The 7-day queue is kept separately as `queue_time_s`.\n- No in-house X-ray source is added.\n\n### 6. Modelling limits\n- **Supply cap not enforced:** the 12-place shaker does not enforce your 1 L/week limit. A simulator could therefore overstate steady-state supply. The supply-capped figure is about 176 crystals per week, roughly 25 per day.\n- **Partial pucks overcount:** the counting sink assumes 16 crystals per puck, so partial pucks are slightly overcounted.\n- **Throughput target:** 600 crystals per 7 days, about 86 crystals per day.\n\n### 7. Assumptions, BOM and safety\n- **Room:** assumed 8 m \u00d7 6 m.\n- **Operators:** one protein scientist and one crystallographer, 8 h shifts each.\n- **BOM:** about **$1.015M** for instruments only, excluding operators and the beamline fee. No budget was given, so this is provisional.\n- **Hazards:**\n  - LN2 cryogens, which need ventilation and O\u2082 monitoring.\n  - A high-speed centrifuge.\n  - Expression assumed at BSL-1.\n- **No safety certification is claimed.**\n\n### 8. Status of the numbers\nAll throughput figures are my own predictions. They are not simulator output and not measured performance.\n\nPlease send:\n- whether you have existing protein or plates on hand\n- protein use per drop\n- expected hit rate\n- room size, budget and operating hours\n\nWith those I can firm up the plan.",
+ "stop_reason": "end_turn",
+ "completed": true,
+ "vanilla_protocol": 2,
+ "lab_spec": {
+  "id": "xchem_600_soaks",
+  "name": "Fragment-soak crystallography campaign (600 soaked crystals)",
+  "domain": "biology",
+  "description": "We get 0.5 mg of purified protein per litre and can grow 1 litre per week. Plan crystallisation plates for 600 soaked crystals next week.",
+  "throughput_target": {
+   "value": 86,
+   "unit": "crystals_per_day",
+   "operating_hours_per_day": 24
+  },
+  "room": {
+   "width_m": 8,
+   "depth_m": 6,
+   "height_m": 3,
+   "doors": [
+    {
+     "x": 0,
+     "y": 3
+    }
+   ]
+  },
+  "labware": [
+   "shake_flask",
+   "crystallization_plate_96",
+   "puck",
+   "other"
+  ],
+  "required_capabilities": [
+   "cell_culture",
+   "centrifugation",
+   "cell_lysis",
+   "protein_purification",
+   "protein_qc",
+   "concentration_measurement",
+   "crystallization_setup",
+   "incubation",
+   "crystal_imaging",
+   "crystal_soaking",
+   "crystal_harvesting",
+   "cryo_cooling",
+   "cold_storage",
+   "manual_bench",
+   "plate_transport_arm",
+   "external_service",
+   "in_silico"
+  ],
+  "constraints": {
+   "biosafety_level": 1,
+   "hazards": [
+    "cryogens",
+    "high_g_centrifuge"
+   ]
+  },
+  "operators": [
+   {
+    "role": "protein_scientist",
+    "count": 1,
+    "shift_hours": 8,
+    "skills": [
+     "cell_culture",
+     "centrifugation",
+     "cell_lysis",
+     "protein_purification",
+     "protein_qc",
+     "concentration_measurement",
+     "manual_bench"
+    ]
+   },
+   {
+    "role": "crystallographer",
+    "count": 1,
+    "shift_hours": 8,
+    "skills": [
+     "crystallization_setup",
+     "crystal_harvesting",
+     "cryo_cooling",
+     "crystal_soaking",
+     "manual_bench"
+    ]
+   }
+  ],
+  "notes": [
+   "Target 600 soaked crystals per 7 days, about 86 crystals/day (assumed 24 h instrument operation; operators on 8 h shifts).",
+   "Room size, budget, operating hours and hazards were not provided; values here are assumptions (provisional design).",
+   "Protein supply 0.5 mg/L and 1 L/week are user-given; recovery, protein use per drop, hit rate, soak survival and mount success are placeholders.",
+   "Supply-capped estimate is about 176 mounted crystals per week from 4 plates; 600 needs about 14 plates and about 1.6 mg protein.",
+   "Cryogen ventilation and O2 monitoring are required near the LN2 dewar and dry shipper; harvesting is on a vibration-isolated table; the expression zone is kept separate.",
+   "The 1 L/week supply cap cannot be enforced by the 12-place shaker capacity in the model."
+  ],
+  "scenario": "fbdd_crystallography"
+ },
+ "workflow": {
+  "id": "xchem_600_soaks_wf_v1",
+  "lab_spec_id": "xchem_600_soaks",
+  "labware": "crystallization_plate_96",
+  "equipment": [
+   {
+    "instance_id": "shaker_1",
+    "catalog_id": "infors_multitron_pro",
+    "rationale": "Expression culture of the 1 L weekly lot."
+   },
+   {
+    "instance_id": "centrifuge_1",
+    "catalog_id": "beckman_avanti_jxn26",
+    "rationale": "Litre-scale cell harvest and lysate clarification."
+   },
+   {
+    "instance_id": "homogeniser_1",
+    "catalog_id": "avestin_emulsiflex_c3",
+    "rationale": "Cell lysis at litre scale."
+   },
+   {
+    "instance_id": "akta_1",
+    "catalog_id": "cytiva_akta_pure_25",
+    "rationale": "Protein purification."
+   },
+   {
+    "instance_id": "gel_1",
+    "catalog_id": "biorad_mini_protean_tetra",
+    "rationale": "Protein QC by gel."
+   },
+   {
+    "instance_id": "nanodrop_1",
+    "catalog_id": "thermo_nanodrop_one",
+    "rationale": "Concentration measurement to set the protein budget per drop."
+   },
+   {
+    "instance_id": "mosquito_1",
+    "catalog_id": "sptlabtech_mosquito_xtal3",
+    "rationale": "Low-volume drop setup, which is critical when protein is scarce."
+   },
+   {
+    "instance_id": "growth_hotel_1",
+    "catalog_id": "liconic_stx44",
+    "rationale": "Separate 44-slot temperature-controlled residence for crystal growth and soak residence, so growth does not block the imager camera."
+   },
+   {
+    "instance_id": "imager_1",
+    "catalog_id": "formulatrix_rock_imager_1000",
+    "rationale": "Crystal inspection; one camera (capacity 1) at 180 s per plate per inspection."
+   },
+   {
+    "instance_id": "arm_1",
+    "catalog_id": "ur5e",
+    "rationale": "Moves plates between the mosquito, growth hotel and imager; operators handle the other transfers."
+   },
+   {
+    "instance_id": "echo_1",
+    "catalog_id": "beckman_echo_525",
+    "rationale": "Acoustic fragment soaking (crystal_soaking capability)."
+   },
+   {
+    "instance_id": "shifter_1",
+    "catalog_id": "olt_crystal_shifter",
+    "rationale": "Operator-attended harvesting aid at 35 s per crystal (placeholder data)."
+   },
+   {
+    "instance_id": "vib_table_1",
+    "catalog_id": "tmc_vibration_table",
+    "rationale": "Vibration-isolated surface for the harvesting station."
+   },
+   {
+    "instance_id": "dewar_1",
+    "catalog_id": "ln2_storage_dewar",
+    "rationale": "LN2 cryo-cooling and puck filling."
+   },
+   {
+    "instance_id": "dry_shipper_1",
+    "catalog_id": "taylor_wharton_cx100",
+    "rationale": "Storage and transit container for pucks to the synchrotron; its hold time is cold retention, not a step duration."
+   },
+   {
+    "instance_id": "bench_1",
+    "catalog_id": "lab_bench",
+    "rationale": "Handling bench for loading pucks into the charged dry shipper."
+   }
+  ],
+  "steps": [
+   {
+    "id": "express_culture",
+    "name": "Expression culture (1 L lot)",
+    "capability": "cell_culture",
+    "candidate_instances": [
+     "shaker_1"
+    ],
+    "duration_s": 43200,
+    "after": [],
+    "mode": "automated",
+    "params": {
+     "flow_unit": "1 L expression lot (shake_flask)",
+     "units_per_run": 1,
+     "duration_basis": "catalog Infors cell_culture 43200 s per lot; user cadence is 1 L/week, which the shaker capacity of 12 does not enforce"
+    }
+   },
+   {
+    "id": "cell_harvest",
+    "name": "Cell harvest centrifugation",
+    "capability": "centrifugation",
+    "candidate_instances": [
+     "centrifuge_1"
+    ],
+    "duration_s": 1800,
+    "after": [
+     "express_culture"
+    ],
+    "mode": "semi_automated",
+    "operator_role": "protein_scientist",
+    "params": {
+     "flow_unit": "1 L expression lot",
+     "duration_basis": "catalog Avanti JXN-26 1800 s per run"
+    }
+   },
+   {
+    "id": "lysis",
+    "name": "Cell lysis",
+    "capability": "cell_lysis",
+    "candidate_instances": [
+     "homogeniser_1"
+    ],
+    "duration_s": 600,
+    "after": [
+     "cell_harvest"
+    ],
+    "mode": "semi_automated",
+    "operator_role": "protein_scientist",
+    "params": {
+     "flow_unit": "1 lot",
+     "duration_basis": "catalog EmulsiFlex-C3 600 s per run"
+    }
+   },
+   {
+    "id": "clarify",
+    "name": "Lysate clarification",
+    "capability": "centrifugation",
+    "candidate_instances": [
+     "centrifuge_1"
+    ],
+    "duration_s": 1800,
+    "after": [
+     "lysis"
+    ],
+    "mode": "semi_automated",
+    "operator_role": "protein_scientist",
+    "params": {
+     "flow_unit": "1 lot",
+     "duration_basis": "catalog 1800 s per run"
+    }
+   },
+   {
+    "id": "purify",
+    "name": "Protein purification",
+    "capability": "protein_purification",
+    "candidate_instances": [
+     "akta_1"
+    ],
+    "duration_s": 3600,
+    "after": [
+     "clarify"
+    ],
+    "mode": "semi_automated",
+    "operator_role": "protein_scientist",
+    "duration_uncertainty": {
+     "value": 3600,
+     "low": 3600,
+     "high": 14400,
+     "confidence": "estimated",
+     "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "1 lot",
+     "duration_basis": "catalog floor 3600 s per run; high bound allows multi-step purification (estimate)",
+     "expected_yield_mg": 0.5
+    }
+   },
+   {
+    "id": "protein_qc",
+    "name": "Protein QC gel",
+    "capability": "protein_qc",
+    "candidate_instances": [
+     "gel_1"
+    ],
+    "duration_s": 2400,
+    "after": [
+     "purify"
+    ],
+    "mode": "semi_automated",
+    "operator_role": "protein_scientist",
+    "params": {
+     "flow_unit": "1 lot",
+     "duration_basis": "catalog 2400 s per run"
+    }
+   },
+   {
+    "id": "conc_measure",
+    "name": "Concentration measurement",
+    "capability": "concentration_measurement",
+    "candidate_instances": [
+     "nanodrop_1"
+    ],
+    "duration_s": 60,
+    "after": [
+     "protein_qc"
+    ],
+    "mode": "manual",
+    "operator_role": "protein_scientist",
+    "params": {
+     "flow_unit": "1 lot",
+     "duration_basis": "catalog 60 s per sample"
+    }
+   },
+   {
+    "id": "drop_setup",
+    "name": "Crystallisation drop setup (4 plates per lot)",
+    "capability": "crystallization_setup",
+    "candidate_instances": [
+     "mosquito_1"
+    ],
+    "duration_s": 480,
+    "after": [
+     "conc_measure"
+    ],
+    "mode": "semi_automated",
+    "operator_role": "crystallographer",
+    "fan_out": 4,
+    "params": {
+     "flow_unit": "in: 1 protein lot; out: crystallization_plate_96",
+     "plates_per_lot": 4,
+     "drops_per_plate": 96,
+     "duration_basis": "catalog 120 s per plate x 4 plates per lot; plates per lot is protein-limited (placeholder protein use per drop)"
+    }
+   },
+   {
+    "id": "image_t0",
+    "name": "Day-0 inspection",
+    "capability": "crystal_imaging",
+    "candidate_instances": [
+     "imager_1"
+    ],
+    "duration_s": 180,
+    "after": [
+     "drop_setup"
+    ],
+    "mode": "automated",
+    "params": {
+     "flow_unit": "crystallization_plate_96",
+     "duration_basis": "catalog 180 s per plate per inspection; camera capacity 1",
+     "inspection_schedule": "day 0, day 1, day 3; the day-1 inspection is not modelled separately"
+    }
+   },
+   {
+    "id": "growth",
+    "name": "Crystal growth residence",
+    "capability": "incubation",
+    "candidate_instances": [
+     "growth_hotel_1"
+    ],
+    "duration_s": 259200,
+    "after": [
+     "image_t0"
+    ],
+    "mode": "automated",
+    "duration_uncertainty": {
+     "value": 259200,
+     "low": 86400,
+     "high": 1209600,
+     "confidence": "placeholder",
+     "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "crystallization_plate_96",
+     "duration_basis": "placeholder 3-day growth residence per plate; kept in a separate incubator, not the imager"
+    }
+   },
+   {
+    "id": "image_final",
+    "name": "Final inspection before selection",
+    "capability": "crystal_imaging",
+    "candidate_instances": [
+     "imager_1"
+    ],
+    "duration_s": 180,
+    "after": [
+     "growth"
+    ],
+    "mode": "automated",
+    "params": {
+     "flow_unit": "crystallization_plate_96",
+     "duration_basis": "catalog 180 s per plate"
+    }
+   },
+   {
+    "id": "drop_selection",
+    "name": "Drop selection / soak targeting",
+    "capability": "in_silico",
+    "candidate_instances": [],
+    "duration_s": 900,
+    "after": [
+     "image_final"
+    ],
+    "mode": "in_silico",
+    "duration_uncertainty": {
+     "value": 900,
+     "low": 300,
+     "high": 2700,
+     "confidence": "estimated",
+     "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "crystallization_plate_96",
+     "duration_basis": "estimate per plate for image review",
+     "assumed_drops_with_crystal_fraction": 0.6
+    }
+   },
+   {
+    "id": "soak_dispense",
+    "name": "Fragment soak dispensing",
+    "capability": "crystal_soaking",
+    "candidate_instances": [
+     "echo_1"
+    ],
+    "duration_s": 900,
+    "after": [
+     "drop_selection"
+    ],
+    "mode": "automated",
+    "params": {
+     "flow_unit": "crystallization_plate_96",
+     "duration_basis": "catalog Echo 525 crystal_soaking 900 s per plate"
+    }
+   },
+   {
+    "id": "soak_residence",
+    "name": "Soak residence",
+    "capability": "incubation",
+    "candidate_instances": [
+     "growth_hotel_1"
+    ],
+    "duration_s": 3600,
+    "after": [
+     "soak_dispense"
+    ],
+    "mode": "automated",
+    "duration_uncertainty": {
+     "value": 3600,
+     "low": 3600,
+     "high": 86400,
+     "confidence": "placeholder",
+     "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "crystallization_plate_96",
+     "duration_basis": "catalog incubation floor 3600 s; actual soak residence is a placeholder"
+    }
+   },
+   {
+    "id": "harvest",
+    "name": "Shifter-assisted crystal harvesting",
+    "capability": "crystal_harvesting",
+    "candidate_instances": [
+     "shifter_1"
+    ],
+    "duration_s": 1715,
+    "after": [
+     "soak_residence"
+    ],
+    "mode": "manual",
+    "operator_role": "crystallographer",
+    "fan_out": 44,
+    "duration_uncertainty": {
+     "value": 1715,
+     "low": 1225,
+     "high": 2940,
+     "confidence": "placeholder",
+     "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "in: crystallization_plate_96; out: crystal token (other)",
+     "units_per_run": 49,
+     "physical_batch_basis": "crystal",
+     "duration_basis": "35 s per crystal (catalog, placeholder) x 49 attempted mounts per plate (96 drops x 0.6 hits x 0.85 soak survival); bounds 25-60 s per crystal x 49",
+     "attempted_mounts_per_plate": 49,
+     "mount_success_fraction": 0.9,
+     "successful_crystals_per_plate": 44,
+     "operator_attended": "entire duration"
+    }
+   },
+   {
+    "id": "puck_load",
+    "name": "Fill 16-pin puck under LN2",
+    "capability": "cryo_cooling",
+    "candidate_instances": [
+     "dewar_1"
+    ],
+    "duration_s": 300,
+    "after": [
+     "harvest"
+    ],
+    "mode": "manual",
+    "operator_role": "crystallographer",
+    "batch_size": 16,
+    "fan_out": 0.0625,
+    "duration_uncertainty": {
+     "value": 300,
+     "low": 120,
+     "high": 600,
+     "confidence": "estimated",
+     "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "in: 16 crystal tokens; out: 1 puck",
+     "duration_basis": "estimate per puck; catalog cryo_cooling floor 120 s"
+    }
+   },
+   {
+    "id": "shipper_load",
+    "name": "Load pucks into charged dry shipper",
+    "capability": "manual_bench",
+    "candidate_instances": [
+     "bench_1"
+    ],
+    "duration_s": 900,
+    "after": [
+     "puck_load"
+    ],
+    "mode": "manual",
+    "operator_role": "crystallographer",
+    "batch_size": 3,
+    "params": {
+     "flow_unit": "puck",
+     "dry_shipper_instance": "dry_shipper_1",
+     "pucks_per_load": 3,
+     "duration_basis": "catalog lab_bench manual_bench 900 s per run (placeholder); 3 pucks per shipper load is a placeholder because CX100 puck capacity is not in the catalog; shipper hold time is not used as a duration"
+    }
+   },
+   {
+    "id": "ship_diffract",
+    "name": "Ship to synchrotron and collect diffraction",
+    "capability": "external_service",
+    "candidate_instances": [],
+    "duration_s": 2304,
+    "after": [
+     "shipper_load"
+    ],
+    "mode": "external",
+    "params": {
+     "flow_unit": "puck",
+     "dry_shipper_instance": "dry_shipper_1",
+     "external_catalog_ref": "diamond_i04_1",
+     "queue_time_s": 604800,
+     "duration_basis": "catalog xray_diffraction 2304 s per puck (basis unverified); shipping/queue 604800 s from the catalog external_service estimate is kept separately"
+    }
+   },
+   {
+    "id": "analysis",
+    "name": "Data processing and hit analysis",
+    "capability": "in_silico",
+    "candidate_instances": [],
+    "duration_s": 3600,
+    "after": [
+     "ship_diffract"
+    ],
+    "mode": "in_silico",
+    "duration_uncertainty": {
+     "value": 3600,
+     "low": 1800,
+     "high": 14400,
+     "confidence": "estimated",
+     "source": "agent_estimate"
+    },
+    "params": {
+     "flow_unit": "puck",
+     "count_throughput": true,
+     "units_per_labware": 16,
+     "duration_basis": "estimate per puck",
+     "note": "16 crystals per full puck; partial pucks are slightly overcounted"
+    }
+   }
+  ]
+ },
+ "claims": [
+  {
+   "id": "throughput_below_target",
+   "statement": "The design does not reach 86 soaked, mounted crystals/day (600/week); supply-capped output is about 176 crystals/week (about 25/day). A simulator that does not enforce the 1 L/week cap may report higher.",
+   "metric": "throughput.p50",
+   "comparator": "<=",
+   "predicted_value": 86,
+   "confidence": 0.5,
+   "status": "unverified"
+  },
+  {
+   "id": "bom_total",
+   "statement": "Instrument BOM is about $1.015M (operators and beamline fee excluded); no budget was given.",
+   "metric": "bom.total_usd",
+   "comparator": "<=",
+   "predicted_value": 1020000,
+   "confidence": 0.8,
+   "status": "unverified"
+  },
+  {
+   "id": "layout_ok",
+   "statement": "Equipment fits the assumed 8 m x 6 m room without layout violations.",
+   "metric": "layout.violations",
+   "comparator": "==",
+   "predicted_value": 0,
+   "confidence": 0.55,
+   "status": "unverified"
+  }
+ ],
+ "usage": {
+  "cache_creation_input_tokens": 0,
+  "cache_read_input_tokens": 0,
+  "input_tokens": 26259,
+  "output_tokens": 17897
+ },
+ "task_id": "xchem_protein_shortfall",
+ "arm": "vanilla",
+ "follow_up_used": false,
+ "answered_at": "2026-10-04T10:08:31+00:00",
+ "elapsed_s": 181.3,
+ "model": "claude-opus-5-5"
+}
