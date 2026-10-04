@@ -299,6 +299,15 @@ body.has-brief #statcard { overflow-y: auto; } /* top and max-height set from th
 #fix .variants li.control { color: #4a515c; } #fix .assume { display: block; color: #7a5200; font-size: 12px; }
 /* "Day 3, 14:05:22" on one line: a little wider clock panel and no wrapping. */
 #clockbar { width: 330px; } #clock-t { white-space: nowrap; font-size: 10px; }
+
+/* Case study cards: the ask, what LabForge did, what it found, why it matters. */
+.card .story { margin: 4px 0 0; font: 14px/1.5 var(--sys); color: #1d2330; }
+.card .story dt { font: 9px "Press Start 2P", monospace; color: #1f4f8f; text-transform: uppercase; margin: 12px 0 4px; }
+.card .story dt:first-child { margin-top: 0; }
+.card .story dd { margin: 0; }
+.card .story dd.good { border-left: 4px solid #1a5e33; padding-left: 8px; }
+.card .story dd.bad { border-left: 4px solid #a3271a; padding-left: 8px; }
+.card .story dd.why { background: #fff6d6; border-radius: 6px; padding: 8px 10px; }
 #modal table.sortable th[data-dir="asc"]::after { content: " ▲"; } #modal table.sortable th[data-dir="desc"]::after { content: " ▼"; }
 #modal .footnote { color: var(--muted); font-size: 13px; }
 
