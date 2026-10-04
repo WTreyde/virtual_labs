@@ -31,6 +31,132 @@
     "0 recorded layout violations; physical feasibility is qualified.",
     "Planning median 410.7 versus independent verifier 424.0 crystals_per_day; the headline is the planning simulation, not a verified measurement.",
     "Growth-hotel crystallisation-plate compatibility, shipper capacity and transit concurrency need confirmation.",
-    "Timing and yield assumptions are provisional; no physical lab was operated."
-  ]
+    "Timing and yield assumptions are provisional; no physical lab was operated.",
+    "The current imager what-ifs also add staff; they do not isolate the effect of moving growth alone."
+  ],
+  "imager_staffing_whatifs": {
+    "method": "independent verifier recomputation; no agent/model call",
+    "verification_config": {
+      "replicates": 50,
+      "seed": 12345
+    },
+    "baseline_verified_p50": 424.0,
+    "changes": [
+      "move crystal-growth residence to the existing Rock Imager",
+      "increase skilled-operator availability"
+    ],
+    "attribution": "These variants change growth residence and staffing together, so their throughput gain cannot be attributed to either change alone.",
+    "variants": {
+      "third_operator": {
+        "verified_p50": 634.7,
+        "p10": 485.3,
+        "p90": 821.3,
+        "unit": "crystals_per_day",
+        "baseline_verified_p50": 424.0,
+        "delta_vs_baseline": 210.7,
+        "beats_baseline": true,
+        "operator_utilisation": [
+          {
+            "instance_id": "skilled_operator_1",
+            "busy_fraction": 0.94,
+            "mean_queue_wait_s": 0.0
+          },
+          {
+            "instance_id": "skilled_operator_2",
+            "busy_fraction": 0.939,
+            "mean_queue_wait_s": 0.0
+          },
+          {
+            "instance_id": "skilled_operator_3",
+            "busy_fraction": 0.935,
+            "mean_queue_wait_s": 0.0
+          }
+        ],
+        "binding_limits": [
+          {
+            "kind": "operator_capacity",
+            "instances": [
+              "skilled_operator_1"
+            ],
+            "severity": "high",
+            "message": "skilled_operator_1 is busy 94% of their shift; it caps throughput near 675 crystals per day.",
+            "suggestion": "Add a second operator or stagger shifts."
+          },
+          {
+            "kind": "operator_capacity",
+            "instances": [
+              "skilled_operator_2"
+            ],
+            "severity": "high",
+            "message": "skilled_operator_2 is busy 94% of their shift; it caps throughput near 676 crystals per day.",
+            "suggestion": "Add a second operator or stagger shifts."
+          },
+          {
+            "kind": "operator_capacity",
+            "instances": [
+              "skilled_operator_3"
+            ],
+            "severity": "high",
+            "message": "skilled_operator_3 is busy 93% of their shift; it caps throughput near 679 crystals per day.",
+            "suggestion": "Add a second operator or stagger shifts."
+          }
+        ]
+      },
+      "second_shift": {
+        "verified_p50": 1306.7,
+        "p10": 1082.7,
+        "p90": 1642.7,
+        "unit": "crystals_per_day",
+        "baseline_verified_p50": 424.0,
+        "delta_vs_baseline": 882.7,
+        "beats_baseline": true,
+        "operator_utilisation": [
+          {
+            "instance_id": "skilled_operator_1",
+            "busy_fraction": 0.923,
+            "mean_queue_wait_s": 0.0
+          },
+          {
+            "instance_id": "skilled_operator_2",
+            "busy_fraction": 0.922,
+            "mean_queue_wait_s": 0.0
+          },
+          {
+            "instance_id": "skilled_operator_3",
+            "busy_fraction": 0.923,
+            "mean_queue_wait_s": 0.0
+          }
+        ],
+        "binding_limits": [
+          {
+            "kind": "operator_capacity",
+            "instances": [
+              "skilled_operator_1"
+            ],
+            "severity": "high",
+            "message": "skilled_operator_1 is busy 92% of their shift; it caps throughput near 1415 crystals per day.",
+            "suggestion": "Add a second operator or stagger shifts."
+          },
+          {
+            "kind": "operator_capacity",
+            "instances": [
+              "skilled_operator_3"
+            ],
+            "severity": "high",
+            "message": "skilled_operator_3 is busy 92% of their shift; it caps throughput near 1416 crystals per day.",
+            "suggestion": "Add a second operator or stagger shifts."
+          },
+          {
+            "kind": "operator_capacity",
+            "instances": [
+              "skilled_operator_2"
+            ],
+            "severity": "high",
+            "message": "skilled_operator_2 is busy 92% of their shift; it caps throughput near 1418 crystals per day.",
+            "suggestion": "Add a second operator or stagger shifts."
+          }
+        ]
+      }
+    }
+  }
 }

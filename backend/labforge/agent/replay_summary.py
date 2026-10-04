@@ -32,12 +32,34 @@ def _imager_whatif_summary(record):
     }
 
 
+def _staffing_whatif_summary(record):
+    summary = record['summary']
+    return {
+        'method': summary['method'],
+        'verification_config': summary['verification_config'],
+        'baseline_verified_p50': summary['recorded_baseline_verified_p50'],
+        'changes': ['move crystal-growth residence to the existing Rock Imager',
+                    'increase skilled-operator availability'],
+        'attribution': ('These variants change growth residence and staffing together, so their throughput gain '
+                        'cannot be attributed to either change alone.'),
+        'variants': summary['variants'],
+    }
+
+
 def _load_imager_whatif(run):
     source = run.get('source')
     if not source:
         return None
-    path = ROOT / Path(source).parent / 'xchem-imager-whatif.json'
-    return json.loads(path.read_text()) if path.is_file() else None
+    source_dir = ROOT / Path(source).parent
+    path = source_dir / 'xchem-imager-whatif.json'
+    if path.is_file():
+        return json.loads(path.read_text())
+    # The 50-replicate replay deliberately has no 10-replicate imager-only result beside it.
+    # Its current evidence is the separately verified staffing bundle from inbox item 6.
+    staffing = source_dir.parent / 'scenarios_20261004_staffing_whatifs' / 'summary.json'
+    if source_dir.name == 'scenarios_20261004_resim50' and staffing.is_file():
+        return {'kind': 'imager_staffing_bundle', 'summary': json.loads(staffing.read_text())}
+    return None
 
 
 def summarise(name, run, imager_whatif=None):
@@ -90,7 +112,13 @@ def summarise(name, run, imager_whatif=None):
         'limits': limits,
     }
     if name == 'fbdd' and imager_whatif:
-        summary['imager_growth_whatif'] = _imager_whatif_summary(imager_whatif)
+        if imager_whatif.get('kind') == 'imager_staffing_bundle':
+            summary['imager_staffing_whatifs'] = _staffing_whatif_summary(imager_whatif)
+            summary['limits'].append(
+                'The current imager what-ifs also add staff; they do not isolate the effect of moving growth alone.'
+            )
+        else:
+            summary['imager_growth_whatif'] = _imager_whatif_summary(imager_whatif)
     return summary
 
 
