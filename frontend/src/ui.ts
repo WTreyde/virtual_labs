@@ -1,4 +1,5 @@
 import { pct, slotsText, storageFacts } from "./capacity";
+import { operatorLook } from "./sprites";
 import { clock } from "./timeline";
 import type { CatalogItem, Confidence, Design, UncertainNumber } from "./types";
 
@@ -152,7 +153,7 @@ export function showStatCard(d: Design, instanceId: string, sprite?: string) {
   if (eq?.rationale) body += `<div class="why">“${esc(eq.rationale)}”</div>`;
   if (item) body += `<button class="whatif" data-id="${esc(instanceId)}">How could this be better?</button>`;
 
-  const title = item ? `${esc(item.vendor)} ${esc(item.model)}` : op ? esc(op.role) : esc(instanceId);
+  const title = item ? `${esc(item.vendor)} ${esc(item.model)}` : op ? `${operatorLook(d.layout.operators!.indexOf(op)).name} · ${esc(op.role)}` : esc(instanceId);
   // Plate storage: busy % and slots up front, and how busy the lab's other storage is (e.g. hotel vs imager).
   const facts = storageFacts(d), mine = facts.find((f) => f.id === instanceId);
   let storage = "";

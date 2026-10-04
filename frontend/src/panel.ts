@@ -2,8 +2,10 @@ import type { Design } from "./types";
 
 /** Strand A: the side panel (metrics with uncertainty band, BOM). Owner: Roshan. */
 export function renderPanel(d: Design) {
+  const peek = document.querySelector("#metrics-acc .acc-peek")!; // shown on the folded Throughput bar
   if (!d.workflow.equipment.length) {
-    document.querySelector("#metrics")!.innerHTML = `<b>Throughput</b><span class="muted">No design yet.</span>`;
+    peek.textContent = "";
+    document.querySelector("#metrics")!.innerHTML = `<span class="muted">No design yet.</span>`;
     document.querySelector("#bom")!.innerHTML = `<b>Bill of materials</b><span class="muted">No equipment chosen yet.</span>`;
     return;
   }
@@ -12,8 +14,8 @@ export function renderPanel(d: Design) {
   const max = Math.max(hi, target) * 1.25;
   const pct = (v: number) => `${(100 * v) / max}%`;
   const p = t.prob_meets_target;
+  peek.textContent = `${t.p50 ?? t.value} ${String(t.unit).replace(/_/g, " ")}`;
   document.querySelector("#metrics")!.innerHTML = `
-    <div class="metric-title">Throughput</div>
     <div class="metric-big">${t.p50 ?? t.value} <span class="unit">${String(t.unit).replace(/_/g, " ")}</span></div>
     <div class="metric-row"><span>P10–P90</span><span>${lo}–${hi}</span></div>
     <div class="metric-row"><span>Target</span><span>${target}</span></div>

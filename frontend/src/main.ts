@@ -1,8 +1,6 @@
 import "@fontsource/press-start-2p";
 import Phaser from "phaser";
-import { benchTasks, catalogItems, catalogNames, chatStream, exampleDesign, health, HttpError, LIVE_CHAT_MESSAGE, leaderboard, liveCatalog, optimise, prioritise, setOffline, validation } from "./api";
-import demoQueue from "../../backend/labforge/catalog/data/demo_prioritise_queue.json";
-import cachedDemoSchedule from "./fixtures/demo_schedule.json";
+import { benchTasks, catalogItems, catalogNames, chatStream, exampleDesign, health, HttpError, LIVE_CHAT_MESSAGE, leaderboard, liveCatalog, optimise, setOffline, validation } from "./api";
 import { galleryDesign } from "./fixtures/gallery";
 import { fixCard } from "./capacity";
 import { verdictsBox } from "./verdicts";
@@ -15,9 +13,10 @@ import { howItWorksHtml } from "./howitworks";
 import { marketHtml } from "./market";
 import { protocolsFor, renderProtocol, renderProtocolList } from "./protocols";
 import { describe, emptyDesign, loadReplay, loadSummary, loadWhatIfCache, playReplay } from "./replay";
+import { loadScheduleCase } from "./schedulecase";
 import { migrateLegacyLinks, parseRoute, routeKey, type Route } from "./router";
 import { clock } from "./timeline";
-import type { ChatMessage, Design, ProjectRequest, ProjectSchedule } from "./types";
+import type { ChatMessage, Design } from "./types";
 import { dialogue, hideStatCard, introLines, onTick, setupClock, showStatCard } from "./ui";
 import { closeModal, openModal, showError, showHtml, showLeaderboard, showLoading, showSchedule, showValidation, showWhatIf } from "./views";
 
@@ -57,21 +56,50 @@ const fontReady = Promise.race([document.fonts.load('8px "Press Start 2P"'), new
 fontReady.catch(() => undefined).then(() => game.scene.add("lab", LabScene, true, { design }));
 game.events.on("tick", onTick);
 game.events.on("ready-clock", () => setupClock(design));
+// Phones: bottleneck bubbles start hidden; the "!" button above the dialogue box shows and hides them.
+const alertsBtn = $<HTMLButtonElement>("#alerts-btn");
+function setBubbles(on: boolean) {
+  alertsBtn.classList.toggle("on", on);
+  alertsBtn.setAttribute("aria-pressed", String(on));
+  alertsBtn.title = on ? "Hide the bottleneck warnings" : "Show the bottleneck warnings on the lab";
+  game.events.emit("show-bubbles", on);
+}
+game.events.on("bubbles", (n: number) => {
+  alertsBtn.classList.toggle("hidden", !n);
+  alertsBtn.querySelector(".n")!.textContent = String(n);
+  alertsBtn.classList.add("invite"); // pulses until the first tap on this design
+  setBubbles(false);
+});
+alertsBtn.addEventListener("click", () => { alertsBtn.classList.remove("invite"); setBubbles(!alertsBtn.classList.contains("on")); });
 game.events.on("select", (sel: { id: string; sprite?: string } | null) => {
   if (!sel) return hideStatCard();
   showStatCard(design, sel.id, sel.sprite);
-  placeStatCard();
 });
 
-/** On case pages the stat card opens just below the brief (whose height varies) and stops above the dialogue box. */
-function placeStatCard() {
-  const card = $("#statcard"), brief = $("#brief");
-  if (!document.body.classList.contains("has-brief")) { card.style.top = ""; card.style.maxHeight = ""; return; }
-  const game = $("#game").getBoundingClientRect(), b = brief.getBoundingClientRect();
-  const top = Math.round(b.bottom - game.top + 10), bottomGap = 140; // clear of the dialogue box
-  card.style.top = `${top}px`;
-  card.style.maxHeight = `${Math.max(160, game.height - top - bottomGap)}px`;
+// ---- side panel accordion: every section folds, and only one is open at a time ----------------------
+
+const accs = [...document.querySelectorAll<HTMLElement>("#panel .acc")];
+/** Open one section (by its body id, e.g. "brief", "metrics", "log") and fold all the others; `null` folds all. */
+function openAcc(which: string | null) {
+  for (const sec of accs) {
+    const on = sec.id === `${which}-acc`;
+    sec.classList.toggle("open", on);
+    sec.querySelector(".acc-head")!.setAttribute("aria-expanded", String(on));
+  }
 }
+for (const sec of accs)
+  sec.querySelector(".acc-head")!.addEventListener("click", () => openAcc(sec.classList.contains("open") ? null : sec.id.replace(/-acc$/, "")));
+
+// ---- top nav: "Menu" dropdown on phones, "Case studies" dropdown everywhere -------------------------
+
+const menuBtn = $<HTMLButtonElement>("#menu-btn"), topnav = $("#topnav");
+function setMenu(open: boolean) {
+  topnav.classList.toggle("menu-open", open);
+  menuBtn.setAttribute("aria-expanded", String(open));
+}
+menuBtn.addEventListener("click", (e) => { e.stopPropagation(); setMenu(!topnav.classList.contains("menu-open")); });
+document.addEventListener("click", (e) => { if (!topnav.contains(e.target as Node)) setMenu(false); });
+window.addEventListener("keydown", (e) => { if (e.key === "Escape") setMenu(false); });
 
 function show(d: Design) {
   design = d;
@@ -88,10 +116,11 @@ async function updateProtocolsPanel(d: Design) {
   const found = caps.length ? await protocolsFor(caps) : [];
   if (design !== d) return;
   box.classList.toggle("hidden", !found.length);
-  // Near the top of the panel, collapsed, so it is visible on case pages without pushing the rest down.
-  box.innerHTML = found.length ? `<details><summary><b>Protocols for this lab (${found.length})</b> <span class="muted">published methods for its steps</span></summary><ul>${found.map(({ row, matched }) =>
+  // Near the top of the panel (folded like every section); the count shows on its bar.
+  box.closest(".acc")!.querySelector(".acc-peek")!.textContent = found.length ? `${found.length} published` : "";
+  box.innerHTML = found.length ? `<b>Protocols for this lab</b><ul>${found.map(({ row, matched }) =>
     `<li><a href="#/protocols/${encodeURIComponent(row.id)}">${row.title.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`)}</a><div class="muted">covers ${matched.map((c) => c.replace(/_/g, " ")).join(", ")}</div></li>`).join("")}</ul>
-    <a class="all-protocols" href="#/protocols">All protocols ▸</a></details>` : "";
+    <a class="all-protocols" href="#/protocols">All protocols ▸</a>` : "";
 }
 
 /** One log entry per line, scrolled to the newest. */
@@ -118,9 +147,10 @@ async function go(r: Route) {
   $("#checked").classList.add("hidden");
   $("#fix").classList.add("hidden");
   $("#verdicts").classList.add("hidden");
-  $("#brief").classList.add("hidden");
-  document.body.classList.remove("has-brief");
-  placeStatCard();
+  $("#brief-acc").classList.add("hidden");
+  alertsBtn.classList.add("hidden"); // the scene shows it again when the next design has bottleneck bubbles
+  openAcc("metrics");
+  setMenu(false);
   $("#skill-btn").classList.add("hidden");
   $("#agent-banner").classList.add("hidden");
   agentLog.clear();
@@ -135,6 +165,7 @@ async function go(r: Route) {
   landing.classList.toggle("hidden", !onLanding);
   for (const a of document.querySelectorAll<HTMLAnchorElement>("#topnav a"))
     a.classList.toggle("active", a.dataset.route === routeKey(r));
+  $(".nav-group[data-group=case]").classList.toggle("active", r.page === "case" || r.page === "cases" || r.page === "schedule");
 
   switch (r.page) {
     case "landing": return renderLanding(landing);
@@ -239,20 +270,17 @@ async function startReplay(name: string) {
 }
 
 /**
- * Keep the case's problem statement on screen for the whole replay: the case title, the short brief from the
- * summary, and the agent's full brief behind a toggle.
+ * Keep the case's problem statement in the side panel for the whole replay: the case title, the short brief from
+ * the summary, and the agent's full brief behind a toggle. Open by default; the Throughput bar below folds it away.
  */
 function showBrief(name: string, full: string, short?: string) {
   const el = $("#brief"), title = CASES.find((c) => c.name === name)?.title ?? name;
   const esc = (v: string) => v.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
-  el.innerHTML = `<div class="brief-kicker">The brief</div><div class="brief-title">${esc(title)}</div>
+  el.innerHTML = `<div class="brief-title">${esc(title)}</div>
     <p class="brief-short">${esc(short ?? full.split(/(?<=\.)\s/)[0])}</p>
     <details><summary>Full brief</summary><p class="brief-full">${esc(full)}</p></details>`;
-  el.classList.remove("hidden");
-  document.body.classList.add("has-brief");
-  // Expanding the full brief needs the space: close any open stat card (reopen by clicking the instrument).
-  const details = el.querySelector("details")!;
-  details.addEventListener("toggle", () => (details.open ? hideStatCard() : placeStatCard()));
+  $("#brief-acc").classList.remove("hidden");
+  openAcc("brief");
 }
 
 // ---- live chat ----------------------------------------------------------------------------------
@@ -264,6 +292,7 @@ $<HTMLFormElement>("#chat-form").addEventListener("submit", async (e) => {
   const input = $<HTMLInputElement>("#chat-input"), started = route;
   history.push({ role: "user", content: input.value });
   appendLog(`You: ${input.value}`, "user");
+  openAcc("log"); // follow the agent's steps while it works
   input.value = "";
   try {
     // Stream the agent's steps into the log and dialogue box as they happen.
@@ -375,18 +404,10 @@ async function downloadSkill(name: string) {
 // ---- full-page views ----------------------------------------------------------------------------
 
 async function openSchedule() {
-  // Max's demo queue (three projects on one screening cell); offline, a cached /prioritise run of the same queue.
-  const projects = demoQueue.projects as unknown as ProjectRequest[];
-  showLoading("What order should these projects run in?");
-  const extra = await Promise.all(["chem", "fbdd"].map((n) => loadReplay(n).then((x) => x.catalog ?? {}).catch(() => ({}))));
-  const [{ result, cached }, catalog] = await Promise.all([
-    prioritise(projects, demoQueue.lab_id, cachedDemoSchedule.schedule as ProjectSchedule), catalogItems(extra)]);
-  // Instruments by vendor and model, not instance id; a readable catalog id when the catalog doesn't have it.
-  const deviceNames: Record<string, { short: string; full: string }> = {};
-  for (const p of projects) for (const e of p.workflow.equipment) {
-    const it = catalog[e.catalog_id], fallback = e.catalog_id.replace(/_/g, " ");
-    deviceNames[e.instance_id] = it ? { short: it.model, full: `${it.vendor} ${it.model}` } : { short: fallback, full: fallback };
-  }
+  // The scheduling case: Max's demo queue (three projects on one screening cell); offline, a cached /prioritise run.
+  showLoading("Scheduling case: what order should these projects run in?");
+  const { result, projects, cached, deviceNames } = await loadScheduleCase();
+  if (route.page !== "schedule") return;
   showSchedule(result, projects, cached, deviceNames);
 }
 /** #/protocols (list) and #/protocols/<id> (detail), static files from public/protocols/. */

@@ -1,3 +1,4 @@
+import { scheduleMC } from "./schedulecase";
 import type { BenchTask, InstrumentOptimisation, Leaderboard, ProjectRequest, ProjectSchedule, ValidationRow } from "./types";
 
 /**
@@ -104,7 +105,7 @@ function tile(label: string, before: string, after: string, good: boolean) {
 const PROJECT_NAME: Record<string, string> = {
   enzyme_campaign: "Enzyme campaign", chem_library_screen: "Chemistry library screen", urgent_retest: "Urgent hit re-test",
 };
-const projectName = (id: string) => PROJECT_NAME[id] ?? id.replace(/_/g, " ");
+export const projectName = (id: string) => PROJECT_NAME[id] ?? id.replace(/_/g, " ");
 
 /**
  * The Schedule tab: which order to run several projects through one existing lab. It states the question and the
@@ -137,15 +138,18 @@ export function showSchedule(s: ProjectSchedule, projects: ProjectRequest[], cac
     const first = i === 0 ? `Run the ${name.toLowerCase()} first` : i === recOrder.length - 1 ? `then the ${name.toLowerCase()}` : `then the ${name.toLowerCase()}`;
     return p === firstDue && fin[id] != null ? `${first} (done at ${num(fin[id])} h, deadline ${num(p!.deadline_h!)} h)` : first;
   });
+  // Headline finish times: the Monte Carlo medians when the backend reports them (same pair as the README), else average step times.
+  const mc = scheduleMC(s.caveat);
+  const recH = mc?.rec ?? rec.makespan_h, naiveH = naive ? mc?.naive ?? naive.makespan_h : undefined;
   const answer = recOrder.length
-    ? `${steps.join(", ")}: everything is done in <b>${num(rec.makespan_h)} h</b>${naive ? ` instead of ${num(naive.makespan_h)} h in the order listed` : ""}${
+    ? `${steps.join(", ")}: everything is done in <b>${mc ? "about " : ""}${num(recH)} h</b>${naiveH != null ? ` instead of ${num(naiveH)} h in the order listed` : ""}${mc ? ` (median of ${mc.reps} simulations)` : ""}${
       (rec.deadline_misses?.length ?? 0) === 0 ? ", with no missed deadline" : `, but ${esc(list((rec.deadline_misses ?? []).map(projectName)))} still miss their deadline`}.`
     : `Recommended: ${esc(rec.policy)}.`;
 
   const tile2 = (label: string, explain: string, before: string, after: string, good: boolean) =>
     `<div class="tile"><div class="tile-label">${esc(label)}</div><div class="tile-val"><span class="was">${esc(before)}</span> → <b>${esc(after)}</b> ${good ? "✓" : ""}</div><div class="tile-explain">${esc(explain)}</div></div>`;
   const tiles = naive
-    ? tile2("Finishes in", "time until all projects are done (order listed → recommended)", `${num(naive.makespan_h)} h`, `${num(rec.makespan_h)} h`, rec.makespan_h < naive.makespan_h) +
+    ? tile2("Finishes in", `time until all projects are done (order listed → recommended)${mc ? `, median of ${mc.reps} simulations` : ""}`, `${num(naiveH!)} h`, `${num(recH)} h`, recH < naiveH!) +
       tile2("Lab busy", "average share of time the cell's instruments are working", pct(naive.mean_utilisation), pct(rec.mean_utilisation), rec.mean_utilisation > naive.mean_utilisation) +
       tile2("Deadlines missed", "projects finishing after their deadline", String(naive.deadline_misses?.length ?? 0), String(rec.deadline_misses?.length ?? 0), (rec.deadline_misses?.length ?? 0) < (naive.deadline_misses?.length ?? 0))
     : "";
@@ -195,28 +199,27 @@ export function showSchedule(s: ProjectSchedule, projects: ProjectRequest[], cac
 
   const orderText = (c: ProjectSchedule["candidates"][number]) => c.order ? c.order.map(projectName).join(" → ") : ({ interleave: "Take turns between projects", bottleneck_mix: "Mix projects to spread the load" } as Record<string, string>)[c.policy] ?? c.policy;
   const table = `<details><summary>Table view: every order LabForge tried</summary><table>
-    <tr><th>Order</th><th>Finishes (h)</th><th>Lab busy</th><th>Deadlines missed</th></tr>
+    <tr><th>Order</th><th>Finishes (h, average step times)</th><th>Lab busy</th><th>Deadlines missed</th></tr>
     ${s.candidates.map((c) => `<tr${c === rec ? ' class="rec"' : ""}><td>${esc(orderText(c))}${c === rec ? " (recommended)" : c === naive ? " (order listed)" : ""}</td>
       <td>${num(c.makespan_h)}</td><td>${pct(c.mean_utilisation)}</td><td>${esc((c.deadline_misses ?? []).map(projectName).join(", ") || "none")}</td></tr>`).join("")}
     </table></details>`;
 
   // The backend's caveat in plain words when it has the usual shape; otherwise as written.
-  const m = s.caveat?.match(/\((\d+) replicates\):\s*recommended ([\d.]+) h \(P10-P90 ([\d.]+)-([\d.]+) h\) vs order given ([\d.]+) h \(([\d.]+)-([\d.]+) h\); recommended finishes first in (\d+)% of replicates/);
-  const caveat = m
-    ? `Planned on average step times, without transfer times or operator shifts. A check over ${m[1]} simulated variations of the step times
-       still gives about <b>${num(+m[2])} h</b> (likely ${num(+m[3])}–${num(+m[4])} h) for the recommended order vs ${num(+m[5])} h (${num(+m[6])}–${num(+m[7])} h) for the order listed;
-       the recommended order finished first in ${m[8]}% of them.`
+  const caveat = mc
+    ? `The headline times are medians over ${mc.reps} simulations with random step times: likely ${num(mc.recLo)}–${num(mc.recHi)} h for the recommended order
+       vs ${num(mc.naiveLo)}–${num(mc.naiveHi)} h for the order listed, and the recommended order finished first in ${mc.firstPct}% of them. The schedule
+       and table above are one run on average step times (${num(rec.makespan_h)} h vs ${naive ? num(naive.makespan_h) : "?"} h). Transfer times and operator shifts are not modelled.`
     : s.caveat ? esc(s.caveat) : "";
 
-  openModal("What order should these projects run in?", `
+  openModal("Scheduling case: what order should these projects run in?", `
     <div class="sched-qa">
       <p class="sched-q"><span class="qa-tag">The question</span>${esc(question)}</p>
       <p class="sched-a"><span class="qa-tag">The answer</span>${answer}${cached ? " <i class=\"muted\">(cached run; backend offline)</i>" : ""}</p>
-      <p class="muted">A separate planning example, not one of the case studies: it plans work through a lab that already exists.
-        The chemistry library screen here is the screening stage of a library like the chemistry case.</p>
+      <p class="muted">Case study: getting more out of a lab that already exists, with no new equipment. Unlike the two design cases this is not a
+        recorded agent run: LabForge's scheduler simulates every running order.</p>
     </div>
     <div class="tiles">${tiles}</div>
-    <h3>Recommended schedule</h3>${legend}${gantt}${busy}${table}
+    <h3>Recommended schedule${mc ? " (one run on average step times)" : ""}</h3>${legend}${gantt}${busy}${table}
     ${caveat ? `<p class="note">⚠ ${caveat}</p>` : ""}`);
 }
 

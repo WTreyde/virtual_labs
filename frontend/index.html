@@ -19,21 +19,28 @@
           <rect x="6" y="6" width="4" height="2" fill="#e9f7ff"/><rect x="5" y="8" width="6" height="2" fill="#3ee07a"/><rect x="4" y="10" width="8" height="4" fill="#3ee07a"/>
           <rect x="5" y="11" width="1" height="1" fill="#b6ffd2"/><rect x="8" y="12" width="1" height="1" fill="#b6ffd2"/><rect x="10" y="10" width="1" height="1" fill="#b6ffd2"/>
         </svg><span class="logo-word">LabForge</span></a>
-      <a href="#/cases" data-route="cases">Case studies</a>
-      <a href="#/case/chem" data-route="case/chem">Chemistry case</a>
-      <a href="#/case/fbdd" data-route="case/fbdd">XChem case</a>
-      <a href="#/design" data-route="design">Design your own</a>
-      <a href="#/bench" data-route="bench">Bench</a>
-      <a href="#/validation" data-route="validation">Validation</a>
-      <a href="#/schedule" data-route="schedule">Schedule</a>
-      <a href="#/protocols" data-route="protocols">Protocols</a>
-      <a href="#/how" data-route="how">How it works</a>
-      <a href="#/market" data-route="market">Why it matters</a>
+      <!-- Phones: the page links fold into this one "Menu" dropdown, in the same bar as the logo. -->
+      <button id="menu-btn" type="button" aria-expanded="false" aria-controls="nav-links">Menu <span class="chev" aria-hidden="true">▾</span></button>
+      <div id="nav-links">
+        <a href="#/design" data-route="design">Design your own</a>
+        <div class="nav-group" data-group="case">
+          <a href="#/cases" data-route="cases" aria-haspopup="true">Case studies <span class="chev" aria-hidden="true">▾</span></a>
+          <div class="nav-sub" aria-label="Case studies">
+            <a href="#/case/chem" data-route="case/chem">Chemistry case</a>
+            <a href="#/case/fbdd" data-route="case/fbdd">XChem case</a>
+            <a href="#/case/schedule" data-route="schedule">Scheduling case</a>
+          </div>
+        </div>
+        <a href="#/bench" data-route="bench">Bench</a>
+        <a href="#/validation" data-route="validation">Validation</a>
+        <a href="#/protocols" data-route="protocols">Protocols</a>
+        <a href="#/how" data-route="how">How it works</a>
+        <a href="#/market" data-route="market">Why it matters</a>
+      </div>
     </nav>
     <section id="landing" class="hidden" aria-label="Start"></section>
     <main id="app">
     <div id="game">
-      <div id="brief" class="frame hidden" aria-label="Case brief"></div>
       <div id="statcard" class="frame hidden"></div>
       <div id="clockbar" class="frame hidden">
         <div class="controls">
@@ -51,17 +58,45 @@
       <div id="agent-banner" class="hidden" role="status"></div>
       <div id="modal" class="frame hidden" role="dialog" aria-modal="true"></div>
       <div id="viz-tip" class="hidden"></div>
+      <button id="alerts-btn" type="button" class="hidden" aria-pressed="false" title="Show the bottleneck warnings on the lab"><span class="bang" aria-hidden="true">!</span><span class="n"></span></button>
       <div id="dialogue" class="frame hidden"><div class="speaker">LABFORGE</div><div class="text"></div><span class="caret">▼</span></div>
     </div>
     <aside id="panel">
-      <section id="metrics"></section>
-      <section id="protocols-for" class="hidden"></section>
-      <section id="checked" class="hidden"></section>
-      <section id="fix" class="hidden"></section>
-      <section id="verdicts" class="hidden"></section>
-      <section id="bom"></section>
+      <!-- Every panel section folds; opening one folds the others (main.ts openAcc). A section whose body is
+           .hidden hides with it. -->
+      <section id="brief-acc" class="acc hidden">
+        <button type="button" class="acc-head" aria-expanded="false" aria-controls="brief"><span>The brief</span><span class="chev" aria-hidden="true">▾</span></button>
+        <div id="brief" class="acc-body" aria-label="Case brief"></div>
+      </section>
+      <section id="metrics-acc" class="acc open">
+        <button type="button" class="acc-head" aria-expanded="true" aria-controls="metrics"><span>Throughput</span><span class="acc-peek"></span><span class="chev" aria-hidden="true">▾</span></button>
+        <div id="metrics" class="acc-body"></div>
+      </section>
+      <section id="protocols-for-acc" class="acc">
+        <button type="button" class="acc-head" aria-expanded="false" aria-controls="protocols-for"><span>Protocols for this lab</span><span class="acc-peek"></span><span class="chev" aria-hidden="true">▾</span></button>
+        <div id="protocols-for" class="acc-body hidden"></div>
+      </section>
+      <section id="checked-acc" class="acc">
+        <button type="button" class="acc-head" aria-expanded="false" aria-controls="checked"><span>What we checked</span><span class="chev" aria-hidden="true">▾</span></button>
+        <div id="checked" class="acc-body hidden"></div>
+      </section>
+      <section id="fix-acc" class="acc">
+        <button type="button" class="acc-head" aria-expanded="false" aria-controls="fix"><span>Idle capacity: what if?</span><span class="chev" aria-hidden="true">▾</span></button>
+        <div id="fix" class="acc-body hidden"></div>
+      </section>
+      <section id="verdicts-acc" class="acc">
+        <button type="button" class="acc-head" aria-expanded="false" aria-controls="verdicts"><span>Verifier verdicts</span><span class="chev" aria-hidden="true">▾</span></button>
+        <div id="verdicts" class="acc-body hidden"></div>
+      </section>
+      <section id="bom-acc" class="acc">
+        <button type="button" class="acc-head" aria-expanded="false" aria-controls="bom"><span>Bill of materials</span><span class="chev" aria-hidden="true">▾</span></button>
+        <div id="bom" class="acc-body"></div>
+      </section>
+      <section id="log-acc" class="acc">
+        <button type="button" class="acc-head" aria-expanded="false" aria-controls="log"><span>Agent log</span><span class="chev" aria-hidden="true">▾</span></button>
+        <div id="log" class="acc-body"></div>
+      </section>
       <section id="chat">
-        <div id="log"></div>
         <form id="chat-form"><input id="chat-input" placeholder="Describe your lab..." /><button>Send</button></form>
       </section>
       <button id="whatif-btn" class="hidden"></button>
