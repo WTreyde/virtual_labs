@@ -222,3 +222,34 @@ body.page-view #modal table.bench thead th { top: 46px; }
 #log .st.succeeded { color: #1f6b3a; } #log .st.failed { color: #a3271a; } #log .st.running { color: #b07d00; }
 #log .ms { color: #6b8fb3; margin-left: 4px; }
 #log .sum { color: #556; margin: 1px 0 0 16px; }
+
+/* ---- Readability pass (team feedback): pixel font only for headings and numbers, at 9px or more; prose in a
+   system font at 12-13px with generous line height; all text at least 4.5:1 against its background. ---- */
+:root { --muted: #4a515c; --sys: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.muted, #panel .muted, #bom .vendor, #bom .note, #metrics .metric-row > span:first-child, #metrics .metric-big .unit,
+#checked .check-row > span:first-child, #checked .limits-title, #fix .check-row > span:first-child,
+#statcard .sub, #statcard .id, #statcard .range, #statcard .row > span:first-child, #statcard .why,
+#log .sum, #log .ms, #clockbar .stats, #topnav a { color: var(--muted); }
+#topnav a { color: #dfe4e8; } #topnav a.active { color: #2b2f36; }
+#panel { font-size: 10px; }
+#metrics .metric-row { font-size: 10px; line-height: 1.8; } #metrics .metric-big .unit { font-size: 10px; }
+#bom table { font-size: 10px; } #bom td { line-height: 1.6; }
+#bom .vendor { font: 12px/1.4 var(--sys); margin-top: 3px; }
+#bom .note { font: 12px/1.5 var(--sys); }
+#checked, #fix { font-size: 10px; line-height: 1.8; }
+#checked .limits, #fix p { font: 13px/1.55 var(--sys); color: #222; }
+#verdicts .verdict, #verdicts .v-sum { font-size: 13px; }
+#log { font: 13px/1.6 var(--sys); color: #1d2330; }
+#statcard { font-size: 10px; line-height: 1.8; }
+#statcard .sub, #statcard .why, #statcard .warn { font: 12px/1.5 var(--sys); }
+#statcard .busy-big { font-size: 12px; }
+#dialogue { font-size: 13px; line-height: 1.9; }
+#clockbar { font-size: 10px; } #clockbar .stats { font-size: 9px; line-height: 1.6; }
+.badge { font-size: 8px; padding: 3px 5px; }
+/* Badge colours darkened so white text clears 4.5:1. */
+.badge-datasheet { background: #23733f; } .badge-literature { background: #1f5fae; }
+.badge-estimated { background: #8a5d00; } .badge-placeholder, .badge-unknown { background: #a3271a; }
+#verdicts .v-status { background: #5f6670; }
+.card-sub .ok, #checked .ok { color: #1a5e33; }
+.badge { font-size: 9px; } #verdicts .v-status { font-size: 9px; } #fix .fix-show, #statcard .whatif, #whatif-btn, #skill-btn { font-size: 10px; }
+#dialogue .caret { color: #a3271a; }
