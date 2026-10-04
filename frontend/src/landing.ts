@@ -148,21 +148,16 @@ export function caseStory(run: RecordedRun, s: CaseSummary, problem?: string): s
 const perDay_ = (u: string) => (unitOf(u).endsWith("per day") ? "/day" : ` ${unitOf(u)}`);
 
 /**
- * A case story: the ask and what LabForge did are always shown; what it found and why it matters sit behind a
- * toggle (collapsed by default) so the cards stay short.
+ * A case story: the ask and what LabForge did are always shown. "What it found" and "Why it matters" keep their
+ * headings, and each heading opens its own text on click (collapsed by default) so the cards stay short.
  */
 function storyHtml(ask: string, did: string, found: string, good: boolean, why: string): string {
   return `<dl class="story">
       <dt>The ask</dt><dd>${ask}</dd>
       <dt>What LabForge did</dt><dd>${did}</dd>
     </dl>
-    <details class="story-more">
-      <summary>What it found and why it matters</summary>
-      <dl class="story">
-        <dt>What it found</dt><dd class="${good ? "good" : "bad"}">${found}</dd>
-        <dt>Why it matters</dt><dd class="why">${why}</dd>
-      </dl>
-    </details>`;
+    <details class="story-item"><summary>What it found</summary><div class="story-body ${good ? "good" : "bad"}">${found}</div></details>
+    <details class="story-item"><summary>Why it matters</summary><div class="story-body why">${why}</div></details>`;
 }
 
 /** The scheduling case title, in the same "topic: detail" style as the design cases. */

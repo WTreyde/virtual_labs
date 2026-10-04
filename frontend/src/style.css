@@ -518,14 +518,19 @@ body.page-view #statcard .whatif { display: none; } /* no simulated design behin
   .hw-svg { min-width: 820px; }
 }
 
-/* Case cards: the result folds away so cards stay short; the title and the go line are the links. */
+/* Case cards: the title and the go line are the links. */
 .card h2 a { color: inherit; text-decoration: none; } .card h2 a:hover { text-decoration: underline; }
 a.card-go { text-decoration: none; align-self: flex-start; } a.card-go:hover { text-decoration: underline; }
-.card .story-more { margin-top: 10px; border-top: 2px dotted #c8ccd2; padding-top: 8px; }
-.card .story-more > summary { cursor: pointer; font: 600 14px var(--sys); color: #1f4f8f; list-style: none; }
-.card .story-more > summary::-webkit-details-marker { display: none; }
-.card .story-more > summary::before { content: "▸ "; } .card .story-more[open] > summary::before { content: "▾ "; }
-.card .story-more > .story { margin-top: 8px; }
 /* Collapsed, the cards share one height (links aligned at the bottom); once a card is opened, the others keep theirs. */
-.cards { align-items: stretch; } .cards:has(.story-more[open]) { align-items: start; }
-.card .story-more { margin-top: auto; }
+.cards { align-items: stretch; } .cards:has(.story-item[open]) { align-items: start; }
+
+/* "What it found" / "Why it matters": the heading is the toggle (styled like the other story headings), text hidden until clicked. */
+.card .story-item { font: 14px/1.5 var(--sys); color: #1d2330; margin-top: 12px; }
+.card .story-item > summary { cursor: pointer; list-style: none; font: 9px "Press Start 2P", monospace; color: #1f4f8f; text-transform: uppercase; }
+.card .story-item > summary::-webkit-details-marker { display: none; }
+.card .story-item > summary::before { content: "▸ "; } .card .story-item[open] > summary::before { content: "▾ "; }
+.card .story-item > summary:hover { text-decoration: underline; }
+.card .story-body { margin-top: 4px; }
+.card .story-body.good { border-left: 4px solid #1a5e33; padding-left: 8px; }
+.card .story-body.bad { border-left: 4px solid #a3271a; padding-left: 8px; }
+.card .story-body.why { background: #fff6d6; border-radius: 6px; padding: 8px 10px; }
