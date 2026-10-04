@@ -7,7 +7,7 @@ import { galleryDesign } from "./fixtures/gallery";
 import { fixCard } from "./capacity";
 import { verdictsBox } from "./verdicts";
 import { AgentLog } from "./agentlog";
-import { renderCases, renderLanding, summaryBox } from "./landing";
+import { CASES, renderCases, renderLanding, summaryBox } from "./landing";
 import { LabScene } from "./LabScene";
 import { renderPanel } from "./panel";
 import { openReport } from "./report";
@@ -54,7 +54,21 @@ const fontReady = Promise.race([document.fonts.load('8px "Press Start 2P"'), new
 fontReady.catch(() => undefined).then(() => game.scene.add("lab", LabScene, true, { design }));
 game.events.on("tick", onTick);
 game.events.on("ready-clock", () => setupClock(design));
-game.events.on("select", (sel: { id: string; sprite?: string } | null) => (sel ? showStatCard(design, sel.id, sel.sprite) : hideStatCard()));
+game.events.on("select", (sel: { id: string; sprite?: string } | null) => {
+  if (!sel) return hideStatCard();
+  showStatCard(design, sel.id, sel.sprite);
+  placeStatCard();
+});
+
+/** On case pages the stat card opens just below the brief (whose height varies) and stops above the dialogue box. */
+function placeStatCard() {
+  const card = $("#statcard"), brief = $("#brief");
+  if (!document.body.classList.contains("has-brief")) { card.style.top = ""; card.style.maxHeight = ""; return; }
+  const game = $("#game").getBoundingClientRect(), b = brief.getBoundingClientRect();
+  const top = Math.round(b.bottom - game.top + 10), bottomGap = 140; // clear of the dialogue box
+  card.style.top = `${top}px`;
+  card.style.maxHeight = `${Math.max(160, game.height - top - bottomGap)}px`;
+}
 
 function show(d: Design) {
   design = d;
@@ -87,6 +101,9 @@ async function go(r: Route) {
   $("#checked").classList.add("hidden");
   $("#fix").classList.add("hidden");
   $("#verdicts").classList.add("hidden");
+  $("#brief").classList.add("hidden");
+  document.body.classList.remove("has-brief");
+  placeStatCard();
   $("#skill-btn").classList.add("hidden");
   $("#agent-banner").classList.add("hidden");
   agentLog.clear();
@@ -159,6 +176,7 @@ async function startReplay(name: string) {
     const [run, whatif, summary] = await Promise.all([loadReplay(name), loadWhatIfCache(name), loadSummary(name)]);
     if (!live()) return;
     badge.querySelector(".text")!.textContent = `Replay of a recorded run${run.model ? ` · ${run.model}` : ""}`;
+    showBrief(name, run.brief, summary?.brief);
     if (run.output.lab_spec) show(emptyDesign(run.output.lab_spec));
     await playReplay(run, {
       say: (lines, speaker) => live() && dialogue.say(lines, speaker),
@@ -198,6 +216,23 @@ async function startReplay(name: string) {
   }
   // Playback is over: the what-if may now ask the backend (it falls back to the case's cached sweep offline).
   setOffline(false);
+}
+
+/**
+ * Keep the case's problem statement on screen for the whole replay: the case title, the short brief from the
+ * summary, and the agent's full brief behind a toggle.
+ */
+function showBrief(name: string, full: string, short?: string) {
+  const el = $("#brief"), title = CASES.find((c) => c.name === name)?.title ?? name;
+  const esc = (v: string) => v.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
+  el.innerHTML = `<div class="brief-kicker">The brief</div><div class="brief-title">${esc(title)}</div>
+    <p class="brief-short">${esc(short ?? full.split(/(?<=\.)\s/)[0])}</p>
+    <details><summary>Full brief</summary><p class="brief-full">${esc(full)}</p></details>`;
+  el.classList.remove("hidden");
+  document.body.classList.add("has-brief");
+  // Expanding the full brief needs the space: close any open stat card (reopen by clicking the instrument).
+  const details = el.querySelector("details")!;
+  details.addEventListener("toggle", () => (details.open ? hideStatCard() : placeStatCard()));
 }
 
 // ---- live chat ----------------------------------------------------------------------------------

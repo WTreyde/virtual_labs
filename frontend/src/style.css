@@ -278,3 +278,13 @@ body.page-view #modal table.bench thead th { top: 46px; }
 .big-btn.own.limited .big-sub { color: #7a1d12; }
 .cases-title { color: #ffd23f; font-size: 18px; margin: 0 0 12px; }
 .pitch.small { font-size: 12px; margin-bottom: 24px; }
+
+/* Case brief: top left of the scene for the whole replay; the replay badge stacks above it, stat cards open below. */
+#brief { top: 54px; left: 16px; width: min(440px, calc(100% - 360px)); padding: 10px 14px; z-index: 12; }
+#brief .brief-kicker { font-size: 8px; color: #6b8fb3; text-transform: uppercase; }
+#brief .brief-title { font-size: 11px; line-height: 1.6; margin: 4px 0; }
+#brief .brief-short, #brief .brief-full { font: 13px/1.5 var(--sys); margin: 4px 0; color: #1d2330; }
+#brief details summary { cursor: pointer; font: 12px var(--sys); color: #1f5fae; }
+#brief .brief-full { max-height: 40vh; overflow-y: auto; white-space: pre-wrap; }
+body.has-brief #replay-badge { left: 16px; transform: none; }
+body.has-brief #statcard { overflow-y: auto; } /* top and max-height set from the brief's height (main.ts) */
