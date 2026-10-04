@@ -10,6 +10,9 @@ trap 'rm -rf "$tmp"' EXIT
 git -C "$root" archive HEAD | tar -x -C "$tmp"
 cp "$root/deploy/hf-space/README.md" "$tmp/README.md"   # Space settings live in README front-matter
 rm -f "$tmp/.env"
+# The Hub rejects plain binary files; the Space needs none of these (README screenshots, Finder metadata).
+rm -rf "$tmp/docs/img"
+find "$tmp" -name .DS_Store -delete
 cd "$tmp"
 git init -q -b main
 git lfs install --local >/dev/null 2>&1 || true
