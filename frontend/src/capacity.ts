@@ -59,7 +59,7 @@ export function fixCard(d: Design, summary?: CaseSummary): string {
   let result: string;
   const staffing = summary?.imager_staffing_whatifs as Record<string, any> | undefined;
   if (staffing?.variants && Object.keys(staffing.variants).length) {
-    result = staffingResult(staffing, perDay, n);
+    result = staffingResult(staffing, perDay, n, beamSecondsPerUnit(d));
   } else if (w && base != null && after != null) {
     const change = (after - base) / base;
     const verdict = Math.abs(change) < NOISE ? "No throughput gain" : change > 0 ? `${Math.round(change * 100)}% more throughput` : `${Math.round(-change * 100)}% less throughput`;
@@ -81,26 +81,56 @@ export function fixCard(d: Design, summary?: CaseSummary): string {
 }
 
 const VARIANT_LABEL: Record<string, string> = {
+  third_operator_only: "Control: a third operator only (growth stays in the STX44)",
   third_operator: "Grow in the imager + a third operator",
   second_shift: "… + a second shift",
 };
+const VARIANT_ORDER = ["third_operator_only", "third_operator", "second_shift"];
 
 /**
- * Verified staffing what-ifs (summary.imager_staffing_whatifs, Albert's #88): each variant's checked P50 and band
- * against the checked baseline. The variants change growth location and staffing together, so the card says both
- * changes drive the gain together, never that the imager alone does; staffing is extra people, not free equipment.
+ * Beam-seconds per counted unit at the design's own collection time: the external (synchrotron) step's duration_s
+ * per run, divided by units per run (batch_size × units per labware, e.g. 7 pucks × 16 crystals). Undefined if the
+ * workflow does not say enough to compute it.
  */
-function staffingResult(st: Record<string, any>, perDay: string, n: (v: number) => string): string {
+export function beamSecondsPerUnit(d: Design): number | undefined {
+  const steps = (d.workflow.steps ?? []) as any[];
+  const ext = steps.find((s) => s.mode === "external" && s.duration_s);
+  if (!ext) return undefined;
+  const per = ext.params?.units_per_labware ?? steps.find((s) => s.after?.includes(ext.id))?.params?.units_per_labware;
+  const units = (ext.batch_size ?? 1) * (per ?? 0);
+  return units > 0 ? ext.duration_s / units : undefined;
+}
+
+/**
+ * Verified staffing what-ifs (summary.imager_staffing_whatifs, Albert's #88/#91): each variant's checked P50 and band
+ * against the checked baseline, the control (a third operator with growth still in the hotel) first. Gains are shown
+ * as joint, never credited to the imager alone; staffing is extra people, not free equipment; and each gain assumes
+ * the synchrotron keeps up, with the beam hours it would need at the design's own collection time.
+ */
+function staffingResult(st: Record<string, any>, perDay: string, n: (v: number) => string, beamS?: number): string {
   const base = st.baseline_verified_p50;
-  const rows = Object.entries(st.variants as Record<string, any>).map(([key, v]) => {
-    const gain = base ? Math.round(((v.verified_p50 - base) / base) * 100) : undefined;
+  const keys = Object.keys(st.variants).sort((a, b) => (VARIANT_ORDER.indexOf(a) + 99) % 99 - (VARIANT_ORDER.indexOf(b) + 99) % 99);
+  const rows = keys.map((key) => {
+    const v = st.variants[key];
+    const change = base ? (v.verified_p50 - base) / base : undefined;
+    const noGain = change != null && change < NOISE;
     const band = v.p10 != null && v.p90 != null ? ` <span class="muted">(${n(v.p10)}–${n(v.p90)})</span>` : "";
-    const busiest = (v.operator_utilisation ?? []).reduce((m: number, u: any) => Math.max(m, u.busy_fraction ?? 0), 0);
-    return `<li><b>${esc(VARIANT_LABEL[key] ?? key.replace(/_/g, " "))}</b>: ${esc(n(v.verified_p50))}${perDay} checked${band}${
-      gain != null ? `, ${gain >= 0 ? "+" : ""}${gain}% vs ${esc(n(base))}` : ""}${busiest ? `. Operators still the limit (${Math.round(busiest * 100)}% busy).` : "."}</li>`;
+    const limit = (v.binding_limits ?? [])[0];
+    const limitText = limit?.instances?.[0]?.startsWith("skilled_operator") || limit?.kind === "operator_capacity"
+      ? `Operators still the limit (${Math.round(Math.max(...(v.operator_utilisation ?? []).map((u: any) => u.busy_fraction ?? 0)) * 100)}% busy).`
+      : limit ? `${esc(limit.message)}` : "";
+    const beamH = beamS && !noGain ? (v.verified_p50 * beamS) / 3600 : undefined;
+    const beam = beamH != null ? ` <span class="assume">Assumes the synchrotron keeps up: at ${Math.round(beamS!)} s per crystal this needs about ${Math.round(beamH)} h of beam a day.</span>` : "";
+    return `<li${key === "third_operator_only" ? ' class="control"' : ""}><b>${esc(VARIANT_LABEL[key] ?? key.replace(/_/g, " "))}</b>: ${esc(n(v.verified_p50))}${perDay} checked${band}${
+      change != null ? (noGain ? ", <b>no gain</b> vs " + esc(n(base)) : `, +${Math.round(change * 100)}% vs ${esc(n(base))}`) : ""}. ${limitText}${beam}</li>`;
   }).join("");
+  const iso = st.isolated_effects;
+  const together = st.variants.third_operator?.verified_p50;
+  const neither = st.variants.third_operator_only && together != null
+    ? `<p class="footnote"><b>Neither change alone helps; together they reach ${esc(n(together))}${perDay}.</b> A third operator alone leaves the STX44 as the limit${
+      iso?.move_growth_to_imager_at_three_operators != null ? `; with three operators, moving growth to the imager adds about ${esc(n(iso.move_growth_to_imager_at_three_operators))}${perDay}` : ""}.
+      ${iso?.basis ? esc(iso.basis) : ""} The extra operators are people, not equipment. Shift handoff is not modelled.</p>`
+    : `<p class="footnote">Both changes together drive the gain, so it cannot be credited to either alone. The extra operators are people, not equipment. Shift handoff is not modelled.</p>`;
   return `<div class="check-row"><span>Simulated</span><span>independent check${st.verification_config?.replicates ? `, ${st.verification_config.replicates} replicates` : ""}</span></div>
-    <ul class="variants">${rows}</ul>
-    <p class="footnote">Both changes together drive the gain: growth moves to the imager and staffing increases, so it cannot be credited to either alone.
-      The extra operators are people, not equipment. Shift handoff is not modelled.</p>`;
+    <ul class="variants">${rows}</ul>${neither}`;
 }
