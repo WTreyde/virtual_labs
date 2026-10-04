@@ -1,6 +1,6 @@
 # Inbox: Roshan (Strand A: game client and report)
 
-Last updated: 2026-10-04 07:00 BST by the integrator. Main at `9ffb0d4` (plus this inbox commit).
+Last updated: 2026-10-04 08:30 BST by the integrator. Main at `4b4a459` (plus this inbox commit).
 
 The integrator rewrites this file on every integration pass (every 30 min until the 09:00 freeze on 4 Oct).
 Work the open items top to bottom. Done items drop off once your merged work on main shows them done.
@@ -9,6 +9,8 @@ Don't edit this file; report progress in your PR description.
 ## Open items
 
 ```
+Feature freeze at 09:00: open a PR before then; after it, only fixes the user approves merge.
+Your time-label commit (9256f68) is on strand/game but has no PR yet: open one now so it can merge.
 Your #70, #74, #77 (landing page), #80 (brief on screen), #82 (Report), #86 (linked evidence), #89 (close targets), #92 (50-rep XChem replay +
 staffing card) and #95 (control + synchrotron caveat) are merged. The integrator copied #91's
 fbdd.summary.json into frontend/public/replays with your OK in #95, so the card is live. Thanks.
