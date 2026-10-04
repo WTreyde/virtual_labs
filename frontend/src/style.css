@@ -529,3 +529,21 @@ body.page-view #alerts-btn, body.on-landing #alerts-btn { display: none !importa
 /* Full-page views (e.g. #/market "Why this matters") scroll with the page: no second scroll box inside. */
 body.page-view #modal .answer { max-height: none; overflow: visible; }
 @media (max-width: 900px) { body.page-view #modal .answer figure { margin: 0; } } /* charts use the full phone width */
+
+
+/* Case cards: the title and the go line are the links. */
+.card h2 a { color: inherit; text-decoration: none; } .card h2 a:hover { text-decoration: underline; }
+a.card-go { text-decoration: none; align-self: flex-start; } a.card-go:hover { text-decoration: underline; }
+/* Collapsed, the cards share one height (links aligned at the bottom); once a card is opened, the others keep theirs. */
+.cards { align-items: stretch; } .cards:has(.story-item[open]) { align-items: start; }
+
+/* "What it found" / "Why it matters": the heading is the toggle (styled like the other story headings), text hidden until clicked. */
+.card .story-item { font: 14px/1.5 var(--sys); color: #1d2330; margin-top: 12px; }
+.card .story-item > summary { cursor: pointer; list-style: none; font: 9px "Press Start 2P", monospace; color: #1f4f8f; text-transform: uppercase; }
+.card .story-item > summary::-webkit-details-marker { display: none; }
+.card .story-item > summary::before { content: "▸ "; } .card .story-item[open] > summary::before { content: "▾ "; }
+.card .story-item > summary:hover { text-decoration: underline; }
+.card .story-body { margin-top: 4px; }
+.card .story-body.good { border-left: 4px solid #1a5e33; padding-left: 8px; }
+.card .story-body.bad { border-left: 4px solid #a3271a; padding-left: 8px; }
+.card .story-body.why { background: #fff6d6; border-radius: 6px; padding: 8px 10px; }
