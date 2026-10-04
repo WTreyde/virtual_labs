@@ -1,8 +1,6 @@
 import "@fontsource/press-start-2p";
 import Phaser from "phaser";
-import { benchTasks, catalogItems, catalogNames, chatStream, exampleDesign, health, HttpError, LIVE_CHAT_MESSAGE, leaderboard, liveCatalog, optimise, prioritise, setOffline, validation } from "./api";
-import demoQueue from "../../backend/labforge/catalog/data/demo_prioritise_queue.json";
-import cachedDemoSchedule from "./fixtures/demo_schedule.json";
+import { benchTasks, catalogItems, catalogNames, chatStream, exampleDesign, health, HttpError, LIVE_CHAT_MESSAGE, leaderboard, liveCatalog, optimise, setOffline, validation } from "./api";
 import { galleryDesign } from "./fixtures/gallery";
 import { fixCard } from "./capacity";
 import { verdictsBox } from "./verdicts";
@@ -15,9 +13,10 @@ import { howItWorksHtml } from "./howitworks";
 import { marketHtml } from "./market";
 import { protocolsFor, renderProtocol, renderProtocolList } from "./protocols";
 import { describe, emptyDesign, loadReplay, loadSummary, loadWhatIfCache, playReplay } from "./replay";
+import { loadScheduleCase } from "./schedulecase";
 import { migrateLegacyLinks, parseRoute, routeKey, type Route } from "./router";
 import { clock } from "./timeline";
-import type { ChatMessage, Design, ProjectRequest, ProjectSchedule } from "./types";
+import type { ChatMessage, Design } from "./types";
 import { dialogue, hideStatCard, introLines, onTick, setupClock, showStatCard } from "./ui";
 import { closeModal, openModal, showError, showHtml, showLeaderboard, showLoading, showSchedule, showValidation, showWhatIf } from "./views";
 
@@ -165,7 +164,7 @@ async function go(r: Route) {
   landing.classList.toggle("hidden", !onLanding);
   for (const a of document.querySelectorAll<HTMLAnchorElement>("#topnav a"))
     a.classList.toggle("active", a.dataset.route === routeKey(r));
-  $(".nav-group[data-group=case]").classList.toggle("active", r.page === "case" || r.page === "cases");
+  $(".nav-group[data-group=case]").classList.toggle("active", r.page === "case" || r.page === "cases" || r.page === "schedule");
 
   switch (r.page) {
     case "landing": return renderLanding(landing);
@@ -404,18 +403,10 @@ async function downloadSkill(name: string) {
 // ---- full-page views ----------------------------------------------------------------------------
 
 async function openSchedule() {
-  // Max's demo queue (three projects on one screening cell); offline, a cached /prioritise run of the same queue.
-  const projects = demoQueue.projects as unknown as ProjectRequest[];
-  showLoading("What order should these projects run in?");
-  const extra = await Promise.all(["chem", "fbdd"].map((n) => loadReplay(n).then((x) => x.catalog ?? {}).catch(() => ({}))));
-  const [{ result, cached }, catalog] = await Promise.all([
-    prioritise(projects, demoQueue.lab_id, cachedDemoSchedule.schedule as ProjectSchedule), catalogItems(extra)]);
-  // Instruments by vendor and model, not instance id; a readable catalog id when the catalog doesn't have it.
-  const deviceNames: Record<string, { short: string; full: string }> = {};
-  for (const p of projects) for (const e of p.workflow.equipment) {
-    const it = catalog[e.catalog_id], fallback = e.catalog_id.replace(/_/g, " ");
-    deviceNames[e.instance_id] = it ? { short: it.model, full: `${it.vendor} ${it.model}` } : { short: fallback, full: fallback };
-  }
+  // The scheduling case: Max's demo queue (three projects on one screening cell); offline, a cached /prioritise run.
+  showLoading("Scheduling case: what order should these projects run in?");
+  const { result, projects, cached, deviceNames } = await loadScheduleCase();
+  if (route.page !== "schedule") return;
   showSchedule(result, projects, cached, deviceNames);
 }
 /** #/protocols (list) and #/protocols/<id> (detail), static files from public/protocols/. */

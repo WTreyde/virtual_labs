@@ -104,7 +104,7 @@ function tile(label: string, before: string, after: string, good: boolean) {
 const PROJECT_NAME: Record<string, string> = {
   enzyme_campaign: "Enzyme campaign", chem_library_screen: "Chemistry library screen", urgent_retest: "Urgent hit re-test",
 };
-const projectName = (id: string) => PROJECT_NAME[id] ?? id.replace(/_/g, " ");
+export const projectName = (id: string) => PROJECT_NAME[id] ?? id.replace(/_/g, " ");
 
 /**
  * The Schedule tab: which order to run several projects through one existing lab. It states the question and the
@@ -208,12 +208,12 @@ export function showSchedule(s: ProjectSchedule, projects: ProjectRequest[], cac
        the recommended order finished first in ${m[8]}% of them.`
     : s.caveat ? esc(s.caveat) : "";
 
-  openModal("What order should these projects run in?", `
+  openModal("Scheduling case: what order should these projects run in?", `
     <div class="sched-qa">
       <p class="sched-q"><span class="qa-tag">The question</span>${esc(question)}</p>
       <p class="sched-a"><span class="qa-tag">The answer</span>${answer}${cached ? " <i class=\"muted\">(cached run; backend offline)</i>" : ""}</p>
-      <p class="muted">A separate planning example, not one of the case studies: it plans work through a lab that already exists.
-        The chemistry library screen here is the screening stage of a library like the chemistry case.</p>
+      <p class="muted">Case study: getting more out of a lab that already exists, with no new equipment. Unlike the two design cases this is not a
+        recorded agent run: LabForge's scheduler simulates every running order.</p>
     </div>
     <div class="tiles">${tiles}</div>
     <h3>Recommended schedule</h3>${legend}${gantt}${busy}${table}

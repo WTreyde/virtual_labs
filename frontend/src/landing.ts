@@ -1,5 +1,7 @@
 import { health, LIVE_CHAT_MESSAGE } from "./api";
 import { loadReplay, loadSummary, type RecordedRun } from "./replay";
+import { loadScheduleCase, type ScheduleCase } from "./schedulecase";
+import { projectName } from "./views";
 import { startTwinHero, twinHero } from "./twin";
 import type { CaseSummary } from "./types";
 
@@ -85,7 +87,7 @@ export function renderLanding(el: HTMLElement) {
         and tells you which of its own numbers it doesn't trust.</p>
       <div class="big-buttons">
         <a class="big-btn own" href="#/design"><span class="big-label">Design your own lab</span><span class="big-sub">Chat with the agent about your brief</span></a>
-        <a class="big-btn" href="#/cases"><span class="big-label">Case studies</span><span class="big-sub">Two recorded agent runs, with what we checked</span></a>
+        <a class="big-btn" href="#/cases"><span class="big-label">Case studies</span><span class="big-sub">Two lab designs and a scheduling plan, with what we checked</span></a>
       </div>
     </div>
     ${twinHero()}`;
@@ -150,18 +152,65 @@ export function caseStory(run: RecordedRun, s: CaseSummary, problem?: string): s
 }
 const perDay_ = (u: string) => (unitOf(u).endsWith("per day") ? "/day" : ` ${unitOf(u)}`);
 
+/** The scheduling case title, in the same "topic: detail" style as the design cases. */
+export const SCHEDULE_CASE_TITLE = "Shared screening cell: three projects, one urgent deadline, best running order";
+
+/**
+ * The scheduling case card, in the same four parts as the design cases, from the queue and the /prioritise result:
+ * the ask, what LabForge did, what it found and why it matters. Nothing is hard-coded.
+ */
+export function scheduleStory({ projects, result: s }: ScheduleCase): string {
+  const given = projects.map((p) => p.id);
+  const rec = s.candidates.find((c) => c.policy === s.recommended) ?? s.candidates[0];
+  const naive = s.candidates.find((c) => c.order?.join(">") === given.join(">"));
+  const instruments = new Set(projects.flatMap((p) => p.workflow.equipment.map((e) => e.instance_id))).size;
+  const list = (xs: string[]) => (xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs.at(-1)}`);
+  const due = projects.filter((p) => p.deadline_h != null);
+  const asked = list(projects.map((p) => `${projectName(p.id).toLowerCase()} (${p.units} plates${p.deadline_h != null ? `, due within ${fmt(p.deadline_h)} h` : ""})`));
+  const ask = `A screening team shares one existing cell, with ${instruments} instruments, between ${projects.length} projects: ${esc(asked)}.
+    In what order should they run so ${due.length ? "the urgent work meets its deadline and " : ""}everything finishes soonest?`;
+  const nOrders = s.candidates.filter((c) => c.order).length, nMixed = s.candidates.length - nOrders;
+  const mc = s.caveat?.match(/\((\d+) replicates\)/)?.[1];
+  const did = `Simulated <b>every running order</b> (${nOrders}${nMixed ? `, plus ${nMixed} mixed schedule${nMixed === 1 ? "" : "s"}` : ""}) on the cell's instruments,
+    picked the one that meets deadlines first and finishes soonest${mc ? `, then re-checked it over ${mc} random variations of the step times` : ""}.`;
+  const fin = rec.project_finish_h ?? {}, firstDue = (rec.order ?? []).map((id) => projects.find((p) => p.id === id)).find((p) => p?.deadline_h != null);
+  const orderText = (rec.order ?? []).map(projectName).join(" → ");
+  const missedBefore = naive?.deadline_misses?.length ?? 0, missedAfter = rec.deadline_misses?.length ?? 0;
+  const saved = naive ? naive.makespan_h - rec.makespan_h : 0;
+  const found = `<b>Best order: ${esc(orderText)}.</b> Everything is done in ${fmt(rec.makespan_h)} h${naive ? ` instead of ${fmt(naive.makespan_h)} h in the order listed` : ""}${
+    firstDue && fin[firstDue.id] != null ? `, and the ${esc(projectName(firstDue.id).toLowerCase())} finishes at ${fmt(fin[firstDue.id])} h (deadline ${fmt(firstDue.deadline_h!)} h)` : ""}.${
+    missedBefore > missedAfter ? ` The order listed misses ${missedBefore} deadline${missedBefore === 1 ? "" : "s"}.` : ""}`;
+  const why = saved > 0.05
+    ? `The same lab gets about <b>${fmt(saved)} h</b> back and ${missedAfter === 0 ? "keeps every deadline" : "misses fewer deadlines"} with <b>no new equipment</b>: only the running order changes.`
+    : `Shows that the order listed is already close to best, so time would be better spent elsewhere.`;
+  return `<dl class="story">
+      <dt>The ask</dt><dd>${ask}</dd>
+      <dt>What LabForge did</dt><dd>${did}</dd>
+      <dt>What it found</dt><dd class="${missedAfter === 0 ? "good" : "bad"}">${found}</dd>
+      <dt>Why it matters</dt><dd class="why">${why}</dd>
+    </dl>`;
+}
+
 export async function renderCases(el: HTMLElement) {
   el.innerHTML = `
     <div class="landing-inner">
       <h1 class="cases-title">Case studies</h1>
-      <p class="pitch small">Two lab-design requests modelled on real drug-discovery pipelines, answered by the LabForge agent and replayed here.
-        Each card says what was asked, what LabForge did and what it found, with the key numbers independently checked.</p>
+      <p class="pitch small">Three case studies modelled on real drug-discovery work: two lab designs answered by the LabForge agent and replayed here,
+        and a plan for running projects through a lab that already exists. Each card says what was asked, what LabForge did and what it found.</p>
       <div class="cards">
         ${CASES.map((c) => `<a class="card frame-card" href="#/case/${c.name}" data-case="${c.name}">
           <div class="card-kicker">Case study · recorded agent run</div>
           <h2>${esc(c.title)}</h2><div class="card-sub muted">Loading…</div><div class="card-go">Watch the replay ▸</div></a>`).join("")}
+        <a class="card frame-card" href="#/case/schedule" data-case="schedule">
+          <div class="card-kicker">Case study · scheduling run</div>
+          <h2>${esc(SCHEDULE_CASE_TITLE)}</h2><div class="card-sub muted">Loading…</div><div class="card-go">Open the schedule ▸</div></a>
       </div>
     </div>`;
+  loadScheduleCase().then((sc) => {
+    const sub = el.querySelector<HTMLElement>('[data-case="schedule"] .card-sub')!;
+    sub.classList.remove("muted");
+    sub.innerHTML = scheduleStory(sc);
+  }).catch((e) => { el.querySelector('[data-case="schedule"] .card-sub')!.textContent = (e as Error).message; });
   await Promise.all(CASES.map(async (c) => {
     const sub = el.querySelector<HTMLElement>(`[data-case="${c.name}"] .card-sub`)!;
     try {
