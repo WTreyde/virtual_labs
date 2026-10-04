@@ -253,3 +253,4 @@ body.page-view #modal table.bench thead th { top: 46px; }
 .card-sub .ok, #checked .ok { color: #1a5e33; }
 .badge { font-size: 9px; } #verdicts .v-status { font-size: 9px; } #fix .fix-show, #statcard .whatif, #whatif-btn, #skill-btn { font-size: 10px; }
 #dialogue .caret { color: #a3271a; }
+#log .st.declined { color: #7a5200; } #log .log-note.declined { color: #7a5200; font-weight: 600; }

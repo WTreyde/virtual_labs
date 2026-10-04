@@ -65,7 +65,7 @@ function show(d: Design) {
 
 /** One log entry per line, scrolled to the newest. */
 const agentLog = new AgentLog(log);
-function appendLog(line: string, kind: "user" | "agent" | "notice" = "notice") {
+function appendLog(line: string, kind: "user" | "agent" | "notice" | "declined" = "notice") {
   agentLog.note(line, kind);
   log.scrollTop = log.scrollHeight;
 }
@@ -225,6 +225,13 @@ $<HTMLFormElement>("#chat-form").addEventListener("submit", async (e) => {
     });
     if (route !== started) return;
     history = out.history;
+    if (out.declined) {
+      // A refusal is the model's answer, not a failure: say so plainly and keep the lab on screen as it was.
+      agentLog.declineLast();
+      appendLog(`The model declined this request. ${out.declined}`, "declined");
+      dialogue.say(["The model declined this request.", out.declined]);
+      return;
+    }
     appendLog(`Agent: ${out.reply}`, "agent");
     show(out.design);
     hideStatCard();

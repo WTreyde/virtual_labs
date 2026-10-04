@@ -32,10 +32,24 @@ export function exampleDesign(): Design {
   return d;
 }
 
-type ChatOut = { reply: string; design: Design; history: ChatMessage[] };
+/** `declined`: set when the model declined the request (a refusal), with the message to show; not an error. */
+type ChatOut = { reply: string; design: Design; history: ChatMessage[]; declined?: string };
+
+/**
+ * A provider refusal ends the turn with status "declined_by_model" and a message (Albert); older backends only
+ * report stop_reason "refusal". Returns the message to show, or undefined when the model did not decline.
+ */
+export function declineMessage(out: any): string | undefined {
+  if (out?.status !== "declined_by_model" && out?.stop_reason !== "refusal") return undefined;
+  const reply = typeof out.messages?.at(-1)?.content === "string" ? out.messages.at(-1).content : "";
+  return String(out.message ?? out.decline_message ?? reply ?? "").trim() || "No reason was given.";
+}
 
 /** Turn a /chat result (or the stream's final `result.output`) into the client's design and history. */
 async function chatResult(out: any, messages: ChatMessage[], current: Design): Promise<ChatOut> {
+  const declined = declineMessage(out);
+  if (declined) // keep the current scene; a refusal is not a design and not an error
+    return { reply: declined, design: current, history: out.history ?? messages, declined };
   const catalog = byId(await (await apiFetch("/catalog")).json());
   const design = out.layout ? { lab_spec: out.lab_spec, workflow: out.workflow, layout: out.layout, sim_result: out.sim_result, catalog, report_markdown: out.report_markdown } : current;
   const reply = out.messages?.at(-1)?.content ?? "";
