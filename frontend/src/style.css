@@ -526,4 +526,6 @@ a.card-go { text-decoration: none; align-self: flex-start; } a.card-go:hover { t
 .card .story-more > summary::-webkit-details-marker { display: none; }
 .card .story-more > summary::before { content: "▸ "; } .card .story-more[open] > summary::before { content: "▾ "; }
 .card .story-more > .story { margin-top: 8px; }
-.cards { align-items: start; } /* opening one card must not stretch its neighbours */
+/* Collapsed, the cards share one height (links aligned at the bottom); once a card is opened, the others keep theirs. */
+.cards { align-items: stretch; } .cards:has(.story-more[open]) { align-items: start; }
+.card .story-more { margin-top: auto; }

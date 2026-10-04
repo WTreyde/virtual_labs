@@ -184,8 +184,8 @@ export function scheduleStory({ projects, result: s }: ScheduleCase): string {
     In what order should they run so ${due.length ? "the urgent work meets its deadline and " : ""}everything finishes soonest?`;
   const nOrders = s.candidates.filter((c) => c.order).length, nMixed = s.candidates.length - nOrders;
   const mc = s.caveat?.match(/\((\d+) replicates\)/)?.[1];
-  const did = `Simulated <b>every running order</b> (${nOrders}${nMixed ? `, plus ${nMixed} mixed schedule${nMixed === 1 ? "" : "s"}` : ""}) on the cell's instruments,
-    picked the one that meets deadlines first and finishes soonest${mc ? `, then re-checked it over ${mc} random variations of the step times` : ""}.`;
+  const did = `Simulated <b>all ${nOrders + nMixed} running orders</b> on the cell's instruments, picked the best for deadlines and finish time${
+    mc ? `, and re-checked it over ${mc} random variations of step times` : ""}.`;
   const fin = rec.project_finish_h ?? {}, firstDue = (rec.order ?? []).map((id) => projects.find((p) => p.id === id)).find((p) => p?.deadline_h != null);
   const orderText = (rec.order ?? []).map(projectName).join(" → ");
   const missedBefore = naive?.deadline_misses?.length ?? 0, missedAfter = rec.deadline_misses?.length ?? 0;
