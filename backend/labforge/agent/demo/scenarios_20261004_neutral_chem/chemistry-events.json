@@ -1,0 +1,1 @@
+[{"type": "model_call", "event_id": "model-step-1", "name": "claude-opus-5-5", "step": 1, "model": "claude-opus-5-5", "started_at": "2026-10-04T00:14:05.055Z", "status": "running", "summary": "Started planning step 1."}]
