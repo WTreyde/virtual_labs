@@ -374,8 +374,16 @@ async function openSchedule() {
   // Max's demo queue (three projects on one screening cell); offline, a cached /prioritise run of the same queue.
   const projects = demoQueue.projects as unknown as ProjectRequest[];
   showLoading("What order should these projects run in?");
-  const { result, cached } = await prioritise(projects, demoQueue.lab_id, cachedDemoSchedule.schedule as ProjectSchedule);
-  showSchedule(result, projects, cached);
+  const extra = await Promise.all(["chem", "fbdd"].map((n) => loadReplay(n).then((x) => x.catalog ?? {}).catch(() => ({}))));
+  const [{ result, cached }, catalog] = await Promise.all([
+    prioritise(projects, demoQueue.lab_id, cachedDemoSchedule.schedule as ProjectSchedule), catalogItems(extra)]);
+  // Instruments by vendor and model, not instance id; a readable catalog id when the catalog doesn't have it.
+  const deviceNames: Record<string, { short: string; full: string }> = {};
+  for (const p of projects) for (const e of p.workflow.equipment) {
+    const it = catalog[e.catalog_id], fallback = e.catalog_id.replace(/_/g, " ");
+    deviceNames[e.instance_id] = it ? { short: it.model, full: `${it.vendor} ${it.model}` } : { short: fallback, full: fallback };
+  }
+  showSchedule(result, projects, cached, deviceNames);
 }
 /** #/protocols (list) and #/protocols/<id> (detail), static files from public/protocols/. */
 async function openProtocols(id?: string) {
