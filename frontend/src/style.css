@@ -261,3 +261,5 @@ body.page-view #modal table.bench thead th { top: 46px; }
 #topnav .brand .logo-mark { background: #ffd23f; border-radius: 6px; padding: 2px; box-shadow: 0 0 0 2px #1b1f24, 0 3px 0 #000a; }
 #topnav .brand .logo-word { color: #ffd23f; font-size: 16px; letter-spacing: 1px; text-shadow: 2px 2px 0 #000; }
 #topnav .brand.active { background: transparent; }
+#fix .footnote { font: 12px/1.45 var(--sys); color: var(--muted); margin: 6px 0 0; }
+#fix { border-color: #2b2f36; background: #fbfbf5; } /* neutral: a what-if, not a recommended fix */

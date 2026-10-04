@@ -1,7 +1,7 @@
 import type { CaseSummary, CatalogItem, Design } from "./types";
 
 /**
- * Strand A: storage capacity facts read from a design, for the stat card and "The fix" card. Nothing is
+ * Strand A: storage capacity facts read from a design, for the stat card and the idle-capacity card. Nothing is
  * hard-coded: an instrument "stores plates" if it lists a storage capability, its slots come from the catalog
  * (storage_slots, else process.capacity), and busy fractions come from the simulation's utilisation.
  */
@@ -40,23 +40,38 @@ export function idleCapacityFix(d: Design) {
 
 const esc = (s: unknown) => String(s ?? "").replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 
-/** "The fix" card for a case page, or "" when the design has no idle-capacity fix. */
+/**
+ * The idle-capacity card for a case page, or "" when the design has no such pair. It is never called "the fix": the
+ * what-if result (summary.imager_growth_whatif) is compared verified-with-verified against the case's own checked
+ * baseline, a change within NOISE counts as no gain, and the planning number is only a footnote.
+ */
+const NOISE = 0.05; // ±5% between two independent checks is within simulation noise (assumption, estimated)
+
 export function fixCard(d: Design, summary?: CaseSummary): string {
   const fix = idleCapacityFix(d);
   if (!fix) return "";
   const { busiest: b, alt: a } = fix;
   const w = summary?.imager_growth_whatif as Record<string, any> | undefined;
   const unit = String(w?.unit ?? summary?.headline_throughput.unit ?? "").replace(/_/g, " ");
-  const planned = w?.planned_p50 ?? w?.p50 ?? w?.headline_throughput?.p50;
-  const verified = w?.verified_p50 ?? w?.headline_throughput?.verified_p50;
+  const perDay = unit.endsWith("per day") ? "/day" : ` ${unit}`;
   const n = (v: number) => (Math.abs(v) >= 100 ? Math.round(v).toLocaleString() : String(+(+v).toFixed(1)));
-  const result = planned != null || verified != null
-    ? `<div class="check-row"><span>Simulated</span><span>${planned != null ? `${esc(n(planned))} planned` : ""}${planned != null && verified != null ? " · " : ""}${verified != null ? `${esc(n(verified))} checked` : ""}${unit ? ` ${esc(unit)}` : ""}</span></div>`
-    : `<div class="check-row"><span>Simulated</span><span class="muted">not yet simulated</span></div>`;
-  return `<b>The fix</b>
+  const base = summary?.headline_throughput.verified_p50, after = w?.verified_p50, planned = w?.planned_p50 ?? w?.p50;
+  let result: string;
+  if (w && base != null && after != null) {
+    const change = (after - base) / base;
+    const verdict = Math.abs(change) < NOISE ? "No throughput gain" : change > 0 ? `${Math.round(change * 100)}% more throughput` : `${Math.round(-change * 100)}% less throughput`;
+    const nb = w.bottleneck;
+    const next = nb ? `${nb.kind === "operator" ? "operators" : esc(nb.instance_id)}${nb.busy_fraction != null ? `, ${Math.round(nb.busy_fraction * 100)}% busy` : ""}` : "";
+    result = `<div class="check-row"><span>Simulated</span><span><b>${verdict}</b> (${esc(n(base))} → ${esc(n(after))}${perDay} checked)</span></div>
+      ${next ? `<div class="check-row"><span>Next limit</span><span>${next}${nb?.instance_id ? ` <span class="muted">(${esc(nb.instance_id)})</span>` : ""}</span></div>` : ""}
+      ${planned != null ? `<p class="footnote">The planning simulation alone said ${esc(n(planned))}${perDay}; the independent check does not confirm it.</p>` : ""}`;
+  } else {
+    result = `<div class="check-row"><span>Simulated</span><span class="muted">not yet simulated</span></div>`;
+  }
+  return `<b>Idle capacity: what if?</b>
     <p>The planner grows plates in the <b>${esc(b.model)}</b> (${esc(b.id)}): ${pct(b.busy)} busy, ${esc(slotsText(b.slots))}.
       The <b>${esc(a.model)}</b> (${esc(a.id)}) is already in the lab at ${pct(a.busy)} busy with ${esc(slotsText(a.slots))}.
-      Grow the plates there instead.</p>
+      Growing plates there instead needs no extra equipment.</p>
     <div class="check-row"><span>Extra equipment</span><span>$0 (already in the design)</span></div>
     ${result}
     <button class="fix-show" data-id="${esc(a.id)}">Show the ${esc(a.model)}</button>`;
