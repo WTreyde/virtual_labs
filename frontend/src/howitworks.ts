@@ -164,7 +164,7 @@ function diagram(): string {
 
   return `<div class="hw-diagram-frame"><svg class="hw-svg" viewBox="0 0 1200 920" role="img" aria-labelledby="hw-diagram-title hw-diagram-desc">
     <title id="hw-diagram-title">LabForge system architecture</title>
-    <desc id="hw-diagram-desc">A plain-English lab brief goes to a Claude planner agent. The agent calls Amass-backed evidence search, catalogue search, layout, and Modal-backed simulation tools. An independent verifier recomputes its claims before producing a checked design.</desc>
+    <desc id="hw-diagram-desc">A plain-English lab brief goes to a Claude planner agent. The agent calls Amass-backed evidence search, catalogue search, layout, and simulation tools (Modal is an optional backend for Monte Carlo replicates; the recorded runs used local compute). An independent verifier recomputes its claims before producing a checked design.</desc>
     <defs>
       <marker id="hw-arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="context-stroke"/></marker>
     </defs>
