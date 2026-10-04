@@ -71,6 +71,8 @@ def _elapsed_ms(started: float) -> int:
 
 def offline_turn() -> dict:
     return {
+        "status": "offline_demo",
+        "message": "Live model access is unavailable; showing the offline worked example.",
         "messages": [{"role": "assistant", "content": "(offline demo) Here is the enzyme screening lab from the worked example."}],
         "lab_spec": load_example("lab_spec"),
         "workflow": load_example("workflow"),
@@ -201,9 +203,20 @@ def run_turn(history: list[dict], max_steps: int = 12, on_event=None, stream_tex
             break
 
     text = "".join(b.get("text", "") for b in messages[-1]["content"] if b.get("type") == "text") if messages[-1]["role"] == "assistant" else ""
+    if stop_reason == 'refusal':
+        status = 'declined_by_model'
+        status_message = 'The model declined this request; no completed live design was produced.'
+    elif stop_reason == 'backend_contract_error':
+        status = 'blocked_by_backend'
+        status_message = 'A backend output failed its contract; the integrator must repair it before retrying.'
+    elif completed:
+        status = 'completed'
+        status_message = 'The model completed this turn.'
+    else:
+        status = 'incomplete'
+        status_message = 'The response or tool-call limit was reached before planning completed.'
     if not completed:
-        reason = 'a backend output broke a shared contract; the integrator must repair it before retrying' if stop_reason == 'backend_contract_error' else 'the API declined the request' if stop_reason == 'refusal' else 'the response or tool-call limit was reached'
-        text += f"\nPlanning is incomplete: {reason}. Any returned design is provisional."
+        text += f"\nPlanning is incomplete. {status_message} Any returned design is provisional."
     if session.design is not None:
         produced.update(session.design)
         produced['claims'] = session.claims
@@ -224,5 +237,6 @@ def run_turn(history: list[dict], max_steps: int = 12, on_event=None, stream_tex
         produced['project_schedule'] = session.project_schedule
     if session.claim_history:
         produced['claim_history'] = session.claim_history
-    return {"messages": [{"role": "assistant", "content": text.strip()}],
+    return {"status": status, "message": status_message,
+            "messages": [{"role": "assistant", "content": text.strip()}],
             "history": messages, "completed": completed, "stop_reason": stop_reason, **produced}

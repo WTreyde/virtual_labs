@@ -29,7 +29,8 @@ async def stream_turn(history: list[dict]):
     def worker():
         try:
             result = run_turn(history, on_event=put, stream_text=True)
-            put({'type': 'result', 'output': result})
+            put({'type': 'result', 'status': result.get('status'),
+                 'message': result.get('message'), 'output': result})
         except Disconnected:
             pass
         except Exception as exc:
