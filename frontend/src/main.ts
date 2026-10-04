@@ -60,19 +60,19 @@ game.events.on("select", (sel: { id: string; sprite?: string } | null) => {
   showStatCard(design, sel.id, sel.sprite);
 });
 
-// ---- side panel accordion: the brief and the throughput share the top of the panel ------------------
+// ---- side panel accordion: every section folds, and only one is open at a time ----------------------
 
-type Acc = "brief" | "metrics";
-/** Open one section and fold the other; `null` folds both. */
-function openAcc(which: Acc | null) {
-  for (const k of ["brief", "metrics"] as Acc[]) {
-    const sec = $(`#${k}-acc`), on = k === which;
+const accs = [...document.querySelectorAll<HTMLElement>("#panel .acc")];
+/** Open one section (by its body id, e.g. "brief", "metrics", "log") and fold all the others; `null` folds all. */
+function openAcc(which: string | null) {
+  for (const sec of accs) {
+    const on = sec.id === `${which}-acc`;
     sec.classList.toggle("open", on);
     sec.querySelector(".acc-head")!.setAttribute("aria-expanded", String(on));
   }
 }
-for (const k of ["brief", "metrics"] as Acc[])
-  $(`#${k}-acc .acc-head`).addEventListener("click", () => openAcc($(`#${k}-acc`).classList.contains("open") ? null : k));
+for (const sec of accs)
+  sec.querySelector(".acc-head")!.addEventListener("click", () => openAcc(sec.classList.contains("open") ? null : sec.id.replace(/-acc$/, "")));
 
 // ---- top nav: "Menu" dropdown on phones, "Case studies" dropdown everywhere -------------------------
 
@@ -270,6 +270,7 @@ $<HTMLFormElement>("#chat-form").addEventListener("submit", async (e) => {
   const input = $<HTMLInputElement>("#chat-input"), started = route;
   history.push({ role: "user", content: input.value });
   appendLog(`You: ${input.value}`, "user");
+  openAcc("log"); // follow the agent's steps while it works
   input.value = "";
   try {
     // Stream the agent's steps into the log and dialogue box as they happen.

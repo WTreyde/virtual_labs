@@ -346,6 +346,13 @@ body.page-view #statcard .whatif { display: none; } /* no simulated design behin
 #panel .acc-head .acc-peek { font: 600 12px var(--sys); color: inherit; opacity: 0.85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 55%; }
 #panel .acc.open .acc-peek { display: none; }
 #panel .acc-head:focus-visible { outline: 3px solid #1f5fae; outline-offset: -3px; }
+/* A section is shown only while its content is: hidden or empty bodies take their header with them. */
+#panel .acc:has(> .acc-body.hidden), #panel #log-acc:has(> #log:empty) { display: none; }
+/* The sections were framed boxes of their own; inside the accordion the frame is the section's. */
+#panel .acc > .acc-body { border: none; border-radius: 0; background: transparent; padding: 8px 10px 10px; }
+#panel .acc > .acc-body > b:first-child { display: none; } /* the header already names the section */
+#panel .acc > #log { min-height: 0; max-height: 55vh; overflow-y: auto; }
+#chat { flex: none; min-height: 0; }
 
 /* ---- Top nav: page links, "Case studies" dropdown, "Menu" button on phones. ---- */
 #nav-links { display: flex; gap: 4px; align-items: center; }

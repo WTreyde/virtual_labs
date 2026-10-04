@@ -59,22 +59,41 @@
       <div id="dialogue" class="frame hidden"><div class="speaker">LABFORGE</div><div class="text"></div><span class="caret">▼</span></div>
     </div>
     <aside id="panel">
-      <!-- Brief and Throughput share the top of the panel: open one and the other folds away. -->
+      <!-- Every panel section folds; opening one folds the others (main.ts openAcc). A section whose body is
+           .hidden hides with it. -->
       <section id="brief-acc" class="acc hidden">
-        <button type="button" class="acc-head" aria-expanded="true" aria-controls="brief"><span>The brief</span><span class="chev" aria-hidden="true">▾</span></button>
+        <button type="button" class="acc-head" aria-expanded="false" aria-controls="brief"><span>The brief</span><span class="chev" aria-hidden="true">▾</span></button>
         <div id="brief" class="acc-body" aria-label="Case brief"></div>
       </section>
       <section id="metrics-acc" class="acc open">
         <button type="button" class="acc-head" aria-expanded="true" aria-controls="metrics"><span>Throughput</span><span class="acc-peek"></span><span class="chev" aria-hidden="true">▾</span></button>
         <div id="metrics" class="acc-body"></div>
       </section>
-      <section id="checked" class="hidden"></section>
-      <section id="fix" class="hidden"></section>
-      <section id="verdicts" class="hidden"></section>
-      <section id="bom"></section>
-      <section id="protocols-for" class="hidden"></section>
+      <section id="checked-acc" class="acc">
+        <button type="button" class="acc-head" aria-expanded="false" aria-controls="checked"><span>What we checked</span><span class="chev" aria-hidden="true">▾</span></button>
+        <div id="checked" class="acc-body hidden"></div>
+      </section>
+      <section id="fix-acc" class="acc">
+        <button type="button" class="acc-head" aria-expanded="false" aria-controls="fix"><span>Idle capacity: what if?</span><span class="chev" aria-hidden="true">▾</span></button>
+        <div id="fix" class="acc-body hidden"></div>
+      </section>
+      <section id="verdicts-acc" class="acc">
+        <button type="button" class="acc-head" aria-expanded="false" aria-controls="verdicts"><span>Verifier verdicts</span><span class="chev" aria-hidden="true">▾</span></button>
+        <div id="verdicts" class="acc-body hidden"></div>
+      </section>
+      <section id="bom-acc" class="acc">
+        <button type="button" class="acc-head" aria-expanded="false" aria-controls="bom"><span>Bill of materials</span><span class="chev" aria-hidden="true">▾</span></button>
+        <div id="bom" class="acc-body"></div>
+      </section>
+      <section id="protocols-for-acc" class="acc">
+        <button type="button" class="acc-head" aria-expanded="false" aria-controls="protocols-for"><span>Protocols for this lab</span><span class="chev" aria-hidden="true">▾</span></button>
+        <div id="protocols-for" class="acc-body hidden"></div>
+      </section>
+      <section id="log-acc" class="acc">
+        <button type="button" class="acc-head" aria-expanded="false" aria-controls="log"><span>Agent log</span><span class="chev" aria-hidden="true">▾</span></button>
+        <div id="log" class="acc-body"></div>
+      </section>
       <section id="chat">
-        <div id="log"></div>
         <form id="chat-form"><input id="chat-input" placeholder="Describe your lab..." /><button>Send</button></form>
       </section>
       <button id="whatif-btn" class="hidden"></button>
