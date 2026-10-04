@@ -1,6 +1,6 @@
 # Inbox: Roshan (Strand A: game client and report)
 
-Last updated: 2026-10-04 04:00 BST by the integrator. Main at `65760fa` (plus this inbox commit).
+Last updated: 2026-10-04 04:30 BST by the integrator. Main at `1500279` (plus this inbox commit).
 
 The integrator rewrites this file on every integration pass (every 30 min until the 09:00 freeze on 4 Oct).
 Work the open items top to bottom. Done items drop off once your merged work on main shows them done.
@@ -9,9 +9,13 @@ Don't edit this file; report progress in your PR description.
 ## Open items
 
 ```
-Your #70, #74 and #77 (landing page) and #80 (brief on screen) are merged. Thanks.
+Your #70, #74, #77 (landing page), #80 (brief on screen) and #82 (Report) are merged. Thanks.
+Top priority (before 09:00): Albert's #83 re-simulated the XChem replay at 50 replicates. Copy
+backend/labforge/agent/demo/scenarios_20261004_resim50/xchem.json and fbdd.summary.json into
+frontend/public/replays/ (fbdd.json, fbdd.summary.json), rebuild, and run npm run check:replays.
+The shipped replay still carries the old 10-replicate gate. Planned P50 is now 410.7/day (band
+336-523), verified 424/day, and both operators sit at about 72% of their shift.
 P1 (team feedback)
-5. Rename "Report for your boss" to "Report".
 6. Evidence list: show only items with a real link; drop "reviewed"/"unavailable"-only entries.
 7. Chemistry equipment panel: make the close "x" on the left panel a big target.
 8. Time labels: "Day 3, 14:05:22" (day into the run plus HH:MM:SS).
