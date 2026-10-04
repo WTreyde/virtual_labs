@@ -1,6 +1,6 @@
 # Inbox: Roshan (Strand A: game client and report)
 
-Last updated: 2026-10-04 02:00 BST by the integrator. Main at `53fbd2a` (plus this inbox commit).
+Last updated: 2026-10-04 02:30 BST by the integrator. Main at `5b2141f` (plus this inbox commit).
 
 The integrator rewrites this file on every integration pass (every 30 min until the 09:00 freeze on 4 Oct).
 Work the open items top to bottom. Done items drop off once your merged work on main shows them done.
@@ -9,9 +9,14 @@ Don't edit this file; report progress in your PR description.
 ## Open items
 
 ```
-Your #68 (declined requests shown in the chat and log) is merged; it matches Albert's #67 fields.
+Your #70 (logo) is merged.
+P0 (new): XChem "The fix" card must be honest about the what-if (Albert's #71).
+0. fbdd.summary.json imager_growth_whatif now says: planned P50 560, verified P50 411 crystals/day,
+   bottleneck "both skilled operators, 97%". The baseline is 424 verified. So growing in the imager
+   gives no checked gain (411 vs 424, within noise); operators become the limit. Show it that way,
+   e.g. "Simulated: no throughput gain (424 -> 411/day checked); next limit: operators 97%", and
+   compare verified with verified. Don't headline the 560 planned figure, and don't call it a fix.
 P1 (team feedback)
-2. LabForge logo at the top in a bright, highly visible colour.
 3. Landing page: two buttons only, "Design your own lab" and "Case studies".
 4. Case pages: keep the case's problem statement on screen.
 5. Rename "Report for your boss" to "Report".
