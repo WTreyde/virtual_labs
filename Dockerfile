@@ -8,6 +8,7 @@ COPY frontend/package.json frontend/package-lock.json frontend/
 RUN cd frontend && npm ci
 COPY examples examples
 COPY schemas schemas
+COPY backend/labforge/catalog/data backend/labforge/catalog/data
 COPY frontend frontend
 RUN cd frontend && VITE_API= npx vite build
 
