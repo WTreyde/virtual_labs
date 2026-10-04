@@ -3,7 +3,7 @@ import { report } from "./api";
 import type { Design } from "./types";
 
 /**
- * Strand A: "Report for your boss". Renders the /report Markdown as a printable page with a snapshot of
+ * Strand A: the "Report" button. Renders the /report Markdown as a printable page with a snapshot of
  * the lab scene; the browser's print dialog saves it as PDF. Works offline with a clearly labelled draft.
  */
 
