@@ -178,7 +178,7 @@ function diagram(): string {
  * the three tools, then the checked design contract as a vertical checklist. Shown below 760px (style.css).
  */
 function diagramTall(): string {
-  const W = 380, X = 22, PW = 320, M = "hw-arrowhead-tall", s: string[] = [];
+  const W = 388, X = 46, PW = 306, M = "hw-arrowhead-tall", s: string[] = [];
   const cx = X + PW / 2;
   const lines = (text: string, width: number) => wrap(text, width).length;
   // Panel height from its wrapped body (as panel() lays it out), plus room for a row of pills.
@@ -195,7 +195,7 @@ function diagramTall(): string {
   const sub = "The model plans; evidence and simulation test the design; an independent verifier checks the claims.";
   s.push(multiline(16, y, sub, 300, "hw-subtitle", 20));
   y += lines(sub, 300) * 20 + 10;
-  s.push(huggingFaceBadge(40, y));
+  s.push(huggingFaceBadge((W - 300) / 2, y));
   y += 100;
 
   const brief = "Target, room, budget, shifts and scientific constraints.";
@@ -210,30 +210,40 @@ function diagramTall(): string {
   const hPlan = panelH(plan, true), planTop = y;
   s.push(panel(X, y, PW, hPlan, "Planner agent", plan, C.agent, "backend/labforge/agent/planner.py — the Claude tool-use loop.", "REASONING LOOP"));
   s.push(claudeBadge(X + PW - 164, y + 14));
-  pillRow(y + hPlan - 46, [["LabSpec", 84], ["Workflow", 96], ["Claims", 80]], C.agent);
+  pillRow(y + hPlan - 46, [["LabSpec", 76], ["Workflow", 88], ["Claims", 70]], C.agent);
   y += hPlan;
-  const planMid = planTop + hPlan / 2;
-  s.push(arrow(`M${cx} ${y}V${y + 52}`, C.agent, "evidence · simulate · claims", cx + 10, y + 30, false, M));
-  y += 56;
+  const planMid = planTop + hPlan / 2, planBottom = y;
+  y += 70; // room for the three branches to turn left (drawn once the tools are placed)
 
   s.push(`<text x="${X}" y="${y + 6}" class="hw-section">TOOLS THE AGENT CAN CALL</text>`);
   y += 20;
   const tool = (title: string, body: string, color: string, tip: string, kicker: string, pills: [string, number][], badge?: (x: number, y: number) => string) => {
     const h = panelH(body, true);
     s.push(panel(X, y, PW, h, title, body, color, tip, kicker));
-    if (badge) s.push(badge(X + PW - 130, y + 14));
+    if (badge) s.push(badge(X + PW - 130, y + 34)); // below the kicker, beside the title, clear of a long kicker
     pillRow(y + h - 46, pills, color);
     const top = y;
     y += h + 16;
     return { top, h };
   };
-  tool("Evidence layer", "Searches 79 vendor items and retrieves literature. Every number keeps its source and uncertainty range.", C.evidence,
-    "backend/labforge/catalog and backend/labforge/agent/amass.py.", "REAL-WORLD INPUTS", [["search_catalog", 128], ["search_evidence", 140]], amassBadge);
-  tool("Digital twin", "Places equipment with safety clearances, then samples uncertain durations to calculate throughput, queues and bottlenecks.", C.engine,
+  const evi = tool("Evidence layer", "Searches 79 vendor items and retrieves literature. Every number keeps its source and uncertainty range.", C.evidence,
+    "backend/labforge/catalog and backend/labforge/agent/amass.py.", "REAL-WORLD INPUTS", [["search_catalog", 120], ["search_evidence", 134]], amassBadge);
+  const twin = tool("Digital twin", "Places equipment with safety clearances, then samples uncertain durations to calculate throughput, queues and bottlenecks.", C.engine,
     "backend/labforge/layout and backend/labforge/sim. Modal is available as the Monte Carlo replicate backend.", "LAYOUT + MONTE CARLO",
-    [["layout engine", 130], ["Monte Carlo", 130]], modalBadge);
+    [["layout engine", 124], ["Monte Carlo", 124]], modalBadge);
   const ver = tool("Independent verifier", "Ignores the agent’s reported results, rebuilds the layout and simulation, checks tampering, and marks each claim supported, refuted or unverifiable.", C.verify,
-    "backend/labforge/verify/verifier.py and tamper.py.", "FALSIFICATION", [["recompute", 86], ["compare", 80], ["Brier score", 96]]);
+    "backend/labforge/verify/verifier.py and tamper.py.", "FALSIFICATION", [["recompute", 80], ["compare", 74], ["Brier score", 92]]);
+
+  // The planner calls each tool: down out of the planner, left (the call's name sits on that stretch, in the tool's
+  // colour), down the left-hand side, then a short turn right into the tool. Nested so no two lines cross: "claims"
+  // turns first and runs outermost to the lowest box, "evidence" turns last and runs innermost to the highest.
+  const branch = (label: string, color: string, dropX: number, turnY: number, spineX: number, targetY: number) => {
+    s.push(arrow(`M${dropX} ${planBottom}V${turnY}H${spineX}V${targetY}H${X - 2}`, color, "", 0, 0, false, M));
+    s.push(`<text x="${(dropX + spineX) / 2}" y="${turnY + 4}" text-anchor="middle" class="hw-flow-label" style="fill:${color}">${label}</text>`);
+  };
+  branch("claims", C.verify, X + 40, planBottom + 16, 10, ver.top + 40);
+  branch("simulate", C.engine, X + 100, planBottom + 32, 19, twin.top + 40);
+  branch("evidence", C.evidence, X + 160, planBottom + 48, 28, evi.top + 40);
 
   // Refuted claims go back up the right-hand side into the planner.
   const spine = X + PW + 18, vy = ver.top + 44;
