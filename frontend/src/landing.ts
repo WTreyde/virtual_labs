@@ -143,14 +143,27 @@ export function caseStory(run: RecordedRun, s: CaseSummary, problem?: string): s
     why = `You learn the brief is out of reach, and exactly which step limits it, <b>before</b> committing ${overBudget ? usd(m!.bom!) + " to equipment" : "money to equipment"}.${
       refuted ? ` LabForge flagged its own ${refuted} failed claim${refuted === 1 ? "" : "s"} instead of hiding them.` : ""}`;
   }
+  return storyHtml(ask, did, found, met, why);
+}
+const perDay_ = (u: string) => (unitOf(u).endsWith("per day") ? "/day" : ` ${unitOf(u)}`);
+
+/**
+ * A case story: the ask and what LabForge did are always shown; what it found and why it matters sit behind a
+ * toggle (collapsed by default) so the cards stay short.
+ */
+function storyHtml(ask: string, did: string, found: string, good: boolean, why: string): string {
   return `<dl class="story">
       <dt>The ask</dt><dd>${ask}</dd>
       <dt>What LabForge did</dt><dd>${did}</dd>
-      <dt>What it found</dt><dd class="${met ? "good" : "bad"}">${found}</dd>
-      <dt>Why it matters</dt><dd class="why">${why}</dd>
-    </dl>`;
+    </dl>
+    <details class="story-more">
+      <summary>What it found and why it matters</summary>
+      <dl class="story">
+        <dt>What it found</dt><dd class="${good ? "good" : "bad"}">${found}</dd>
+        <dt>Why it matters</dt><dd class="why">${why}</dd>
+      </dl>
+    </details>`;
 }
-const perDay_ = (u: string) => (unitOf(u).endsWith("per day") ? "/day" : ` ${unitOf(u)}`);
 
 /** The scheduling case title, in the same "topic: detail" style as the design cases. */
 export const SCHEDULE_CASE_TITLE = "Shared screening cell: three projects, one urgent deadline, best running order";
@@ -183,12 +196,7 @@ export function scheduleStory({ projects, result: s }: ScheduleCase): string {
   const why = saved > 0.05
     ? `The same lab gets about <b>${fmt(saved)} h</b> back and ${missedAfter === 0 ? "keeps every deadline" : "misses fewer deadlines"} with <b>no new equipment</b>: only the running order changes.`
     : `Shows that the order listed is already close to best, so time would be better spent elsewhere.`;
-  return `<dl class="story">
-      <dt>The ask</dt><dd>${ask}</dd>
-      <dt>What LabForge did</dt><dd>${did}</dd>
-      <dt>What it found</dt><dd class="${missedAfter === 0 ? "good" : "bad"}">${found}</dd>
-      <dt>Why it matters</dt><dd class="why">${why}</dd>
-    </dl>`;
+  return storyHtml(ask, did, found, missedAfter === 0, why);
 }
 
 export async function renderCases(el: HTMLElement) {
@@ -198,12 +206,12 @@ export async function renderCases(el: HTMLElement) {
       <p class="pitch small">Three case studies modelled on real drug-discovery work: two lab designs answered by the LabForge agent and replayed here,
         and a plan for running projects through a lab that already exists. Each card says what was asked, what LabForge did and what it found.</p>
       <div class="cards">
-        ${CASES.map((c) => `<a class="card frame-card" href="#/case/${c.name}" data-case="${c.name}">
+        ${CASES.map((c) => `<div class="card frame-card" data-case="${c.name}">
           <div class="card-kicker">Case study · recorded agent run</div>
-          <h2>${esc(c.title)}</h2><div class="card-sub muted">Loading…</div><div class="card-go">Watch the replay ▸</div></a>`).join("")}
-        <a class="card frame-card" href="#/case/schedule" data-case="schedule">
+          <h2><a href="#/case/${c.name}">${esc(c.title)}</a></h2><div class="card-sub muted">Loading…</div><a class="card-go" href="#/case/${c.name}">Watch the replay ▸</a></div>`).join("")}
+        <div class="card frame-card" data-case="schedule">
           <div class="card-kicker">Case study · scheduling run</div>
-          <h2>${esc(SCHEDULE_CASE_TITLE)}</h2><div class="card-sub muted">Loading…</div><div class="card-go">Open the schedule ▸</div></a>
+          <h2><a href="#/case/schedule">${esc(SCHEDULE_CASE_TITLE)}</a></h2><div class="card-sub muted">Loading…</div><a class="card-go" href="#/case/schedule">Open the schedule ▸</a></div>
       </div>
     </div>`;
   loadScheduleCase().then((sc) => {
