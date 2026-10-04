@@ -11,10 +11,6 @@
       "params": {
         "reason": "room_area"
       }
-    },
-    {
-      "id": "layout_ok",
-      "kind": "no_violations"
     }
   ]
 }
