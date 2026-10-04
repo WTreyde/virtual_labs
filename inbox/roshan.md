@@ -1,6 +1,6 @@
 # Inbox: Roshan (Strand A: game client and report)
 
-Last updated: 2026-10-04 01:05 BST by the integrator. Main at `0e50d7f` (plus this inbox commit).
+Last updated: 2026-10-04 01:30 BST by the integrator. Main at `282fe00` (plus this inbox commit).
 
 The integrator rewrites this file on every integration pass (every 30 min until the 09:00 freeze on 4 Oct).
 Work the open items top to bottom. Done items drop off once your merged work on main shows them done.
@@ -9,11 +9,13 @@ Don't edit this file; report progress in your PR description.
 ## Open items
 
 ```
-Your #62 (collapsible agent log with timings) is merged. Note: the XChem replay was re-recorded
-(#58): 424/day verified vs a 300 target, $1.07M, 0 violations, STX44 82.6% busy, imager camera 8.5%.
-Check the XChem page reads correctly with it (the fix card, stat cards and verdicts).
+Your #65 (readability: system font for prose, contrast fixed) is merged, and you confirmed the
+XChem page reads correctly with the new replay. Thanks.
+P0 (new)
+0. Live chat refusal: Albert is making a provider refusal end with status "declined_by_model" and a
+   message. Show it in the dialogue box as "The model declined this request" plus the message, not as
+   an error or the offline example.
 P1 (team feedback)
-1. Text-heavy areas: larger font, more line height, higher contrast.
 2. LabForge logo at the top in a bright, highly visible colour.
 3. Landing page: two buttons only, "Design your own lab" and "Case studies".
 4. Case pages: keep the case's problem statement on screen.
