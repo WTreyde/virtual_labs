@@ -1,6 +1,6 @@
 import { health, LIVE_CHAT_MESSAGE } from "./api";
 import { loadReplay, loadSummary, type RecordedRun } from "./replay";
-import { loadScheduleCase, type ScheduleCase } from "./schedulecase";
+import { loadScheduleCase, scheduleMC, type ScheduleCase } from "./schedulecase";
 import { projectName } from "./views";
 import { startTwinHero, twinHero } from "./twin";
 import type { CaseSummary } from "./types";
@@ -178,14 +178,16 @@ export function scheduleStory({ projects, result: s }: ScheduleCase): string {
   const ask = `A screening team shares one existing cell, with ${instruments} instruments, between ${projects.length} projects: ${esc(asked)}.
     In what order should they run so ${due.length ? "the urgent work meets its deadline and " : ""}everything finishes soonest?`;
   const nOrders = s.candidates.filter((c) => c.order).length, nMixed = s.candidates.length - nOrders;
-  const mc = s.caveat?.match(/\((\d+) replicates\)/)?.[1];
+  const mc = scheduleMC(s.caveat);
   const did = `Simulated <b>all ${nOrders + nMixed} running orders</b> on the cell's instruments, picked the best for deadlines and finish time${
-    mc ? `, and re-checked it over ${mc} random variations of step times` : ""}.`;
+    mc ? `, and re-checked it over ${mc.reps} random variations of step times` : ""}.`;
   const fin = rec.project_finish_h ?? {}, firstDue = (rec.order ?? []).map((id) => projects.find((p) => p.id === id)).find((p) => p?.deadline_h != null);
   const orderText = (rec.order ?? []).map(projectName).join(" → ");
   const missedBefore = naive?.deadline_misses?.length ?? 0, missedAfter = rec.deadline_misses?.length ?? 0;
-  const saved = naive ? naive.makespan_h - rec.makespan_h : 0;
-  const found = `<b>Best order: ${esc(orderText)}.</b> Everything is done in ${fmt(rec.makespan_h)} h${naive ? ` instead of ${fmt(naive.makespan_h)} h in the order listed` : ""}${
+  // Finish times: the Monte Carlo medians when reported (same pair as the README and the case page), else average step times.
+  const recH = mc?.rec ?? rec.makespan_h, naiveH = naive ? mc?.naive ?? naive.makespan_h : undefined;
+  const saved = naiveH != null ? naiveH - recH : 0;
+  const found = `<b>Best order: ${esc(orderText)}.</b> Everything is done in ${mc ? "about " : ""}${fmt(recH)} h${naiveH != null ? ` instead of ${fmt(naiveH)} h in the order listed` : ""}${mc ? ` (median of ${mc.reps} simulations)` : ""}${
     firstDue && fin[firstDue.id] != null ? `, and the ${esc(projectName(firstDue.id).toLowerCase())} finishes at ${fmt(fin[firstDue.id])} h (deadline ${fmt(firstDue.deadline_h!)} h)` : ""}.${
     missedBefore > missedAfter ? ` The order listed misses ${missedBefore} deadline${missedBefore === 1 ? "" : "s"}.` : ""}`;
   const why = saved > 0.05

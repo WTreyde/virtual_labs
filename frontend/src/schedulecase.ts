@@ -30,3 +30,16 @@ export function loadScheduleCase(): Promise<ScheduleCase> {
     return { projects, result, cached, deviceNames };
   })().catch((e) => { pending = undefined; throw e; }));
 }
+
+/**
+ * The Monte Carlo check the backend reports in the schedule's caveat (median and P10-P90 over N runs with random step
+ * times). The case card and page lead with these medians, the same pair as the README and the pitch; the Gantt and the
+ * table stay on average step times. Undefined when the caveat doesn't have the usual shape.
+ */
+export interface ScheduleMC { reps: number; rec: number; recLo: number; recHi: number; naive: number; naiveLo: number; naiveHi: number; firstPct: number }
+export function scheduleMC(caveat?: string): ScheduleMC | undefined {
+  const m = caveat?.match(/\((\d+) replicates\):\s*recommended ([\d.]+) h \(P10-P90 ([\d.]+)-([\d.]+) h\) vs order given ([\d.]+) h \(([\d.]+)-([\d.]+) h\); recommended finishes first in (\d+)% of replicates/);
+  if (!m) return undefined;
+  const [reps, rec, recLo, recHi, naive, naiveLo, naiveHi, firstPct] = m.slice(1).map(Number);
+  return { reps, rec, recLo, recHi, naive, naiveLo, naiveHi, firstPct };
+}

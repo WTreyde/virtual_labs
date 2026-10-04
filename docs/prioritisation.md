@@ -34,6 +34,8 @@ Result from `POST /prioritise` (3 Oct, current catalog):
 | P10–P90 | 42.5–64.8 h | 37.4–51.7 h |
 | Recommended finishes first | | **30 of 30 runs** |
 
+**Quoted everywhere (README, the Scheduling case card and page, the pitch): these Monte Carlo P50s, 43.9 h vs 49.8 h, about 6 h or 12% sooner.** The 16% above is the single run on mean step times only.
+
 The P50s are longer than the mean-duration figures above because slow draws on the bottleneck instruments compound; the ranking holds in every run. Reproduce with `labforge.sim.portfolio.prioritise` on the demo queue (its `caveat` field carries these numbers).
 
 Why: the re-test needs the LC-MS, which the library would otherwise hold for ~32 h, and the enzyme campaign loads the liquid handler instead, so running the library early overlaps the two bottlenecks. Step durations are planning estimates from `docs/pipelines.md` (each step's `params.duration_source`). The queue sizes were chosen so the demo shows the effect: with fewer than ~50 plates queued, every project fits into the lab at once and the order barely matters.
