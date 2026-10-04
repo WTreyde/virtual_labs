@@ -23,6 +23,12 @@
 
 ![Case studies: the ask, what LabForge did, what it found](docs/img/case-studies.png)
 
+## How it works
+
+One brief in, one checked lab design out. Claude does the planning; deterministic code does the maths; a separate verifier re-checks every number the agent claims. Open the **How it works** tab (`#/how`) and hover a box to see where it lives in the code.
+
+![How LabForge works: planner agent, catalog, layout engine, Monte Carlo simulator and independent verifier](docs/img/how-it-works.png)
+
 ## Try it
 
 - **Hosted replay demo:** https://huggingface.co/spaces/wtreyde/labforge (recorded agent runs; live design is off there, no API key needed)
