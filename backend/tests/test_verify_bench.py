@@ -342,3 +342,25 @@ def test_vanilla_prompt_allows_a_design_without_tools():
     from labforge.bench.runner import _vanilla_system
     s = _vanilla_system()
     assert "replaces every rule above that needs a tool" in s and '"id":"bmg_clariostar"' in s and '"workflow"' in s
+
+
+def test_verifier_applies_a_beamtime_cap_the_design_declares():
+    from labforge.verify.verifier import recompute
+    eq = {"src_1": "generic_plate_hotel", "lh_1": "opentrons_flex"}
+    exact = lambda d: {"value": d, "low": d, "high": d}
+    steps = [{"id": "load", "name": "load", "capability": "manual_bench", "candidate_instances": ["src_1"], "duration_s": 0,
+              "after": [], "duration_uncertainty": exact(0)},
+             {"id": "prep", "name": "prep", "capability": "liquid_handling", "candidate_instances": ["lh_1"], "duration_s": 3600,
+              "after": ["load"], "duration_uncertainty": exact(3600)},
+             {"id": "collect", "name": "collect", "capability": "external_service", "candidate_instances": [], "mode": "external",
+              "duration_s": 1800, "after": ["prep"], "duration_uncertainty": exact(1800),
+              "params": {"queue_time_s": 3600, "beamtime_h_per_day": {"value": 4, "low": 4, "high": 4, "confidence": "estimated"}}}]
+    spec = {"id": "s", "name": "s", "domain": "biology", "description": "s", "throughput_target": {"value": 20, "unit": "plates_per_day"},
+            "room": {"width_m": 6, "depth_m": 5, "doors": [{"x": 0, "y": 2.5}]}}
+    wf = {"id": "w", "lab_spec_id": "s", "steps": steps, "equipment": [{"instance_id": i, "catalog_id": c} for i, c in eq.items()]}
+    r = recompute(spec, wf)
+    assert r["sim"]["throughput"]["p50"] < 12  # ~8/day (4 h of beam / 30 min per plate), not the 24/day the prep allows
+    claim = {"id": "c", "statement": "20 plates a day", "metric": "throughput.p50", "comparator": ">=", "predicted_value": 20,
+             "confidence": 0.9, "status": "unverified"}
+    [checked] = verify_claims([claim], wf, r["layout"], r["sim"], recomputed=r)
+    assert checked["status"] == "refuted"

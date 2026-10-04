@@ -239,3 +239,35 @@ def test_timed_storage_operations_keep_the_process_capacity():
     w = wf([step("load", ["src_1"], 0), step("store", ["store_1"], 120, ["load"], capability="compound_storage")],
            {**SOURCE, "store_1": "compound_store"})
     assert run(spec(), w, layout())["throughput"]["p50"] == pytest.approx(86400 / 120, rel=0.05)
+
+
+def test_beamtime_cap_limits_an_external_step_only_when_set():
+    # 30 min of beam per plate after a 1 h prep (24 plates/day upstream). Without a cap the synchrotron keeps up;
+    # with 4 h of beam a day it collects 8 plates a day; an uncertain cap is drawn per replicate.
+    steps = [step("load", ["src_1"], 0), step("prep", ["lh_1"], 3600, ["load"]),
+             step("collect", [], 1800, ["prep"], mode="external", params={"queue_time_s": 3600}),
+             step("hits", [], 600, ["collect"], mode="in_silico")]
+    w = wf(steps, {**SOURCE, "lh_1": "opentrons_flex"})
+    free = run(spec(), w, layout(), hours=96)
+    assert free["throughput"]["p50"] == pytest.approx(24, rel=0.05)
+    assert not any(u["instance_id"].endswith("__beamtime") for u in free["utilisation"])
+
+    w["steps"][2]["params"]["beamtime_h_per_day"] = 4
+    capped = run(spec(), w, layout(), hours=240)  # beam comes in daily lumps: a long window averages the edges out
+    assert capped["throughput"]["p50"] == pytest.approx(8, rel=0.15)
+    util = {u["instance_id"]: u["busy_fraction"] for u in capped["utilisation"]}
+    assert util["collect__beamtime"] > 0.9
+    assert any(b["kind"] == "external_queue" and "beamtime" in b["message"] for b in capped["bottlenecks"])
+
+    w["steps"][2]["params"]["beamtime_h_per_day"] = {"value": 4, "low": 2, "high": 8, "confidence": "estimated"}
+    ranged = run(spec(), w, layout(), hours=96, reps=6)["throughput"]
+    assert ranged["p10"] < ranged["p90"] and 2 < ranged["p50"] < 20
+
+
+def test_recorded_demo_designs_simulate_exactly_as_before():
+    # The beamtime cap and storage pools are opt-in or catalog-driven; the recorded XChem design sets neither.
+    import json
+    from pathlib import Path
+    o = json.loads((Path(__file__).parents[2] / "frontend/public/replays/fbdd.json").read_text())["output"]
+    s = simulate(o["lab_spec"], o["workflow"], o["layout"], replicates=o["sim_result"]["replicates"], seed=0, sensitivity=False)
+    assert s["throughput"]["p50"] == o["sim_result"]["throughput"]["p50"]

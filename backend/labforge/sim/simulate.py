@@ -20,6 +20,9 @@ Model (SimPy, one process per workflow step):
 - `external` steps (synchrotron): no instrument, unlimited concurrency unless
   `params.max_concurrent`; `params.queue_time_s` (number or uncertain_number) is added to the
   turnaround. Labware that leaves for an external service is not transferred back in the room.
+  Optional `params.beamtime_h_per_day` (number or uncertain_number, e.g. confidence "estimated") caps the beam an
+  external step gets per day: each run uses its `duration_s` of beam, topped up daily (`<step>__beamtime` in
+  utilisation). Off unless set.
 - `in_silico` steps (or steps without instruments): a pure delay; labware stays where it was.
 
 Downtime (optional, `simulate(..., downtime=...)`): per-instance random failures (MTBF/MTTR) or a
@@ -51,6 +54,7 @@ from labforge.sim.parallel import map_replicates
 BANDS = {"datasheet": (0.95, 1.10), "literature": (0.85, 1.25), "estimated": (0.8, 1.4), "placeholder": (0.5, 2.0)}
 JITTER = 0.05  # run-to-run variation around a replicate's mean duration
 SEMI_AUTO_OPERATOR_S = 300.0  # estimated: operator time to load and start a semi-automated instrument
+DAY_S = 86400.0
 RESIDENCE_CAPABILITIES = {"incubation", "plate_storage", "cold_storage", "compound_storage"}  # may use storage_slots
 HUMAN_WALK_BAND = (0.8, 1.5)  # estimated: real walking/handling vs the layout's straight-line estimate
 UNASSIGNED_CARRY_S = 120.0  # placeholder: someone carries labware no transporter can reach
@@ -229,6 +233,18 @@ class Model:
             self.mean[s["id"]] = self._draw(duration_range(s, item), pins.get(s["id"]))
             self.queue[s["id"]] = self._draw(_uncertain((s.get("params") or {}).get("queue_time_s")),
                                              pins.get(f"{s['id']}.queue"))
+        # Optional beamtime cap on an external step (params.beamtime_h_per_day, number or uncertain_number): that many
+        # beam-seconds a day, topped up at each day boundary (unused beam does not carry over); each run uses its
+        # duration_s of beam after its queue. Off unless set, so designs without it simulate exactly as before.
+        self.beam, self.beam_queue, self.beam_used = {}, {}, defaultdict(list)
+        for s in self.steps:
+            bt = (s.get("params") or {}).get("beamtime_h_per_day")
+            if step_mode(s) == "external" and bt is not None:
+                band = (float(bt),) * 3 if isinstance(bt, (int, float)) else _uncertain(bt)  # a plain number is exact
+                cap = max(1.0, self._draw(band, pins.get(f"{s['id']}.beamtime")) * 3600)
+                self.beam[s["id"]] = simpy.Container(self.env, capacity=cap, init=cap)
+                self.beam_queue[s["id"]] = simpy.Resource(self.env, capacity=1)
+                self.env.process(self._top_up_beam(s["id"]))
         self.walk = self._draw((HUMAN_WALK_BAND[0], 1.0, HUMAN_WALK_BAND[1]), pins.get("operator_walking"))
         self.down = self._down_intervals(downtime or {}, t0 + MAX_WINDOW_H * 3600)
 
@@ -249,6 +265,25 @@ class Model:
         self.n_tokens, self.unassigned_used = 0, set()
 
     # ---------- helpers ----------
+    def _top_up_beam(self, sid: str):
+        beam = self.beam[sid]
+        while True:
+            yield self.env.timeout(DAY_S - self.env.now % DAY_S)
+            if beam.level < beam.capacity:
+                yield beam.put(beam.capacity - beam.level)
+
+    def _use_beam(self, sid: str, seconds: float):
+        """Take `seconds` of beam, first come first served (a beamline collects one shipment at a time): what is left
+        today, then the rest from the next days' allocations."""
+        beam, left = self.beam[sid], seconds
+        with self.beam_queue[sid].request() as turn:
+            yield turn
+            while left > 1e-9:
+                take = min(left, beam.level if beam.level > 1e-9 else beam.capacity)
+                yield beam.get(take)
+                self.beam_used[sid].append((self.env.now, take))
+                left -= take
+
     def _draw(self, rng3: tuple[float, float, float], pin: str | None) -> float:
         low, mode, high = rng3
         if pin == "low":
@@ -536,6 +571,8 @@ class Model:
         else:
             if mode == "external":
                 yield self.env.timeout(self._jitter(self.queue[sid]))
+                if sid in self.beam:
+                    yield from self._use_beam(sid, dur)
             if timed:
                 yield from self.machine_work(inst, dur, self.slots[sid])
             else:
@@ -583,6 +620,9 @@ class Model:
             self._end_busy(h)
         window = self.t1 - self.t0
         util = {i: self.busy[i] / (window * self.caps[i]) for i in self.res}
+        for sid, beam in self.beam.items():  # share of the beamtime on offer in the window that was used
+            used = sum(x for t, x in self.beam_used[sid] if self.t0 <= t < self.t1)
+            util[f"{sid}__beamtime"] = min(1.0, used / (beam.capacity * window / DAY_S))
         for op in self.ops.values():
             shift = op.shift_seconds(self.t0, self.t1)
             util[op.id] = self.busy[op.id] / shift if shift else 0.0
@@ -744,6 +784,13 @@ def _bottlenecks(workflow: dict, layout: dict, run: dict, util: dict, p50: float
                     "suggestion": "Add an arm or operator that reaches both."})
     for inst, u in sorted(util.items(), key=lambda kv: -kv[1]):
         if u <= 0.7:
+            continue
+        if inst.endswith("__beamtime"):
+            step_id = inst[: -len("__beamtime")]
+            cap = f"; it caps throughput near {p50 / u:.0f} {unit.replace('_', ' ')}" if u > 0.85 and p50 > 0 else ""
+            out.append({"kind": "external_queue", "instances": [], "severity": "high" if u > 0.85 else "medium",
+                        "message": f"Step {step_id} uses {u:.0%} of the beamtime on offer (params.beamtime_h_per_day){cap}.",
+                        "suggestion": "Book more beamtime, collect fewer datasets per crystal, or shorten exposures."})
             continue
         kind = "operator_capacity" if inst in operators else "transporter_capacity" if inst in movers else "instrument_capacity"
         what = f"busy {u:.0%} of their shift" if inst in operators else f"busy {u:.0%} of the time"
