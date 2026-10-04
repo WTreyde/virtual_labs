@@ -37,6 +37,23 @@ function offlineDraft(d: Design): string {
   ].join("\n");
 }
 
+/**
+ * In the report's Evidence section keep only items with a real link. Search bookkeeping with no source
+ * ("Literature search `...`: unavailable / retrieved", "reviewed"-only lines) is dropped; if nothing is left,
+ * the section says so instead of listing searches that found nothing usable.
+ */
+export function linkedEvidenceOnly(md: string): string {
+  return md.replace(/(^## Evidence[^\n]*\n)([\s\S]*?)(?=^## |(?![\s\S]))/m, (_, head: string, body: string) => {
+    const lines = body.split("\n");
+    const items = lines.filter((l) => /^\s*[-*] /.test(l));
+    const linked = items.filter((l) => /https?:\/\/\S+/.test(l));
+    const prose = lines.filter((l) => l.trim() && !/^\s*[-*] /.test(l));
+    const dropped = items.length - linked.length;
+    const note = dropped ? `\n_${dropped} search ${dropped === 1 ? "entry" : "entries"} without a source link not shown._\n` : "";
+    return `${head}\n${prose.join("\n")}${prose.length ? "\n\n" : ""}${linked.length ? linked.join("\n") : "No linked evidence: durations and yields remain estimates."}\n${note}\n`;
+  });
+}
+
 const PAGE_CSS = `
   body { font: 14px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; color: #1d2330; max-width: 860px; margin: 32px auto; padding: 0 24px; background: #fff; }
   .bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 20px; }
@@ -73,7 +90,7 @@ export async function openReport(d: Design, snapshot: () => Promise<string | und
     <div class="bar"><span class="meta">LabForge · ${when} · ${d.report_markdown ? "report from a recorded agent run" : md.live ? "report from the agent backend" : "offline draft"}</span>
       <button onclick="print()">Print / Save as PDF</button></div>
     ${img ? `<img class="scene" src="${img}" alt="Isometric view of the proposed lab layout"><div class="caption">Proposed layout as shown in LabForge. Instrument sizes follow catalog footprints; art is schematic.</div>` : ""}
-    ${await marked.parse(md.text.replace(/</g, "&lt;"))}
+    ${await marked.parse(linkedEvidenceOnly(md.text).replace(/</g, "&lt;"))}
     </body></html>`);
   w.document.close();
 }
