@@ -13,7 +13,7 @@ from pathlib import Path
 from labforge.agent.demo_scenarios import MIN_PLANNER_REPLICATES, catalog_gaps, check_scenario
 from labforge.agent.errors import redacted_json
 from labforge.agent.report import render_report
-from labforge.agent.replay_summary import ROOT, summarise
+from labforge.agent.replay_summary import ROOT, _load_imager_whatif, summarise
 from labforge.agent.tools import PLANNER_REPLICATES
 from labforge.catalog.store import load_catalog
 from labforge.sim.simulate import simulate
@@ -99,7 +99,9 @@ def main() -> None:
     args.output.write_text(redacted_json(run))
     if args.summary_output:
         args.summary_output.parent.mkdir(parents=True, exist_ok=True)
-        args.summary_output.write_text(json.dumps(summarise('fbdd', run), indent=2) + '\n')
+        args.summary_output.write_text(
+            json.dumps(summarise('fbdd', run, _load_imager_whatif(run)), indent=2) + '\n'
+        )
 
 
 if __name__ == '__main__':

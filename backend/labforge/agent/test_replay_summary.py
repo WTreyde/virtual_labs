@@ -28,10 +28,16 @@ def test_landing_summary_preserves_recorded_results_and_refutations(name):
 
 
 def test_fbdd_summary_reports_the_separate_imager_growth_whatif():
-    record = json.loads((REPLAYS / 'fbdd.json').read_text())
+    root = Path(__file__).resolve().parents[3]
+    record = json.loads((root / 'backend/labforge/agent/demo/scenarios_20261004_resim50/xchem.json').read_text())
     whatif = _load_imager_whatif(record)
-    assert whatif['method'] == 'deterministic recorded-design what-if; no model call'
-    summary = summarise('fbdd', record, whatif)['imager_growth_whatif']
-    assert set(summary) == {'planned_p50', 'verified_p50', 'unit', 'bottleneck'}
-    assert summary['unit'] == 'crystals_per_day'
-    assert summary['bottleneck']['kind'] in ('instrument', 'operator')
+    assert whatif['kind'] == 'imager_staffing_bundle'
+    summary = summarise('fbdd', record, whatif)
+    assert 'imager_growth_whatif' not in summary  # do not ship the stale 10-replicate result
+    staffing = summary['imager_staffing_whatifs']
+    assert staffing['verification_config']['replicates'] == 50
+    assert set(staffing['variants']) == {'third_operator', 'second_shift'}
+    assert staffing['variants']['third_operator']['verified_p50'] == 634.7
+    assert staffing['variants']['second_shift']['verified_p50'] == 1306.7
+    assert 'cannot be attributed' in staffing['attribution']
+    assert any('do not isolate' in limit for limit in summary['limits'])
