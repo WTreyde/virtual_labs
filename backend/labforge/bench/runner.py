@@ -201,11 +201,19 @@ def run_failure(answer: dict) -> str | None:
 
 
 def normalise(raw: dict, arm: str, task: dict) -> dict:
-    """Strand C answers carry `messages`; checks read one `message` string. Other fields pass through."""
+    """Strand C answers carry `messages`; checks read one `message` string. Other fields pass through.
+
+    The planner's own `message` is a status line ("The model completed this turn."), not what it told the
+    user, so the assistant text in `messages` wins whenever there is any; the status line is kept apart."""
     answer = dict(raw, task_id=task["id"], arm=arm)
-    if "message" not in answer:
-        texts = [m.get("content") for m in raw.get("messages", []) if m.get("role") == "assistant"]
-        answer["message"] = "\n".join(t if isinstance(t, str) else json.dumps(t) for t in texts if t)
+    texts = [m.get("content") for m in raw.get("messages", []) if m.get("role") == "assistant"]
+    said = "\n".join(t if isinstance(t, str) else json.dumps(t) for t in texts if t)
+    if said:
+        if "message" in raw and raw["message"] != said:
+            answer["status_message"] = raw["message"]
+        answer["message"] = said
+    elif "message" not in answer:
+        answer["message"] = ""
     return answer
 
 
