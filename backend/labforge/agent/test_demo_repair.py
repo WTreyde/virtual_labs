@@ -36,14 +36,19 @@ def test_gate_rejects_recorded_storage_mismatch_and_requires_independent_agreeme
     run = previous_xchem()
     gate = check_scenario('xchem', run['output'], {k: run['gate'][k] for k in ('missing_capabilities', 'catalog_ids')})
     assert not gate['checks']['puck_loading_is_handling']
+    assert not gate['checks']['planner_sample_size']
     assert not gate['checks']['independent_throughput_agreement']
     assert not gate['passed']
     comparison = throughput_comparison(run['output'])
     assert comparison['planned_p50'] == 10.5 and comparison['verified_p50'] == 0.3
+    assert comparison['planner_replicates'] == 10
+    assert not comparison['planner_sample_size_ok']
     corrected = copy.deepcopy(run['output'])
     for c in corrected['claims']:
         if c['metric'] == 'throughput.p50':
             c['verified_value'] = 9.5
+    assert not throughput_comparison(corrected)['agrees']
+    corrected['sim_result']['replicates'] = 50
     assert throughput_comparison(corrected)['agrees']
     for c in corrected['claims']:
         if c['metric'] == 'throughput.p50':

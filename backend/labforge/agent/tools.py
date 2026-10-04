@@ -11,6 +11,12 @@ from labforge.catalog.store import get as get_item
 import math
 
 
+# A ten-draw median was visibly unstable in the XChem imager what-if. Keep the
+# planner headline on a large enough independent sample that the acceptance
+# gate is comparing estimates rather than one lucky handful of runs.
+PLANNER_REPLICATES = 50
+
+
 def _search_catalog(capability: str | None = None, labware: str | None = None, max_price_usd: float | None = None) -> dict:
     items = search(capability, labware, max_price_usd)
     return {"items": [{k: it.get(k) for k in ("id", "vendor", "model", "capabilities", "footprint", "process",
@@ -25,7 +31,7 @@ def _layout_and_simulate(lab_spec: dict, workflow: dict) -> dict:
 
     try:
         layout = generate_layout(lab_spec, workflow)
-        sim = engine.simulate(lab_spec, workflow, layout, replicates=10)
+        sim = engine.simulate(lab_spec, workflow, layout, replicates=PLANNER_REPLICATES)
         validate(layout, "layout")
         validate(sim, "sim_result")
     except ValueError as exc:

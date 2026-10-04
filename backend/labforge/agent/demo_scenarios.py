@@ -45,18 +45,27 @@ def catalog_gaps():
 # Independent seeds/replicate counts can differ; a >20% P50 gap is a demo failure,
 # not something to hide by substituting the verifier's number into the planning result.
 THROUGHPUT_AGREEMENT_TOLERANCE = 0.20
+MIN_PLANNER_REPLICATES = 50
 
 
 def throughput_comparison(output):
-    planned = output.get('sim_result', {}).get('throughput', {}).get('p50')
+    sim = output.get('sim_result', {})
+    throughput = sim.get('throughput', {})
+    planned = throughput.get('p50')
+    replicates = sim.get('replicates')
+    sample_size_ok = isinstance(replicates, int) and not isinstance(replicates, bool) \
+        and replicates >= MIN_PLANNER_REPLICATES
     values = {c['verified_value'] for c in output.get('claims', [])
               if c.get('metric') == 'throughput.p50' and c.get('status') in ('supported', 'refuted')
               and 'verified_value' in c and 'recomputed by the verifier' in c.get('verifier_note', '')}
     verified = next(iter(values)) if len(values) == 1 else None
     difference = abs(planned - verified) / max(abs(planned), abs(verified), 1e-9) if planned is not None and verified is not None else None
-    return {'planned_p50': planned, 'verified_p50': verified,
+    return {'planned_p50': planned, 'verified_p50': verified, 'planner_replicates': replicates,
+            'minimum_planner_replicates': MIN_PLANNER_REPLICATES,
+            'planner_sample_size_ok': sample_size_ok,
+            'planning_band': {'p10': throughput.get('p10'), 'p90': throughput.get('p90')},
             'relative_difference': difference, 'tolerance': THROUGHPUT_AGREEMENT_TOLERANCE,
-            'agrees': difference is not None and difference <= THROUGHPUT_AGREEMENT_TOLERANCE}
+            'agrees': sample_size_ok and difference is not None and difference <= THROUGHPUT_AGREEMENT_TOLERANCE}
 
 
 def check_scenario(name, output, coverage):
@@ -91,10 +100,15 @@ def check_scenario(name, output, coverage):
         checks['puck_loading_is_handling'] = bool(loading) and all(
             s['capability'] in ('manual_bench', 'cryo_cooling') and
             s.get('mode') in ('manual', 'semi_automated') and s.get('operator_role') in roles for s in loading)
-        checks['independent_throughput_agreement'] = throughput_comparison(output)['agrees']
+        comparison = throughput_comparison(output)
+        checks['planner_sample_size'] = comparison['planner_sample_size_ok']
+        checks['independent_throughput_agreement'] = comparison['agrees']
         harvesting = [s for s in steps if s['capability'] == 'crystal_harvesting']
         checks['full_operator_harvesting'] = bool(harvesting) and all(s.get('mode') == 'manual' and s.get('operator_role') in roles for s in harvesting)
-    return {'passed': all(checks.values()), 'checks': checks, 'missing_stages': missing_stages, **coverage}
+    result = {'passed': all(checks.values()), 'checks': checks, 'missing_stages': missing_stages, **coverage}
+    if name == 'xchem':
+        result['throughput_comparison'] = comparison
+    return result
 
 
 def hotel_whatif_request(output):
