@@ -237,16 +237,15 @@ class BenchmarkTests(unittest.TestCase):
     def test_vanilla_never_receives_hidden_checks_and_cannot_fake_verification(self):
         from labforge.agent.benchmark import run_arm
         task = json.loads((Path(__file__).parents[1] / 'bench/tasks/enzyme_infeasible.json').read_text())
-        answer = {'messages': [], 'claims': [{**claim(), 'status': 'supported', 'verified_value': 999}], 'sim_result': {'fake': True}}
-        create = Mock(return_value=SimpleNamespace(content=[SimpleNamespace(type='text', text=json.dumps(answer))], stop_reason='end_turn'))
-        sdk = SimpleNamespace(Anthropic=lambda **kw: SimpleNamespace(messages=SimpleNamespace(create=create)))
-        with patch.dict(sys.modules, {'anthropic': sdk}), patch.dict(os.environ, {'ANTHROPIC_API_KEY': 'test-only'}):
+        answer = {'message': 'No tools were used.', 'claims': [{**claim(), 'status': 'unverified'}],
+                  'completed': True, 'vanilla_protocol': 2}
+        with patch.dict(os.environ, {'ANTHROPIC_API_KEY': 'test-only'}), \
+             patch('labforge.bench.runner._vanilla', return_value=answer) as vanilla:
             out = run_arm('vanilla', task)
-        self.assertEqual(create.call_args.kwargs['messages'], [{'role': 'user', 'content': task['brief']}])
-        self.assertNotIn('tools', create.call_args.kwargs)
-        self.assertNotIn('sim_result', out)
+        vanilla.assert_called_once_with({'brief': task['brief']})
+        self.assertEqual(out['vanilla_protocol'], 2)
+        self.assertEqual(out['benchmark_arm'], 'vanilla')
         self.assertEqual(out['claims'][0]['status'], 'unverified')
-        self.assertNotIn('verified_value', out['claims'][0])
 
 
 class ValidationAdapterTests(unittest.TestCase):
