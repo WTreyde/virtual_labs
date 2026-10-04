@@ -364,3 +364,16 @@ def test_verifier_applies_a_beamtime_cap_the_design_declares():
              "confidence": 0.9, "status": "unverified"}
     [checked] = verify_claims([claim], wf, r["layout"], r["sim"], recomputed=r)
     assert checked["status"] == "refuted"
+
+
+def test_planner_answer_is_scored_on_what_it_told_the_user_not_its_status_line():
+    """run_turn returns `message` = a status line; the reply itself is in `messages` (bench rerun, 4 Oct)."""
+    from labforge.bench.runner import normalise
+    task = next(t for t in load_tasks() if t["id"] == "xchem_inhouse_xray")
+    raw = {"status": "completed", "message": "The model completed this turn.", "completed": True,
+           "messages": [{"role": "assistant", "content": "I can't design this: on-site diffraction isn't supported, "
+                         "so this brief is not feasible as asked."}]}
+    answer = normalise(raw, "platform", task)
+    assert answer["message"].startswith("I can't design this")
+    assert answer["status_message"] == "The model completed this turn."
+    assert normalise({"message": "plain reply"}, "vanilla", task)["message"] == "plain reply"
