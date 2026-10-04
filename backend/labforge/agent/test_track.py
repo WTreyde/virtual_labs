@@ -341,12 +341,15 @@ class StreamingTests(unittest.IsolatedAsyncioTestCase):
         from labforge.agent.streaming import stream_turn
         def run(history, on_event, stream_text):
             on_event({'type': 'text_delta', 'text': 'test-secret'})
-            return {'messages': [], 'history': history}
+            return {'status': 'declined_by_model', 'message': 'The model declined this request.',
+                    'messages': [], 'history': history}
         with patch.dict(os.environ, {'ANTHROPIC_API_KEY': 'test-secret'}), patch('labforge.agent.streaming.run_turn', side_effect=run):
             frames = [frame async for frame in stream_turn([])]
         self.assertEqual(len(frames), 2)
         self.assertIn('[redacted]', frames[0])
         self.assertIn('"type": "result"', frames[-1])
+        self.assertIn('"status": "declined_by_model"', frames[-1])
+        self.assertIn('"message": "The model declined this request."', frames[-1])
         self.assertTrue(all(frame.startswith('data: ') and frame.endswith('\n\n') for frame in frames))
 
 

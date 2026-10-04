@@ -53,5 +53,7 @@ def test_empty_provider_refusal_stops_without_retry_or_crash(monkeypatch):
     out = run_turn([{'role':'user', 'content':'Plan a lab'}], stream_text=False)
     assert len(calls) == 1
     assert out['completed'] is False and out['stop_reason'] == 'refusal'
-    assert 'API declined' in out['messages'][0]['content']
+    assert out['status'] == 'declined_by_model'
+    assert out['message'] == 'The model declined this request; no completed live design was produced.'
+    assert out['message'] in out['messages'][0]['content']
     assert 'workflow' not in out
