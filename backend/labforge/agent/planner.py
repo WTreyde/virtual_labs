@@ -101,6 +101,7 @@ def run_turn(history: list[dict], max_steps: int = 12, on_event=None, stream_tex
     completed = False
     stop_reason = 'tool_limit'
     produced: dict = {}
+    usage: dict = {}  # API tokens summed over every planning step (benchmark cost reporting)
     for step_index in range(max_steps):
         step = step_index + 1
         model = os.environ.get("ANTHROPIC_MODEL", MODEL)
@@ -131,6 +132,9 @@ def run_turn(history: list[dict], max_steps: int = 12, on_event=None, stream_tex
                   "duration_ms": _elapsed_ms(model_started), "status": "failed",
                   "summary": f"Planning step {step} failed."})
             raise
+        for key, value in (response.usage.model_dump() if getattr(response, "usage", None) else {}).items():
+            if isinstance(value, int):
+                usage[key] = usage.get(key, 0) + value
         content = [b.model_dump(mode="json", exclude_none=True) for b in response.content]
         stop_reason = response.stop_reason
         tool_count = sum(block.get("type") == "tool_use" for block in content)
@@ -239,4 +243,4 @@ def run_turn(history: list[dict], max_steps: int = 12, on_event=None, stream_tex
         produced['claim_history'] = session.claim_history
     return {"status": status, "message": status_message,
             "messages": [{"role": "assistant", "content": text.strip()}],
-            "history": messages, "completed": completed, "stop_reason": stop_reason, **produced}
+            "history": messages, "completed": completed, "stop_reason": stop_reason, "usage": usage, **produced}
