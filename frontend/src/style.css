@@ -263,3 +263,18 @@ body.page-view #modal table.bench thead th { top: 46px; }
 #topnav .brand.active { background: transparent; }
 #fix .footnote { font: 12px/1.45 var(--sys); color: var(--muted); margin: 6px 0 0; }
 #fix { border-color: #2b2f36; background: #fbfbf5; } /* neutral: a what-if, not a recommended fix */
+
+/* Landing: the pitch and two big buttons. */
+.landing-inner.home { display: flex; flex-direction: column; align-items: center; text-align: center; padding-top: 12vh; }
+.big-buttons { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
+.big-btn { display: flex; flex-direction: column; gap: 10px; width: 340px; padding: 26px 24px; text-decoration: none; color: #1d2330; background: #fbfbf5;
+  border: 4px solid #2b2f36; border-radius: 12px; box-shadow: inset 0 0 0 3px #fbfbf5, inset 0 0 0 5px #6b8fb3, 0 6px 0 #0006; transition: transform 0.1s; }
+.big-btn:hover, .big-btn:focus-visible { transform: translateY(-3px); outline: none; box-shadow: inset 0 0 0 3px #fbfbf5, inset 0 0 0 5px #e0503c, 0 9px 0 #0006; }
+.big-btn .big-label { font-size: 16px; line-height: 1.5; }
+.big-btn .big-sub { font: 14px/1.5 var(--sys); color: var(--muted); }
+.big-btn.own { background: #ffd23f; box-shadow: inset 0 0 0 3px #ffd23f, inset 0 0 0 5px #2b2f36, 0 6px 0 #0006; }
+.big-btn.own .big-sub { color: #3b3200; }
+.big-btn.own.limited { background: #f2f0e6; box-shadow: inset 0 0 0 3px #f2f0e6, inset 0 0 0 5px #a3271a, 0 6px 0 #0006; }
+.big-btn.own.limited .big-sub { color: #7a1d12; }
+.cases-title { color: #ffd23f; font-size: 18px; margin: 0 0 12px; }
+.pitch.small { font-size: 12px; margin-bottom: 24px; }

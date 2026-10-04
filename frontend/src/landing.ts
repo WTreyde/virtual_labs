@@ -3,7 +3,7 @@ import { loadReplay, loadSummary, type RecordedRun } from "./replay";
 import type { CaseSummary } from "./types";
 
 /**
- * Strand A: the landing page (#/). Two recorded case studies and "Design your own lab". Each case subtitle is read
+ * Strand A: the landing page (#/: pitch and two buttons) and the case-study page (#/cases). Each case subtitle is read
  * from that case's <name>.summary.json (planned vs independently checked throughput, gate, budget, bottleneck), or
  * from the replay itself when there is no summary; never hard-coded, so it stays true when recordings are replaced.
  */
@@ -72,37 +72,42 @@ export function caseHeadline(run: RecordedRun): { throughput?: string; detail?: 
   return { throughput: `${fmt(t.p50 ?? t.value)} ${unit}`, detail, bottleneck };
 }
 
-export async function renderLanding(el: HTMLElement) {
+/** The landing page (#/): the pitch and two buttons, "Design your own lab" and "Case studies". */
+export function renderLanding(el: HTMLElement) {
   el.innerHTML = `
-    <div class="landing-inner">
+    <div class="landing-inner home">
       <p class="pitch">Describe the autonomous lab you want. An agent designs it from real vendor equipment, lays it out, simulates it,
         and tells you which of its own numbers it doesn't trust.</p>
+      <div class="big-buttons">
+        <a class="big-btn own" href="#/design"><span class="big-label">Design your own lab</span><span class="big-sub">Chat with the agent about your brief</span></a>
+        <a class="big-btn" href="#/cases"><span class="big-label">Case studies</span><span class="big-sub">Two recorded agent runs, with what we checked</span></a>
+      </div>
+    </div>`;
+  // Say up front when live design is unavailable (public demo, no backend, or no API key).
+  health().then(({ state, liveAgent, note }) => {
+    const own = el.querySelector<HTMLElement>(".big-btn.own");
+    if (!own || (state === "on" && liveAgent)) return;
+    // Short on the button; the full setup note (note) is shown in the #/design banner.
+    own.querySelector(".big-sub")!.textContent = state === "on"
+      ? "Live agent off (no API key): replies use the offline worked example."
+      : LIVE_CHAT_MESSAGE[state];
+    if (state === "on" && note) own.title = note;
+    own.classList.add("limited");
+  });
+}
+
+/** The case-study page (#/cases): one card per recorded case, subtitles read from its summary or replay. */
+export async function renderCases(el: HTMLElement) {
+  el.innerHTML = `
+    <div class="landing-inner">
+      <h1 class="cases-title">Case studies</h1>
+      <p class="pitch small">Recorded agent runs, replayed without the backend. Each shows the planned numbers next to what an independent check found.</p>
       <div class="cards">
         ${CASES.map((c) => `<a class="card frame-card" href="#/case/${c.name}" data-case="${c.name}">
           <div class="card-kicker">Case study · recorded agent run</div>
           <h2>${esc(c.title)}</h2><div class="card-sub muted">Loading…</div><div class="card-go">Watch the replay ▸</div></a>`).join("")}
-        <a class="card frame-card own" href="#/design">
-          <div class="card-kicker">Live</div>
-          <h2>Design your own lab</h2>
-          <div class="card-sub">Chat with the agent about your own brief. It picks equipment, lays out the room, simulates it and writes the report.
-            <span class="muted">Needs the backend with an API key.</span></div>
-          <div class="card-go">Start designing ▸</div></a>
       </div>
     </div>`;
-  // The "Design your own" card says so up front when live design is unavailable (e.g. the public demo).
-  health().then(({ state, liveAgent, note }) => {
-    const own = el.querySelector<HTMLElement>(".card.own");
-    if (!own || (state === "on" && liveAgent)) return;
-    if (state === "on") { // chat works but answers with the offline example
-      own.querySelector(".card-kicker")!.textContent = "Live agent off";
-      own.querySelector(".card-sub .muted")!.textContent = note ?? "The backend has no API key, so replies use the offline worked example.";
-      return;
-    }
-    own.classList.add("disabled");
-    own.querySelector(".card-kicker")!.textContent = state === "off" ? "Off in this public demo" : "Needs the backend";
-    own.querySelector(".card-sub")!.textContent = LIVE_CHAT_MESSAGE[state];
-    own.querySelector(".card-go")!.textContent = "See what it would look like ▸";
-  });
   await Promise.all(CASES.map(async (c) => {
     const sub = el.querySelector<HTMLElement>(`[data-case="${c.name}"] .card-sub`)!;
     try {

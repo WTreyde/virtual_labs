@@ -7,7 +7,7 @@ import { galleryDesign } from "./fixtures/gallery";
 import { fixCard } from "./capacity";
 import { verdictsBox } from "./verdicts";
 import { AgentLog } from "./agentlog";
-import { renderLanding, summaryBox } from "./landing";
+import { renderCases, renderLanding, summaryBox } from "./landing";
 import { LabScene } from "./LabScene";
 import { renderPanel } from "./panel";
 import { openReport } from "./report";
@@ -96,13 +96,15 @@ async function go(r: Route) {
   setChatEnabled(r.page === "design");
   $<HTMLInputElement>("#chat-input").placeholder = "Describe your lab...";
   document.body.classList.toggle("page-view", ["bench", "validation", "schedule"].includes(r.page));
-  document.body.classList.toggle("on-landing", r.page === "landing");
-  landing.classList.toggle("hidden", r.page !== "landing");
+  const onLanding = r.page === "landing" || r.page === "cases";
+  document.body.classList.toggle("on-landing", onLanding);
+  landing.classList.toggle("hidden", !onLanding);
   for (const a of document.querySelectorAll<HTMLAnchorElement>("#topnav a"))
     a.classList.toggle("active", a.dataset.route === routeKey(r));
 
   switch (r.page) {
     case "landing": return renderLanding(landing);
+    case "cases": return renderCases(landing);
     case "case": return startReplay(r.name);
     case "design": {
       const d = exampleDesign();

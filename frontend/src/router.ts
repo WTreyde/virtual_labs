@@ -1,16 +1,17 @@
 /**
- * Strand A: hash routes for the one-page app. #/ landing, #/case/<name>, #/design, #/bench, #/validation,
+ * Strand A: hash routes for the one-page app. #/ landing, #/cases, #/case/<name>, #/design, #/bench, #/validation,
  * #/schedule, plus the hidden dev route #/gallery. The older query links (?replay=, ?view=, ?demo=gallery) are
  * rewritten to their hash route once at startup, keeping other params such as ?t= and ?select=.
  */
 export type Route =
-  | { page: "landing" } | { page: "case"; name: string } | { page: "design"; whatif?: string }
+  | { page: "landing" } | { page: "cases" } | { page: "case"; name: string } | { page: "design"; whatif?: string }
   | { page: "bench" } | { page: "validation" } | { page: "schedule" } | { page: "gallery" };
 
 export function parseRoute(hash = location.hash): Route {
   const [a, b] = hash.replace(/^#\/?/, "").split("/");
   switch (a) {
-    case "case": return b ? { page: "case", name: decodeURIComponent(b) } : { page: "landing" };
+    case "case": return b ? { page: "case", name: decodeURIComponent(b) } : { page: "cases" };
+    case "cases": return { page: "cases" };
     case "design": return { page: "design", whatif: b ? decodeURIComponent(b) : undefined };
     case "bench": case "validation": case "schedule": case "gallery": return { page: a };
     default: return { page: "landing" };
