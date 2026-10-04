@@ -55,6 +55,21 @@ const fontReady = Promise.race([document.fonts.load('8px "Press Start 2P"'), new
 fontReady.catch(() => undefined).then(() => game.scene.add("lab", LabScene, true, { design }));
 game.events.on("tick", onTick);
 game.events.on("ready-clock", () => setupClock(design));
+// Phones: bottleneck bubbles start hidden; the "!" button above the dialogue box shows and hides them.
+const alertsBtn = $<HTMLButtonElement>("#alerts-btn");
+function setBubbles(on: boolean) {
+  alertsBtn.classList.toggle("on", on);
+  alertsBtn.setAttribute("aria-pressed", String(on));
+  alertsBtn.title = on ? "Hide the bottleneck warnings" : "Show the bottleneck warnings on the lab";
+  game.events.emit("show-bubbles", on);
+}
+game.events.on("bubbles", (n: number) => {
+  alertsBtn.classList.toggle("hidden", !n);
+  alertsBtn.querySelector(".n")!.textContent = String(n);
+  alertsBtn.classList.add("invite"); // pulses until the first tap on this design
+  setBubbles(false);
+});
+alertsBtn.addEventListener("click", () => { alertsBtn.classList.remove("invite"); setBubbles(!alertsBtn.classList.contains("on")); });
 game.events.on("select", (sel: { id: string; sprite?: string } | null) => {
   if (!sel) return hideStatCard();
   showStatCard(design, sel.id, sel.sprite);
