@@ -1,6 +1,6 @@
 # Inbox: Roshan (Strand A: game client and report)
 
-Last updated: 2026-10-04 03:30 BST by the integrator. Main at `ae0830c` (plus this inbox commit).
+Last updated: 2026-10-04 04:00 BST by the integrator. Main at `65760fa` (plus this inbox commit).
 
 The integrator rewrites this file on every integration pass (every 30 min until the 09:00 freeze on 4 Oct).
 Work the open items top to bottom. Done items drop off once your merged work on main shows them done.
@@ -9,9 +9,8 @@ Don't edit this file; report progress in your PR description.
 ## Open items
 
 ```
-Your #70, #74 and #77 (landing page with two buttons, #/cases) are merged. Thanks.
+Your #70, #74 and #77 (landing page) and #80 (brief on screen) are merged. Thanks.
 P1 (team feedback)
-4. Case pages: keep the case's problem statement on screen.
 5. Rename "Report for your boss" to "Report".
 6. Evidence list: show only items with a real link; drop "reviewed"/"unavailable"-only entries.
 7. Chemistry equipment panel: make the close "x" on the left panel a big target.
