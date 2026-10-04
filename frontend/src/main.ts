@@ -148,6 +148,7 @@ async function go(r: Route) {
   $("#fix").classList.add("hidden");
   $("#verdicts").classList.add("hidden");
   $("#brief-acc").classList.add("hidden");
+  alertsBtn.classList.add("hidden"); // the scene shows it again when the next design has bottleneck bubbles
   openAcc("metrics");
   setMenu(false);
   $("#skill-btn").classList.add("hidden");
