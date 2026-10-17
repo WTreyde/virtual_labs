@@ -1,5 +1,5 @@
 // Plays each recorded run end to end, then again with Skip pressed at several moments, and checks it lands on the
-// final state (the design, or the agent's answer) with no backend calls. Strand A (Roshan).
+// final state (the design, or the agent's answer) with no backend calls.
 //
 //   make frontend (or make demo)       then:   npm run check:replays -- chem fbdd
 // Env: BASE_URL (default http://localhost:5173; http://localhost:8000 under make demo), CHROME (default: macOS install).

@@ -1,4 +1,4 @@
-"""Vendor optimisation: how would this lab's throughput change if one instrument were better? Owner: Maxim.
+"""Vendor optimisation: how would this lab's throughput change if one instrument were better?
 
 For one equipment instance, sweep a spec through the Monte Carlo simulator with the same random
 seeds at every point (common random numbers, so differences are the spec change and not noise):

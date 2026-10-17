@@ -3,7 +3,7 @@ import { operatorLook } from "./sprites";
 import { clock } from "./timeline";
 import type { CatalogItem, Confidence, Design, UncertainNumber } from "./types";
 
-/** Strand A: Pokémon-style HTML overlay over the game: agent dialogue box and instrument stat card. Owner: Roshan. */
+/** Pokémon-style HTML overlay over the game: agent dialogue box and instrument stat card. */
 
 const esc = (s: unknown) => String(s ?? "").replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 const money = (n?: number) => (n == null ? "?" : `$${Math.round(n).toLocaleString()}`);

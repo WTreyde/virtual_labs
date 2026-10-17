@@ -1,4 +1,4 @@
-"""Strand D: zone needs come from what equipment is and does in this brief; walkways reach every work spot."""
+"""Zone needs come from what equipment is and does in this brief; walkways reach every work spot."""
 from labforge.layout.placer import generate_layout, resolve_items
 from labforge.layout.safety import choose_kinds, derive_zones, load_rules, zone_needs
 from labforge.layout.validate import walkway_unreachable

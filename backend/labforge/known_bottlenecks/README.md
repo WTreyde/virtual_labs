@@ -10,7 +10,7 @@ Run `cd backend && python -m labforge.known_bottlenecks.run` (local catalog, no 
 | XChem harvesting with Shifter ~103 crystals/h (same paper) | crystal harvesting | harvest bench, 98% busy | 730 vs 824 crystals per 8 h (−11%) |
 | OT-2 pendant-drop surface tension module ([npj Comput Mater 2025](https://www.nature.com/articles/s41524-025-01842-9), open [data and code](https://doi.org/10.5281/zenodo.17232763)) | surfactant equilibration, not the robot ("These equilibration times place limitations on the throughput rate of the platform") | OT-2 100% busy (one instrument); most sensitive input: explore-phase equilibration time | P10–P50–P90 8.9–11.0–17.5 vs 6–16 surfactants/day (paper's 90 min to 4 h each); ranges overlap |
 
-Figures are from the simulator on `main` at 8ed4eae. On Maxim's rewrite (PR #1) all three still match, with errors of +15%, −9% and −9%.
+Figures are from the simulator on `main` at 8ed4eae. On the simulator rewrite (PR #1) the first three still match, with errors of +15%, −9% and −9%.
 
 What-if on Burger: halving GC time roughly doubles throughput (5.5 → 11.5 batches/day) and GC stays the limit; a second GC gives 11, a third 14, where photolysis starts to bind.
 
@@ -35,4 +35,4 @@ What-if on the OT-2 case (same seeds): halving the equilibration waits gives 11.
 ## Missing for a stronger test
 - A sourced charging pattern for the Liverpool robot (the downtime model exists; the input does not). Operator shifts are modelled but unused in these cases.
 - Batching (`batch_size`), e.g. A-Lab box furnaces holding several crucibles; then A-Lab (4 box furnaces, 1 XRD, 353 experiments in 17 days, [Szymanski et al. 2023](https://www.nature.com/articles/s41586-023-06734-w)) becomes a throughput check. Its paper names no bottleneck.
-- The equipment here lives in `cases.py`, not Strand B's catalog.
+- The equipment here lives in `cases.py`, not the main catalog.

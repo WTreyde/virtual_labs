@@ -1,4 +1,4 @@
-"""Strand C: the planner agent. Owner: Albert.
+"""The planner agent.
 
 `run_turn(history)` takes the chat so far, lets Claude call tools until it is done, and returns
 the new assistant messages plus any LabSpec/Workflow/Layout/SimResult it produced.
@@ -212,7 +212,7 @@ def run_turn(history: list[dict], max_steps: int = 12, on_event=None, stream_tex
         status_message = 'The model declined this request; no completed live design was produced.'
     elif stop_reason == 'backend_contract_error':
         status = 'blocked_by_backend'
-        status_message = 'A backend output failed its contract; the integrator must repair it before retrying.'
+        status_message = 'A backend output failed its contract; the backend must be fixed before retrying.'
     elif completed:
         status = 'completed'
         status_message = 'The model completed this turn.'

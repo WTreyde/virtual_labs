@@ -2,7 +2,7 @@ import { scheduleMC } from "./schedulecase";
 import type { BenchTask, InstrumentOptimisation, Leaderboard, ProjectRequest, ProjectSchedule, ValidationRow } from "./types";
 
 /**
- * Strand A: modal views over the game. Vendor what-if (POST /optimise) and project schedule (POST /prioritise).
+ * Modal views over the game. Vendor what-if (POST /optimise) and project schedule (POST /prioritise).
  * Charts are plain SVG strings: one axis each, recessive grid, thin marks, legends for 2+ series, and a hover
  * tooltip from `data-tip` on every mark. Project colours are categorical slots 1-3 of the dataviz reference
  * palette (validated all-pairs on the light frame); the third slot is under 3:1 contrast, so the Gantt also

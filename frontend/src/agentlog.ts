@@ -1,8 +1,8 @@
 import { describe, type AgentEvent } from "./replay";
 
 /**
- * Strand A: the agent log under the BOM total. One collapsible block per planning step, one row per tool call, with
- * status, duration and a one-line summary. Uses the lifecycle events from the planner (Albert's #52): starts and ends
+ * The agent log under the BOM total. One collapsible block per planning step, one row per tool call, with
+ * status, duration and a one-line summary. Uses the lifecycle events from the planner: starts and ends
  * share `event_id`; ends carry `status`, `duration_ms` and `summary`. Older recordings have none of these, so a
  * tool end is paired with the earliest open start of the same tool, and the summary is derived from its output.
  * Durations are shown only when the event reports them; nothing is estimated.

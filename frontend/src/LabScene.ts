@@ -22,7 +22,7 @@ class Path {
 
 
 /**
- * Strand A: the isometric lab. Owner: Roshan.
+ * The isometric lab.
  * Draws the room, zones and instruments as procedural pixel-art sprites sized from catalog footprints,
  * transfer paths, operators and bottleneck speech bubbles. Plates and operators move on the shared sim
  * `clock` from SimResult.timeline; busy instruments show step progress and how many plates they hold.

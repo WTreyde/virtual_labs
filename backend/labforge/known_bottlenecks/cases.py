@@ -1,9 +1,9 @@
-"""Published autonomous labs whose bottleneck the authors report, rebuilt for the Strand D simulator.
+"""Published autonomous labs whose bottleneck the authors report, rebuilt for the LabForge simulator.
 
 Each case has the paper's own numbers (marked `source`), our fill-ins for what the paper does not
 give (marked `placeholder`), the bottleneck the authors name, and the throughput they observed.
 `run.py` simulates each case and checks whether the simulator names the same bottleneck and lands
-near the observed throughput. Equipment lives in a local catalog so Strand B's cache is untouched.
+near the observed throughput. Equipment lives in a local catalog so the main catalog cache is untouched.
 """
 
 # Durations in seconds. One labware unit = one batch rack (Burger) or one crystal plate (XChem).

@@ -1,4 +1,4 @@
-"""Integrator: the one HTTP API the game client talks to. Owner: the integrator.
+"""The one HTTP API the game client talks to.
 
 Run: uvicorn labforge.gateway:app --reload --port 8000
 `make demo` also serves the built game (frontend/dist) from this app, so everything is on one URL.
@@ -45,7 +45,7 @@ class DesignRequest(BaseModel):
     instance_id: str | None = None
 
 
-# LABFORGE_REPLAY_ONLY=1 (the public Hugging Face Space) turns off live agent runs, so no one spends our API credits.
+# LABFORGE_REPLAY_ONLY=1 (a public replay-only deployment, e.g. the Dockerfile) turns off live agent runs, so no API key is used.
 REPLAY_ONLY = os.getenv("LABFORGE_REPLAY_ONLY", "").strip().lower() in {"1", "true", "yes"}
 REPLAY_ONLY_MESSAGE = "Live design is off on this public demo. Open the chemistry or XChem case study to watch a recorded agent run."
 

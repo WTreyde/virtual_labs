@@ -1,4 +1,4 @@
-"""Strand C benchmark arms. Strand D owns hidden checks and scoring.
+"""Benchmark arms. Hidden checks and scoring live in labforge.bench.runner.
 
 python -m labforge.agent.benchmark --arm vanilla --task path/to/task.json
 """

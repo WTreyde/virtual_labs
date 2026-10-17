@@ -1,4 +1,4 @@
-"""Bake offline fallbacks for the demo so case pages and #/schedule work without the backend. Strand A (Roshan).
+"""Bake offline fallbacks for the demo so case pages and #/schedule work without the backend.
 
 Run from the repo root with the backend installed (re-run after replays or the demo queue change):
     python frontend/scripts/cache_offline.py [--force]

@@ -37,7 +37,7 @@ def test_backend_contract_stops_further_model_calls_and_keeps_proposal(monkeypat
     assert out['completed'] is False
     assert out['failed_proposal'] == proposal
     assert 'workflow' not in out and 'sim_result' not in out
-    assert 'integrator' in out['messages'][0]['content']
+    assert 'backend must be fixed' in out['messages'][0]['content']
 
 
 def test_empty_provider_refusal_stops_without_retry_or_crash(monkeypatch):

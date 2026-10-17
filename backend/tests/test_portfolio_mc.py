@@ -1,4 +1,4 @@
-"""Strand D: the recommended project schedule, re-checked under the Monte Carlo simulator's uncertainty."""
+"""The recommended project schedule, re-checked under the Monte Carlo simulator's uncertainty."""
 import copy
 import time
 

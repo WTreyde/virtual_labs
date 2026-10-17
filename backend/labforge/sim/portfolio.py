@@ -1,4 +1,4 @@
-"""Project prioritisation: which order should several projects run through one lab? Owner: Maxim.
+"""Project prioritisation: which order should several projects run through one lab?
 
 Each project is a Workflow (using the lab's equipment instance ids) plus how many labware units it
 needs, an optional priority weight and an optional deadline. We simulate the lab running all

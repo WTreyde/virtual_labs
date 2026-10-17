@@ -1,4 +1,4 @@
-"""Planner-side checks before handing a design to other strands."""
+"""Planner-side checks before handing a design to layout, simulation and verification."""
 import math
 from labforge.catalog.store import load_catalog
 from labforge.contracts import validate

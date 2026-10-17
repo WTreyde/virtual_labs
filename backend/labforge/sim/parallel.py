@@ -1,4 +1,4 @@
-"""Strand D: where Monte Carlo replicates run. Owner: Maxim.
+"""Where Monte Carlo replicates run.
 
 Every job is the keyword arguments of `run_replicate` (plain JSON), so jobs run the same way in
 this process, in local worker processes, or on Modal. Pick with `backend=` or the

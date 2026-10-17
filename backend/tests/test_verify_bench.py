@@ -1,4 +1,4 @@
-"""Strand D verifier and LabDesignBench scoring: recompute everything, catch tampering, score honesty."""
+"""Verifier and LabDesignBench scoring: recompute everything, catch tampering, score honesty."""
 import copy
 import json
 
@@ -127,7 +127,7 @@ def test_unanswered_arm_is_reported_not_scored(monkeypatch):
     assert row["score"] is None and row["tasks_answered"] == 0 and "ANTHROPIC_API_KEY" in row["tasks"][0]["error"]
 
 
-def test_strand_c_answer_shape_is_normalised():
+def test_agent_answer_shape_is_normalised():
     from labforge.bench.runner import normalise
     raw = {"messages": [{"role": "user", "content": "brief"}, {"role": "assistant", "content": "This cannot be met."}],
            "lab_spec": SPEC, "workflow": WORKFLOW, "claims": []}

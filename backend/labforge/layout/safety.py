@@ -1,6 +1,6 @@
-"""Strand D: which equipment needs which safety zone, and the zones drawn around it. Owner: Maxim.
+"""Which equipment needs which safety zone, and the zones drawn around it.
 
-Rules come from catalog/data/safety_rules.json (strand B). Hazards per instrument come from the
+Rules come from catalog/data/safety_rules.json. Hazards per instrument come from the
 catalog's `safety` fields and, when the catalog is silent, are inferred from the spec's hazards
 and the capabilities the instrument runs in this workflow (marked "inferred" in messages).
 """

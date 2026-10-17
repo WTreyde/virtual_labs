@@ -1,4 +1,4 @@
-"""Strand D: place equipment in the room. Owner: Maxim.
+"""Place equipment in the room.
 
 1. Transfer edges come from the workflow graph, weighted by labware flow (fan-out multiplies it).
 2. Greedy start: each arm's ring is filled in workflow order, so a cluster is one stretch of the

@@ -1,4 +1,4 @@
-"""Strand B: the protocol library loads, validates and links to designs."""
+"""The protocol library loads, validates and links to designs."""
 from labforge.contracts import load_example
 from labforge.protocols import for_workflow, index, load_protocols
 

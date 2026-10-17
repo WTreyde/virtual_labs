@@ -1,5 +1,5 @@
 /**
- * Strand A: the landing hero. Our rendered chemistry case (end of its simulation) on the left, a picture of a real
+ * The landing hero. Our rendered chemistry case (end of its simulation) on the left, a picture of a real
  * lab on the right, and glowing data lines running between them: blocky pixel art where they leave the twin,
  * sharpening into smooth glowing lines as they reach the real lab. Pulses flow left to right.
  */

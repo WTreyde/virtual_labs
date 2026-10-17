@@ -28,4 +28,4 @@ In Python: `labforge.orchestrator.build_orchestrator(spec, workflow, layout, cat
 - The dispatch policy is a drum-buffer-rope heuristic from utilisation, not an optimised schedule.
 - Tool definitions describe what the agent should call; they are not drivers. Instruments marked `unconfirmed` or `vendor_software_only` need a verified driver or a person.
 - Aligned with device-description standards such as Anthropic's Model Hardware Standard; not an implementation of it (spec not public).
-- Not yet done (pitch only): run the generated agent against the simulator as a mock lab and score its throughput and safety violations.
+- Not built yet: run the generated agent against the simulator as a mock lab and score its throughput and safety violations.

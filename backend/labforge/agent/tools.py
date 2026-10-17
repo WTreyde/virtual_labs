@@ -1,4 +1,4 @@
-"""Strand C: tools the planner agent can call. Owner: Albert.
+"""Tools the planner agent can call.
 
 Each entry pairs a Claude tool definition with the Python function that runs it.
 Tool functions take and return plain JSON-able dicts that follow /schemas.
@@ -43,7 +43,7 @@ def _layout_and_simulate(lab_spec: dict, workflow: dict) -> dict:
         s.get('batch_size', 1) != 1 or s.get('fan_out', 1) != 1 or
         s.get('mode') in ('manual', 'semi_automated', 'external') for s in workflow['steps'])
     if complex_flow and not hasattr(engine, 'warmup_hours'):
-        result['simulation_limitations'] = ['Installed legacy simulator does not implement output-unit conversion, batch/fan-out or operator shifts, and has no pipeline warm-up. Complex-flow throughput cannot be verified; use the Strand D simulator.']
+        result['simulation_limitations'] = ['Installed legacy simulator does not implement output-unit conversion, batch/fan-out or operator shifts, and has no pipeline warm-up. Complex-flow throughput cannot be verified; use labforge.sim.simulate.']
     return result
 
 
@@ -103,5 +103,4 @@ TOOLS = {
         },
         _layout_and_simulate,
     ),
-    # TODO(Albert): cite_evidence (Amass), record_claim (schemas/claim.schema.json), update_spec.
 }

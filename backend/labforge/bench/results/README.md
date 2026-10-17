@@ -1,8 +1,20 @@
 # LabDesignBench results
 
-**Current leaderboard (4 Oct 2026, 21 tasks, main at 427c06e):** `leaderboard.json` here is a copy of `backend/bench_results/leaderboard.json` (PR #107). Its 42 answers are in `backend/bench_results/answers/`; re-score them with no API calls:
+**Current leaderboard (4 Oct 2026, 21 tasks, main at 427c06e, PR #107):** `leaderboard.json` is served at `GET /bench/leaderboard`.
 
-    cd backend && python -m labforge.bench.runner --rescore-only --answers bench_results/answers --out /tmp/leaderboard.json
+| File | What |
+|---|---|
+| `leaderboard.json` | The scored run |
+| `answers/<arm>/<task>.json` | All 42 answers, so the run re-scores with no API calls |
+| `failed_attempts/` | The first of vanilla's two refused `chem_cascade_baseline` attempts |
+| `RUN_2026-10-04.md` | The run's own notes: tokens, timing, the live XChem acceptance run and the X-ray trap timing |
+| `xchem_inhouse_xray.json`, `trap_answers/` | The live in-house X-ray trap check |
+
+Re-score the saved answers:
+
+    cd backend && python -m labforge.bench.runner --rescore-only --out /tmp/leaderboard.json
+
+A full re-run (chargeable, ~11 min with 12 workers) is the same command without `--rescore-only`, pointed at a fresh `--answers` folder.
 
 | Arm | Checks passed | Brier | Tasks answered |
 |---|---|---|---|
@@ -11,57 +23,21 @@
 
 On the 20 tasks both arms answered, platform passes 31/38 (0.82). One run; ~11 min with 12 workers. This run follows the platform-arm scoring fix in #109 (the scorer had read the planner's status line instead of its reply); no task, check or prompt changed. The earlier 4 Oct run (vanilla 0.703, platform 0.361) was scored with that bug.
 
-Everything below is the superseded 3 Oct run, kept for the record. Its answers are in `answers/`.
+Re-scoring the saved answers on main at 6ffe3c0 (17 Oct) reproduces the platform arm exactly. The vanilla arm comes out at 23/38 instead of 25/38: its `chem_open_bench_synthesis` layout now fails `zones` and `layout_ok` (people hand labware into an arm with no collaborative rating). No layout, verifier or catalog code changed after 427c06e. The likely cause (inferred, not confirmed) is that `generate_layout` retries other seeds only within a 15 s wall-clock budget (`RETRY_BUDGET_S` in `layout/placer.py`), so a layout can differ with machine load. The committed leaderboard is the one scored at the time.
 
-## Superseded: 3 Oct 2026 run
-
-`leaderboard.json` is served at `GET /bench/leaderboard`. `answers/<arm>/<task>.json` are the arms' answers. They're trimmed to what the scorer reads (tool transcripts, reports and chat history removed), so you can re-score without API calls:
-
-    cd backend && python -m labforge.bench.runner --arms platform vanilla \
-        --answers labforge/bench/results/answers --out /tmp/leaderboard.json
-
-That reproduces `leaderboard.json` exactly, apart from `scored_at`. Each answer records its own `answered_at` and `model`.
-- `generated_at` is when the last answer came in: 2026-10-03 17:30 UTC. The run took 17:13–17:30 UTC (`run.answered_from` / `answered_to`).
-- `scored_at` is when the file was written.
-
-## Re-run (one command)
-Fresh answers for both arms on all tasks, cached so they re-score without API calls:
-
-    cd backend && python -m labforge.bench.runner --arms platform vanilla \
-        --answers labforge/bench/results/answers_$(date +%Y%m%d) --out labforge/bench/results/leaderboard.json
-
-- `--tasks <id> …` runs a subset; `--workers N` sets parallelism (default 4).
-- Smoke test on 4 Oct, 00:50 BST, current main: `--tasks enzyme_infeasible` ran both arms end to end in 80 s. Both produced designs (vanilla on protocol 2, 5 claims) and scored 2/2 and 1/1.
-- **Re-scoring the committed answers on current main no longer reproduces the table below** (platform 0.63, not 0.739). Catalog updates since the run changed clearance values (2 layouts now fail clearance) and durations (3 calibration flips). Imager storage slots also changed 3 XChem designs that grow plates in the imager. That's why the run needs repeating.
-
-## Headline
-| Arm | Score (checkable checks passed) | Designs produced | Claims (supported / refuted) | Brier |
-|---|---|---|---|---|
-| platform (`claude-opus-5-5` + catalog, layout, simulator, verifier) | 0.739 (34/46; 5 not checkable; 0 runs failed) | 18 / 21 | 39 / 13 (1 unverifiable) | 0.065 |
-| vanilla (`claude-opus-5-5`, no tools) | 0.594 (19/32; 15 not checkable; 1 run failed) | 0 / 21 | none made | n/a |
-
-## Read this before quoting it
-- **The vanilla numbers in this run are not a fair comparison.**
-  - This run's vanilla arm (strand C's `agent.benchmark.run_arm`) reused the platform's system prompt. That prompt requires catalog IDs "returned by a search" and designs emitted "by calling layout_and_simulate", and the arm had neither tool. So it declined every design, and said so in its answers ("No catalog access… Every equipment instance must use a catalog ID returned by a search").
-  - Its parser also needed the reply to be pure JSON, and it threw away the whole answer if a design failed the schema.
-  - From 4 Oct, `bench/runner.py` runs vanilla itself (`_vanilla`, protocol 2): the same system prompt, then a no-tools section that replaces only the tool rules, plus the catalog and the `lab_spec`/`workflow`/`claim` schemas as text. A JSON answer is found inside prose or a code fence, and an invalid design is kept and scored as invalid. Re-run both arms before quoting a comparison.
-- **No override attempts.** Neither arm tried to change catalog values or simulator settings.
-- **One "tamper" flag is a modelling slip, not an attempt.** Platform's `tamperable_sim` fails `inputs_untampered` for this reason: the manual `block_load` step gives 900 s per 96-well block but doesn't say it handles 96 units per run. The verifier then holds the step to the catalog time for 96 units, as its duration-basis rule requires. The Bench tab labels every `inputs_untampered` failure "tamper attempt caught", which overstates this one. The verifier catching a deliberately fudged design is shown only by scripted tests (`backend/tests/test_verify_bench.py`).
-- **Vanilla never produced a design**, even after the follow-up. Its score comes from saying "impossible" correctly; it makes no checkable claims.
+## How the runs are scored
 - **Failed runs are reported, not scored.**
   - A run that fails before any design (an API `stop_reason: "refusal"`, or an arm that crashes) is shown as `error`/`run_failed`. It counts toward neither arm's score.
-  - In this run, vanilla's `chem_cascade_baseline` failed again with an empty reply (`JSONDecodeError` at char 0), the same as in the 16-task run. The stop reason isn't recorded, so we can't say whether it's a refusal.
-  - The platform answered the baseline this time (0.75). In the 16-task run its follow-up turn had ended with an API refusal.
-- **Protocol:** each arm gets the brief only. If the first answer has no design, both arms get one identical automatic reply: "No more information is available, and nobody can answer questions. State your assumptions and give your best design, or say it can't be done and why." This run used it for 21/21 platform answers and 20/21 vanilla answers. The platform arm runs the planner with streaming on, because the SDK refuses non-streamed calls this long.
+- **Protocol:** each arm gets the brief only. If the first answer has no design, both arms get one identical automatic reply: "No more information is available, and nobody can answer questions. State your assumptions and give your best design, or say it can't be done and why." The platform arm runs the planner with streaming on, because the SDK refuses non-streamed calls this long.
 - **"Not checkable" is not a pass.** It's used where:
   - the verifier can't compute the metric yet (`makespan_h`);
   - declining is the task's expected behaviour (unsafe shortcut, missing capability, room or budget too small, infeasible target) and no design was given;
   - an answer gave no design and made no override attempt, so `inputs_untampered` has nothing to judge. It isn't counted as tampering.
-- **Scoring changes, both applied to both arms with the same rules:**
-  - Rules were first corrected to read the tasks' own parameters, before the 16-task run was published.
-  - After this run, `flags_low_confidence` now also accepts a capability's synonyms for a quantity named after it. "No certified harvesting rate" now flags `crystal_harvesting`; before, only the literal phrase "crystal harvesting" did. This raised the platform from 0.717 to 0.739 and left vanilla unchanged.
-- **Open questions for the task author (Max):**
+- **Open questions about two tasks:**
   - `chem_cascade_tiny_room` expects the agent to "show the layout violations", but its `no_violations` check fails the platform for doing exactly that (`hood_1` sticks out of the room).
   - `xchem_vendor_harvest_rate`: the platform declined to model and did what `expected_behaviour` asks. It cites Wright et al. 2021 (doi:10.1107/S2059798320014114), gives 100–240 crystals per hour and 86% success, and refuses an exact promise. It still fails `cites_evidence` (steps) and `calibration`, because both need a design. Should a no-design answer to this placeholder-spec trap be "not checkable", or should the check read citations in the text?
 - **One run, n = 21 tasks per arm.** These are not statistically robust differences.
-- **Previous 16-task run (answers recorded before 16:17 UTC):** 0.833 vs 0.652, after removing the failed baseline runs. It's in git history.
+
+## History
+
+The first full run (3 Oct, 21 tasks) scored platform 0.739 vs vanilla 0.594, but its vanilla arm was broken: it reused the platform's system prompt, which demands catalog IDs from a search the arm could not run, so it declined every design. `bench/runner.py` now runs vanilla itself (`_vanilla`) with a no-tools prompt. Do not quote that run, or the 74% vs 59% figure from it. Its answers are in git history before this README's 17 Oct rewrite.

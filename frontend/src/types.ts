@@ -1,5 +1,4 @@
 // Hand-written mirrors of /schemas, covering only the fields the client reads.
-// TODO(Roshan): generate from the JSON schemas (e.g. json-schema-to-typescript) once they settle.
 export type Vec3 = { x: number; y: number; z: number };
 export type Confidence = "datasheet" | "literature" | "estimated" | "placeholder";
 export interface UncertainNumber { value: number; low?: number; high?: number; confidence?: Confidence; source?: string }
@@ -120,7 +119,7 @@ export interface Leaderboard {
 /** GET /bench/tasks: the brief, the trap it tests and the behaviour expected of an honest agent. */
 export interface BenchTask { id: string; domain?: string; trap?: string; brief?: string; expected_behaviour?: string }
 
-/** public/replays/<case>.summary.json, written with each recording (Albert): headline facts and known limits. */
+/** public/replays/<case>.summary.json, written with each recording: headline facts and known limits. */
 export interface CaseSummary {
   title?: string; brief?: string; source?: string;
   headline_throughput: { p50: number; p10?: number; p90?: number; unit: string; basis?: string; verified_p50?: number; target?: number };
@@ -128,8 +127,8 @@ export interface CaseSummary {
   budget_vs_bom?: { currency?: string; budget?: number; bom?: number; claim_status?: string; basis?: string };
   gate_passed?: boolean;
   limits?: string[];
-  /** Albert's what-if for growing plates in the imager instead of the hotel (shape may still change). */
+  /** What-if for growing plates in the imager instead of the hotel. */
   imager_growth_whatif?: Record<string, unknown>;
-  /** Verified staffing what-ifs (Albert's #88): variants with verified_p50, band and operator utilisation. */
+  /** Verified staffing what-ifs: variants with verified_p50, band and operator utilisation. */
   imager_staffing_whatifs?: Record<string, unknown>;
 }

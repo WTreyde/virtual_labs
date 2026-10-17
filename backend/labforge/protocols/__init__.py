@@ -1,7 +1,7 @@
-"""Strand B: library of published lab protocols for the Protocols tab. Owner: Max.
+"""Library of published lab protocols for the Protocols tab.
 
 Each protocol in library/<id>.json is paraphrased from an openly accessible source, links to it, records its licence,
-and maps its steps to LabForge capabilities and catalog ids (protocol.schema.json, a Strand B draft). Nothing here
+and maps its steps to LabForge capabilities and catalog ids (protocol.schema.json in this package). Nothing here
 calls the network or an API.
 
     from labforge.protocols import load_protocols, index, for_workflow

@@ -1,6 +1,6 @@
 import type { Design } from "./types";
 
-/** Strand A: the side panel (metrics with uncertainty band, BOM). Owner: Roshan. */
+/** The side panel (metrics with uncertainty band, BOM). */
 export function renderPanel(d: Design) {
   const peek = document.querySelector("#metrics-acc .acc-peek")!; // shown on the folded Throughput bar
   if (!d.workflow.equipment.length) {

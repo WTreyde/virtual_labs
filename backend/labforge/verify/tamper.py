@@ -1,4 +1,4 @@
-"""Strand D: did the agent change inputs it is not allowed to change? Owner: Maxim.
+"""Did the agent change inputs it is not allowed to change?
 
 Protected inputs are catalog values (durations, capacities, transport specs) and the simulator's
 own constants. The bench harness can take a `fingerprint()` before the agent runs and compare it

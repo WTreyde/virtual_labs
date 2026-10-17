@@ -1,13 +1,13 @@
-"""LabDesignBench runner. Owner: Max (tasks) with Maxim (checks, scoring, leaderboard).
+"""LabDesignBench runner.
 
 Two arms answer every task:
 - "vanilla": Claude with no tools, asked to return a design and claims as JSON.
 - "platform": our planner agent with catalog, layout, simulation and verifier.
-Answers come from `labforge.agent.benchmark.run_arm(arm, task)` (strand C) or from cached files
+Answers come from `labforge.agent.benchmark.run_arm(arm, task)` or from cached files
 `<answers_dir>/<arm>/<task_id>.json`. Each answer is scored by the task's hidden checks against a
 design the verifier recomputes itself; results go into a leaderboard JSON for the UI.
 
-A BenchAnswer (plain JSON; ask the integrator before relying on more fields):
+A BenchAnswer (plain JSON; only these fields are read):
     {"task_id", "arm",
      "message": final text to the user,
      "feasible": bool | null          # the agent's own verdict on the brief
@@ -17,8 +17,8 @@ A BenchAnswer (plain JSON; ask the integrator before relying on more fields):
      "sim_config" / "catalog_overrides": {...}        # present only if the agent tried to change them
      "input_fingerprint": str          # optional: labforge.verify.tamper.fingerprint() given to the agent}
 
-Run: python -m labforge.bench.runner --arms platform vanilla --out bench_results/leaderboard.json
-Each answer is saved to bench_results/answers/<arm>/<task_id>.json as it arrives (--answers to change the folder):
+Run: python -m labforge.bench.runner --arms platform vanilla --out labforge/bench/results/leaderboard.json
+Each answer is saved to labforge/bench/results/answers/<arm>/<task_id>.json as it arrives (--answers to change the folder):
 rerun the same command to resume after a crash, or add --rescore-only to score the saved answers again with no agent calls.
 """
 import argparse
@@ -54,7 +54,7 @@ FOLLOW_UP = ("No more information is available, and nobody can answer questions.
 
 def _ask(arm: str, task: dict) -> dict:
     """One answer from an arm, given the brief only (never the checks). Platform: the planner with streaming on (the
-    SDK refuses non-streamed calls this long). Vanilla: `_vanilla` (see there for why not strand C's arm)."""
+    SDK refuses non-streamed calls this long). Vanilla: `_vanilla` (see there for why not agent.benchmark.run_arm)."""
     validate(task, "bench_task")
     if arm == "platform":
         from labforge.agent.planner import run_turn
@@ -98,7 +98,7 @@ def _vanilla_system() -> str:
 
 
 def _vanilla(task: dict) -> dict:
-    """Claude with no tools. Strand C's arm (agent.benchmark.run_arm) reused the platform prompt, which demands catalog
+    """Claude with no tools. The original arm (agent.benchmark.run_arm) reused the platform prompt, which demands catalog
     IDs from a search the arm cannot run, so it declined every design (0/21 on 3 Oct); its parser also needed the
     reply to be pure JSON and dropped the whole answer if a design failed the schema. Here the prompt allows a design,
     a JSON object is found inside prose or a code fence, and an invalid design is kept (the checks report why)."""
@@ -160,7 +160,7 @@ def _json_object(text: str) -> dict | None:
 
 
 def run_arm(arm: str, task: dict) -> dict:
-    """Ask strand C's arm for an answer. No credentials means "not run", never a made-up score.
+    """Ask the agent's arm for an answer. No credentials means "not run", never a made-up score.
 
     Protocol: if the first answer has no design (typically follow-up questions), the arm gets one identical
     automatic reply (FOLLOW_UP) in a fresh message that repeats the brief and its own first reply; the
@@ -211,7 +211,7 @@ def run_failure(answer: dict) -> str | None:
 
 
 def normalise(raw: dict, arm: str, task: dict) -> dict:
-    """Strand C answers carry `messages`; checks read one `message` string. Other fields pass through.
+    """Answers carry `messages`; checks read one `message` string. Other fields pass through.
 
     The planner's own `message` is a status line ("The model completed this turn."), not what it told the
     user, so the assistant text in `messages` wins whenever there is any; the status line is kept apart."""
@@ -266,7 +266,7 @@ def _text(ctx: Context) -> str:
 
 
 # ---------- checks: (ctx, params) -> (passed, note); passed None means "could not be checked" ----------
-# Task params follow bench/tasks (strand B): limiting_capability, missing_capability, reason, capabilities,
+# Task params follow bench/tasks: limiting_capability, missing_capability, reason, capabilities,
 # quantities, fields, hazards/zones, protected, all_catalog_ids_exist, metric.
 
 # Where declining or saying "impossible" is the right answer, a missing design is not a failure.
@@ -615,10 +615,10 @@ def _one(values) -> str | None:
 def main():
     ap = argparse.ArgumentParser(description="Run LabDesignBench and write a leaderboard JSON.")
     ap.add_argument("--arms", nargs="+", default=["platform", "vanilla"])
-    ap.add_argument("--answers", type=Path, default=Path("bench_results/answers"),
+    ap.add_argument("--answers", type=Path, default=Path("labforge/bench/results/answers"),
                     help="save each answer here as <arm>/<task_id>.json as it arrives; rerun the same command to resume "
                          "(saved answers are reused, crashed runs are retried)")
-    ap.add_argument("--out", type=Path, default=Path("bench_results/leaderboard.json"))
+    ap.add_argument("--out", type=Path, default=Path("labforge/bench/results/leaderboard.json"))
     ap.add_argument("--list", action="store_true", help="only list tasks and their checks")
     ap.add_argument("--tasks", nargs="+", default=None, help="only these task ids (e.g. a smoke test)")
     ap.add_argument("--workers", type=int, default=12, help="answers fetched in parallel")

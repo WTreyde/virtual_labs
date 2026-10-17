@@ -1,4 +1,4 @@
-"""Strand D: check the agent's claims against independent evidence. Owner: Maxim.
+"""Check the agent's claims against independent evidence.
 
 A claim's `metric` names a value the verifier computes itself, e.g. "throughput.p50",
 "bom.total_usd", "layout.violations" or "bottleneck.lcms_1". The verifier never trusts numbers the
