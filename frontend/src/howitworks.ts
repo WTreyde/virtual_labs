@@ -78,15 +78,6 @@ function modalBadge(x: number, y: number): string {
   </g>`;
 }
 
-function huggingFaceBadge(x: number, y: number): string {
-  return `<g class="hw-brand" aria-label="Hosted on Hugging Face Spaces">
-    <rect x="${x}" y="${y}" width="300" height="76" rx="14" fill="#fff6cf" stroke="#efd77a"/>
-    <image href="${BRANDS}huggingface.svg" x="${x + 12}" y="${y + 8}" width="65" height="60" preserveAspectRatio="xMidYMid meet"/>
-    <text x="${x + 90}" y="${y + 31}" class="hw-brand-name hw-brand-hf">Hugging Face</text>
-    <text x="${x + 90}" y="${y + 56}" class="hw-brand-meta hw-brand-host">Hosted on Hugging Face</text>
-  </g>`;
-}
-
 function pill(x: number, y: number, w: number, label: string, color = C.ink): string {
   return `<rect x="${x}" y="${y}" width="${w}" height="28" rx="8" fill="#fff" stroke="${color}" stroke-opacity=".32"/>
     <text x="${x + w / 2}" y="${y + 18}" text-anchor="middle" class="hw-pill">${esc(label)}</text>`;
@@ -110,7 +101,6 @@ function diagram(): string {
     "Builds the workflow, selects real equipment, calls tools, reads bottlenecks and revises the design.", C.agent,
     "backend/labforge/agent/planner.py — the Claude tool-use loop.", "REASONING LOOP"));
   s.push(claudeBadge(538, 132));
-  s.push(huggingFaceBadge(838, 165));
   s.push(pill(342, 245, 104, "LabSpec", C.agent));
   s.push(pill(456, 245, 112, "Workflow", C.agent));
   s.push(pill(578, 245, 108, "Claims", C.agent));
@@ -141,7 +131,7 @@ function diagram(): string {
   s.push(arrow("M430 300V340H203V382", C.evidence, "evidence", 322, 329));
   s.push(arrow("M515 300V382", C.engine, "simulate", 523, 345));
   s.push(arrow("M625 300V340H982V382", C.verify, "claims", 902, 329));
-  // Refuted claims go back to the planner: up from the verifier, under the Hugging Face badge, into the planner.
+  // Refuted claims go back to the planner: up from the verifier, into the planner.
   s.push(arrow("M1100 382V270H713", C.verify, "refute → revise", 868, 262, true));
 
   s.push(`<text x="32" y="635" class="hw-section">CHECKED DESIGN CONTRACT</text>`);
@@ -196,8 +186,6 @@ function diagramTall(): string {
   const sub = "The model plans; evidence and simulation test the design; an independent verifier checks the claims.";
   s.push(multiline(16, y, sub, 300, "hw-subtitle", 20));
   y += lines(sub, 300) * 20 + 10;
-  s.push(huggingFaceBadge((W - 300) / 2, y));
-  y += 100;
 
   const brief = "Target, room, budget, shifts and scientific constraints.";
   const hBrief = panelH(brief, false);

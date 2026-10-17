@@ -498,9 +498,7 @@ body.page-view #alerts-btn, body.on-landing #alerts-btn { display: none !importa
 #modal .hw-svg .hw-title { font-size: 17px; font-weight: 740; letter-spacing: -0.015em; }
 #modal .hw-svg .hw-body { font-size: 12.5px; fill: #5d6677; }
 #modal .hw-svg .hw-brand-name { font-size: 15px; font-weight: 760; }
-#modal .hw-svg .hw-brand-hf { font-size: 18px; }
 #modal .hw-svg .hw-brand-meta { font-size: 7px; font-weight: 720; fill: #8a5a48; letter-spacing: 0.12em; }
-#modal .hw-svg .hw-brand-host { font-size: 13px; font-weight: 700; fill: #79631a; letter-spacing: 0.01em; }
 #modal .hw-svg .hw-pill { font-size: 11px; font-weight: 650; }
 #modal .hw-svg .hw-arrow { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 #modal .hw-svg .hw-flow-label { font-size: 10.5px; font-weight: 680; paint-order: stroke; stroke: #fbfbf5; stroke-width: 5px; stroke-linejoin: round; }
