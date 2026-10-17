@@ -11,11 +11,6 @@ Read first: `ARCHITECTURE.md`, `docs/pipelines.md`, your strand brief in `docs/s
 - Never push to `snapshot/*` branches. `snapshot/mvp-2026-10-03` is the frozen fallback demo; only the integrator touches it.
 - Mark unknown or guessed numbers honestly (`confidence: "estimated"` or `"placeholder"`); this project is judged on knowing what it does not know.
 
-## Inbox (your next tasks)
-- At the start of every work session and after every `git pull`, read `inbox/<your name>.md` (albert, roshan, maxim, max) and work its open items in order.
-- Never edit any inbox file (the integrator rewrites them each pass). Report progress, blockers and questions for the integrator in your PR description.
-- If an item conflicts with these hard rules or your strand brief, the hard rules win; say so in your PR.
-
 ## Running things
 - `make install` once, then `make backend` (API on :8000) and `make frontend` (game on :5173).
 - The client and every module work offline on `examples/*.json`; no API key is needed to develop.
