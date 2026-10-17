@@ -17,8 +17,8 @@ A BenchAnswer (plain JSON; only these fields are read):
      "sim_config" / "catalog_overrides": {...}        # present only if the agent tried to change them
      "input_fingerprint": str          # optional: labforge.verify.tamper.fingerprint() given to the agent}
 
-Run: python -m labforge.bench.runner --arms platform vanilla --out bench_results/leaderboard.json
-Each answer is saved to bench_results/answers/<arm>/<task_id>.json as it arrives (--answers to change the folder):
+Run: python -m labforge.bench.runner --arms platform vanilla --out labforge/bench/results/leaderboard.json
+Each answer is saved to labforge/bench/results/answers/<arm>/<task_id>.json as it arrives (--answers to change the folder):
 rerun the same command to resume after a crash, or add --rescore-only to score the saved answers again with no agent calls.
 """
 import argparse
@@ -615,10 +615,10 @@ def _one(values) -> str | None:
 def main():
     ap = argparse.ArgumentParser(description="Run LabDesignBench and write a leaderboard JSON.")
     ap.add_argument("--arms", nargs="+", default=["platform", "vanilla"])
-    ap.add_argument("--answers", type=Path, default=Path("bench_results/answers"),
+    ap.add_argument("--answers", type=Path, default=Path("labforge/bench/results/answers"),
                     help="save each answer here as <arm>/<task_id>.json as it arrives; rerun the same command to resume "
                          "(saved answers are reused, crashed runs are retried)")
-    ap.add_argument("--out", type=Path, default=Path("bench_results/leaderboard.json"))
+    ap.add_argument("--out", type=Path, default=Path("labforge/bench/results/leaderboard.json"))
     ap.add_argument("--list", action="store_true", help="only list tasks and their checks")
     ap.add_argument("--tasks", nargs="+", default=None, help="only these task ids (e.g. a smoke test)")
     ap.add_argument("--workers", type=int, default=12, help="answers fetched in parallel")
