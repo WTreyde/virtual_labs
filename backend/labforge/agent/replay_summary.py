@@ -69,7 +69,7 @@ def _load_imager_whatif(run):
     if path.is_file():
         return json.loads(path.read_text())
     # The 50-replicate replay deliberately has no 10-replicate imager-only result beside it.
-    # Its current evidence is the separately verified staffing bundle from inbox item 6.
+    # Its current evidence is the separately verified staffing bundle (scenarios_20261004_staffing_whatifs).
     staffing = source_dir.parent / 'scenarios_20261004_staffing_whatifs' / 'summary.json'
     if source_dir.name == 'scenarios_20261004_resim50' and staffing.is_file():
         return {'kind': 'imager_staffing_bundle', 'summary': json.loads(staffing.read_text())}

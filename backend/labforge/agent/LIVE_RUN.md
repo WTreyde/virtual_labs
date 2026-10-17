@@ -1,4 +1,6 @@
-# Agent setup and local demo
+# Planner agent: setup and live runs
+
+The hosted demo (https://wtreyde.github.io/virtual_labs/) is replay-only. Live agent runs happen locally and need your own Anthropic API key; everything else in the repo works offline.
 
 ## Install
 
@@ -26,32 +28,27 @@ ANTHROPIC_WORKSPACE_ID=
 
 Use an Anthropic API key, preferably scoped to your intended workspace. For an unscoped
 key, set `ANTHROPIC_WORKSPACE_ID` to the workspace ID: the client sends the required
-`anthropic-workspace-id` header. The account needs API access and sufficient billing credits.
-The model can be overridden with a model ID available to your account. Amass credentials
-are not required for the current two-tool planner; evidence retrieval is not wired in yet.
+`anthropic-workspace-id` header. The account needs API access and billing credits.
+The model can be overridden with a model ID available to your account.
 
 `.env` is Git-ignored. Do not commit credentials or paste them into chat. Keys remain on
 the Python server, never in the browser. Shell environment variables take precedence.
 Restart the server after editing credentials because loaded values remain in its environment.
+Without a key, the gateway's chat serves the offline worked example; with
+`LABFORGE_REPLAY_ONLY=1` it turns live chat off entirely.
 
-## Start the test UI
+## Start the agent workbench
 
 ```bash
 PYTHONPATH=backend .venv/bin/python -m labforge.agent.test_ui
 ```
 
-Open http://127.0.0.1:8011. Use `--port 8012` if that port is occupied.
-For credentials in another checkout, explicitly select that file:
-
-```bash
-env -u ANTHROPIC_API_KEY -u ANTHROPIC_WORKSPACE_ID \
-  PYTHONPATH=backend .venv/bin/python -m labforge.agent.test_ui \
-  --env-file /absolute/path/to/virtual_labs/.env
-```
-
-This example clears shell overrides for key/workspace. No copying between checkouts is needed.
-The workbench is a local debugging interface, separate from the team's main frontend.
-It binds to loopback and requires a page-generated token for run requests.
+Open http://127.0.0.1:8011. Use `--port 8012` if that port is occupied, and
+`--env-file /absolute/path/to/.env` to load credentials from another checkout (clear
+shell overrides with `env -u ANTHROPIC_API_KEY -u ANTHROPIC_WORKSPACE_ID` first).
+The workbench is a local debugging interface, separate from the game client. It binds to
+loopback and requires a page-generated token for run requests. It needs neither Node.js
+nor the game client.
 
 ## Try the decision loop
 
@@ -72,18 +69,19 @@ Other useful prompts:
 - Add a second liquid handler if the catalog and remaining budget permit, then rerun and compare throughput.
 - Can the catalog support LC-MS quality control? Disclose missing capabilities instead of inventing equipment.
 
-The system prompt is visible in the UI. Tool events expose actions and inputs/results,
+The system prompt is visible in the workbench. Tool events expose actions and inputs/results,
 not private model reasoning. Tool events and assistant text stream as they occur; the final
-response contains the full recommendation. The claims/report panel shows checked results. Follow-ups retain model/tool history. Offline fixture mode calls neither
-Claude nor the simulator and must not be presented as a successful live run.
+response contains the full recommendation. Follow-ups retain model/tool history. Offline
+fixture mode calls neither Claude nor the simulator and must not be presented as a live run.
 
 A design turn can return messages, LabSpec, Workflow, Layout, SimResult, claims, Brier score,
 evidence searches, report_markdown, history, completed and verification_complete.
-verification_complete means the requested classes of checks were submitted, not that
-all claims were supported or that the design is feasible. A follow-up-question turn may return only text and history. A completed
-turn is not necessarily a completed design. Simulation numbers are model-based estimates.
+`verification_complete` means the requested classes of checks were submitted, not that
+all claims were supported or that the design is feasible. A follow-up-question turn may
+return only text and history. A completed turn is not necessarily a completed design.
+Simulation numbers are model-based estimates.
 
-## CLI and checks
+## CLI
 
 ```bash
 PYTHONPATH=backend .venv/bin/python -m labforge.agent.cli \
@@ -96,8 +94,6 @@ PYTHONPATH=backend .venv/bin/python -m labforge.agent.cli \
   > /tmp/labforge-followup.json
 
 PYTHONPATH=backend .venv/bin/python -m labforge.agent.cli --offline --brief demo
-PYTHONPATH=backend .venv/bin/python -m unittest labforge.agent.test_first_layer labforge.agent.test_workbench labforge.agent.test_track
-.venv/bin/python validate_examples.py
 ```
 
 The CLI also accepts `--env-file /absolute/path/to/.env`. Exit codes: 0 = completed turn,
@@ -113,12 +109,12 @@ The CLI also accepts `--env-file /absolute/path/to/.env`. Exit codes: 0 = comple
 | Model unavailable | Set `ANTHROPIC_MODEL` to a model your account can access, then restart. |
 | Billing/rate limit | Check API credits/access; wait or reduce requests for rate limits. |
 | No equipment matches | This is a catalog coverage gap; the planner should disclose it. |
-| Tool validation error | The model can repair its proposal; persistent errors require checking shared contracts. |
+| Tool validation error | The model can repair its proposal; persistent errors mean a contract in `schemas/` is not met. |
 | Port already in use | Stop the previous server or choose another `--port`. |
 
-The UI includes redacted API error details. Never include keys in screenshots or bug reports.
+The workbench shows redacted API error details. Never include keys in screenshots or bug reports.
 
-## Implemented tools and team integration
+## Tools
 
 | Tool | Responsibility |
 |---|---|
@@ -128,59 +124,132 @@ The UI includes redacted API error details. Never include keys in screenshots or
 | verify_claims | Backend-held throughput, layout and BOM consistency checks |
 | create_report | Deterministic summary, BOM, checked claims, refutation history, assumptions and unknowns |
 | optimise_instrument | Hypothetical cycle-time/capacity sweeps, elasticity, headroom and next bottleneck |
+| plan_projects | Order and mix several projects on one lab (see below) |
 
 Amass is optional: set `AMASS_API_KEY` for read-only search. Endpoint and Bearer authentication
 follow [Amass API docs](https://api.amass.tech/api/doc). No full texts are requested.
-The cache defaults to `~/.cache/labforge/evidence`; set shell variable `LABFORGE_EVIDENCE_CACHE`
+The cache defaults to `~/.cache/labforge/evidence`; set `LABFORGE_EVIDENCE_CACHE`
 to choose another location. Unconfigured access, failed retrieval and empty results are
 explicit. Retrieved papers are candidates, not automatic validation of duration/yield values.
 Duration citations and workflow evidence must reference catalog/retrieved sources from the turn;
 the model must still justify relevance. Unsupported durations remain estimates.
 
 Verification accepts claims only. It uses the last backend-held design/results, ignoring
-model-supplied statuses and observed values. For a previous turn, the proposal is recomputed
-rather than trusting serialized simulator results. A revised design clears current checked claims; the audit retains historical checks. Additional
-verification batches for one design preserve earlier claims and refutations. Per-step capacity
-checks supply deterministic processing-time bounds and minimum parallel slots, rather than
-relying on mental arithmetic. These bounds are optimistic and do not prove throughput.
+model-supplied statuses and observed values, and passes the backend-held LabSpec to the
+independent verifier. For a previous turn, the proposal is recomputed rather than trusting
+serialized simulator results. A revised design clears current checked claims; the audit
+retains historical checks. Additional verification batches for one design preserve earlier
+claims and refutations. Per-step capacity checks supply deterministic processing-time bounds
+and minimum parallel slots; these bounds are optimistic and do not prove throughput.
 Unknown equipment costs make BOM assertions unverifiable. Brier scores demonstrate model-based
-consistency scoring; this small demo cannot establish calibration in actual laboratories.
+consistency scoring; a small demo cannot establish calibration in actual laboratories.
 
-For gateway streaming, the integrator can use:
+Backend output contract errors stop the loop with `stop_reason=backend_contract_error` and
+retain `failed_proposal`; the model is not asked to redesign around a backend/schema defect.
+Refusals (`stop_reason=refusal`) end the turn with status `declined_by_model`.
 
-```python
-from fastapi.responses import StreamingResponse
-from labforge.agent.streaming import stream_turn
+### Workflow rules worth knowing
 
-# In a gateway route that already validates ChatRequest:
-return StreamingResponse(stream_turn(req.messages), media_type="text/event-stream")
-```
+- Non-plate workflows need exactly one terminal counting step with positive
+  `params.units_per_labware`, and that sink must have no successor.
+- Catalog `process.duration_basis` is a capability-to-unit map. For example the Shifter gives
+  `durations_s.crystal_harvesting = 35` with `duration_basis.crystal_harvesting = "crystal"`.
+  Workflow durations describe one processing run: declare numeric `params.units_per_run`
+  (mount attempts) and scale per-crystal time and bounds by it. For 32 attempts the catalog
+  mean is 1120 s and its low bound 480 s; planner validation rejects durations below the scaled
+  floor, and the verifier restores a too-short proposal on the same basis.
+- External and in-silico steps (e.g. synchrotron diffraction) need no local catalog instrument.
+  XChem designs must keep manual harvesting and external diffraction, with no in-house X-ray.
+- Puck loading is operator-attended handling (`manual_bench` or `cryo_cooling`); the dry
+  shipper is a storage/transit container.
 
-SSE frames are JSON `data:` events: model_call, text_delta, tool_start, tool_end,
-tool_error, result or error, with keepalive comments. Preserve `result.output.history`
-on the next request. The existing /chat route can still call run_turn synchronously.
-A disconnect stops further calls at the next event boundary; an in-flight API call may finish.
-No gateway/frontend/schema changes are included in this strand.
+## Streaming
 
-For Strand D's benchmark runner, import:
+`POST /chat/stream` on the gateway wraps `labforge.agent.streaming.stream_turn` in a
+`StreamingResponse`. SSE frames are JSON `data:` events: model_call, text_delta, tool_start,
+tool_end, tool_error, result or error, with keepalive comments. Send `result.output.history`
+back on the next request. `POST /chat` runs the same turn synchronously. A disconnect stops
+further calls at the next event boundary; an in-flight API call may finish.
+
+## Benchmark arms
 
 ```python
 from labforge.agent.benchmark import run_arm
 answer = run_arm("platform", task)  # or "vanilla"
 ```
 
-Both arms receive only task.brief, never hidden checks or trap labels. The vanilla arm
-has no tools and cannot return trusted simulation/verification results. The scoring runner
-must independently evaluate proposals; Strand D owns the checks and leaderboard wiring.
+Both arms receive only `task.brief`, never hidden checks or trap labels. Scoring, the
+leaderboard and the vanilla arm actually used for the published results live in
+`labforge.bench.runner` (see `backend/labforge/bench/results/README.md`).
 
 ```bash
 PYTHONPATH=backend .venv/bin/python -m labforge.agent.benchmark \
   --arm vanilla --task backend/labforge/bench/tasks/enzyme_infeasible.json
 ```
 
-## Validation and remaining integration
+## Project scheduling
 
-Run all backend checks with live credentials explicitly disabled for offline tests:
+`plan_projects(lab_spec, projects)` wraps `labforge.sim.portfolio.prioritise`. Every project
+has an ID, a validated Workflow on the shared lab, a positive integer `units` count of
+workflow labware units, and optional positive `weight` and nonnegative `deadline_h`.
+Shared equipment IDs must identify the same catalog item in all projects. The tool supports
+up to six projects and 1000 total units; batch_size and fan_out must be 1. The returned
+`project_schedule` validates against the shared schema. Scheduling leaves the current design
+and checked claims unchanged. It compares mean-duration release policies and omits transfers,
+operator shifts and stochastic failures; `prioritise` re-checks the recommendation with Monte
+Carlo replicates (see `docs/prioritisation.md`).
+
+## Validation runner
+
+`labforge.validation.runner` delegates to `labforge.agent.validation_cases.design_from_brief`.
+Only `case.brief` is sent to Claude; reported costs, notes and sources are withheld. Missing
+credentials, follow-up questions, unsupported catalogs or incomplete planning return no design,
+not a fixture or invented estimate.
+
+## Recording live runs
+
+All of these make chargeable Claude calls.
+
+**Live gate** (fixed baseline, an inflated target, one equipment revision, vendor sensitivity):
+
+```bash
+PYTHONPATH=backend .venv/bin/python -m labforge.agent.live_gate \
+  --env-file /absolute/path/to/.env --out /tmp/labforge-live-gate
+```
+
+It writes each transcript before advancing, then checks completion, refutation, unchanged
+assumptions and throughput improvement. `--resume-baseline /path/to/baseline.json` reuses a
+completed baseline. A pass demonstrates live orchestration, not a buildable physical lab.
+
+**Demo scenarios** (the chemistry and XChem briefs):
+
+```bash
+ANTHROPIC_MODEL=claude-opus-5-5 PYTHONPATH=backend .venv/bin/python \
+  -m labforge.agent.demo_scenarios --env-file /absolute/path/to/.env \
+  --out /tmp/labforge-scenarios --live
+```
+
+Omit `--live` for a catalog coverage check only. `--scenario chemistry` or `--scenario xchem`
+runs one. Results are credential-redacted and written as events arrive, with the API stop
+reason. Success requires the complete pipeline, simulation, checked claims and report; exit
+status 2 signals unmet gates. A gate pass means complete orchestration and checked claims, not
+that the target, budget or layout are feasible: inspect refuted claims and layout violations.
+`--hotel-whatif` adds a second turn if an incubation resource is the busiest instrument, writing
+`xchem-whatif.json` beside the untouched baseline.
+
+**Updating the game's replays.** Copy a recording with
+`frontend/scripts/copy_replays.py <record-directory> <chem|fbdd>`, then regenerate the landing
+summaries (exact recorded P10/P50/P90, independent P50, busiest instrument, BOM versus budget,
+refuted claims):
+
+```bash
+PYTHONPATH=backend .venv/bin/python -m labforge.agent.replay_summary frontend/public/replays
+```
+
+Never replace a baseline with a what-if. The recordings behind the current replays, and the
+earlier ones, are indexed in [`demo/README.md`](demo/README.md).
+
+## Tests
 
 ```bash
 env ANTHROPIC_API_KEY= AMASS_API_KEY= PYTHONPATH=backend \
@@ -190,160 +259,4 @@ env ANTHROPIC_API_KEY= AMASS_API_KEY= PYTHONPATH=backend \
 
 Tests cover model/tool orchestration, refutation and revision, history replay, secret redaction,
 Amass envelopes and cache, the no-tools benchmark arm, streaming, unknown prices, and a real
-simulator-to-verifier run. The live multi-turn gate passed on 2026-10-03; a condensed transcript is saved in
-`demo/live_gate_20261003.json`. It demonstrates orchestration, not physical validation.
-
-Team dependencies: chemistry/FBDD catalog coverage, simulator batch/fan-out/shift/external-step
-semantics, gateway/frontend history and SSE wiring, and benchmark hidden checks/scoring.
-A layout screenshot/PDF remains the frontend's responsibility. Review simulator limitations
-before interpreting any complex workflow. Model-based checks do not validate a physical lab.
-
-## Repeatable live gate
-
-```bash
-PYTHONPATH=backend .venv/bin/python -m labforge.agent.live_gate \
-  --env-file /absolute/path/to/.env --out /tmp/labforge-live-gate
-```
-
-This makes chargeable Claude calls for a fixed baseline, an inflated target, one equipment
-revision, and vendor sensitivity comparison. It writes each transcript/result before advancing,
-then checks completion, refutation, unchanged assumptions and throughput improvement.
-Use `--resume-baseline /path/to/baseline.json` to reuse an already completed baseline.
-A passing gate demonstrates live orchestration under the model, not a buildable physical lab.
-Layout violations must remain visible even when numerical throughput improves.
-
-Max's validation runner now delegates to `labforge.agent.validation_cases.design_from_brief`.
-Only case.brief is sent to Claude; reported costs, notes and sources are withheld. Missing
-credentials, follow-up questions, unsupported catalogs or incomplete planning return no design,
-not a fixture or invented estimate. The current seed briefs omit essential requirements and
-still require catalog expansion and source verification before headline cost validation.
-
-The workbench and game gateway load code once at startup. Restart both after updating the
-branch. For a separate gateway port, use frontend environment `VITE_API=http://127.0.0.1:8001`.
-
-The saved gate produced 47.0 plates/day at baseline and refuted the unchanged design's
-100-plate target. Adding a second handler improved P50 to 93.3 but still missed the target
-and introduced a layout overlap. Both vendor sweeps ran without changing the design.
-Cycle-time sweeps scale entire workflow steps, including all parallel candidates; capacity
-sweeps change only the selected instance. Tool metadata and prompts disclose this distinction.
-The saved vendor response predates that disclosure; interpret its handler gains as step-wide.
-The sensitivity baseline uses 48 hours and 8 replicates, so it differs from the main simulation.
-Amass was unconfigured in this run; all duration estimates remain explicitly unvalidated.
-
-## Project scheduling
-
-`plan_projects(lab_spec, projects)` wraps `labforge.sim.portfolio.prioritise`. Every project
-has an ID, a validated Workflow on the shared lab, a positive integer `units` count of
-workflow labware units, and optional positive `weight` and nonnegative `deadline_h`.
-Shared equipment IDs must identify the same catalog item in all projects. The interactive
-tool supports up to six projects and 1000 total units; batch_size and fan_out must be 1.
-The returned `project_schedule` validates against the shared schema and is exposed in
-the planner response. Scheduling leaves the current design and checked claims unchanged.
-This compares mean-duration release policies; it omits transfers, operator shifts and
-stochastic failures. Monte Carlo confirmation remains Strand D's responsibility.
-
-## Chemistry and XChem acceptance
-
-```bash
-ANTHROPIC_MODEL=claude-opus-5-5 PYTHONPATH=backend .venv/bin/python \
-  -m labforge.agent.demo_scenarios --env-file /absolute/path/to/.env \
-  --out /tmp/labforge-scenarios --live
-```
-
-Omit `--live` for catalog coverage only. Live mode makes chargeable calls for both full
-demo briefs and stores credential-redacted results without model/tool history. Success
-requires the complete pipeline, simulation, checked claims and report. XChem must retain
-manual harvesting, external diffraction and no in-house X-ray equipment. A catalog-blocked
-response is saved but does not pass the end-to-end gate; exit status 2 signals unmet gates.
-
-On main `3535097`, both live Opus scenario attempts completed but stopped on missing
-catalog entries; neither returned a full design, simulation or checked report. Saved results
-are in `demo/scenarios_20261003/`. Missing equipment is assigned to Max in
-[issue #9](https://github.com/WTreyde/virtual_labs/issues/9). Rerun after catalog expansion.
-External/in-silico steps do not require local catalog instruments; the XChem response's
-suggestion of a service catalog entry is optional, not a prerequisite. The prompt now makes
-that distinction explicit. No in-house diffraction item is required or permitted in this demo.
-
-## Combined-main integration (3 Oct)
-
-The planner passes the backend-held LabSpec to the new independent verifier. Non-plate
-workflows need exactly one terminal counting step with positive `params.units_per_labware`.
-The sink must have no successor; a counter on the assay readout is insufficient when storage
-or hit analysis follows it. Legacy simulator limitations keep throughput unverifiable.
-
-Backend output contract errors stop the loop with `stop_reason=backend_contract_error` and
-retain `failed_proposal` for the owning strand; the model is not asked to redesign around a
-backend/schema defect. The shared layout schema accepts the catalog's vibration_free zones.
-The game retains full model/tool history and uses the checked planner report. Gateway
-`POST /chat/stream` exposes the existing SSE adapter; the game still uses synchronous chat.
-
-The demo runner supports `--scenario chemistry` or `--scenario xchem`, writes events as they
-arrive, and records the API stop reason. Gate success means complete orchestration and
-checked model claims, not that the target, budget or physical layout are feasible. Inspect
-refuted claims and layout violations separately. Missing evidence remains an explicit estimate.
-
-## Repaired demo replay (3 Oct)
-
-`demo/scenarios_20261003_repaired/` contains successful live chemistry and XChem orchestration
-gates, checked reports and animation timelines. Chemistry’s brief is an abstract equipment-demand
-request, with both reaction stages and powder dosing explicit; the system uses planning templates
-rather than detailed protocol narratives. Refusals remain terminal, clear incomplete results.
-Controlled comparisons do not establish a deterministic word-level refusal trigger.
-
-Puck loading is operator-attended handling (`manual_bench` or `cryo_cooling`), while the dry
-shipper remains a storage/transit container with external shipping/queue assumptions. XChem’s
-gate rejects storage-as-loading and independent P50 gaps above 20%. The recorded planning
-P50 362.7 and independent 376 crystals/day differ by 3.5%, with no catalog duration restoration.
-Both recordings retain refuted feasibility claims and layout issues; passing gates means
-complete orchestration, not a procurement-ready design. See the recordings’ README for Roshan’s
-replay-copy command, metrics, diagnostic limits and owning-strand follow-ups.
-
-## Conditional growth-hotel remedy
-
-After the catalog per-crystal harvesting duration/batch basis and the verifier's matching
-conversion have both merged, fetch main and record a fresh baseline and optional remedy:
-
-```bash
-ANTHROPIC_MODEL=claude-opus-5-5 PYTHONPATH=backend .venv/bin/python \
-  -m labforge.agent.demo_scenarios --env-file /absolute/path/to/.env \
-  --scenario xchem --live --hotel-whatif --out /tmp/labforge-xchem-new-main
-```
-
-`xchem.json` always preserves the first baseline. If a resource used for incubation is the
-busiest instrument (operators excluded from this calendar-time ranking), a second agent
-turn proposes an additional or larger catalog hotel, recomputes layout/simulation, checks
-claims and reports. `xchem-whatif.json` and its event checkpoint are separate: a failed
-remedy cannot overwrite the baseline. This compares a physical equipment proposal, including
-BOM and layout, rather than silently overriding capacity or shortening growth. Timing,
-yield, inspections, shifts and external queues must remain unchanged. Audit the actual
-proposal for those invariants before publishing; report any new bottleneck or no gain.
-
-Copy the baseline with `frontend/scripts/copy_replays.py <committed-record-directory> fbdd`.
-Keep the what-if beside it for review; it is not substituted for the observed baseline.
-The catalog and verifier fixes are now on main via PR #26. Do not reuse a baseline
-recorded against the old 7200-second harvesting placeholder.
-
-## Per-unit catalog times and landing summaries
-
-Catalog `process.duration_basis` is a capability-to-unit map. The Shifter now gives
-`durations_s.crystal_harvesting = 35` and `duration_basis.crystal_harvesting = "crystal"`.
-Workflow durations still describe one processing run: declare numeric
-`params.units_per_run` (mount attempts), multiply per-crystal time and uncertainty
-bounds by the count, and distinguish attempts from successful output. For 32 attempts,
-the mean is 1120 seconds, not 35 seconds per plate. Planner validation requires an
-explicit count and rejects durations below the scaled catalog floor. The independent
-verifier owns checking that the count also agrees with downstream output/fan-out.
-
-The landing assets `frontend/public/replays/{chem,fbdd}.summary.json` report the exact
-recorded planning P10/P50/P90, independent P50, busiest instrument, checked BOM versus
-budget and refuted claims. They do not recompute an old replay against a new catalog.
-After copying a new replay, regenerate both summaries with:
-
-```bash
-PYTHONPATH=backend .venv/bin/python -m labforge.agent.replay_summary frontend/public/replays
-```
-
-PR #26 now scales the independent verifier on the same per-crystal basis. Record the
-fresh XChem baseline before running the hotel what-if, and never replace the baseline
-with a remedy. For 32 attempts, the catalog mean is 1120 seconds and its low bound is
-480 seconds; a 300-second proposal is restored on that basis.
+simulator-to-verifier run. `make check` runs the same suite plus the frontend typecheck.

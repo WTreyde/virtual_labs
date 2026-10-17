@@ -1,6 +1,6 @@
 # LabDesignBench results
 
-**Current leaderboard (4 Oct 2026, 21 tasks, main at 427c06e):** `leaderboard.json` here is a copy of `backend/bench_results/leaderboard.json` (PR #107). Its 42 answers are in `backend/bench_results/answers/`; re-score them with no API calls:
+**Current leaderboard (4 Oct 2026, 21 tasks, main at 427c06e):** `leaderboard.json` here is served at `GET /bench/leaderboard` and is a copy of `backend/bench_results/leaderboard.json` (PR #107). Its 42 answers, the run's own notes and the live XChem and trap checks are in `backend/bench_results/`; re-score the answers with no API calls:
 
     cd backend && python -m labforge.bench.runner --rescore-only --answers bench_results/answers --out /tmp/leaderboard.json
 
@@ -10,6 +10,8 @@
 | vanilla (`claude-opus-5-5`, no tools) | 0.658 (25/38) | 0.192 | 20 / 21 (one API refusal, both attempts kept) |
 
 On the 20 tasks both arms answered, platform passes 31/38 (0.82). One run; ~11 min with 12 workers. This run follows the platform-arm scoring fix in #109 (the scorer had read the planner's status line instead of its reply); no task, check or prompt changed. The earlier 4 Oct run (vanilla 0.703, platform 0.361) was scored with that bug.
+
+Re-scoring the saved answers on main at 6ffe3c0 (17 Oct) reproduces the platform arm exactly. The vanilla arm comes out at 23/38 instead of 25/38: its `chem_open_bench_synthesis` layout now fails `zones` and `layout_ok` (people hand labware into an arm with no collaborative rating). No layout, verifier or catalog code changed after 427c06e, so the cause is not yet known; the committed leaderboard is the one scored at the time.
 
 Everything below is the superseded 3 Oct run, kept for the record. Its answers are in `answers/`.
 
@@ -42,7 +44,7 @@ Fresh answers for both arms on all tasks, cached so they re-score without API ca
 
 ## Read this before quoting it
 - **The vanilla numbers in this run are not a fair comparison.**
-  - This run's vanilla arm (strand C's `agent.benchmark.run_arm`) reused the platform's system prompt. That prompt requires catalog IDs "returned by a search" and designs emitted "by calling layout_and_simulate", and the arm had neither tool. So it declined every design, and said so in its answers ("No catalog access… Every equipment instance must use a catalog ID returned by a search").
+  - This run's vanilla arm (`agent.benchmark.run_arm`) reused the platform's system prompt. That prompt requires catalog IDs "returned by a search" and designs emitted "by calling layout_and_simulate", and the arm had neither tool. So it declined every design, and said so in its answers ("No catalog access… Every equipment instance must use a catalog ID returned by a search").
   - Its parser also needed the reply to be pure JSON, and it threw away the whole answer if a design failed the schema.
   - From 4 Oct, `bench/runner.py` runs vanilla itself (`_vanilla`, protocol 2): the same system prompt, then a no-tools section that replaces only the tool rules, plus the catalog and the `lab_spec`/`workflow`/`claim` schemas as text. A JSON answer is found inside prose or a code fence, and an invalid design is kept and scored as invalid. Re-run both arms before quoting a comparison.
 - **No override attempts.** Neither arm tried to change catalog values or simulator settings.
@@ -60,7 +62,7 @@ Fresh answers for both arms on all tasks, cached so they re-score without API ca
 - **Scoring changes, both applied to both arms with the same rules:**
   - Rules were first corrected to read the tasks' own parameters, before the 16-task run was published.
   - After this run, `flags_low_confidence` now also accepts a capability's synonyms for a quantity named after it. "No certified harvesting rate" now flags `crystal_harvesting`; before, only the literal phrase "crystal harvesting" did. This raised the platform from 0.717 to 0.739 and left vanilla unchanged.
-- **Open questions for the task author (Max):**
+- **Open questions about two tasks:**
   - `chem_cascade_tiny_room` expects the agent to "show the layout violations", but its `no_violations` check fails the platform for doing exactly that (`hood_1` sticks out of the room).
   - `xchem_vendor_harvest_rate`: the platform declined to model and did what `expected_behaviour` asks. It cites Wright et al. 2021 (doi:10.1107/S2059798320014114), gives 100–240 crystals per hour and 86% success, and refuses an exact promise. It still fails `cites_evidence` (steps) and `calibration`, because both need a design. Should a no-design answer to this placeholder-spec trap be "not checkable", or should the check read citations in the text?
 - **One run, n = 21 tasks per arm.** These are not statistically robust differences.

@@ -1,6 +1,8 @@
-# Public, replay-only LabForge demo (Hugging Face Docker Space, or any container host).
-# Builds the game client, then serves it with the API from one uvicorn process on port 7860.
+# Replay-only LabForge demo with the full API, for running locally or on any container host (e.g. Render).
+# Builds the game client, then serves it with the API from one uvicorn process on port 7860:
+#   docker build -t labforge . && docker run -p 8000:7860 labforge   # then open http://localhost:8000
 # Live agent runs are off (LABFORGE_REPLAY_ONLY=1); no API keys are baked in or needed.
+# The hosted demo is the static GitHub Pages build instead (make pages).
 
 FROM node:22-slim AS frontend
 WORKDIR /app

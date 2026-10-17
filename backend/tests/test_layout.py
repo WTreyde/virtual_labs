@@ -1,4 +1,4 @@
-"""Strand D layout behaviour: multi-arm clusters, locked placements, zones, safety and egress checks."""
+"""Layout behaviour: multi-arm clusters, locked placements, zones, safety and egress checks."""
 import copy
 import time
 

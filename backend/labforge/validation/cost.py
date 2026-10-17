@@ -1,4 +1,4 @@
-"""Validation: predicted lab cost with uncertainty, compared like-for-like with a published cost. Owner: Max.
+"""Validation: predicted lab cost with uncertainty, compared like-for-like with a published cost.
 
 Each catalog price gets a range from its provenance, or from its confidence if there is none. Prices are drawn
 lognormally with the catalog value as the median and the range as P10-P90, so a long upper tail widens the band

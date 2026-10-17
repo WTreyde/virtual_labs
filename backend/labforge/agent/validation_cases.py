@@ -1,4 +1,4 @@
-"""Planner adapter for Max's validation runner. Never reveal reported cost to the model."""
+"""Planner adapter for the validation runner. Never reveal reported cost to the model."""
 from labforge.agent.config import load_env
 from labforge.agent.planner import run_turn
 from labforge.agent.validation import validate_design

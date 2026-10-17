@@ -1,6 +1,6 @@
 # Demo pipelines
 
-Two reference workflows the agent should be able to design end to end. Durations are rough planning estimates (marked as such in the catalog with `confidence: estimated`); the agent should cite sources via Amass where it can and widen its uncertainty where it cannot. Instruments named are typical commercial choices, not endorsements; the catalog strand fills in specs.
+Two reference workflows the agent should be able to design end to end. Durations are rough planning estimates (marked as such in the catalog with `confidence: estimated`); the agent should cite sources via Amass where it can and widen its uncertainty where it cannot. Instruments named are typical commercial choices, not endorsements; specs come from the catalog.
 
 Legend for **Mode**: A = automated, S = semi-automated (human loads/unloads), M = manual (human operator), X = external service.
 

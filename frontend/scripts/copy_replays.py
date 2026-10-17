@@ -1,4 +1,4 @@
-"""Copy recorded agent runs into frontend/public/replays/ for ?replay=<name>. Strand A (Roshan).
+"""Copy recorded agent runs into frontend/public/replays/ for ?replay=<name>.
 
 Run from the repo root with the backend installed:
     python frontend/scripts/copy_replays.py <scenarios_dir> <name>...      e.g. ... scenarios_20261003_combined_main fbdd

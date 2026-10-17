@@ -1,4 +1,4 @@
-"""Strand B: equipment catalog. Owner: Max.
+"""Equipment catalog.
 
 The cached catalog lives in data/catalog.json (a list of CatalogItem). scrape.py fills it once;
 everything else only reads it.

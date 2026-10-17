@@ -39,7 +39,7 @@ make install    # backend (pip -e) + frontend (npm)
 make demo       # builds the game and serves it with the API on http://localhost:8000
 ```
 
-Everything works offline from recorded runs. For live agent design, put `ANTHROPIC_API_KEY` in `.env` (see [backend/labforge/agent/LIVE_RUN.md](backend/labforge/agent/LIVE_RUN.md)). For development: `make backend` (API on :8000), `make frontend` (game on :5173), `make check` (tests, schemas, typecheck).
+Everything works offline from recorded runs. For live agent design, put your own `ANTHROPIC_API_KEY` in `.env` (see [backend/labforge/agent/LIVE_RUN.md](backend/labforge/agent/LIVE_RUN.md)). `docker build -t labforge . && docker run -p 8000:7860 labforge` serves the same replay-only app with its API from a container. For development: `make backend` (API on :8000), `make frontend` (game on :5173), `make check` (tests, schemas, typecheck).
 
 ## Demo scenarios
 
@@ -56,6 +56,14 @@ The pipelines are in [docs/pipelines.md](docs/pipelines.md); 20 published protoc
 - **Game client:** an animated isometric view in Phaser 3, plus the BOM, report, validation, schedule and protocols views (`frontend/`).
 - **LabDesignBench:** trap briefs that check whether a lab-design agent admits what can't be done (`backend/labforge/bench/`).
 
-Architecture: [ARCHITECTURE.md](ARCHITECTURE.md). Contracts between components: [schemas/](schemas/).
+Architecture: [ARCHITECTURE.md](ARCHITECTURE.md). Contracts between components: [schemas/](schemas/). Contributing: [CONTRIBUTING.md](CONTRIBUTING.md).
 
-Built at an AI-for-science hackathon (Track 2, "Originator") by a team of five.
+## History
+
+LabForge was built in about 26 hours on 3–4 October 2026 at the AIxScience hackathon (Track 2, "Originator": agents that do science and know when they're wrong) by a team of five, working in four parallel strands (game client, catalog and benchmark, agent, layout and simulation) that met at the JSON contracts in `schemas/`.
+
+- All numbers above come from runs on the final hackathon code (4 Oct). The recorded agent runs behind them are in `backend/labforge/agent/demo/` and `backend/bench_results/`, and are kept unedited.
+- The hackathon's API key has since been revoked, so the hosted demo is replay-only. Live design needs your own key.
+- The public demo first ran as a Hugging Face Space; since October 2026 it is the static GitHub Pages build above.
+- Modal was wired in for the vendor scrape and Monte Carlo fan-out but none of the quoted results used it.
+- The team's working notes (strand briefs, agent prompts, sync rules) are in the git history before this section was added.

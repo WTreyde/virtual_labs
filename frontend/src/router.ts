@@ -1,5 +1,5 @@
 /**
- * Strand A: hash routes for the one-page app. #/ landing, #/cases, #/case/<name>, #/design, #/bench, #/validation,
+ * Hash routes for the one-page app. #/ landing, #/cases, #/case/<name>, #/design, #/bench, #/validation,
  * #/schedule, #/how, #/market, plus the hidden dev route #/gallery. The older query links (?replay=, ?view=, ?demo=gallery) are
  * rewritten to their hash route once at startup, keeping other params such as ?t= and ?select=.
  */

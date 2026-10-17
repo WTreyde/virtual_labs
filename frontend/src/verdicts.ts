@@ -1,7 +1,7 @@
 import type { CaseSummary } from "./types";
 
 /**
- * Strand A: the verifier's verdict on each claim the agent made, shown next to the BOM on case pages, so a passed
+ * The verifier's verdict on each claim the agent made, shown next to the BOM on case pages, so a passed
  * pipeline gate is never the only thing on screen. Read from the recording's checked claims; numbers are the
  * verifier's own (verified_value), with the case summary adding planned throughput where it has it.
  */

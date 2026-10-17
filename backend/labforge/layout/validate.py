@@ -1,4 +1,4 @@
-"""Strand D: layout checks. Owner: Maxim.
+"""Layout checks.
 
 Geometry (overlap, out of room, clearance, keep-out), transport (unreachable transfers), and
 safety from catalog/data/safety_rules.json: hazard zones, a walkway from the door to every

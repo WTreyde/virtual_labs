@@ -21,7 +21,7 @@ import { dialogue, hideStatCard, introLines, onTick, setupClock, showStatCard } 
 import { closeModal, openModal, showError, showHtml, showLeaderboard, showLoading, showSchedule, showValidation, showWhatIf } from "./views";
 
 /**
- * Strand A: the one-page app. Hash routes (see router.ts) pick what the shared game, panel and modal show:
+ * The one-page app. Hash routes (see router.ts) pick what the shared game, panel and modal show:
  * the landing page, a recorded case (replay), live design chat, or a full-page view (bench, validation, schedule).
  */
 
@@ -404,7 +404,7 @@ async function downloadSkill(name: string) {
 // ---- full-page views ----------------------------------------------------------------------------
 
 async function openSchedule() {
-  // The scheduling case: Max's demo queue (three projects on one screening cell); offline, a cached /prioritise run.
+  // The scheduling case: the demo queue (three projects on one screening cell); offline, a cached /prioritise run.
   showLoading("Scheduling case: what order should these projects run in?");
   const { result, projects, cached, deviceNames } = await loadScheduleCase();
   if (route.page !== "schedule") return;

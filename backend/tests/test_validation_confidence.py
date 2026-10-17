@@ -1,4 +1,4 @@
-"""Strand B: cost predictions carry a confidence that reflects the evidence behind each price."""
+"""Cost predictions carry a confidence that reflects the evidence behind each price."""
 from labforge.catalog.store import get
 from labforge.contracts import load_example
 from labforge.validation.cost import bom_estimate, item_evidence, select_price

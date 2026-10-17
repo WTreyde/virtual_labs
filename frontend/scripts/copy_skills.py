@@ -1,4 +1,4 @@
-"""Copy each case's generated agent skill into frontend/public/skills/<case>/ for offline download. Strand A (Roshan).
+"""Copy each case's generated agent skill into frontend/public/skills/<case>/ for offline download.
 
 Run from the repo root after the orchestrator samples change:
     python frontend/scripts/copy_skills.py

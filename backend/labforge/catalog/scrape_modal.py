@@ -1,4 +1,4 @@
-"""Strand B: the one-off vendor scrape, run on Modal. Owner: Max.
+"""The one-off vendor scrape, run on Modal.
 
 Each item in scrape.VENDOR_PAGES becomes one Modal call. Inside it, Claude reads the product page and
 datasheets with the server-side web_fetch / web_search tools and submits a CatalogItem through a tool whose
@@ -33,7 +33,7 @@ SYSTEM = """You extract specs of one commercial lab instrument into a CatalogIte
 Research: use web_fetch on the product page you are given, then web_search / web_fetch for the datasheet,
 brochure or manual (PDFs are best) to find dimensions, weight, throughput, capacity, power and interfaces.
 
-Rules for numbers (this project is judged on knowing what it does not know):
+Rules for numbers (say plainly what is not known):
 - Every number you put in the item (footprint, durations, capacity, speeds, reach, power, lead time) gets an
   entry in `provenance`, keyed by its JSON path (e.g. "footprint.width_m", "process.durations_s.lcms"), with
   value, low, high, confidence and source (the URL it came from, or "agent_estimate").

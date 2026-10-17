@@ -1,4 +1,4 @@
-"""Strand C consistency, evidence and benchmark regression checks."""
+"""Consistency, evidence and benchmark regression checks."""
 import copy
 import json
 import os

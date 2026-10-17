@@ -1,4 +1,4 @@
-"""Cross-strand contracts: new catalog zones and model/tool history survive the gateway."""
+"""Cross-component contracts: new catalog zones and model/tool history survive the gateway."""
 from fastapi.testclient import TestClient
 from unittest.mock import patch
 

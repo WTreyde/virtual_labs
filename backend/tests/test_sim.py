@@ -1,4 +1,4 @@
-"""Strand D simulator behaviour: batches, fan-out, operators with shifts, external and in-silico steps."""
+"""Simulator behaviour: batches, fan-out, operators with shifts, external and in-silico steps."""
 import pytest
 
 from labforge.contracts import errors

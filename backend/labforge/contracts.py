@@ -1,6 +1,6 @@
-"""Shared JSON contracts. Every strand validates what it produces with `validate()`.
+"""Shared JSON contracts. Every component validates what it produces with `validate()`.
 
-The schemas in /schemas are the source of truth; only the integrator changes them.
+The schemas in /schemas are the source of truth; change a schema and its example in `examples/` together.
 """
 import json
 from functools import lru_cache

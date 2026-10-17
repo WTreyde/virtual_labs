@@ -1,4 +1,4 @@
-"""SSE adapter for the integrator's StreamingResponse; no gateway edits required."""
+"""SSE adapter for the gateway's StreamingResponse (POST /chat/stream)."""
 import asyncio
 import threading
 

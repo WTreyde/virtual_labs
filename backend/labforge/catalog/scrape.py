@@ -1,4 +1,4 @@
-"""Strand B: one-off vendor scrape into data/catalog.json. Owner: Max.
+"""One-off vendor scrape into data/catalog.json.
 
 Plan (once, then commit the cached JSON so nobody depends on the network at demo time):
 1. VENDOR_PAGES lists product pages for every instrument in docs/pipelines.md.

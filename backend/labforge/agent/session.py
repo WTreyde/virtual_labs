@@ -126,8 +126,8 @@ class ToolSession:
                     c.update(status='unverifiable', verifier_note='Unknown equipment price or unsupported metric; cannot verify.')
                 checked.append(c)
         else:
-            # Strand D's verifier accepts spec for independent layout/simulation recomputation.
-            # Keep compatibility while its PR is pending on the main gateway.
+            # Pass the backend-held spec so the verifier recomputes layout and simulation itself
+            # (stand-in verifiers in tests may not accept it).
             kwargs = {'spec': d['lab_spec']} if 'spec' in inspect.signature(verify_claims).parameters else {}
             checked = verify_claims(ordinary, d['workflow'], d['layout'], d['sim_result'], **kwargs)
         if d.get('simulation_limitations'):

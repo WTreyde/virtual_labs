@@ -1,4 +1,4 @@
-"""Strand D: Modal app that runs simulation replicates and bench tasks in parallel. Owner: Maxim.
+"""Modal app that runs simulation replicates and bench tasks in parallel.
 
 Deploy once:   cd backend && modal deploy labforge/sim/modal_app.py
 Then:          LABFORGE_SIM_BACKEND=modal make backend   (or simulate(..., backend="modal"))

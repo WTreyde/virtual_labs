@@ -2,7 +2,7 @@ import { marked } from "marked";
 import type { CaseSummary, CatalogItem, Design, InstrumentOptimisation } from "./types";
 
 /**
- * Strand A: ?replay=<name> plays a recorded agent run from /replays/<name>.json at demo speed with no backend
+ * ?replay=<name> plays a recorded agent run from /replays/<name>.json at demo speed with no backend
  * calls: the brief, the agent's tool calls in order, then (if the run produced one) the layout, the timeline
  * animation and the BOM/report; otherwise the agent's own explanation of why it stopped.
  * Files come from backend/labforge/agent/demo (python -m labforge.agent.demo_scenarios), copied by

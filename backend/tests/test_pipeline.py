@@ -1,4 +1,4 @@
-"""Contract tests: every strand's output must validate against /schemas. Keep these green before pushing."""
+"""Contract tests: every component's output must validate against /schemas. Keep these green before pushing."""
 from fastapi.testclient import TestClient
 
 from labforge.agent.report import render_report

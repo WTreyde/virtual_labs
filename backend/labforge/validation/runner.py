@@ -1,4 +1,4 @@
-"""Validation runner: design each published lab from its brief and compare with its real cost. Owner: Max.
+"""Validation runner: design each published lab from its brief and compare with its real cost.
 
 Run: python -m labforge.validation.runner                    (costs every case; writes validation_report.json)
      python -m labforge.validation.runner --design-missing   (first runs the agent ONCE per case with no design)
@@ -28,7 +28,7 @@ def load_cases() -> list[dict]:
 
 
 def design_from_brief(case: dict) -> dict | None:
-    """Delegate to Strand C; reported costs are withheld from the model."""
+    """Delegate to the planner agent; reported costs are withheld from the model."""
     from labforge.agent.validation_cases import design_from_brief as plan
     return plan(case)
 

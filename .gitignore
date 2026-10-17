@@ -6,3 +6,4 @@ dist/
 *.egg-info/
 .pytest_cache/
 validation_report.json
+.DS_Store

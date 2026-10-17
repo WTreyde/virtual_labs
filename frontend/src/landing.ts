@@ -6,7 +6,7 @@ import { startTwinHero, twinHero } from "./twin";
 import type { CaseSummary } from "./types";
 
 /**
- * Strand A: the landing page (#/: pitch and two buttons) and the case-study page (#/cases). Each case subtitle is read
+ * The landing page (#/: pitch and two buttons) and the case-study page (#/cases). Each case subtitle is read
  * from that case's <name>.summary.json (planned vs independently checked throughput, gate, budget, bottleneck), or
  * from the replay itself when there is no summary; never hard-coded, so it stays true when recordings are replaced.
  */

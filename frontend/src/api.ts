@@ -47,7 +47,7 @@ export function exampleDesign(): Design {
 type ChatOut = { reply: string; design: Design; history: ChatMessage[]; declined?: string };
 
 /**
- * A provider refusal ends the turn with status "declined_by_model" and a message (Albert); older backends only
+ * A provider refusal ends the turn with status "declined_by_model" and a message; older backends only
  * report stop_reason "refusal". Returns the message to show, or undefined when the model did not decline.
  */
 export function declineMessage(out: any): string | undefined {

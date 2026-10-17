@@ -1,8 +1,8 @@
 import type { CatalogItem } from "./types";
 
 /**
- * Strand A: the Protocols tab (#/protocols, #/protocols/<id>). Published lab protocols for the two demo pipelines,
- * paraphrased by Strand B and exported statically to public/protocols/ (cd backend && python -m labforge.protocols
+ * The Protocols tab (#/protocols, #/protocols/<id>). Published lab protocols for the two demo pipelines,
+ * paraphrased in backend/labforge/protocols/ and exported statically to public/protocols/ (cd backend && python -m labforge.protocols
  * ../frontend/public/protocols), so it works offline like the replays.
  * Honesty rules from the library README: never present a paraphrase as the official protocol, always show the source
  * link and licence, and show "time not stated by source" where a step has no duration.

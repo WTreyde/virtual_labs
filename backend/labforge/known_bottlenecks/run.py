@@ -14,7 +14,7 @@ _LOCAL = {c["id"]: c for c in CATALOG}
 
 
 def _use_local_catalog():
-    """Point the simulator at this module's catalog without touching Strand B's cache.
+    """Point the simulator at this module's catalog without touching the main catalog cache.
 
     The simulator may import `load_catalog` by name, so patch it there too, and keep replicates in
     this process: worker processes or Modal would not see the patch.

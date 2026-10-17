@@ -1,6 +1,6 @@
 /**
  * A single, static architecture diagram for #/how. Every component shown here
- * maps to code that runs today; sponsor marks sit beside the component they power.
+ * maps to code that runs today; logos of the tools used (Claude, Amass, Modal) sit beside the component they power.
  */
 
 const C = {

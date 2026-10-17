@@ -1,4 +1,4 @@
-"""Strand D: Monte Carlo discrete-event simulation of a workflow on a layout. Owner: Maxim.
+"""Monte Carlo discrete-event simulation of a workflow on a layout.
 
 Model (SimPy, one process per workflow step):
 - Labware tokens flow along the `after` graph through bounded buffers. A step reserves space in

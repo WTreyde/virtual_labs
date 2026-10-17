@@ -1,7 +1,7 @@
 import type { CaseSummary, CatalogItem, Design } from "./types";
 
 /**
- * Strand A: storage capacity facts read from a design, for the stat card and the idle-capacity card. Nothing is
+ * Storage capacity facts read from a design, for the stat card and the idle-capacity card. Nothing is
  * hard-coded: an instrument "stores plates" if it lists a storage capability, its slots come from the catalog
  * (storage_slots, else process.capacity), and busy fractions come from the simulation's utilisation.
  */
@@ -102,7 +102,7 @@ export function beamSecondsPerUnit(d: Design): number | undefined {
 }
 
 /**
- * Verified staffing what-ifs (summary.imager_staffing_whatifs, Albert's #88/#91): each variant's checked P50 and band
+ * Verified staffing what-ifs (summary.imager_staffing_whatifs): each variant's checked P50 and band
  * against the checked baseline, the control (a third operator with growth still in the hotel) first. Gains are shown
  * as joint, never credited to the imager alone; staffing is extra people, not free equipment; and each gain assumes
  * the synchrotron keeps up, with the beam hours it would need at the design's own collection time.

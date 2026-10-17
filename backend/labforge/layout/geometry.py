@@ -1,4 +1,4 @@
-"""Strand D helpers shared by placer and validator. Owner: Maxim."""
+"""Helpers shared by placer and validator."""
 import heapq
 import math
 

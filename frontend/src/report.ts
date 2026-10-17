@@ -4,7 +4,7 @@ import type { Design } from "./types";
 import { openModal, showLoading } from "./views";
 
 /**
- * Strand A: the "Report" button. Renders the /report Markdown as a printable page with a snapshot of
+ * The "Report" button. Renders the /report Markdown as a printable page with a snapshot of
  * the lab scene, shown in-page; the browser's print dialog saves it as PDF. Works offline with a clearly labelled draft.
  */
 
@@ -73,7 +73,7 @@ const PAGE_CSS = `
 
 /**
  * Shows the report in-page (an iframe in the modal) instead of a pop-up window: window.open returns null in
- * sandboxed embeds such as the Hugging Face Space iframe and in some browsers even with pop-ups allowed.
+ * sandboxed embeds (iframes) and in some browsers even with pop-ups allowed.
  * From the modal the report can be printed / saved as PDF, downloaded as HTML, or opened in a new tab.
  */
 export async function openReport(d: Design, snapshot: () => Promise<string | undefined>) {

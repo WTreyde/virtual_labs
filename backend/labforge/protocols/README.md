@@ -1,8 +1,8 @@
-# Protocol library (Strand B)
+# Protocol library
 
 20 published lab protocols for the two demo pipelines in `docs/pipelines.md`: 10 for the chemistry library (HTE setup, powder dosing, parallel synthesis and workup, amide library with SPE, LC-MS QC, acoustic dose-response, TR-FRET screening, Z' validation) and 10 for XChem (expression, Ni-NTA, size exclusion, SDS-PAGE, mosquito drop setting, Echo soaking, Shifter harvesting, cryo-cooling and puck loading, dry-shipper shipping, PanDDA).
 
-- One file per protocol in `library/`, validated against `protocol.schema.json` (a Strand B draft; propose for `schemas/` if the UI adopts it).
+- One file per protocol in `library/`, validated against `protocol.schema.json` in this package (the Protocols tab reads it; it is not part of `schemas/`).
 - Steps are mapped to LabForge capabilities and catalog ids, so a design can find its protocols: `labforge.protocols.for_workflow(workflow)`.
 - Static export for the offline UI: `cd backend && python -m labforge.protocols ../frontend/public/protocols` (writes `index.json` and `<id>.json`).
 

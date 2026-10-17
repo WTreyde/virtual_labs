@@ -1,4 +1,4 @@
-# Validation and vendor optimisation (from judge feedback, 3 Oct)
+# Validation and vendor optimisation
 
 ## 1. Validation against real labs
 
@@ -6,10 +6,12 @@
 
 - Each real lab is a `ValidationCase` (`schemas/validation_case.schema.json`) in `backend/labforge/validation/cases/`: sources, a brief written as a user would type it (no cost in it), the reported cost and **which cost categories it covers** (instruments, robots, analytics, integration labour, construction...). Like-for-like matters: many papers exclude analytics or include building works.
 - `python -m labforge.validation.runner` designs each lab (hand-written workflow, or the agent from the brief), computes P10/P50/P90 predicted cost over price uncertainty, and reports whether the real figure falls inside the band plus the log10 error.
-- Headline for the pitch: "N real labs, reported cost inside our 80% band in K of them, median error X%". Only `verified: true` cases count; a person must check each against its primary source.
+- Only `verified: true` cases count; a person must check each against its primary source.
 - Throughput validation where papers report it (samples/day) uses the same case file.
 
-### Current result (3 Oct, `python -m labforge.validation.runner`; the Validation tab computes the same from `/validation`)
+### First in-sample pass (3 Oct, superseded)
+
+The headline results are the two blind rounds below and the totals in the README. This first pass is kept because the blind rounds were designed against it. The Validation tab computes the current numbers live from `/validation`.
 
 **16 cases, all verified against primary sources; 7 can be costed from the catalog. Reported cost inside our P10–P90 band in 2 of 7; median multiple (our P50 ÷ reported) 1.80x, median |log10 error| 0.26.** Four seed cases with no public cost of known coverage were dropped (CMU Cloud Lab, Edinburgh and Earlham foundries, PoLARIS).
 
@@ -61,7 +63,7 @@ Round 2 (category-corrected): **5 of 6 in band; median 0.75x (we guessed low); 1
 
 **Both blind rounds together (12 cases): 9 of 12 inside the 80% band (75%).** The band holds up. The centre drifts (1.00x, then 0.75x; grants averaged ~16% above purchase prices in the calibration pairs, and that shift is deliberately not applied), and the confidence percentage does not yet beat a constant baseline in either round.
 
-**Slide 6 line:** "Tested blind twice on 12 labs we had never seen, our 80% cost band caught 9 of 12. We show that band, and we say plainly that our single-number confidence score is not yet reliable."
+**Summary:** tested blind twice on 12 labs we had never seen, our 80% cost band caught 9 of 12. We show that band, and say plainly that our single-number confidence score is not yet reliable.
 
 ## 2. Optimisation for vendors
 
@@ -71,12 +73,3 @@ Round 2 (category-corrected): **5 of 6 in band; median 0.75x (we guessed low); 1
 - Output (`schemas/instrument_optimisation.schema.json`): throughput curve with P10–P90, elasticity near baseline (≈0 means "not the limit here"), the next bottleneck, and a plain-language note such as "halving the reader's cycle time raises throughput 40%; after that the LC-MS becomes the limit".
 - Gateway: `POST /optimise` with `instance_id`. UI: a "vendor view" chart when you click an instrument.
 - Demo line: an LC-MS vendor sees that a 30% faster gradient lifts library throughput by Y%, while a faster plate reader would change nothing in this lab.
-
-## Owners
-| Work | Owner |
-|---|---|
-| Find, transcribe and verify validation cases; cost model ranges; validation runner | Max (Strand B) |
-| Agent designs labs from case briefs (`design_from_brief`) | Albert (Strand C) |
-| What-if sweeps, transfer-time and uptime sweeps, Modal parallelism | Maxim (Strand D) |
-| Vendor view chart and validation scatter (predicted vs reported cost) | Roshan (Strand A) |
-| Schemas, `/optimise` and `/validation` routes | Integrator |

@@ -5,7 +5,7 @@ import { loadReplay } from "./replay";
 import type { ProjectRequest, ProjectSchedule } from "./types";
 
 /**
- * Strand A: the scheduling case study (#/case/schedule). Max's demo queue (three projects sharing one existing
+ * The scheduling case study (#/case/schedule). The demo queue (three projects sharing one existing
  * screening cell) run through POST /prioritise, or its cached result offline. Shared by the case card and the page so
  * both show the same numbers.
  */
@@ -33,7 +33,7 @@ export function loadScheduleCase(): Promise<ScheduleCase> {
 
 /**
  * The Monte Carlo check the backend reports in the schedule's caveat (median and P10-P90 over N runs with random step
- * times). The case card and page lead with these medians, the same pair as the README and the pitch; the Gantt and the
+ * times). The case card and page lead with these medians, the same pair as the README; the Gantt and the
  * table stay on average step times. Undefined when the caveat doesn't have the usual shape.
  */
 export interface ScheduleMC { reps: number; rec: number; recLo: number; recHi: number; naive: number; naiveLo: number; naiveHi: number; firstPct: number }
