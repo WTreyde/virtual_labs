@@ -12,6 +12,7 @@ const C = {
   output: "#2767a8",
 };
 
+const BRANDS = `${(import.meta as any).env?.BASE_URL ?? "/"}brands/`;
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 
 function wrap(text: string, width: number): string[] {
@@ -59,28 +60,28 @@ function panel(
 function claudeBadge(x: number, y: number): string {
   return `<g class="hw-brand" aria-label="Claude by Anthropic">
     <rect x="${x}" y="${y}" width="150" height="42" rx="10" fill="#f7eee7"/>
-    <image href="/brands/claude.svg" x="${x + 13}" y="${y + 8}" width="124" height="27" preserveAspectRatio="xMidYMid meet"/>
+    <image href="${BRANDS}claude.svg" x="${x + 13}" y="${y + 8}" width="124" height="27" preserveAspectRatio="xMidYMid meet"/>
   </g>`;
 }
 
 function amassBadge(x: number, y: number): string {
   return `<g class="hw-brand" aria-label="Amass">
     <rect x="${x}" y="${y}" width="116" height="42" rx="10" fill="#efeafd"/>
-    <image href="/brands/amass.svg" x="${x + 9}" y="${y + 7}" width="98" height="28" preserveAspectRatio="xMidYMid meet"/>
+    <image href="${BRANDS}amass.svg" x="${x + 9}" y="${y + 7}" width="98" height="28" preserveAspectRatio="xMidYMid meet"/>
   </g>`;
 }
 
 function modalBadge(x: number, y: number): string {
   return `<g class="hw-brand" aria-label="Modal">
     <rect x="${x}" y="${y}" width="116" height="42" rx="10" fill="#0c0f0b"/>
-    <image href="/brands/modal.svg" x="${x + 9}" y="${y + 10}" width="98" height="22" preserveAspectRatio="xMidYMid meet"/>
+    <image href="${BRANDS}modal.svg" x="${x + 9}" y="${y + 10}" width="98" height="22" preserveAspectRatio="xMidYMid meet"/>
   </g>`;
 }
 
 function huggingFaceBadge(x: number, y: number): string {
   return `<g class="hw-brand" aria-label="Hosted on Hugging Face Spaces">
     <rect x="${x}" y="${y}" width="300" height="76" rx="14" fill="#fff6cf" stroke="#efd77a"/>
-    <image href="/brands/huggingface.svg" x="${x + 12}" y="${y + 8}" width="65" height="60" preserveAspectRatio="xMidYMid meet"/>
+    <image href="${BRANDS}huggingface.svg" x="${x + 12}" y="${y + 8}" width="65" height="60" preserveAspectRatio="xMidYMid meet"/>
     <text x="${x + 90}" y="${y + 31}" class="hw-brand-name hw-brand-hf">Hugging Face</text>
     <text x="${x + 90}" y="${y + 56}" class="hw-brand-meta hw-brand-host">Hosted on Hugging Face</text>
   </g>`;

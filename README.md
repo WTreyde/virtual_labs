@@ -31,7 +31,7 @@ One brief in, one checked lab design out. Claude does the planning; deterministi
 
 ## Try it
 
-- **Hosted replay demo:** https://huggingface.co/spaces/wtreyde/labforge (recorded agent runs; live design is off there, no API key needed)
+- **Hosted replay demo:** https://wtreyde.github.io/virtual_labs/ (GitHub Pages, rebuilt on every push to `main` by `.github/workflows/pages.yml`; recorded agent runs, live design is off, no API key needed). `make pages` builds the same static site locally.
 - **Locally:**
 
 ```bash

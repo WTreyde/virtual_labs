@@ -15,11 +15,22 @@ export class HttpError extends Error {
   constructor(readonly status: number, message: string) { super(message); }
 }
 
+/**
+ * The static build (GitHub Pages, VITE_STATIC_API=1) has no backend: GET routes read the JSON snapshots that
+ * deploy/pages/export_api.py writes to <base>/api/, and every POST fails fast into its offline fallback.
+ */
+const STATIC_API = !!(import.meta as any).env?.VITE_STATIC_API;
+const BASE = (import.meta as any).env?.BASE_URL ?? "/";
+
 /** Replay mode sets this so nothing talks to the backend; every call then fails fast into its offline fallback. */
 let offline = false;
 export function setOffline(on: boolean) { offline = on; }
-const apiFetch = (path: string, init?: RequestInit): Promise<Response> =>
-  offline ? Promise.reject(new Error("offline (replay mode)")) : fetch(`${API}${path}`, init);
+const apiFetch = (path: string, init?: RequestInit): Promise<Response> => {
+  if (offline) return Promise.reject(new Error("offline (replay mode)"));
+  if (!STATIC_API) return fetch(`${API}${path}`, init);
+  if (init?.method && init.method !== "GET") return Promise.reject(new Error("static demo: no backend"));
+  return fetch(`${BASE}api${path.split("?")[0]}.json`, { signal: init?.signal });
+};
 
 const byId = (items: CatalogItem[]) => Object.fromEntries(items.map((i) => [i.id, i]));
 
